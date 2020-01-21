@@ -148,15 +148,12 @@ bool load_vm()
 	char buf[256];
 
 	// Look for [; memory-size: num]
-	trace_on();
 	while (fgets(buf, sizeof(buf), input_fp) == buf)
 	{
 		memory_size = load_memory_size(buf);
 		if (memory_size > 0)
 			break;
 	}
-
-	trace_on();
 
 	the_memory = (BYTE *)malloc(memory_size);
 	memset(the_memory, 0, memory_size);
@@ -210,13 +207,25 @@ void process_arg(char *arg)
         arg = arg+2;
         strcpy(output_fn, arg);
     }
+    else if (*arg == 't') 
+    {
+		trace_on();
+		printf("log level set to trace.\n");
+    }
+    else if (*arg == 'd') 
+    {
+		debug_on();
+		printf("log level set to debug.\n");
+    }
     else if (*arg == '?') 
     {
         printf("args:\n");
         printf("-i:inputFile (full or relative path)\n");
-        printf("  default inputFile is forth.hex");
+        printf("  default inputFile is forth.hex\n");
         printf("-o:outputFile (full or relative path)\n");
-        printf("  default outputFile is forth.bin");
+        printf("  default outputFile is forth.bin\n");
+        printf("-t set log level to trace\n");
+        printf("-d set log level to debug\n");
         printf("-? (prints this message)\n");
     }
     else

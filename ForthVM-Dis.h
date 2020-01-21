@@ -135,9 +135,7 @@ CELL dis_one(char *bytes, char *desc)
 		{
 			arg2 = GETAT(arg1+1);
 			DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
-			strcat(desc, " - ");
-			strcat(desc, dp->name);
-			strcat(desc, "\n;");
+			sprintf(desc, "JMP %s (%04lx)\n;", dp->name, arg1);
 		}
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
@@ -214,7 +212,7 @@ CELL dis_one(char *bytes, char *desc)
 		// PC = arg1;
 		arg2 = GETAT(arg1+1);
 		DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
-		sprintf(desc, "CALL %04lx - %s", arg1, dp->name);
+		sprintf(desc, "CALL %s (%04lx)", dp->name, arg1);
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
 
@@ -347,7 +345,7 @@ CELL dis_one(char *bytes, char *desc)
 	case DICTP:
 		arg1 = GETAT(PC);
 		// PC += CELL_SZ;
-		sprintf(desc, "DICTP %04lx, %s", arg1, &(the_memory[arg1+10]));
+		sprintf(desc, "DICTP %s (%04lx)", &(the_memory[arg1+10]), arg1);
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
 

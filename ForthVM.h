@@ -1,3 +1,4 @@
+#include <conio.h>
 #include "Shared.h"
 #include "logger.h"
 
@@ -389,7 +390,7 @@ CELL cpu_step()
 		return 0;
 
 	case GETCH:
-		arg1 = getchar();
+		arg1 = getch();
 		push(arg1);
 		trace("GETCH\n");
 		return 0;
@@ -470,8 +471,7 @@ CELL cpu_step()
 		DSP = dsp_init;
 		RSP = rsp_init;
 		PC = 0;
-		// isBYE = isEmbedded;
-		isBYE = true;
+		isBYE = isEmbedded;
 		trace("RESET\n");
 		return 0;
 	}

@@ -709,7 +709,7 @@ void process_arg(char *arg)
     {
         printf("args:\n");
         printf("-i:inputFile (full or relative path)\n");
-        printf("  default inputFile is forth.src");
+        printf("  default inputFile is forth.src\n");
         printf("-o:outputFile (full or relative path)\n");
         printf("  default outputFile is forth.hex\n");
         printf("-t set log level to trace\n");

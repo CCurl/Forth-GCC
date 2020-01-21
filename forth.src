@@ -135,8 +135,9 @@
 	< 0=
 ;
 
-: TYPE DROP ZTYPE ; \ ( addr num -- )
 : COUNT DUP 1+ SWAP C@ ; \ ( addr1 --  addr2 num )
+: TYPE DROP ZTYPE ; \ ( addr num -- )
+: CT COUNT TYPE ;
 
 : PAD LAST 200 - ;
 : getInput PAD 128 0 FREADLINE DROP PAD ; \ ( -- addr )
@@ -497,7 +498,9 @@ LAST DICT.GetXT
 	0 Pad DUP 1+ >In ! C!
 	BEGIN
 		0 >In @ C!
-		GETCH DUP 13 =
+		GETCH 
+
+		DUP 13 =
 		IF DROP Pad BL LEAVE THEN
 
 		DUP 8 = 
@@ -627,7 +630,6 @@ LAST DICT.GetXT
 
 \ HEX AAbb . DECIMAL
 
-: CT COUNT TYPE ;
 : FREE LAST HERE - ;
 : FREE? FREE . S"  bytes free." CT ;
 
