@@ -1,0 +1,665 @@
+\ ------------------------------------------------------------------------------------------
+\ This is the source code for the VM's boot loader.
+\ This file is compiled by CFComp.exe and an image of the VM's initial state is created.
+\ CFComp.exe then disassembles that image, creating a listing file named dis.txt
+\ The resulting dis.txt is read by the VM when it boots.
+\ ------------------------------------------------------------------------------------------
+
+\ .CELL 2 \ 2 => 16-bit, 4 => 32-bit
+
+.ORG 32
+
+\ don't inline anything with a 12 in it ... that is RET
+\ The compiler/dis-assembler is hard-coded to put these values here ...
+: CELL   7 C@ ; INLINE
+: DP       16 ; INLINE
+: (LAST)   20 ; INLINE
+: BASE     24 ; INLINE
+: MEM_SZ 16 1024 * ;
+
+: HERE DP @ ; INLINE
+: LAST (LAST) @ ; INLINE
+
+: CELLS CELL * ; \ ( num1 -- num2 )
+
+: >IN   <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+: STATE <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+: isNeg <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+
+\ : STDIN <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+\ : INPUT-FP <asm> .HERE 4 + .LITERAL </asm> ; 0 .COMMA
+
+: !  <asm> STORE  </asm> ; INLINE
+: C! <asm> CSTORE </asm> ; INLINE
+
+: @  <asm> FETCH  </asm> ; INLINE
+: C@ <asm> CFETCH </asm> ; INLINE
+
+: + <asm> ADD </asm> ; INLINE
+: - <asm> SUB </asm> ; INLINE
+: * <asm> MUL </asm> ; INLINE
+: / <asm> DIV </asm> ; INLINE
+
+: 1+ <asm> ONEPLUS </asm> ; INLINE
+: 1- 1 - ; INLINE
+
+: << <asm> LSHIFT </asm> ; INLINE
+: >> <asm> RSHIFT </asm> ; INLINE
+: 2* 1 << ; INLINE 
+: 2/ 1 >> ; INLINE
+
+: AND <asm> AND </asm> ; INLINE
+: OR  <asm> OR  </asm> ; INLINE
+
+: >R <asm> DTOR   </asm> ; INLINE
+: R@ <asm> RFETCH </asm> ; INLINE
+: R> <asm> RTOD   </asm> ; INLINE
+
+: < <asm> LT </asm> ; INLINE
+: = <asm> EQ </asm> ; INLINE
+: > <asm> GT </asm> ; INLINE
+
+: DUP  <asm> DUP  </asm> ; INLINE
+: SWAP <asm> SWAP </asm> ; INLINE
+: DROP <asm> DROP </asm> ; INLINE
+: OVER <asm> OVER </asm> ; INLINE
+: PICK <asm> PICK </asm> ; INLINE
+
+: DEPTH <asm> DEPTH </asm> ; INLINE
+: RESET <asm> RESET </asm> ; INLINE
+: BREAK <asm> BREAK </asm> ; INLINE
+: BYE   <asm> BYE   </asm> ; INLINE
+
+: EMIT  <asm> EMIT  </asm> ; INLINE
+: ZTYPE <asm> ZTYPE </asm> ; INLINE
+: GETCH <asm> GETCH </asm> ; INLINE
+
+: FOPEN     <asm> FOPEN     </asm> ; INLINE
+: FREAD     <asm> FREAD     </asm> ; INLINE
+: FREADLINE <asm> FREADLINE </asm> ; INLINE
+: FWRITE    <asm> FWRITE    </asm> ; INLINE
+: FCLOSE    <asm> FCLOSE    </asm> ; INLINE
+
+: COMPARE <asm> COMPARE </asm> ; INLINE
+: COMPAREI <asm> COMPAREI </asm> ; INLINE
+
+: RDROP R> DROP   ; INLINE
+: TUCK  SWAP OVER ; INLINE
+: NIP   SWAP DROP ; INLINE
+: ROT   >R SWAP R> SWAP ;
+: -ROT  SWAP >R SWAP R> ;
+
+: ++  DUP @  1+ SWAP ! ;  \ ( addr -- )
+: C++ DUP C@ 1+ SWAP C! ; \ ( addr -- )
+
+: --  DUP @  1- SWAP ! ;  \ ( addr -- )
+: C-- DUP C@ 1- SWAP C! ; \ ( addr -- )
+
+: +!  TUCK @  + SWAP !  ;
+: C+! TUCK C@ + SWAP C! ;
+
+: ,  HERE !  CELL DP +! ;
+: C, HERE C!      DP ++ ;
+
+: ?COMPILING STATE @ ;
+: [ 0 STATE ! ; IMMEDIATE
+: ] 1 STATE ! ; IMMEDIATE
+
+: LEAVE ?COMPILING IF <asm> CPUSH RET </asm> C, THEN ; IMMEDIATE
+
+: IF   ?COMPILING IF <asm> CPUSH JMPZ </asm> C, HERE 0 , THEN ; IMMEDIATE
+: ELSE ?COMPILING IF <asm> CPUSH JMP  </asm> C, HERE SWAP 0 , HERE SWAP ! THEN ; IMMEDIATE
+: THEN ?COMPILING IF HERE SWAP ! THEN ; IMMEDIATE
+
+: BEGIN ?COMPILING IF HERE THEN ; IMMEDIATE
+: AGAIN ?COMPILING IF <asm> CPUSH JMP   </asm> C, , THEN ; IMMEDIATE
+: WHILE ?COMPILING IF <asm> CPUSH JMPNZ </asm> C, , THEN ; IMMEDIATE
+: UNTIL ?COMPILING IF <asm> CPUSH JMPZ  </asm> C, , THEN ; IMMEDIATE
+
+: 0= 0 =  ; INLINE
+: <> = 0= ; INLINE
+: <= > 0= ; INLINE
+: >= < 0= ; INLINE
+
+: 2DUP  OVER OVER ; INLINE
+: 2DROP DROP DROP ; INLINE
+
+: CRLF 13 EMIT 10 EMIT ;
+: BL 32 EMIT ; INLINE
+
+: ON 1 SWAP ! ; : OFF 0 SWAP ! ;
+
+: BETWEEN \ ( num min max -- bool )
+	2 PICK 
+	< IF 2DROP 0 LEAVE THEN
+	< 0=
+;
+
+: TYPE DROP ZTYPE ; \ ( addr num -- )
+: COUNT DUP 1+ SWAP C@ ; \ ( addr1 --  addr2 num )
+
+: PAD LAST 200 - ;
+: getInput PAD 128 0 FREADLINE DROP PAD ; \ ( -- addr )
+
+: ?DUP DUP IF DUP THEN ;
+
+: HEX     16 BASE ! ;
+: DECIMAL 10 BASE ! ;
+: OCTAL    8 BASE ! ;
+: BINARY   2 BASE ! ;
+
+: skipWS \ ( addr1 -- addr2 )
+	BEGIN
+		DUP C@ DUP
+		IF
+			32 > 
+			IF LEAVE ELSE 1+ THEN
+		ELSE
+			DROP LEAVE
+		THEN
+	AGAIN
+;
+
+\ NB: this word assumes that leading WS has already been skipped.
+: getOneWord \ ( addr1 -- word-addr addr2 )
+	DUP >R >R
+	BEGIN
+		R@ C@ 32 > IF
+			R> 1+ >R
+		ELSE
+			\ If not at the end of the line, stick a 
+			\ ZERO here and go to the next char.
+			R@ C@ 
+			IF
+				0 R@ C! R> 1+ >R
+			THEN
+			R> R> SWAP LEAVE
+		THEN
+	AGAIN
+;
+
+: DICT>NEXT ;
+: DICT>XT     CELL + ;
+: DICT>FLAGS  2 CELLS + ;
+: DICT>NAME   DICT>FLAGS 1+ ;
+
+: NEXT>DICT ;
+: XT>DICT     CELL - ;
+: FLAGS>DICT  2 CELLS - ;
+: NAME>DICT   1- 2 CELLS - ;
+
+: DICT.GetXT DICT>XT @ ;
+: DICT.GetFLAGS DICT>FLAGS C@ ;
+
+: DICTP>NAME 1+ @ DICT>NAME ;
+
+: XT.GetDICTP \ ( XT -- dictp )
+	DUP C@ <asm> CPUSH DICTP </asm> = 
+	IF
+		1+ @
+	ELSE
+		DROP RESET
+	THEN
+;
+
+: FLAG_IMMEDIATE 1 ;
+: FLAG_INLINE    2 ;
+
+: FLAGS.ISIMMEDIATE? FLAG_IMMEDIATE AND ;
+: FLAGS.ISINLINE?    FLAG_INLINE    AND ;
+
+: DICT.GetIMMEDIATE DICT.GetFLAGS FLAGS.ISIMMEDIATE? ;
+: DICT.GetINLINE    DICT.GetFLAGS FLAGS.ISINLINE? ;
+
+: findInDict \ ( addr -- XT IMM bool )
+	LAST >R
+	BEGIN
+		R@ DUP
+		IF
+			\ addr is a null-termnated string with no count byte
+			DICT>NAME 1+ OVER COMPAREI
+			IF
+				DROP R@ DICT.GetXT R> DICT.GetFLAGS 1
+				LEAVE
+			THEN
+		ELSE
+			2DROP R> 0 0 LEAVE
+		THEN
+		R> @ >R
+	AGAIN
+;
+
+: isHEX? BASE @ 16 = ;
+
+: isNumChar? \ ( ch -- val bool )
+	DUP 48 57 BETWEEN IF 48 - 1 LEAVE THEN
+	isHEX? 
+	IF
+		DUP 65  70 BETWEEN IF 55 - 1 LEAVE THEN
+		DUP 97 102 BETWEEN IF 87 - 1 LEAVE THEN
+	THEN
+	0
+;
+
+: NEGATE 0 SWAP - ;
+: ABS DUP 0 < IF NEGATE THEN ;
+
+: isNumber? \ ( addr -- num bool )
+	\ find out if it is negative
+	DUP C@ 45 = DUP isNeg C! IF 1+ THEN
+	
+	\ accumulate the result on the return stack
+	0 >R
+	BEGIN
+		DUP C@
+		DUP 0 = \ end of word?
+		IF 
+			2DROP R> 
+			isNeg C@ IF NEGATE THEN
+			1 LEAVE
+		THEN
+
+		isNumChar? 
+		IF
+			R> BASE @ * + >R
+			1+
+		ELSE
+			DROP R> 0 LEAVE
+		THEN
+	AGAIN
+;
+
+: MOD 2DUP / * - ;
+
+: /MOD \ ( num1 num2 -- num3 mod )
+	2DUP / >R R@ * - R> SWAP
+;
+
+: (.)  \ ( num -- )
+	DUP 0 = 
+	IF
+		DROP 48 EMIT LEAVE
+	THEN
+	
+	DUP 0 < IF NEGATE 1 ELSE 0 THEN >R
+
+	0 SWAP
+	BEGIN
+		DUP
+		IF
+			BASE @ /MOD 
+			48 OVER 9 > IF 7 + THEN
+			+ SWAP
+		ELSE
+			\ spit out the string
+			DROP
+			R> IF 45 EMIT THEN
+			BEGIN DUP IF EMIT ELSE DROP LEAVE THEN AGAIN
+		THEN
+	AGAIN
+;
+
+: . BL (.) ;
+
+: HEX.     BASE @ SWAP HEX     (.) BASE ! ;
+: DECIMAL. BASE @ SWAP DECIMAL (.) BASE ! ;
+: BINARY.  BASE @ SWAP BINARY  (.) BASE ! ;
+
+: MIN 2DUP > IF SWAP THEN DROP ; 
+: MAX 2DUP < IF SWAP THEN DROP ; 
+
+: .S 
+	BL DEPTH 0 < 
+	IF S" Stack underflow!" COUNT TYPE RESET THEN
+	DEPTH 0 =
+	IF 40 EMIT 237 EMIT 41 EMIT LEAVE THEN
+	40 EMIT
+	DEPTH 1- >R
+	BEGIN 
+		R@ PICK . R@ 
+		IF
+			R> 1- >R
+		ELSE
+			RDROP BL 41 EMIT LEAVE
+		THEN
+	AGAIN
+;
+
+: WORDS \ ( -- )
+	LAST
+	BEGIN
+		DUP @ 0 =
+		IF
+			DROP CRLF LEAVE
+		THEN
+		\ DUP 40 EMIT HEX. 41 EMIT BL \ DEBUG
+		DUP DICT>NAME
+		COUNT TYPE BL
+		@
+	AGAIN
+;
+
+: EXECUTE RDROP >R ; \ ( addr -- )
+
+\ ( addr1 -- addr2 )
+: find.ret
+	BEGIN
+		DUP C@ 
+		<asm> CPUSH RET </asm> =
+		IF
+			LEAVE
+		THEN
+		1+
+	AGAIN
+;
+
+: (inline) \ ( from to -- )
+	2DUP < IF SWAP THEN
+	BEGIN
+		DUP C@ C,
+		1+ 2DUP >
+	WHILE
+	2DROP
+;
+
+: DOES>
+	R> DUP find.ret
+	DUP >R
+	1+
+	(inline)
+;
+
+: Copy.INLINE \ ( XT -- )
+	\ Skip over the DICTP
+	DUP C@ <asm> CPUSH DICTP </asm> =
+	IF 
+		1+ CELL +
+	THEN
+
+	DUP find.ret
+	(inline)
+;
+
+: strlen 0 SWAP 
+	BEGIN
+		TUCK C@ DUP
+		IF
+			DROP 1+ SWAP 1+ 1
+		THEN
+	WHILE
+	NIP
+;
+
+: cstr, \ ( start -- )
+	DUP C@ 
+	OVER + 1+ 1+
+	(inline)
+;
+
+: [COMPILE] \ ( XT flags -- )
+	DUP FLAGS.ISIMMEDIATE? \ Immediate?
+	IF
+		DROP EXECUTE
+	ELSE
+		FLAGS.ISINLINE? 
+		IF
+			Copy.INLINE
+		ELSE
+			<asm> CPUSH CALL </asm> C, ,
+		THEN
+	THEN
+;
+
+: isPostpone <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+
+: POSTPONE.rt
+	R@ @ DICT.GetXT
+	R@ @ DICT.GetFLAGS
+	R> CELL + >R
+	[COMPILE]
+;
+
+LAST DICT.GetXT
+: POSTPONE  \ compile call to POSTPONE.rt
+	<asm> CPUSH CALL </asm> C,
+	<asm> PUSH , </asm> ,
+	isPostpone ON
+; IMMEDIATE
+
+: executeWord  \ ( addr -- )
+	>R R@ findInDict \ ( addr -- XT FLAGS found )
+	IF
+		RDROP
+		?COMPILING
+		IF
+			isPostpone @ 
+			IF
+				DROP XT.GetDICTP ,
+				isPostpone OFF
+			ELSE
+				DUP FLAGS.ISIMMEDIATE? \ Immediate?
+				IF
+					DROP EXECUTE
+				ELSE
+					[COMPILE]
+				THEN
+			THEN
+		ELSE
+			DROP EXECUTE
+		THEN
+	ELSE \ word not found
+		2DROP \ discard IMM and XT place holders
+		R@ isNumber? \ ( addr -- num bool )
+		IF
+			?COMPILING
+			IF
+				isPostpone @ 
+				IF
+					RESET	\ POSTPONE for literals not implemented yet
+					isPostpone OFF
+				ELSE
+					DUP 0 255 BETWEEN
+					IF
+						<asm> CPUSH CPUSH </asm> C, C,
+					ELSE
+						<asm> CPUSH PUSH </asm> C, ,
+					THEN
+				THEN
+			THEN
+		ELSE
+			DROP
+			R@ ZTYPE S" ??" COUNT TYPE RESET \ TODO: error
+		THEN
+		RDROP
+	THEN
+;
+
+: executeInput 
+	\ HEX \ DEBUG
+	BEGIN 
+		\ 65 EMIT >IN @ ZTYPE 65 EMIT CRLF \ DEBUG
+		>IN @ skipWS
+		\ 66 EMIT CRLF >IN @ ZTYPE CRLF \ DEBUG
+		>IN ! >IN @ C@ 
+		IF
+			\ 67 EMIT >IN @ ZTYPE CRLF \ DEBUG
+			>IN @ getOneWord >IN ! executeWord
+		ELSE
+			LEAVE
+		THEN
+	AGAIN
+;
+
+: Pad LAST 200 - ;
+: >In <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+
+: getLine \ ( -- addr )
+	0 Pad DUP 1+ >In ! C!
+	BEGIN
+		0 >In @ C!
+		GETCH DUP 13 =
+		IF DROP Pad BL LEAVE THEN
+
+		DUP 8 = 
+		IF
+			\ .S
+			Pad C@ 0 >
+			IF 
+				Pad C--
+				>In --
+				DUP EMIT BL EMIT
+			ELSE
+				DROP
+			THEN
+		ELSE
+			DUP 32 127 BETWEEN
+			IF
+				DUP EMIT
+				>In @ C! 
+				>In ++
+				Pad C++
+			ELSE
+				DROP
+			THEN
+		THEN
+	AGAIN
+;
+
+: bye BYE ;
+
+: strcpy2c \ ( from to -- ) from is NOT counted, to is to get count byte
+	\ 65 EMIT OVER . DUP . \ DEBUG
+	DUP >R					\ from to
+	0 OVER C!				\ from to (init count)
+	1+ SWAP					\ to+1 from
+	BEGIN
+		DUP C@ DUP			\ to from ch ch
+		IF					\ to from ch
+			2 PICK C!		\ to from
+			SWAP 1+ SWAP 1+
+			R@ C++
+		ELSE				\ to from ch
+			ROT C! DROP
+			RDROP
+			LEAVE
+		THEN
+	AGAIN
+;
+
+: Define-Word \ ( addr -- )
+	LAST OVER strlen 2 CELLS 3 + + - 
+	DUP >R >R					\ Save new LAST
+	LAST R@  !  R> CELL + >R	\ NEXT
+	HERE R@  !  R> CELL + >R	\ XT
+	0    R@ C!  R> 1+ >R		\ IMM
+	R> strcpy2c					\ LEN + NAME
+	R> (LAST) !
+;
+
+: IMMEDIATE LAST DICT>FLAGS DUP C@ FLAG_IMMEDIATE OR SWAP C! ;
+: INLINE    LAST DICT>FLAGS DUP C@ FLAG_INLINE    OR SWAP C! ;
+
+: CREATE-NAME \ ( -- )
+	>IN @ skipWS >IN ! 
+	>IN @ C@ 
+	IF
+		>IN @ getOneWord >IN ! 
+		DUP C@
+		IF
+			Define-Word
+			<asm> CPUSH DICTP </asm> C,
+			LAST ,
+		ELSE
+			DROP RESET
+		THEN
+	THEN
+;
+
+: : CREATE-NAME STATE ON ;
+: :NONAME HERE STATE ON ;
+
+: ; \ ( -- )
+	?COMPILING 
+	IF
+		<asm> CPUSH RET </asm> C,
+		STATE OFF
+	ELSE
+		RESET
+	THEN
+; IMMEDIATE
+
+: LAST? LAST DICT>NAME COUNT TYPE ;
+
+: (FL) \ Forgets the last word
+	LAST CELL + @ DP ! 
+	LAST @ (LAST) ! 
+;
+
+: .fl (FL) LAST? ;
+
+: resetState ?COMPILING 
+	IF (FL) THEN 
+	STATE OFF
+	isPostpone OFF
+	DECIMAL
+;
+
+: OK ?COMPILING 0 = IF S" OK" COUNT TYPE .S THEN CRLF ;
+
+: z DUP BL DECIMAL. DUP BL HEX. DUP C@ BL HEX. 1+ ;
+
+: HELLO >IN @
+	IF 
+		S"  Reset. " COUNT TYPE
+	ELSE
+		S" Hello." COUNT TYPE CRLF
+	THEN 
+;
+
+: ALLOT HERE + DP ! ;
+
+: (const) <asm> CPUSH PUSH </asm> C, , <asm> CPUSH RET </asm> C, ;
+: CONSTANT CREATE-NAME (const) INLINE ;
+: VARIABLE CREATE-NAME HERE 2 + CELL + (const) 0 , INLINE ;
+
+: ? @ . ; \ ( addr -- )
+: C? C@ . ; \ ( addr -- )
+
+\ HEX AAbb . DECIMAL
+
+: CT COUNT TYPE ;
+: FREE LAST HERE - ;
+: FREE? FREE . S"  bytes free." CT ;
+
+: bufAppend DUP C++ DUP C@ + C! ; \ ( ch addr -- )
+: nullTerm DUP C@ + 1+ 0 SWAP C! ; \ ( addr -- )
+
+: mainLoop resetState BEGIN OK getLine 1+ >IN ! executeInput BL AGAIN ;
+: main HELLO mainLoop ;
+
+: ascii. DUP HEX. BL DUP DECIMAL. BL EMIT ;
+: ascii 2DUP < IF SWAP THEN BEGIN CRLF DUP ascii. 1+ 2DUP > WHILE 2DROP ;
+
+: t0 2DUP < IF SWAP THEN BEGIN DUP . 1+ 2DUP > WHILE 2DROP ;
+: t1 2DUP < IF SWAP THEN BEGIN 1+ DUP . 2DUP > WHILE 2DROP ;
+: fn S" img-4th.bin" ;
+: .(HERE) S" HERE: " CT HERE DUP HEX. S"  (" CT . S"  )" CT ;
+: .(LAST) LAST DUP S" LAST: " CT HEX. S"  (" CT . S"  )" CT ;
+
+.(HERE) BL .(LAST) BL FREE? CRLF
+
+1 2 3 .S + + . .S
+
+\ variable fp
+\ : img-save 
+\    fn 1 fopen 0= 
+\    if
+\        fp ! 
+\        0 mem_sz fp @ fwrite .
+\        fp @ fclose 
+\        fp off
+\    else
+\        reset
+\    then
+\    ;
+\ img-save
