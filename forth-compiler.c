@@ -89,9 +89,9 @@ void Compile(FILE *fp_in)
 	char line[128];
     while (fgets(buf, sizeof(buf), fp_in) == buf)
     {
+		string_rtrim(buf);
         ++line_no;
         strcpy(line, buf);
-		// debug(buf);
         Parse(buf);
     }
     fclose(fp_in);
@@ -333,6 +333,8 @@ void Parse(char *line)
 	char parsed[128];
 	char word[128];
 
+	trace("Parse(): line=[%s]\n", line);
+
 	while (string_len(line) > 0)
 	{
 		line = GetWord(line, word);
@@ -352,6 +354,7 @@ void Parse(char *line)
 			return;
 		}
 
+		trace("Parse(): word=[%s], HERE=%04lx, LAST=%04lx, STATE=%ld\n", word, HERE, LAST, STATE);
 		if (string_equals(word, ".ORG"))
 		{
 			GetWord(line, word);
@@ -374,6 +377,7 @@ void Parse(char *line)
 			STATE = 1;
 			line = GetWord(line, word);
 			strcat(parsed, word);
+			trace("\n");
 			debug("Defining word [%s]...\n", word);
 			DefineWord(word, 0);
 			CComma(DICTP);
@@ -543,27 +547,38 @@ void Parse(char *line)
 
 			if (string_equals(word, "S\""))
 			{
+				trace("SLITERAL");
 				CComma(SLITERAL);
-				CELL cur_here = HERE++;
-				BYTE count = 0;
+				int count = 0;
 				bool done = false;
 				line += 1;
+				CELL cur_here = HERE++;
+				BYTE ch;
 				while ((!done) && (!string_isEmpty(line)))
 				{
-					BYTE ch = *line++;
-					string_ccat(parsed, ch);
-
+					ch = *(line++);
+					trace("(1-%04lx)", cur_here);
+					// string_ccat(parsed, ch);
+					if (ch == 0)
+						ch = (BYTE)32;
+					
+					trace(" (%d, %04lx", ch, HERE);
 					if (ch == '\"')
 					{
 						done = true;
+						trace("(3-%04lx)", cur_here);
 					}
 					else
 					{
+						trace(", %ld, %04lx)", count, cur_here);
 						CComma(ch);
+						trace("(2-%04lx)", cur_here);
 						count++;
 					}
 				}
+				trace(") done. HERE=%04lx, cur_here=%04lx\n", HERE, cur_here);
 				CComma(0);
+				trace(") done. HERE=%04lx, cur_here=%04lx\n", HERE, cur_here);
 				CStore(cur_here, count);
 				continue;
 			}
@@ -573,6 +588,7 @@ void Parse(char *line)
 		//if ((STATE == 0) || (STATE == 2))
 		if (0 < opcode)
 		{
+			trace("[%s] Is an ASM keyword: opcode=%d\n", word, opcode);
 			if (STATE == 0)
 			{
 				if (! ExecuteOpcode(opcode))
@@ -590,6 +606,7 @@ void Parse(char *line)
 		opcode = FindForthPrim(word);
 		if (0 < opcode)
 		{
+			trace("[%s] Is a FORTH primitive: opcode=%d\n", word, opcode);
 			if (STATE == 1)
 			{
 				CComma(opcode);
@@ -651,6 +668,7 @@ void Parse(char *line)
 		CELL num = 0;
 		if (MakeNumber(word, &num))
 		{
+			trace("IsNumber: %ld (%04lx), STATE=%ld\n", num, num, STATE);
 			if (STATE == 0) // Interactive
 			{
 				push(num);

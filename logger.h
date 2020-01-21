@@ -32,6 +32,7 @@ void trace(char *fmt, ...)
 		vsnprintf(msg, sizeof(msg), fmt, args);
 		va_end(args);
 		printf("%s", msg);
+		fflush(stdout);
 	}
 }
 
@@ -46,6 +47,7 @@ void debug(char *fmt, ...)
 		vsnprintf(msg, sizeof(msg), fmt, args);
 		va_end(args);
 		printf("%s", msg);
+		fflush(stdout);
 	}
 }
 

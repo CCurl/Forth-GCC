@@ -333,7 +333,7 @@
 		IF
 			DROP CRLF LEAVE
 		THEN
-		\ DUP 40 EMIT HEX. 41 EMIT BL \ DEBUG
+		DUP 40 EMIT HEX. 41 EMIT BL \ DEBUG
 		DUP DICT>NAME
 		COUNT TYPE BL
 		@
@@ -468,8 +468,9 @@ LAST DICT.GetXT
 				THEN
 			THEN
 		ELSE
-			DROP
-			R@ ZTYPE S" ??" COUNT TYPE RESET \ TODO: error
+			. LAST . \ debug
+			/ DROP
+			R@ ZTYPE S" ??" CT RESET \ TODO: error
 		THEN
 		RDROP
 	THEN
@@ -478,13 +479,16 @@ LAST DICT.GetXT
 : executeInput 
 	\ HEX \ DEBUG
 	BEGIN 
-		\ 65 EMIT >IN @ ZTYPE 65 EMIT CRLF \ DEBUG
+		65 EMIT >IN @ ZTYPE 65 EMIT CRLF \ DEBUG
 		>IN @ skipWS
-		\ 66 EMIT CRLF >IN @ ZTYPE CRLF \ DEBUG
-		>IN ! >IN @ C@ 
+		66 EMIT CRLF >IN @ ZTYPE CRLF \ DEBUG
+		>IN ! 
+		\ EOL?
+		>IN @ C@ 
 		IF
-			\ 67 EMIT >IN @ ZTYPE CRLF \ DEBUG
-			>IN @ getOneWord >IN ! executeWord
+			67 EMIT >IN @ ZTYPE CRLF \ DEBUG
+			>IN @ getOneWord 
+			>IN ! executeWord
 		ELSE
 			LEAVE
 		THEN
@@ -622,8 +626,8 @@ LAST DICT.GetXT
 : ALLOT HERE + DP ! ;
 
 : (const) <asm> CPUSH PUSH </asm> C, , <asm> CPUSH RET </asm> C, ;
-: CONSTANT CREATE-NAME (const) INLINE ;
-: VARIABLE CREATE-NAME HERE 2 + CELL + (const) 0 , INLINE ;
+: CONSTANT CREATE-NAME (const) ; INLINE
+: VARIABLE CREATE-NAME HERE 2 + CELL + (const) 0 , ; INLINE
 
 : ? @ . ; \ ( addr -- )
 : C? C@ . ; \ ( addr -- )
@@ -645,8 +649,10 @@ LAST DICT.GetXT
 : t0 2DUP < IF SWAP THEN BEGIN DUP . 1+ 2DUP > WHILE 2DROP ;
 : t1 2DUP < IF SWAP THEN BEGIN 1+ DUP . 2DUP > WHILE 2DROP ;
 : fn S" img-4th.bin" ;
-: .(HERE) S" HERE: " CT HERE DUP HEX. S"  (" CT . S"  )" CT ;
-: .(LAST) LAST DUP S" LAST: " CT HEX. S"  (" CT . S"  )" CT ;
+: .(HERE) S" HERE: " CT HERE DUP HEX. BL S" (" CT . BL S" )" CT ;
+: .(LAST) LAST DUP S" LAST: " CT HEX. BL S" (" CT . BL S" )" CT ;
+
+WORDS
 
 .(HERE) BL .(LAST) BL FREE? CRLF
 
