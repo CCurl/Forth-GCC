@@ -1,32 +1,35 @@
+// bin-dump
+// To build: execute:
+// gcc -g -o bin-dump bin-dump.c
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include "Shared.h"
-#include "functions.h"
-#include "string.h"
-#include "logger.h"
 
-#define MEM_SZ2 32
-BYTE the_memory[MEM_SZ2];
+#define MEM_SZ 32
+unsigned char the_memory[MEM_SZ];
 
 char input_fn[256];
 FILE *input_fp = NULL;
 
+void process_arg(char *);
+
 // *********************************************************************
-bool bin_dump()
+int bin_dump()
 {
 	input_fp = fopen(input_fn, "rb");
 	if (!input_fp)
 	{
-		printf("cannot open file %s", input_fn);
-		return false;
+		printf("cannot open file %s\n", input_fn);
+        process_arg("?");
+		return 0;
 	}
 
     long start = 0;
    	size_t num = 1;
     while (num > 0)
     {
-    	num = fread(the_memory, 1, MEM_SZ2, input_fp);
+    	num = fread(the_memory, 1, MEM_SZ, input_fp);
         if (num)
         {
             printf("%04lx:", start);
@@ -37,52 +40,27 @@ bool bin_dump()
                 printf(" %02x", the_memory[i]);
             }
             printf("\n");
-            start += MEM_SZ2;
+            start += MEM_SZ;
         }
     }
 	fclose(input_fp);
 	input_fp = NULL;
-	debug(" done.\n");
-	return true;
+	return 1;
 }
 
 // *********************************************************************
 void process_arg(char *arg)
 {
-    if (*arg == 'i') 
+    if (*arg == '?') 
     {
-        arg = arg+2;
-        strcpy(input_fn, arg);
-    }
-    else if (*arg == 'l') 
-    {
-        char x[24];
-        strcpy(x, arg);
-        if (string_equals_nocase(x, "1"))
-        {
-            debug_on();
-        }
-        else if (string_equals_nocase(x, "2"))
-        {
-            trace_on();
-        }
-        else
-        {
-            debug_off();
-        }
-        
-    }
-    else if (*arg == '?') 
-    {
-        printf("args:\n");
-        printf("-i:inputFile (full or relative path)\n");
-        printf("  default inputFile is forth.bin");
-        printf("-l:loglevel (0=off, 1=debug, 2=trace)\n");
-        printf("-? (prints this message)\n");
+        printf("usage bin-dump [-?] file:\n");
+        printf("       if no file specified, default file is forth.bin\n");
+        printf("   -? (prints this message)\n");
     }
     else
     {
-        printf("unknown arg '-%s'\n", arg);
+
+        strcpy(input_fn, arg);
     }
 }
 
@@ -97,6 +75,10 @@ int main(int argc, char **argv)
         if (*cp == '-')
         {
             process_arg(++cp);
+        }
+        else
+        {
+            process_arg(cp);
         }
     }
 
