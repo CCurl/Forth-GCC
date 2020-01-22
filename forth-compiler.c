@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include "Shared.h"
 #include "functions.h"
 #include "logger.h"
@@ -808,16 +809,17 @@ void process_arg(char *arg)
     }
     else if (*arg == '?') 
     {
-        printf("args:\n");
-        printf("-i:inputFile (full or relative path)\n");
-        printf("  default inputFile is forth.src\n");
-        printf("-a:assemblyFile (full or relative path)\n");
-        printf("  default assemblyFile is forth.asm\n");
-        printf("-o:outputFile (full or relative path)\n");
-        printf("  default outputFile is forth.bin\n");
-        printf("-t set log level to trace\n");
-        printf("-d set log level to debug\n");
-        printf("-? (prints this message)\n");
+        printf("usage: forth-compiler [args]\n");
+        printf("  -i:inputFile (full or relative path)\n");
+        printf("      default inputFile is forth.src\n");
+        printf("  -a:assemblyFile (full or relative path)\n");
+        printf("      default assemblyFile is forth.asm\n");
+        printf("  -o:outputFile (full or relative path)\n");
+        printf("      default outputFile is forth.bin\n");
+        printf("  -t (set log level to trace)\n");
+        printf("  -d (set log level to debug)\n");
+        printf("  -? (prints this message)\n");
+		exit(0);
     }
     else
     {
