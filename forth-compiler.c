@@ -13,9 +13,10 @@ BYTE the_memory[MEM_SZ];
 
 char input_fn[256];
 char output_fn[256];
+char assembly_fn[256];
 FILE *input_fp = NULL;
 FILE *output_fp = NULL;
-
+bool fatal_error = false;
 
 // Values for the flags bit field
 #define IS_IMMEDIATE 0x01
@@ -249,6 +250,7 @@ void DefineWord(LPCTSTR word, BYTE flags)
 		dp->name[tmp++] = *(cp++);
 	}
 	dp->name[tmp++] = NULL;
+	SyncMem(true);
 }
 
 void Comma(CELL num)
@@ -695,10 +697,86 @@ void Parse(char *line)
 			continue;
 		}
 
-		printf("%s: '%s'??\n", source, word);
+		printf("ERROR: %s: '%s'??\n", source, word);
+		// fatal_error = true;
 	}
 }
 
+void write_assembly_file()
+{
+    if (fatal_error)
+    {
+        return;
+    }
+
+    printf("\nwriting assembly file %s... ", assembly_fn);
+
+    output_fp = fopen(assembly_fn, "wt");
+    if (!output_fp)
+    {
+		fatal_error = true;
+        printf("ERROR: Can't open assembly file.\n");
+        return;
+    }
+
+    fprintf(output_fp, ";memory-size: %04lx (hex)\n;\n", (long)MEM_SZ);
+	dis_vm(output_fp);
+
+    fclose(output_fp);
+    output_fp = NULL;
+
+    printf("done.\n");
+}
+
+void write_output_file()
+{
+    if (fatal_error)
+    {
+        return;
+    }
+
+    printf("writing output file %s... ", output_fn);
+
+    output_fp = fopen(output_fn, "wb");
+    if (!output_fp)
+    {
+		// fatal_error = true;
+        printf("ERROR: Can't open output file.\n");
+        return;
+    }
+
+	fwrite(the_memory, 1, MEM_SZ, output_fp);
+    fclose(output_fp);
+    output_fp = NULL;
+    printf("done.\n");
+}
+
+void CompilerInit()
+{
+	init_vm();
+	the_memory[0] = RET;
+	isEmbedded = true;
+}
+
+void do_compile()
+{
+    printf("compiling from %s... ", input_fn);
+	CompilerInit();
+
+    input_fp = fopen(input_fn, "rt");
+    if (!input_fp)
+    {
+		fatal_error = true;
+        printf("FATAL: Can't open input file.\n");
+        return;
+    }
+
+	Compile(input_fp);
+    fclose(input_fp);
+    input_fp = NULL;
+
+    printf("done.\n");
+}
 
 // *********************************************************************
 void process_arg(char *arg)
@@ -712,6 +790,11 @@ void process_arg(char *arg)
     {
         arg = arg+2;
         strcpy(output_fn, arg);
+    }
+    else if (*arg == 'a') 
+    {
+        arg = arg+2;
+        strcpy(assembly_fn, arg);
     }
     else if (*arg == 't') 
     {
@@ -728,8 +811,10 @@ void process_arg(char *arg)
         printf("args:\n");
         printf("-i:inputFile (full or relative path)\n");
         printf("  default inputFile is forth.src\n");
+        printf("-a:assemblyFile (full or relative path)\n");
+        printf("  default assemblyFile is forth.asm\n");
         printf("-o:outputFile (full or relative path)\n");
-        printf("  default outputFile is forth.hex\n");
+        printf("  default outputFile is forth.bin\n");
         printf("-t set log level to trace\n");
         printf("-d set log level to debug\n");
         printf("-? (prints this message)\n");
@@ -740,58 +825,11 @@ void process_arg(char *arg)
     }
 }
 
-int write_output()
-{
-    printf("\nwriting output file %s... ", output_fn);
-
-    output_fp = fopen(output_fn, "wt");
-    if (!output_fp)
-    {
-        printf("ERROR: Can't open output file.");
-        return 0;
-    }
-
-    fprintf(output_fp, ";memory-size: %04lx (hex)\n;\n", (long)MEM_SZ);
-	dis_vm(output_fp);
-
-    fclose(output_fp);
-    output_fp = NULL;
-
-    printf("done.");
-    return 1;
-}
-
-void CompilerInit()
-{
-	init_vm();
-	the_memory[0] = RET;
-	isEmbedded = true;
-}
-
-int do_compile()
-{
-    printf("compiling from %s... ", input_fn);
-	CompilerInit();
-
-    input_fp = fopen(input_fn, "rt");
-    if (!input_fp)
-    {
-        printf("Can't open input file.");
-        return 0;
-    }
-
-	Compile(input_fp);
-
-    fclose(input_fp);
-    input_fp = NULL;
-    printf("done.");
-    return 1;
-}
-
 int main (int argc, char **argv)
 {
     strcpy(input_fn, "forth.src");
-    strcpy(output_fn, "forth.hex");
+    strcpy(output_fn, "forth.bin");
+	strcpy(assembly_fn, "forth.asm");
 	debug_off();
 
     for (int i = 1; i < argc; i++)
@@ -803,8 +841,9 @@ int main (int argc, char **argv)
         }
     }
 
-    if (do_compile())
-        write_output();
+    do_compile();
+	write_output_file();
+	write_assembly_file();
 
     if (input_fp)
         fclose(input_fp);
@@ -812,5 +851,6 @@ int main (int argc, char **argv)
     if (output_fp)
         fclose(output_fp);
 
+	printf("all done.");
     return 0;
 }

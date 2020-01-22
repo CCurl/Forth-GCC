@@ -6,17 +6,15 @@
 #include "string.h"
 #include "logger.h"
 
-BYTE the_memory[MEM_SZ];
-
-#include "ForthVM.h"
+#define MEM_SZ2 32
+BYTE the_memory[MEM_SZ2];
 
 char input_fn[256];
 FILE *input_fp = NULL;
 
 // *********************************************************************
-bool load_vm()
+bool bin_dump()
 {
-	debug("loading VM from %s ...", input_fn);
 	input_fp = fopen(input_fn, "rb");
 	if (!input_fp)
 	{
@@ -24,7 +22,24 @@ bool load_vm()
 		return false;
 	}
 
-	fread(the_memory, 1, MEM_SZ, input_fp);
+    long start = 0;
+   	size_t num = 1;
+    while (num > 0)
+    {
+    	num = fread(the_memory, 1, MEM_SZ2, input_fp);
+        if (num)
+        {
+            printf("%04lx:", start);
+            for (int i = 0; i < num; i++)
+            {
+                if (i % 8 == 0)
+                    printf(" ");
+                printf(" %02x", the_memory[i]);
+            }
+            printf("\n");
+            start += MEM_SZ2;
+        }
+    }
 	fclose(input_fp);
 	input_fp = NULL;
 	debug(" done.\n");
@@ -85,12 +100,6 @@ int main(int argc, char **argv)
         }
     }
 
-	if (load_vm())
-	{
-		init_vm();
-		PC = 0;
-		cpu_loop();
-	}
-
+	bin_dump();
     return 0;
 }

@@ -43,6 +43,18 @@ void dis_start(CELL start, int num, char *bytes)
 }
 
 // ------------------------------------------------------------------------------------------
+void dis_range(CELL start, CELL end, char *bytes)
+{
+	char x[8];
+	while (start <= end)
+	{
+		BYTE val = the_memory[start++];
+		sprintf(x, " %02x", (int)val);
+		strcat(bytes, x);
+	}
+}
+
+// ------------------------------------------------------------------------------------------
 void dis_PC2(int num, char *bytes)
 {
 	char x[8];
@@ -574,6 +586,10 @@ void dis_vm(FILE *write_to)
 	PC = 0;
 	dis_one(bytes, desc);
 	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
+
+	sprintf(bytes, "0005:");
+	dis_range(5, 31, bytes);
+	fprintf(write_to, "%s\n;\n", bytes);
 
 	PC = 32;
 	// Code
