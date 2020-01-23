@@ -6,7 +6,7 @@ void process_arg(char *);
 // *********************************************************************
 void bin_dumpMem(char *mem, int num, int bytes_per_line, long start)
 {
-    char *cp = mem;
+    unsigned char *cp = mem;
     printf("%04lx:", start);
     for (int i = 0; i < num; i++)
     {

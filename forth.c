@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <string.h>
 #include "Shared.h"
 #include "functions.h"
@@ -59,11 +60,13 @@ void process_arg(char *arg)
     }
     else if (*arg == '?') 
     {
-        printf("args:\n");
-        printf("-i:inputFile (full or relative path)\n");
-        printf("-l:loglevel (0=off, 1=debug, 2=trace)\n");
-        printf("  default inputFile is forth.hex");
-        printf("-? (prints this message)\n");
+        printf("usage forth [args]\n");
+        printf("  -i:imagefile (full or relative path)\n");
+        printf("     default imagefile is forth.bin\n");
+        printf("  -l:loglevel (0=off, 1=debug, 2=trace)\n");
+        printf("     default loglevel is 0\n");
+        printf("  -? (prints this message)\n");
+        exit(0);
     }
     else
     {

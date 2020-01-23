@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include "Shared.h"
 #include "functions.h"
 #include "logger.h"
@@ -13,9 +14,10 @@ BYTE the_memory[MEM_SZ];
 
 char input_fn[256];
 char output_fn[256];
+char assembly_fn[256];
 FILE *input_fp = NULL;
 FILE *output_fp = NULL;
-
+bool fatal_error = false;
 
 // Values for the flags bit field
 #define IS_IMMEDIATE 0x01
@@ -89,9 +91,9 @@ void Compile(FILE *fp_in)
 	char line[128];
     while (fgets(buf, sizeof(buf), fp_in) == buf)
     {
+		string_rtrim(buf);
         ++line_no;
         strcpy(line, buf);
-		// debug(buf);
         Parse(buf);
     }
     fclose(fp_in);
@@ -249,6 +251,7 @@ void DefineWord(LPCTSTR word, BYTE flags)
 		dp->name[tmp++] = *(cp++);
 	}
 	dp->name[tmp++] = NULL;
+	SyncMem(true);
 }
 
 void Comma(CELL num)
@@ -333,6 +336,8 @@ void Parse(char *line)
 	char parsed[128];
 	char word[128];
 
+	trace("Parse(): line=[%s]\n", line);
+
 	while (string_len(line) > 0)
 	{
 		line = GetWord(line, word);
@@ -352,6 +357,7 @@ void Parse(char *line)
 			return;
 		}
 
+		trace("Parse(): word=[%s], HERE=%04lx, LAST=%04lx, STATE=%ld\n", word, HERE, LAST, STATE);
 		if (string_equals(word, ".ORG"))
 		{
 			GetWord(line, word);
@@ -374,6 +380,7 @@ void Parse(char *line)
 			STATE = 1;
 			line = GetWord(line, word);
 			strcat(parsed, word);
+			trace("\n");
 			debug("Defining word [%s]...\n", word);
 			DefineWord(word, 0);
 			CComma(DICTP);
@@ -543,27 +550,38 @@ void Parse(char *line)
 
 			if (string_equals(word, "S\""))
 			{
+				trace("SLITERAL");
 				CComma(SLITERAL);
-				CELL cur_here = HERE++;
-				BYTE count = 0;
+				int count = 0;
 				bool done = false;
 				line += 1;
+				CELL cur_here = HERE++;
+				BYTE ch;
 				while ((!done) && (!string_isEmpty(line)))
 				{
-					BYTE ch = *line++;
-					string_ccat(parsed, ch);
-
+					ch = *(line++);
+					trace("(1-%04lx)", cur_here);
+					// string_ccat(parsed, ch);
+					if (ch == 0)
+						ch = (BYTE)32;
+					
+					trace(" (%d, %04lx", ch, HERE);
 					if (ch == '\"')
 					{
 						done = true;
+						trace("(3-%04lx)", cur_here);
 					}
 					else
 					{
+						trace(", %ld, %04lx)", count, cur_here);
 						CComma(ch);
+						trace("(2-%04lx)", cur_here);
 						count++;
 					}
 				}
+				trace(") done. HERE=%04lx, cur_here=%04lx\n", HERE, cur_here);
 				CComma(0);
+				trace(") done. HERE=%04lx, cur_here=%04lx\n", HERE, cur_here);
 				CStore(cur_here, count);
 				continue;
 			}
@@ -573,6 +591,7 @@ void Parse(char *line)
 		//if ((STATE == 0) || (STATE == 2))
 		if (0 < opcode)
 		{
+			trace("[%s] Is an ASM keyword: opcode=%d\n", word, opcode);
 			if (STATE == 0)
 			{
 				if (! ExecuteOpcode(opcode))
@@ -590,6 +609,7 @@ void Parse(char *line)
 		opcode = FindForthPrim(word);
 		if (0 < opcode)
 		{
+			trace("[%s] Is a FORTH primitive: opcode=%d\n", word, opcode);
 			if (STATE == 1)
 			{
 				CComma(opcode);
@@ -651,6 +671,7 @@ void Parse(char *line)
 		CELL num = 0;
 		if (MakeNumber(word, &num))
 		{
+			trace("IsNumber: %ld (%04lx), STATE=%ld\n", num, num, STATE);
 			if (STATE == 0) // Interactive
 			{
 				push(num);
@@ -677,10 +698,86 @@ void Parse(char *line)
 			continue;
 		}
 
-		printf("%s: '%s'??\n", source, word);
+		printf("ERROR: %s: '%s'??\n", source, word);
+		// fatal_error = true;
 	}
 }
 
+void write_assembly_file()
+{
+    if (fatal_error)
+    {
+        return;
+    }
+
+    printf("\nwriting assembly file %s... ", assembly_fn);
+
+    output_fp = fopen(assembly_fn, "wt");
+    if (!output_fp)
+    {
+		fatal_error = true;
+        printf("ERROR: Can't open assembly file.\n");
+        return;
+    }
+
+    fprintf(output_fp, ";memory-size: %04lx (hex)\n;\n", (long)MEM_SZ);
+	dis_vm(output_fp);
+
+    fclose(output_fp);
+    output_fp = NULL;
+
+    printf("done.\n");
+}
+
+void write_output_file()
+{
+    if (fatal_error)
+    {
+        return;
+    }
+
+    printf("writing output file %s... ", output_fn);
+
+    output_fp = fopen(output_fn, "wb");
+    if (!output_fp)
+    {
+		// fatal_error = true;
+        printf("ERROR: Can't open output file.\n");
+        return;
+    }
+
+	fwrite(the_memory, 1, MEM_SZ, output_fp);
+    fclose(output_fp);
+    output_fp = NULL;
+    printf("done.\n");
+}
+
+void CompilerInit()
+{
+	init_vm();
+	the_memory[0] = RET;
+	isEmbedded = true;
+}
+
+void do_compile()
+{
+    printf("compiling from %s... ", input_fn);
+	CompilerInit();
+
+    input_fp = fopen(input_fn, "rt");
+    if (!input_fp)
+    {
+		fatal_error = true;
+        printf("FATAL: Can't open input file.\n");
+        return;
+    }
+
+	Compile(input_fp);
+    fclose(input_fp);
+    input_fp = NULL;
+
+    printf("done.\n");
+}
 
 // *********************************************************************
 void process_arg(char *arg)
@@ -695,6 +792,11 @@ void process_arg(char *arg)
         arg = arg+2;
         strcpy(output_fn, arg);
     }
+    else if (*arg == 'a') 
+    {
+        arg = arg+2;
+        strcpy(assembly_fn, arg);
+    }
     else if (*arg == 't') 
     {
 		trace_on();
@@ -707,14 +809,17 @@ void process_arg(char *arg)
     }
     else if (*arg == '?') 
     {
-        printf("args:\n");
-        printf("-i:inputFile (full or relative path)\n");
-        printf("  default inputFile is forth.src\n");
-        printf("-o:outputFile (full or relative path)\n");
-        printf("  default outputFile is forth.hex\n");
-        printf("-t set log level to trace\n");
-        printf("-d set log level to debug\n");
-        printf("-? (prints this message)\n");
+        printf("usage: forth-compiler [args]\n");
+        printf("  -i:inputFile (full or relative path)\n");
+        printf("      default inputFile is forth.src\n");
+        printf("  -a:assemblyFile (full or relative path)\n");
+        printf("      default assemblyFile is forth.asm\n");
+        printf("  -o:outputFile (full or relative path)\n");
+        printf("      default outputFile is forth.bin\n");
+        printf("  -t (set log level to trace)\n");
+        printf("  -d (set log level to debug)\n");
+        printf("  -? (prints this message)\n");
+		exit(0);
     }
     else
     {
@@ -722,58 +827,11 @@ void process_arg(char *arg)
     }
 }
 
-int write_output()
-{
-    printf("\nwriting output file %s... ", output_fn);
-
-    output_fp = fopen(output_fn, "wt");
-    if (!output_fp)
-    {
-        printf("ERROR: Can't open output file.");
-        return 0;
-    }
-
-    fprintf(output_fp, ";memory-size: %04lx (hex)\n;\n", (long)MEM_SZ);
-	dis_vm(output_fp);
-
-    fclose(output_fp);
-    output_fp = NULL;
-
-    printf("done.");
-    return 1;
-}
-
-void CompilerInit()
-{
-	init_vm();
-	the_memory[0] = RET;
-	isEmbedded = true;
-}
-
-int do_compile()
-{
-    printf("compiling from %s... ", input_fn);
-	CompilerInit();
-
-    input_fp = fopen(input_fn, "rt");
-    if (!input_fp)
-    {
-        printf("Can't open input file.");
-        return 0;
-    }
-
-	Compile(input_fp);
-
-    fclose(input_fp);
-    input_fp = NULL;
-    printf("done.");
-    return 1;
-}
-
 int main (int argc, char **argv)
 {
     strcpy(input_fn, "forth.src");
-    strcpy(output_fn, "forth.hex");
+    strcpy(output_fn, "forth.bin");
+	strcpy(assembly_fn, "forth.asm");
 	debug_off();
 
     for (int i = 1; i < argc; i++)
@@ -785,8 +843,9 @@ int main (int argc, char **argv)
         }
     }
 
-    if (do_compile())
-        write_output();
+    do_compile();
+	write_output_file();
+	write_assembly_file();
 
     if (input_fp)
         fclose(input_fp);
@@ -794,5 +853,6 @@ int main (int argc, char **argv)
     if (output_fp)
         fclose(output_fp);
 
+	printf("all done.");
     return 0;
 }
