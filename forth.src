@@ -1,4 +1,4 @@
-\ ------------------------------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------
 \ This is the source code for the VM's boot loader.
 \ This file is compiled by CFComp.exe and an image of the VM's initial state is created.
 \ CFComp.exe then disassembles that image, creating a listing file named dis.txt
@@ -15,7 +15,6 @@
 : DP       16 ; INLINE
 : (LAST)   20 ; INLINE
 : BASE     24 ; INLINE
-: MEM_SZ 16 1024 * ;
 
 : HERE DP @ ; INLINE
 : LAST (LAST) @ ; INLINE
@@ -25,6 +24,9 @@
 : >IN   <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 : STATE <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 : isNeg <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+: (MEM_K) <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+16 (MEM_K) !
+: MEM_SZ (MEM_K) @ 1024 * ;
 
 \ : STDIN <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 \ : INPUT-FP <asm> .HERE 4 + .LITERAL </asm> ; 0 .COMMA
@@ -326,18 +328,32 @@
 	AGAIN
 ;
 
-: .WORD DUP DICT>NAME CT BL @ ;
-: WORDS LAST BEGIN DUP 0 = IF DROP CRLF LEAVE THEN .WORD AGAIN ;
+: .(MEM_SZ) S" Memory: " CT MEM_SZ DUP HEX. S"  (" CT . BL S" )" CT ;
+: .(HERE) S" HERE: " CT HERE DUP HEX. S"  (" CT . BL S" )" CT ;
+: .(LAST) LAST DUP S" LAST: " CT HEX. S"  (" CT . BL S" )" CT ;
 
-: WORDS-VERBOSE \ ( -- )
+: .WORD-SHORT DUP DICT>NAME CT BL @ ;
+: .WORD-LONG  
+		DUP HEX. S" :" CT BL
+		DUP DICT>NAME CT BL
+		DUP DICT.GetXT 40 EMIT HEX. 41 EMIT \ DEBUG
+		DUP DICT>FLAGS C@ \ DEBUG
+		DUP S" , Flags: " CT HEX. \ DEBUG
+		DUP FLAGS.ISINLINE? IF S"  (INLINE)" CT THEN \ DEBUG
+		FLAGS.ISIMMEDIATE? IF S"  (IMMEDIATE)" CT THEN \ DEBUG
+		CRLF @
+;
+
+: WORDS               LAST BEGIN DUP 0 = IF DROP CRLF LEAVE THEN .WORD-SHORT AGAIN ;
+: WORDSV .(LAST) CRLF LAST BEGIN DUP 0 = IF DROP CRLF LEAVE THEN .WORD-LONG  AGAIN ;
+
+: WORDS-OLD \ ( -- )
 	LAST DUP HEX. 58 EMIT BL
 	BEGIN
 		DUP 0 =
 		IF
 			DROP CRLF LEAVE
 		THEN
-		DUP DICT>NAME CT BL
-		DUP DICT.GetXT 40 EMIT HEX. 41 EMIT BL \ DEBUG
 		@
 	AGAIN
 ;
@@ -641,9 +657,6 @@ LAST DICT.GetXT
 : bufAppend DUP C++ DUP C@ + C! ; \ ( ch addr -- )
 : nullTerm DUP C@ + 1+ 0 SWAP C! ; \ ( addr -- )
 
-: .(HERE) S" HERE: " CT HERE DUP HEX. BL S" (" CT . BL S" )" CT ;
-: .(LAST) LAST DUP S" LAST: " CT HEX. BL S" (" CT . BL S" )" CT ;
-
 : ascii. DUP HEX. BL DUP DECIMAL. BL EMIT ;
 : ascii 2DUP < IF SWAP THEN BEGIN CRLF DUP ascii. 1+ 2DUP > WHILE 2DROP ;
 
@@ -666,9 +679,12 @@ LAST DICT.GetXT
 99 STATE !
 : main STATE @ 99 = IF STATE OFF S" Hello." CT THEN mainLoop ;
 
-\ WORDS
+WORDSV
 
-.(HERE) BL .(LAST) BL FREE? CRLF
+.(MEM_SZ) 44 EMIT BL
+.(HERE)   44 EMIT BL 
+.(LAST)   44 EMIT BL 
+FREE? CRLF
 
 \ variable fp
 \ : img-save 
