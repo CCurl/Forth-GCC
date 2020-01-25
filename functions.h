@@ -3,9 +3,9 @@
 
 #include "Shared.h"
 
-void Parse(char *);
-DICT_T *FindWord(char *word);
-CELL DisOpcode(CELL PC, FILE *fp);
-CELL DisDict(CELL PC, FILE *fp);
+// void Parse(char *);
+// DICT_T *FindWord(char *word);
+// CELL DisOpcode(CELL PC, FILE *fp);
+// CELL DisDict(CELL PC, FILE *fp);
 
 #endif

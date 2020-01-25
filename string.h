@@ -18,7 +18,7 @@ void string_cat(char *dest, char *src)
 // *********************************************************************
 void string_ccat(char *dest, char ch)
 {
-	char src[2];
+	char src[20];
 	src[0] = ch;
 	src[1] = (char)NULL;
     strcat(dest, src);

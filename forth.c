@@ -1,14 +1,12 @@
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <string.h>
 #include "Shared.h"
+#include "forth-vm.h"
 #include "functions.h"
 #include "string.h"
 #include "logger.h"
-
-BYTE the_memory[MEM_SZ];
-
-#include "ForthVM.h"
 
 char input_fn[256];
 FILE *input_fp = NULL;
@@ -59,11 +57,13 @@ void process_arg(char *arg)
     }
     else if (*arg == '?') 
     {
-        printf("args:\n");
-        printf("-i:inputFile (full or relative path)\n");
-        printf("-l:loglevel (0=off, 1=debug, 2=trace)\n");
-        printf("  default inputFile is forth.hex");
-        printf("-? (prints this message)\n");
+        printf("usage forth [args]\n");
+        printf("  -i:imagefile (full or relative path)\n");
+        printf("     default imagefile is forth.bin\n");
+        printf("  -l:loglevel (0=off, 1=debug, 2=trace)\n");
+        printf("     default loglevel is 0\n");
+        printf("  -? (prints this message)\n");
+        exit(0);
     }
     else
     {
@@ -85,9 +85,9 @@ int main(int argc, char **argv)
         }
     }
 
+	init_vm();
 	if (load_vm())
 	{
-		init_vm();
 		PC = 0;
 		cpu_loop();
 	}

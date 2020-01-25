@@ -1,4 +1,4 @@
-\ ------------------------------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------
 \ This is the source code for the VM's boot loader.
 \ This file is compiled by CFComp.exe and an image of the VM's initial state is created.
 \ CFComp.exe then disassembles that image, creating a listing file named dis.txt
@@ -15,7 +15,6 @@
 : DP       16 ; INLINE
 : (LAST)   20 ; INLINE
 : BASE     24 ; INLINE
-: MEM_SZ 16 1024 * ;
 
 : HERE DP @ ; INLINE
 : LAST (LAST) @ ; INLINE
@@ -25,6 +24,9 @@
 : >IN   <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 : STATE <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 : isNeg <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+: (MEM_K) <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+16 (MEM_K) !
+: MEM_SZ (MEM_K) @ 1024 * ;
 
 \ : STDIN <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 \ : INPUT-FP <asm> .HERE 4 + .LITERAL </asm> ; 0 .COMMA
@@ -326,16 +328,32 @@
 	AGAIN
 ;
 
-: WORDS \ ( -- )
-	LAST
+: .(MEM_SZ) S" Memory: " CT MEM_SZ DUP HEX. S"  (" CT . BL S" )" CT ;
+: .(HERE) S" HERE: " CT HERE DUP HEX. S"  (" CT . BL S" )" CT ;
+: .(LAST) LAST DUP S" LAST: " CT HEX. S"  (" CT . BL S" )" CT ;
+
+: .WORD-SHORT DUP DICT>NAME CT BL @ ;
+: .WORD-LONG  
+		DUP HEX. S" :" CT BL
+		DUP DICT>NAME CT BL
+		DUP DICT.GetXT 40 EMIT HEX. 41 EMIT \ DEBUG
+		DUP DICT>FLAGS C@ \ DEBUG
+		DUP S" , Flags: " CT HEX. \ DEBUG
+		DUP FLAGS.ISINLINE? IF S"  (INLINE)" CT THEN \ DEBUG
+		FLAGS.ISIMMEDIATE? IF S"  (IMMEDIATE)" CT THEN \ DEBUG
+		CRLF @
+;
+
+: WORDS               LAST BEGIN DUP 0 = IF DROP CRLF LEAVE THEN .WORD-SHORT AGAIN ;
+: WORDSV .(LAST) CRLF LAST BEGIN DUP 0 = IF DROP CRLF LEAVE THEN .WORD-LONG  AGAIN ;
+
+: WORDS-OLD \ ( -- )
+	LAST DUP HEX. 58 EMIT BL
 	BEGIN
-		DUP @ 0 =
+		DUP 0 =
 		IF
 			DROP CRLF LEAVE
 		THEN
-		\ DUP 40 EMIT HEX. 41 EMIT BL \ DEBUG
-		DUP DICT>NAME
-		COUNT TYPE BL
 		@
 	AGAIN
 ;
@@ -468,8 +486,9 @@ LAST DICT.GetXT
 				THEN
 			THEN
 		ELSE
+			\ . LAST . \ debug
 			DROP
-			R@ ZTYPE S" ??" COUNT TYPE RESET \ TODO: error
+			R@ ZTYPE S" ??" CT RESET \ TODO: error
 		THEN
 		RDROP
 	THEN
@@ -481,10 +500,13 @@ LAST DICT.GetXT
 		\ 65 EMIT >IN @ ZTYPE 65 EMIT CRLF \ DEBUG
 		>IN @ skipWS
 		\ 66 EMIT CRLF >IN @ ZTYPE CRLF \ DEBUG
-		>IN ! >IN @ C@ 
+		>IN ! 
+		\ EOL?
+		>IN @ C@ 
 		IF
 			\ 67 EMIT >IN @ ZTYPE CRLF \ DEBUG
-			>IN @ getOneWord >IN ! executeWord
+			>IN @ getOneWord 
+			>IN ! executeWord
 		ELSE
 			LEAVE
 		THEN
@@ -607,9 +629,7 @@ LAST DICT.GetXT
 	DECIMAL
 ;
 
-: OK ?COMPILING 0 = IF S" OK" COUNT TYPE .S THEN CRLF ;
-
-: z DUP BL DECIMAL. DUP BL HEX. DUP C@ BL HEX. 1+ ;
+\ : z DUP BL DECIMAL. DUP BL HEX. DUP C@ BL HEX. 1+ ;
 
 : HELLO >IN @
 	IF 
@@ -622,8 +642,9 @@ LAST DICT.GetXT
 : ALLOT HERE + DP ! ;
 
 : (const) <asm> CPUSH PUSH </asm> C, , <asm> CPUSH RET </asm> C, ;
-: CONSTANT CREATE-NAME (const) INLINE ;
-: VARIABLE CREATE-NAME HERE 2 + CELL + (const) 0 , INLINE ;
+: CONSTANT CREATE-NAME (const) ; INLINE
+: VARIABLE CREATE-NAME HERE 2 + CELL + (const) 0 , ; INLINE
+: CVARIABLE CREATE-NAME HERE 2 + 1 + (const) 0 C, ; INLINE
 
 : ? @ . ; \ ( addr -- )
 : C? C@ . ; \ ( addr -- )
@@ -636,21 +657,34 @@ LAST DICT.GetXT
 : bufAppend DUP C++ DUP C@ + C! ; \ ( ch addr -- )
 : nullTerm DUP C@ + 1+ 0 SWAP C! ; \ ( addr -- )
 
-: mainLoop resetState BEGIN OK getLine 1+ >IN ! executeInput BL AGAIN ;
-: main HELLO mainLoop ;
-
 : ascii. DUP HEX. BL DUP DECIMAL. BL EMIT ;
 : ascii 2DUP < IF SWAP THEN BEGIN CRLF DUP ascii. 1+ 2DUP > WHILE 2DROP ;
 
 : t0 2DUP < IF SWAP THEN BEGIN DUP . 1+ 2DUP > WHILE 2DROP ;
 : t1 2DUP < IF SWAP THEN BEGIN 1+ DUP . 2DUP > WHILE 2DROP ;
 : fn S" img-4th.bin" ;
-: .(HERE) S" HERE: " CT HERE DUP HEX. S"  (" CT . S"  )" CT ;
-: .(LAST) LAST DUP S" LAST: " CT HEX. S"  (" CT . S"  )" CT ;
 
-.(HERE) BL .(LAST) BL FREE? CRLF
+: OK ?COMPILING 0 = IF S" OK" COUNT TYPE .S THEN CRLF ;
 
-1 2 3 .S + + . .S
+: mainLoop-orig resetState BEGIN OK getLine 1+ >IN ! executeInput BL AGAIN ;
+: mainLoop 
+	resetState 
+	BEGIN 
+		?COMPILING 0= IF S"  OK" CT .S THEN
+		 \ .(LAST) LAST? \ DEBUG
+		CRLF getLine 1+ >IN ! 
+		executeInput BL 
+	AGAIN ;
+
+99 STATE !
+: main STATE @ 99 = IF STATE OFF S" Hello." CT THEN mainLoop ;
+
+WORDSV
+
+.(MEM_SZ) 44 EMIT BL
+.(HERE)   44 EMIT BL 
+.(LAST)   44 EMIT BL 
+FREE? CRLF
 
 \ variable fp
 \ : img-save 
