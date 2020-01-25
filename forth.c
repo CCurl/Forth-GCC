@@ -3,13 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Shared.h"
+#include "forth-vm.h"
 #include "functions.h"
 #include "string.h"
 #include "logger.h"
-
-BYTE the_memory[MEM_SZ];
-
-#include "ForthVM.h"
 
 char input_fn[256];
 FILE *input_fp = NULL;
@@ -88,9 +85,9 @@ int main(int argc, char **argv)
         }
     }
 
+	init_vm();
 	if (load_vm())
 	{
-		init_vm();
 		PC = 0;
 		cpu_loop();
 	}
