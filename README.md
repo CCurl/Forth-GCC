@@ -4,6 +4,8 @@ This is a simple implementation of Forth, written in C using VS Code and GCC.
 
 Yes, I know ... ANOTHER Forth implementation. This one creates a "bare metal" Forth virtual machine. The goal of this project is to create a basic, easy to understand, and easily extendable implementation of a Forth virtual machine. To that end, the virtual CPU has less than 50 instructions, which make up the VM's opcodes. They are also the Forth system's primitives. See "Shared.h" for that list.
 
+Any collaboration on this project would be warmly welcomed. :)
+
 The cpu_loop() function in "forth-vm.c" is the implementation of the virtual CPU loop. This is where all the fun is.
 
 To create the initial image for the VM, I created a simple, Forth-like compiler/assembler. It generates an in-memory image of the VM's desired initial state from the -i: file. It also creates a listing file in the file named by -o:. A casual inspection of the disassembly will show that the entire system is just a Forth dictionary.
