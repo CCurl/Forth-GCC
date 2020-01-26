@@ -342,7 +342,7 @@ CELL cpu_step()
 		trace("ZTYPE\n");
 		return 0;
 
-	case FOPEN:			// ( name mode -- fp status ) - mode: 0 = read, 1 = write
+	case FOPEN:			// ( name mode -- fp success ) - mode: 0 = read, 1 = write
 		arg2 = pop();
 		arg1 = pop();
 		{
@@ -351,7 +351,7 @@ CELL cpu_step()
 			sprintf(mode, "%cb", arg2 == 0 ? 'r' : 'w');
 			FILE *fp = fopen(fileName, mode);
 			push((int)fp);
-			push(fp != NULL ? 0 : 1);
+			push(fp != NULL ? 1 : 0);
 		}
 		trace("FOPEN\n");
 		return 0;
