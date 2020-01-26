@@ -308,7 +308,8 @@
 
 : . BL (.) ;
 
-: HEX.     BASE @ SWAP HEX     DUP 10 < IF 0 (.) THEN (.) BASE ! ;
+HEX
+: HEX.     BASE @ SWAP HEX DUP 10 < IF 0 (.) THEN (.) BASE ! ; DECIMAL
 : DECIMAL. BASE @ SWAP DECIMAL (.) BASE ! ;
 : BINARY.  BASE @ SWAP BINARY  (.) BASE ! ;
 
