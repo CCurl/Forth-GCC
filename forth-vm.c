@@ -433,10 +433,10 @@ CELL cpu_step()
 		trace("RTOD\n");
 		return 0;
 
-	case ONEPLUS:
-		(*DSP)++;
-		trace("ONEPLUS\n");
-		return 0;
+	// case ONEPLUS:
+	// 	(*DSP)++;
+	// 	trace("ONEPLUS\n");
+	// 	return 0;
 
 	case DEPTH:
 		arg1 = DSP - dsp_init;
@@ -444,19 +444,19 @@ CELL cpu_step()
 		trace("DEPTH\n");
 		return 0;
 
-	case LSHIFT:
-		arg1 = pop();
-		arg2 = pop();
-		push(arg2 << arg1);
-		trace("LSHIFT\n");
-		return 0;
+	// case LSHIFT:
+	// 	arg1 = pop();
+	// 	arg2 = pop();
+	// 	push(arg2 << arg1);
+	// 	trace("LSHIFT\n");
+	// 	return 0;
 
-	case RSHIFT:
-		arg1 = pop();
-		arg2 = pop();
-		push(arg2 >> arg1);
-		trace("RSHIFT\n");
-		return 0;
+	// case RSHIFT:
+	// 	arg1 = pop();
+	// 	arg2 = pop();
+	// 	push(arg2 >> arg1);
+	// 	trace("RSHIFT\n");
+	// 	return 0;
 
 	case AND:
 		arg1 = pop();

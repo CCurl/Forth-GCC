@@ -42,13 +42,11 @@
 : * <asm> MUL </asm> ; INLINE
 : / <asm> DIV </asm> ; INLINE
 
-: 1+ <asm> ONEPLUS </asm> ; INLINE
+: 1+ 1 + ; INLINE
 : 1- 1 - ; INLINE
 
-: << <asm> LSHIFT </asm> ; INLINE
-: >> <asm> RSHIFT </asm> ; INLINE
-: 2* 1 << ; INLINE 
-: 2/ 1 >> ; INLINE
+: 2* 2 * ; INLINE 
+: 2/ 2 / ; INLINE
 
 : AND <asm> AND </asm> ; INLINE
 : OR  <asm> OR  </asm> ; INLINE

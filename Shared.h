@@ -39,12 +39,12 @@
 #define DTOR      33	// 21  >R (Data To Return)
 #define RFETCH    34	// 22  R@
 #define RTOD      35	// 23  R> (Return To Data)
-#define ONEPLUS   36	// 24
+// #define ONEPLUS   36	// 24
 #define PICK      37	// 25
 #define DEPTH     38	// 26
 #define GETCH     39	// 27
-#define LSHIFT    40	// 28
-#define RSHIFT    41	// 29
+// #define LSHIFT    40	// 28
+// #define RSHIFT    41	// 29
 #define AND       42	// 2A
 #define OR		  43	// 2B
 #define BRANCH    44	// 2C

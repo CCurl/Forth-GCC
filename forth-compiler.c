@@ -66,11 +66,11 @@ OPCODE_T opcodes[] = {
 	, { _T("DTOR"), DTOR, _T(">R") }
 	, { _T("RFETCH"), RFETCH, _T("R@") }
 	, { _T("RTOD"), RTOD, _T("R>") }
-	, { _T("ONEPLUS"), ONEPLUS, _T("1+") }
+	// , { _T("ONEPLUS"), ONEPLUS, _T("1+") }
 	, { _T("PICK"), PICK, _T("PICK") }
 	, { _T("DEPTH"), DEPTH, _T("DEPTH") }
-	, { _T("LSHIFT"), LSHIFT, _T("<<") }
-	, { _T("RSHIFT"), RSHIFT, _T(">>") }
+	// , { _T("LSHIFT"), LSHIFT, _T("<<") }
+	// , { _T("RSHIFT"), RSHIFT, _T(">>") }
 	, { _T("AND"), AND, _T("AND") }
 	, { _T("OR"), OR, _T("OR") }
 	, { _T("GETCH"), GETCH, _T("GETCH") }
