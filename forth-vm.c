@@ -422,10 +422,10 @@ CELL cpu_step()
 		trace("DTOR\n");
 		return 0;
 
-	case RFETCH:
-		push(*RSP);
-		trace("RFETCH\n");
-		break;
+	// case RFETCH:
+	// 	push(*RSP);
+	// 	trace("RFETCH\n");
+	// 	break;
 
 	case RTOD:
 		arg1 = rpop();

@@ -52,8 +52,8 @@
 : OR  <asm> OR  </asm> ; INLINE
 
 : >R <asm> DTOR   </asm> ; INLINE
-: R@ <asm> RFETCH </asm> ; INLINE
 : R> <asm> RTOD   </asm> ; INLINE
+: R@ R> DUP >R ; INLINE
 
 : < <asm> LT </asm> ; INLINE
 : = <asm> EQ </asm> ; INLINE

@@ -467,10 +467,10 @@ CELL dis_one(char *bytes, char *desc)
 		sprintf(desc, "DTOR");
 		return 0;
 
-	case RFETCH:
-		// push(*RSP);
-		sprintf(desc, "RFETCH");
-		break;
+	// case RFETCH:
+	// 	// push(*RSP);
+	// 	sprintf(desc, "RFETCH");
+	// 	break;
 
 	case RTOD:
 		// arg1 = rpop();

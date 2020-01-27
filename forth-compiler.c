@@ -31,6 +31,8 @@ OPCODE_T opcodes[] = {
 	, { _T("CPUSH"), CLITERAL, _T("") }
 	, { _T("FETCH"), FETCH, _T("@") }
 	, { _T("STORE"), STORE, _T("!") }
+	, { _T("CFETCH"), CFETCH, _T("C@") }
+	, { _T("CSTORE"), CSTORE, _T("C!") }
 	, { _T("SWAP"), SWAP, _T("SWAP") }
 	, { _T("DROP"), DROP, _T("DROP") }
 	, { _T("DUP"), DUP, _T("DUP") }
@@ -45,8 +47,6 @@ OPCODE_T opcodes[] = {
 	, { _T("RET"), RET, _T("LEAVE") }
 	, { _T("COMPARE"), COMPARE, _T("COMPARE") }
 	, { _T("COMPAREI"), COMPAREI, _T("COMPAREI") }
-	, { _T("CFETCH"), CFETCH, _T("C@") }
-	, { _T("CSTORE"), CSTORE, _T("C!") }
 	, { _T("ADD"), ADD, _T("+") }
 	, { _T("SUB"), SUB, _T("-") }
 	, { _T("MUL"), MUL, _T("*") }
@@ -64,7 +64,7 @@ OPCODE_T opcodes[] = {
 	, { _T("FCLOSE"), FCLOSE, _T("FCLOSE") }
 	, { _T("SLITERAL"), SLITERAL, _T("") }
 	, { _T("DTOR"), DTOR, _T(">R") }
-	, { _T("RFETCH"), RFETCH, _T("R@") }
+	// , { _T("RFETCH"), RFETCH, _T("R@") }
 	, { _T("RTOD"), RTOD, _T("R>") }
 	// , { _T("ONEPLUS"), ONEPLUS, _T("1+") }
 	, { _T("PICK"), PICK, _T("PICK") }

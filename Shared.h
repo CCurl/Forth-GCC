@@ -37,7 +37,7 @@
 #define FWRITE    31	// 1F  ( addr num fp -- ) - fp == 0 means STDIN
 #define FCLOSE    32	// 20  ( fp -- )
 #define DTOR      33	// 21  >R (Data To Return)
-#define RFETCH    34	// 22  R@
+// #define RFETCH    34	// 22  R@
 #define RTOD      35	// 23  R> (Return To Data)
 // #define ONEPLUS   36	// 24
 #define PICK      37	// 25
