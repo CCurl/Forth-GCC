@@ -684,6 +684,51 @@ LAST DICT.GetXT
 
 : dump CR BEGIN 2DUP < IF 2DROP LEAVE THEN DUP BL C@ HEX. 1+ AGAIN ;
 
+\ ------------------------------------------------------------------------------------
+\ A stack is comprised of 3 parts, [stack-pointer] [stack-last] [stack-data]
+\ The stack "bottom" is the first CELL after the stack-pointer
+\
+: (stk-ptr) ;                                   \ ( stk -- stk-ptr-addr )
+: (stk-top) CELL + ;		        	        \ ( stk -- last-cell-addr )
+
+: stk-bottom CELL DUP + + ;                     \ ( stk -- bottom )
+: stk-top (stk-top) @ ;			                \ ( stk -- last-cell-addr )
+: stk-ptr (stk-ptr) @ ;                         \ ( stk -- stk-ptr )
+: stk-reset DUP stk-bottom SWAP (stk-ptr) ! ;   \ ( stk -- )
+: stk-depth DUP stk-ptr                         \ ( stk -- depth )
+    SWAP stk-bottom - CELL / ;
+
+: stk-init 								        \ ( sz stk -- )
+    SWAP CELLS ALLOT
+    HERE OVER (stk-top) !
+    CELL ALLOT stk-reset ;
+
+: stk-over?                                     \ ( stk -- )
+    DUP stk-top OVER stk-ptr <
+    IF
+        S" Stack overflow." CT
+	    stk-reset RESET
+    THEN 
+    DROP ;
+
+: stk-under?                                    \ ( stk -- )
+    DUP stk-ptr OVER stk-bottom <=
+    IF
+		S" Stack empty." CT
+	     stk-reset RESET
+    THEN 
+    DROP ;
+
+: >stk DUP stk-over? (stk-ptr) TUCK @ !	        \ ( val stk -- )
+    CELL += ;
+
+: stk@ DUP stk-under? stk-ptr CELL - @ ;        \ ( stk -- val )
+
+: stk> DUP stk@ SWAP                            \ ( stk -- val )
+    (stk-ptr) CELL -= ;
+
+\ ------------------------------------------------------------------------------------
+
 CR
 .(MEM_SZ) 44 EMIT BL
 .(HERE)   44 EMIT BL 
