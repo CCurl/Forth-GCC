@@ -42,20 +42,18 @@
 : * <asm> MUL </asm> ; INLINE
 : / <asm> DIV </asm> ; INLINE
 
-: 1+ <asm> ONEPLUS </asm> ; INLINE
+: 1+ 1 + ; INLINE
 : 1- 1 - ; INLINE
 
-: << <asm> LSHIFT </asm> ; INLINE
-: >> <asm> RSHIFT </asm> ; INLINE
-: 2* 1 << ; INLINE 
-: 2/ 1 >> ; INLINE
+: 2* 2 * ; INLINE 
+: 2/ 2 / ; INLINE
 
 : AND <asm> AND </asm> ; INLINE
 : OR  <asm> OR  </asm> ; INLINE
 
 : >R <asm> DTOR   </asm> ; INLINE
-: R@ <asm> RFETCH </asm> ; INLINE
 : R> <asm> RTOD   </asm> ; INLINE
+: R@ R> DUP >R ; INLINE
 
 : < <asm> LT </asm> ; INLINE
 : = <asm> EQ </asm> ; INLINE
@@ -707,7 +705,7 @@ LAST DICT.GetXT
     DUP stk-top OVER stk-ptr <
     IF
         S" Stack overflow." CT
-	    stk-reset RESET
+	    DROP RESET
     THEN 
     DROP ;
 
