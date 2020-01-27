@@ -1,13 +1,12 @@
-
-here . last .
+.(HERE)   44 EMIT BL 
+.(LAST)   44 EMIT BL 
 
 last here
+
 variable th th !
 variable tl tl !
 
-: fstk
-	tl @ (last) !
-	th @ dp ! ;
+: forget-these tl @ (last) ! th @ dp ! ;
 	
 variable ms
 decimal 3 ms stk-init
@@ -50,5 +49,6 @@ passed @
 CR CR BL BL BL . BL BL BL BL . BL BL BL BL BL BL
 \ passed failed
 
-fstk
-here . last .
+forget-these
+.(HERE)   44 EMIT BL 
+.(LAST)   44 EMIT BL 
