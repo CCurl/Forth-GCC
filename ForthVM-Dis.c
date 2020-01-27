@@ -467,41 +467,17 @@ CELL dis_one(char *bytes, char *desc)
 		sprintf(desc, "DTOR");
 		return 0;
 
-	// case RFETCH:
-	// 	// push(*RSP);
-	// 	sprintf(desc, "RFETCH");
-	// 	break;
-
 	case RTOD:
 		// arg1 = rpop();
 		// push(arg1);
 		sprintf(desc, "RTOD");
 		return 0;
 
-	// case ONEPLUS:
-	// 	// (*DSP)++;
-	// 	sprintf(desc, "ONEPLUS");
-	// 	return 0;
-
 	case DEPTH:
 		// arg1 = DSP - dsp_init;
 		// push(arg1);
 		sprintf(desc, "DEPTH");
 		return 0;
-
-	// case LSHIFT:
-	// 	// arg1 = pop();
-	// 	// arg2 = pop();
-	// 	// push(arg2 << arg1);
-	// 	sprintf(desc, "LSHIFT");
-	// 	return 0;
-
-	// case RSHIFT:
-	// 	// arg1 = pop();
-	// 	// arg2 = pop();
-	// 	// push(arg2 >> arg1);
-	// 	sprintf(desc, "RSHIFT");
-	// 	return 0;
 
 	case AND:
 		// arg1 = pop();
