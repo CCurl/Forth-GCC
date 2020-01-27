@@ -100,6 +100,9 @@
 : +!  TUCK @  + SWAP !  ;
 : C+! TUCK C@ + SWAP C! ;
 
+: += OVER @ + SWAP ! ;
+: -= OVER @ SWAP - SWAP ! ;
+
 : ,  HERE !  CELL DP +! ;
 : C, HERE C!      DP ++ ;
 
@@ -127,6 +130,7 @@
 : 2DROP DROP DROP ; INLINE
 
 : CRLF 13 EMIT 10 EMIT ;
+: CR CRLF ;
 : BL 32 EMIT ; INLINE
 
 : ON 1 SWAP ! ; : OFF 0 SWAP ! ;
@@ -304,7 +308,8 @@
 
 : . BL (.) ;
 
-: HEX.     BASE @ SWAP HEX     (.) BASE ! ;
+HEX
+: HEX.     BASE @ SWAP HEX DUP 10 < IF 0 (.) THEN (.) BASE ! ; DECIMAL
 : DECIMAL. BASE @ SWAP DECIMAL (.) BASE ! ;
 : BINARY.  BASE @ SWAP BINARY  (.) BASE ! ;
 
@@ -357,6 +362,16 @@
 		@
 	AGAIN
 ;
+
+\ Prints the last <x> words
+: .lastx CR LAST SWAP 0
+    BEGIN
+        2DUP > IF
+            ROT .WORD-LONG -ROT 1+ 
+        ELSE
+            DROP DROP DROP LEAVE
+        THEN
+    AGAIN ;
 
 : EXECUTE RDROP >R ; \ ( addr -- )
 
@@ -495,16 +510,12 @@ LAST DICT.GetXT
 ;
 
 : executeInput 
-	\ HEX \ DEBUG
 	BEGIN 
-		\ 65 EMIT >IN @ ZTYPE 65 EMIT CRLF \ DEBUG
 		>IN @ skipWS
-		\ 66 EMIT CRLF >IN @ ZTYPE CRLF \ DEBUG
 		>IN ! 
 		\ EOL?
 		>IN @ C@ 
 		IF
-			\ 67 EMIT >IN @ ZTYPE CRLF \ DEBUG
 			>IN @ getOneWord 
 			>IN ! executeWord
 		ELSE
@@ -549,8 +560,6 @@ LAST DICT.GetXT
 		THEN
 	AGAIN
 ;
-
-: bye BYE ;
 
 : strcpy2c \ ( from to -- ) from is NOT counted, to is to get count byte
 	\ 65 EMIT OVER . DUP . \ DEBUG
@@ -629,16 +638,6 @@ LAST DICT.GetXT
 	DECIMAL
 ;
 
-\ : z DUP BL DECIMAL. DUP BL HEX. DUP C@ BL HEX. 1+ ;
-
-: HELLO >IN @
-	IF 
-		S"  Reset. " COUNT TYPE
-	ELSE
-		S" Hello." COUNT TYPE CRLF
-	THEN 
-;
-
 : ALLOT HERE + DP ! ;
 
 : (const) <asm> CPUSH PUSH </asm> C, , <asm> CPUSH RET </asm> C, ;
@@ -648,8 +647,6 @@ LAST DICT.GetXT
 
 : ? @ . ; \ ( addr -- )
 : C? C@ . ; \ ( addr -- )
-
-\ HEX AAbb . DECIMAL
 
 : FREE LAST HERE - ;
 : FREE? FREE . S"  bytes free." CT ;
@@ -662,16 +659,11 @@ LAST DICT.GetXT
 
 : t0 2DUP < IF SWAP THEN BEGIN DUP . 1+ 2DUP > WHILE 2DROP ;
 : t1 2DUP < IF SWAP THEN BEGIN 1+ DUP . 2DUP > WHILE 2DROP ;
-: fn S" img-4th.bin" ;
 
-: OK ?COMPILING 0 = IF S" OK" COUNT TYPE .S THEN CRLF ;
-
-: mainLoop-orig resetState BEGIN OK getLine 1+ >IN ! executeInput BL AGAIN ;
 : mainLoop 
 	resetState 
 	BEGIN 
 		?COMPILING 0= IF S"  OK" CT .S THEN
-		 \ .(LAST) LAST? \ DEBUG
 		CRLF getLine 1+ >IN ! 
 		executeInput BL 
 	AGAIN ;
@@ -679,23 +671,21 @@ LAST DICT.GetXT
 99 STATE !
 : main STATE @ 99 = IF STATE OFF S" Hello." CT THEN mainLoop ;
 
-WORDSV
+: fn S" img-4th.bin" ;
+: img-save 
+   fn 1 FOPEN IF
+       >R
+       0 MEM_SZ R@ FWRITE 
+	   . S"  bytes written." CT
+       R> FCLOSE
+   ELSE
+       S" cannot open " CT fn CT RESET
+   THEN ;
 
+: dump CR BEGIN 2DUP < IF 2DROP LEAVE THEN DUP BL C@ HEX. 1+ AGAIN ;
+
+CR
 .(MEM_SZ) 44 EMIT BL
 .(HERE)   44 EMIT BL 
 .(LAST)   44 EMIT BL 
-FREE? CRLF
-
-\ variable fp
-\ : img-save 
-\    fn 1 fopen 0= 
-\    if
-\        fp ! 
-\        0 mem_sz fp @ fwrite .
-\        fp @ fclose 
-\        fp off
-\    else
-\        reset
-\    then
-\    ;
-\ img-save
+FREE? CR
