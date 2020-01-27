@@ -705,7 +705,7 @@ LAST DICT.GetXT
     DUP stk-top OVER stk-ptr <
     IF
         S" Stack overflow." CT
-	    stk-reset RESET
+	    DROP RESET
     THEN 
     DROP ;
 
