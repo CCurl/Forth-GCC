@@ -21,12 +21,14 @@
 
 : CELLS CELL * ; \ ( num1 -- num2 )
 
+
 : >IN   <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 : STATE <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 : isNeg <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 : (MEM_K) <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
-16 (MEM_K) !
+
 : MEM_SZ (MEM_K) @ 1024 * ;
+16 (MEM_K) !
 
 \ : STDIN <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 \ : INPUT-FP <asm> .HERE 4 + .LITERAL </asm> ; 0 .COMMA
@@ -143,9 +145,14 @@
 : TYPE DROP ZTYPE ; \ ( addr num -- )
 : CT COUNT TYPE ;
 
-: PAD LAST 200 - ;
-: getInput PAD 128 0 FREADLINE DROP PAD ; \ ( -- addr )
+: (tmp) <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+: tmp-init LAST (tmp) ! ; \ ( -- )
+: tmp-cur (tmp) @ ;
+: tmp-alloc (tmp) TUCK @ SWAP - SWAP ! tmp-cur ; \ ( size -- addr )
+tmp-init
 
+: PAD tmp-init 200 tmp-alloc ;
+: getInput PAD 128 0 FREADLINE DROP PAD ; \ ( -- addr )
 : ?DUP DUP IF DUP THEN ;
 
 : HEX     16 BASE ! ;
@@ -522,7 +529,7 @@ LAST DICT.GetXT
 	AGAIN
 ;
 
-: Pad LAST 200 - ;
+: Pad LAST 200 - ; 
 : >In <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 
 : getLine \ ( -- addr )
@@ -661,6 +668,7 @@ LAST DICT.GetXT
 : mainLoop 
 	resetState 
 	BEGIN 
+		tmp-init
 		?COMPILING 0= IF S"  OK" CT .S THEN
 		CRLF getLine 1+ >IN ! 
 		executeInput BL 
