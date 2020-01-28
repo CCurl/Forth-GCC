@@ -1,4 +1,4 @@
- ------------------------------------------------------------------------------------------
+\ ------------------------------------------------------------------------------------------
 \ This is the source code for the VM's boot loader.
 \ This file is compiled by forth-compiler.exe and an image of the VM's initial state is created.
 \ It then writes that image to a file specified by -i:<filename>. The default is forth.bin.
