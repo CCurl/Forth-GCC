@@ -342,13 +342,14 @@ CELL cpu_step()
 		trace("ZTYPE\n");
 		return 0;
 
-	case FOPEN:			// ( name mode -- fp success ) - mode: 0 = read, 1 = write
-		arg2 = pop();
-		arg1 = pop();
+	case FOPEN:         // ( name mode type -- fp success )
+		arg3 = pop();   // type: 0 => text, 1 => binary
+		arg2 = pop();   // mode: 0 => read, 1 => write
+		arg1 = pop();   // name
 		{
 			char *fileName = (char *)&the_memory[arg1 + 1];
 			char mode[4];
-			sprintf(mode, "%cb", arg2 == 0 ? 'r' : 'w');
+			sprintf(mode, "%c%c", (arg2 == 0) ? 'r' : 'w', (arg3 == 0) ? 't' : 'b');
 			FILE *fp = fopen(fileName, mode);
 			push((int)fp);
 			push(fp != NULL ? 1 : 0);
@@ -368,27 +369,37 @@ CELL cpu_step()
 		trace("FREAD\n");
 		return 0;
 
-	case FREADLINE:			// ( addr num fp -- count ) - fp == 0 means STDIN
-		arg3 = pop();
-		arg2 = pop();
-		arg1 = pop();
+	case FREADLINE:			// ( addr max-sz fp -- num-read )
+		// trace_on();
+		// trace("FREADLINE\n");
+		arg3 = pop();		// FP - 0 means STDIN
+		arg2 = pop();		// max-sz
+		arg1 = pop();		// to-addr - NB: this is a COUNTED and NULL-TERMINATED string!
+		// trace("addr:%ld, sz=%ld, fp=%ld", arg1, arg2, arg3);
 		{
 			char *pBuf = (char *)&the_memory[arg1 + 1];
 			FILE *fp = arg3 ? (FILE *)arg3 : stdin;
 			if (fgets(pBuf, arg2, fp) != pBuf)
 			{
-				*pBuf = (char)NULL;
+				// trace("<EOF>\n");
+				*(pBuf-1) = 0;
+				*pBuf = (char)0;
+				*(pBuf+1) = (char)0;
+				push(0);
+				return 0; // ZERO means <EOF>
 			}
+			// trace("%s\n", pBuf);
 			arg2 = (CELL)strlen(pBuf);
-			// Strip off any trailing newline
-			if ((arg2 > 0) && (pBuf[arg2 - 1] == '\n'))
+			// trace("len=%ld", arg2);
+			// Strip off the trailing newline if there
+			if ((arg2 > 0) && (pBuf[arg2-1] == '\n'))
 			{
 				pBuf[--arg2] = (char)NULL;
 			}
-			*(--pBuf) = (char)arg2;
-			push(arg2);
+			*(pBuf-1) = (char)(arg2);
+			push((arg2 >= 1) ? arg2 : 1);
 		}
-		trace("FREADLINE\n");
+		// debug_off();
 		return 0;
 
 	case FWRITE:			// ( addr num fp -- count ) - fp == 0 means STDIN

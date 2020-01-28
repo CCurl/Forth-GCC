@@ -1,37 +1,36 @@
  ------------------------------------------------------------------------------------------
 \ This is the source code for the VM's boot loader.
-\ This file is compiled by CFComp.exe and an image of the VM's initial state is created.
-\ CFComp.exe then disassembles that image, creating a listing file named dis.txt
-\ The resulting dis.txt is read by the VM when it boots.
+\ This file is compiled by forth-compiler.exe and an image of the VM's initial state is created.
+\ It then writes that image to a file specified by -i:<filename>. The default is forth.bin.
+\ It also disassembles that image, creating a listing file named by the -o arg, forth.asm.
+\ The image file is read by the VM when it boots.
+\
+\ NB: don't inline anything with a 12 in it ... that is RET
 \ ------------------------------------------------------------------------------------------
-
-\ .CELL 2 \ 2 => 16-bit, 4 => 32-bit
 
 .ORG 32
 
-\ don't inline anything with a 12 in it ... that is RET
 \ The compiler/dis-assembler is hard-coded to put these values here ...
 : CELL   7 C@ ; INLINE
-: DP       16 ; INLINE
+: DP       16 ; INLINE   \ Where the current HERE is stored
 : (LAST)   20 ; INLINE
 : BASE     24 ; INLINE
+: INPUT-FP 28 ; INLINE
 
-: HERE DP @ ; INLINE
+: HERE DP     @ ; INLINE
 : LAST (LAST) @ ; INLINE
 
 : CELLS CELL * ; \ ( num1 -- num2 )
 
-
-: >IN   <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
-: STATE <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
-: isNeg <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
-: (MEM_K) <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+: (MEM_K)   <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+: STATE     <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+: >IN       <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+: isNeg     <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 
 : MEM_SZ (MEM_K) @ 1024 * ;
 16 (MEM_K) !
 
 \ : STDIN <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
-\ : INPUT-FP <asm> .HERE 4 + .LITERAL </asm> ; 0 .COMMA
 
 : !  <asm> STORE  </asm> ; INLINE
 : C! <asm> CSTORE </asm> ; INLINE
@@ -91,17 +90,17 @@
 : ROT   >R SWAP R> SWAP ;
 : -ROT  SWAP >R SWAP R> ;
 
-: ++  DUP @  1+ SWAP ! ;  \ ( addr -- )
-: C++ DUP C@ 1+ SWAP C! ; \ ( addr -- )
+: += OVER @ + SWAP ! ;          \ ( addr n -- )
+: -= OVER @   SWAP - SWAP ! ;   \ ( addr n -- )
 
-: --  DUP @  1- SWAP ! ;  \ ( addr -- )
+: ++ 1 += ;  \ ( addr -- )
+: -- 1 -= ;  \ ( addr -- )
+
+: C++ DUP C@ 1+ SWAP C! ; \ ( addr -- )
 : C-- DUP C@ 1- SWAP C! ; \ ( addr -- )
 
 : +!  TUCK @  + SWAP !  ;
 : C+! TUCK C@ + SWAP C! ;
-
-: += OVER @ + SWAP ! ;
-: -= OVER @ SWAP - SWAP ! ;
 
 : ,  HERE !  CELL DP +! ;
 : C, HERE C!      DP ++ ;
@@ -516,10 +515,8 @@ LAST DICT.GetXT
 
 : executeInput 
 	BEGIN 
-		>IN @ skipWS
-		>IN ! 
-		\ EOL?
-		>IN @ C@ 
+		>IN @ skipWS >IN ! 
+		>IN @ C@  \ <EOL>?
 		IF
 			>IN @ getOneWord 
 			>IN ! executeWord
@@ -529,13 +526,34 @@ LAST DICT.GetXT
 	AGAIN
 ;
 
-: Pad LAST 200 - ; 
-: >In <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+: Pad LAST 200 - 
+	DUP HERE < IF
+		S" Out of Memory!" RESET
+	THEN
+; 
+\ : (Pad) <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+\ : Pad (Pad) @ ; 
+
+: LoadingFromFile? INPUT-FP @ ; \ ( -- bool ) 
+
+: getLineFromFile \ ( addr sz fp -- )
+	\ DROP 0 LEAVE
+	200 INPUT-FP @ FREADLINE 0 =
+	IF 
+		INPUT-FP OFF
+	THEN
+;
 
 : getLine \ ( -- addr )
-	0 Pad DUP 1+ >In ! C!
+	\ tmp-init 200 tmp-alloc (Pad) !
+	0 Pad DUP 1+ >IN ! C!
+
+	LoadingFromFile? IF
+		Pad getLineFromFile
+		LEAVE
+	THEN
 	BEGIN
-		0 >In @ C!
+		0 >IN @ C!
 		GETCH 
 
 		DUP 13 =
@@ -547,7 +565,7 @@ LAST DICT.GetXT
 			Pad C@ 0 >
 			IF 
 				Pad C--
-				>In --
+				>IN --
 				DUP EMIT BL EMIT
 			ELSE
 				DROP
@@ -556,8 +574,8 @@ LAST DICT.GetXT
 			DUP 32 127 BETWEEN
 			IF
 				DUP EMIT
-				>In @ C! 
-				>In ++
+				>IN @ C! 
+				>IN ++
 				Pad C++
 			ELSE
 				DROP
@@ -679,7 +697,7 @@ LAST DICT.GetXT
 
 : fn S" img-4th.bin" ;
 : img-save 
-   fn 1 FOPEN IF
+   fn 1 1 FOPEN IF
        >R
        0 MEM_SZ R@ FWRITE 
 	   . S"  bytes written." CT
@@ -734,6 +752,33 @@ LAST DICT.GetXT
     (stk-ptr) CELL -= ;
 
 \ ------------------------------------------------------------------------------------
+: test-getLine \ ( fp -- addr num-read )
+	Pad SWAP 200 SWAP
+	FREADLINE \ ( addr sz fp -- num-read )
+	Pad SWAP
+;
+
+: run-tests S" tests.4th" 0 0 FOPEN 
+	IF
+		\ S" opened file!" CR CT
+		INPUT-FP !
+		BEGIN
+			INPUT-FP @ test-getLine
+			IF
+				>IN !
+				\ >IN @ CT CR
+				>IN ++
+				executeInput
+			ELSE
+				DROP
+				INPUT-FP @ FCLOSE
+				INPUT-FP OFF
+				LEAVE
+			THEN
+		AGAIN
+	THEN  ;
+
+: bbb BYE ;
 
 CR
 .(MEM_SZ) 44 EMIT BL

@@ -1,8 +1,9 @@
+CR
 .(HERE)   44 EMIT BL 
 .(LAST)   44 EMIT BL 
+CR
 
 last here
-
 variable th th !
 variable tl tl !
 
@@ -19,7 +20,12 @@ decimal 3 ms stk-init
 
 variable num-tests
 variable passed
-: passed? dup . passed +! ;
+: passed? 
+    dup 0= if 
+        PAD CT
+    then
+    58 emit dup . passed +! 
+    44 emit ;
 : next-test: num-tests ++ num-tests ? ;
 0 num-tests ! 0 passed !
 
@@ -35,7 +41,7 @@ next-test:
     mdepth 0 = passed?
 next-test: 
     1 >m ms stk-reset mdepth 0 = passed?
-1111 >m 2222 >m 3333 >m 4444 >m \  *** stack overflow expected ***
+1111 >m 2222 >m 3333 >m
 next-test: 
     mdepth 3 = passed?
 next-test: 
@@ -46,8 +52,7 @@ next-test:
 decimal
 num-tests @ passed @ - 
 passed @
-CR CR BL BL BL . BL BL BL BL . BL BL BL BL BL BL
-\ passed failed
+CR CR BL BL BL . BL BL BL BL . CR
 
 forget-these
 .(HERE)   44 EMIT BL 
