@@ -105,11 +105,41 @@
 : ,  HERE !  CELL DP +! ;
 : C, HERE C!      DP ++ ;
 
+: 0= 0 =  ; INLINE
+: <> = 0= ; INLINE
+: <= > 0= ; INLINE
+: >= < 0= ; INLINE
+
+: TRUE 1 ; INLINE
+: FALSE 0 ; INLINE
+: NOT 0 = ; INLINE
+
+: 2DUP  OVER OVER ; INLINE
+: 2DROP DROP DROP ; INLINE
+
+: COUNT DUP 1+ SWAP C@ ;		\ ( addr1 --  addr2 num )
+
+: TYPE \ ( addr count -- ) 
+    BEGIN
+	    DUP 0=
+		IF
+            2DROP LEAVE
+        THEN
+        SWAP DUP C@ EMIT 1+ SWAP 1-
+    AGAIN ;
+
+: CT COUNT TYPE ;
+
 : ?COMPILING STATE @ ;
 : [ 0 STATE ! ; IMMEDIATE
 : ] 1 STATE ! ; IMMEDIATE
 
-: LEAVE ?COMPILING IF <asm> CPUSH RET </asm> C, THEN ; IMMEDIATE
+: COMPILING-ONLY!
+	?COMPILING NOT IF
+		S"  compiling only!" CT RESET 
+	THEN ;
+
+: LEAVE COMPILING-ONLY! <asm> CPUSH RET </asm> C, ; IMMEDIATE
 
 : IF   ?COMPILING IF <asm> CPUSH JMPZ </asm> C, HERE 0 , THEN ; IMMEDIATE
 : ELSE ?COMPILING IF <asm> CPUSH JMP  </asm> C, HERE SWAP 0 , HERE SWAP ! THEN ; IMMEDIATE
@@ -125,21 +155,13 @@
 : ( BEGIN 
 	>IN @ C@ 
 	DUP 0= IF 
-		DROP LEAVE
+		S" missing closing ')'" CT RESET
 	THEN
-	>IN ++ 	
-	41 = IF \ 41 = ')'
+	>IN ++		
+	41 = IF		\ 41 = ')'
 		LEAVE 
 	THEN
 	AGAIN ; IMMEDIATE
-
-: 0= 0 =  ; INLINE
-: <> = 0= ; INLINE
-: <= > 0= ; INLINE
-: >= < 0= ; INLINE
-
-: 2DUP  OVER OVER ; INLINE
-: 2DROP DROP DROP ; INLINE
 
 : CRLF 13 EMIT 10 EMIT ;
 : CR CRLF ;
@@ -147,18 +169,14 @@
 
 : ON 1 SWAP ! ; : OFF 0 SWAP ! ;
 
-: BETWEEN \ ( num min max -- bool )
+: BETWEEN				\ ( num min max -- bool )
 	2 PICK 
 	< IF 2DROP 0 LEAVE THEN
 	< 0=
 ;
 
-: COUNT DUP 1+ SWAP C@ ; \ ( addr1 --  addr2 num )
-: TYPE DROP ZTYPE ; \ ( addr num -- )
-: CT COUNT TYPE ;
-
 : (tmp) <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
-: tmp-init LAST (tmp) ! ; \ ( -- )
+: tmp-init LAST (tmp) ! ;				\ ( -- )
 : tmp-cur (tmp) @ ;
 : tmp-alloc (tmp) TUCK @ SWAP - SWAP ! tmp-cur ; \ ( size -- addr )
 tmp-init
@@ -520,7 +538,7 @@ LAST DICT.GetXT
 		ELSE
 			\ . LAST . \ debug
 			DROP
-			R@ ZTYPE S" ??" CT RESET \ TODO: error
+			R@ ZTYPE S" ??" CT RESET     \ TODO: error
 		THEN
 		RDROP
 	THEN
@@ -687,14 +705,8 @@ LAST DICT.GetXT
 : FREE LAST HERE - ;
 : FREE? FREE . S"  bytes free." CT ;
 
-: bufAppend DUP C++ DUP C@ + C! ; \ ( ch addr -- )
-: nullTerm DUP C@ + 1+ 0 SWAP C! ; \ ( addr -- )
-
 : ascii. DUP HEX. BL DUP DECIMAL. BL EMIT ;
 : ascii 2DUP < IF SWAP THEN BEGIN CRLF DUP ascii. 1+ 2DUP > WHILE 2DROP ;
-
-: t0 2DUP < IF SWAP THEN BEGIN DUP . 1+ 2DUP > WHILE 2DROP ;
-: t1 2DUP < IF SWAP THEN BEGIN 1+ DUP . 2DUP > WHILE 2DROP ;
 
 : mainLoop 
 	resetState 
@@ -791,21 +803,21 @@ LAST DICT.GetXT
 		AGAIN
 	THEN  ;
 
-\ String literal ***THIS DOESN'T WORK ***
+\ String literal
 \ example " 123"
-: "                  ( -- )
-	7 C, HERE 0 C,   \ SLITERAL count-byte
-	BEGIN 
-		>IN @ C@    (  )
+: " COMPILING-ONLY!				\ ( -- ) assume HERE = 1000, >IN points to " ABC"
+	7 C, HERE 0 C,				\ SLITERAL ( 1001 )
+	BEGIN 						
+		>IN @ C@				\ ( 1001 ch )
 		DUP 0= IF
-			DROP DP !
-			63 DUP EMIT EMIT
+			DROP 1- DP !		\ reset HERE
+			S" missing closing '" CT 34 EMIT 39 EMIT
 			RESET
 		THEN
-		>IN ++ 	
-		34 = IF \ 34 = '"'
-			HERE 0 C,
-			OVER - 1+ SWAP C!
+		>IN ++ 					\ ( 1001 ch )
+		DUP 34 = IF				\ 34 = '"'
+			DROP HERE 0 C,		\ NT string ( 1001 1004 ) 
+			OVER - SWAP C!	\ 
 			LEAVE 
 		THEN
 		C,

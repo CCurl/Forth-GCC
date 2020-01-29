@@ -1,14 +1,16 @@
-CR
-.(HERE)   44 EMIT BL 
-.(LAST)   44 EMIT BL 
-CR
+\ UNIT tests
+
+CR .(HERE) 44 EMIT BL .(LAST) CR
 
 last here
 variable th th !
 variable tl tl !
 
 : forget-these tl @ (last) ! th @ dp ! ;
-	
+
+: t0 2DUP < IF SWAP THEN BEGIN DUP . 1+ 2DUP > WHILE 2DROP ;
+: t1 2DUP < IF SWAP THEN BEGIN 1+ DUP . 2DUP > WHILE 2DROP ;
+
 variable ms
 decimal 3 ms stk-init
 
@@ -20,14 +22,15 @@ decimal 3 ms stk-init
 
 variable num-tests
 variable passed
-: passed? 
-    dup 0= if 
-        PAD CT
-    then
-    58 emit dup . passed +! 
-    44 emit ;
-: next-test: num-tests ++ num-tests ? ;
 0 num-tests ! 0 passed !
+
+: passed?  ( status -- )
+    dup 0= if 
+        " ***Test #" CT num-tests @ (.) "  FAILED***" CT CR
+    then
+    passed +! ;
+
+: next-test: num-tests ++ ;
 
 next-test: 
     444 >m 555 >m mdepth 2 = passed?
@@ -49,12 +52,13 @@ next-test:
 next-test: 
     m@ 2222 = passed?
 
-decimal
-num-tests @ passed @ - 
-passed @
-CR CR BL BL BL . BL BL BL BL . CR
-\ passed failed
+: num-passed passed @ ;
+: num-failed num-tests @ passed @ - ;
 
+: test-results
+    num-passed . "  tests passed," CT 
+    num-failed . "  failed." CT CR ;
+
+test-results
 forget-these
-.(HERE)   44 EMIT BL 
-.(LAST)   44 EMIT BL 
+.(HERE) 44 EMIT BL .(LAST) CR
