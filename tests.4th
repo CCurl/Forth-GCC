@@ -53,6 +53,7 @@ decimal
 num-tests @ passed @ - 
 passed @
 CR CR BL BL BL . BL BL BL BL . CR
+\ passed failed
 
 forget-these
 .(HERE)   44 EMIT BL 

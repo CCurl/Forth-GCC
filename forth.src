@@ -90,14 +90,14 @@
 : ROT   >R SWAP R> SWAP ;
 : -ROT  SWAP >R SWAP R> ;
 
-: += OVER @ + SWAP ! ;          \ ( addr n -- )
+: += OVER @        + SWAP ! ;   \ ( addr n -- )
 : -= OVER @   SWAP - SWAP ! ;   \ ( addr n -- )
 
-: ++ 1 += ;  \ ( addr -- )
-: -- 1 -= ;  \ ( addr -- )
+: ++ 1 += ;   \ ( addr -- )
+: -- 1 -= ;   \ ( addr -- )
 
-: C++ DUP C@ 1+ SWAP C! ; \ ( addr -- )
-: C-- DUP C@ 1- SWAP C! ; \ ( addr -- )
+: C++ DUP C@ 1+ SWAP C! ;   \ ( addr -- )
+: C-- DUP C@ 1- SWAP C! ;   \ ( addr -- )
 
 : +!  TUCK @  + SWAP !  ;
 : C+! TUCK C@ + SWAP C! ;
@@ -119,6 +119,19 @@
 : AGAIN ?COMPILING IF <asm> CPUSH JMP   </asm> C, , THEN ; IMMEDIATE
 : WHILE ?COMPILING IF <asm> CPUSH JMPNZ </asm> C, , THEN ; IMMEDIATE
 : UNTIL ?COMPILING IF <asm> CPUSH JMPZ  </asm> C, , THEN ; IMMEDIATE
+
+: \ 0 >IN @ C! ; IMMEDIATE
+
+: ( BEGIN 
+	>IN @ C@ 
+	DUP 0= IF 
+		DROP LEAVE
+	THEN
+	>IN ++ 	
+	41 = IF \ 41 = ')'
+		LEAVE 
+	THEN
+	AGAIN ; IMMEDIATE
 
 : 0= 0 =  ; INLINE
 : <> = 0= ; INLINE
@@ -758,7 +771,7 @@ LAST DICT.GetXT
 	Pad SWAP
 ;
 
-: run-tests S" tests.4th" 0 0 FOPEN 
+: doTests S" tests.4th" 0 0 FOPEN 
 	IF
 		\ S" opened file!" CR CT
 		INPUT-FP !
@@ -777,6 +790,26 @@ LAST DICT.GetXT
 			THEN
 		AGAIN
 	THEN  ;
+
+\ String literal ***THIS DOESN'T WORK ***
+\ example " 123"
+: "                  ( -- )
+	7 C, HERE 0 C,   \ SLITERAL count-byte
+	BEGIN 
+		>IN @ C@    (  )
+		DUP 0= IF
+			DROP DP !
+			63 DUP EMIT EMIT
+			RESET
+		THEN
+		>IN ++ 	
+		34 = IF \ 34 = '"'
+			HERE 0 C,
+			OVER - 1+ SWAP C!
+			LEAVE 
+		THEN
+		C,
+	AGAIN ; IMMEDIATE
 
 : bbb BYE ;
 
