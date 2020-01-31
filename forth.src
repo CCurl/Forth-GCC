@@ -190,7 +190,7 @@ tmp-init
 : OCTAL    8 BASE ! ;
 : BINARY   2 BASE ! ;
 
-: skipWS \ ( addr1 -- addr2 )
+: skipWS               \ ( addr1 -- addr2 )
 	BEGIN
 		DUP C@ DUP
 		IF
@@ -783,7 +783,7 @@ LAST DICT.GetXT
 	Pad SWAP
 ;
 
-: doTests S" tests.4th" 0 0 FOPEN 
+: load 0 0 FOPEN 		\ ( filename -- ) 
 	IF
 		\ S" opened file!" CR CT
 		INPUT-FP !
@@ -822,6 +822,8 @@ LAST DICT.GetXT
 		THEN
 		C,
 	AGAIN ; IMMEDIATE
+
+: ll S" loads.4th" load ;
 
 : bbb BYE ;
 

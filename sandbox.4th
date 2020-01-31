@@ -8,48 +8,44 @@ variable tl tl !
 
 \ ------------- START OF SANDBOX -------------
 
-: STRLEN ( addr -- addr len ) DUP C@ ; INLINE
 
-: STRCATC   ( addr ch -- addr )
-    OVER
-    DUP C++        \ increment len
-    STRLEN + 
-    0 OVER 1+ C!   \ null-terminate
-    C! ;
-	
-: STR.EMPTY ( addr -- addr ) 0 OVER 1+ C! 0 OVER C! ;
+: t0 2DUP < IF SWAP THEN BEGIN DUP . 1+ 2DUP > WHILE 2DROP ;
+: t1 2DUP < IF SWAP THEN BEGIN 1+ DUP . 2DUP > WHILE 2DROP ;
 
-: nullTerm ( addr -- addr ) DUP STRLEN + 1+ 0 SWAP C! ;
+: make> 2dup < if swap then ;
 
-here 100 +
-str.empty
+cr 20 10 make> swap . .
+cr 10 20 make> swap . .
+cr
 
-60 strcatc strlen .
-61 strcatc strlen .
-62 strcatc strlen .
-63 strcatc strlen .
-64 strcatc strlen .
-65 strcatc strlen .
-66 strcatc strlen .
-67 strcatc strlen .
-68 strcatc strlen .
-69 strcatc strlen .
+: for-loop ( count -- num )
+    0 make>
+    begin 
+        2dup > if >R >R
+            \ vvv the real stuff goes here vvv
+            2*
+            \ ^^^ the real stuff goes here ^^^
+            R> R> 1+
+        else 2drop leave
+        then
+    again ;
 
-cr dup ct
-str.empty dup ct
+1  0 for-loop . cr
+1  1 for-loop . cr
+1  2 for-loop . cr
+1  3 for-loop . cr
+1  4 for-loop . cr
+1 10 for-loop . cr
 
-70 strcatc strlen .
-71 strcatc strlen .
-72 strcatc strlen .
-73 strcatc strlen .
-74 strcatc strlen .
-75 strcatc strlen .
-76 strcatc strlen .
-77 strcatc strlen .
-78 strcatc strlen .
-79 strcatc strlen .
+: 2^^ 1 swap for-loop  ;
 
-cr ct
+ 0 2^^ . cr
+ 1 2^^ . cr
+ 2 2^^ . cr
+ 3 2^^ . cr
+ 4 2^^ . cr
+10 2^^ . cr
+11 2^^ . cr
 
 \ ------------- END OF SANDBOX -------------
 forget-these
