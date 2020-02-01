@@ -33,9 +33,9 @@ forth-compiler.exe - compiles the image for a basic forth vm ...
 forth.exe - runs a given forth vm ...
 
     forth [args]
-        -i:imagefile (NB default sourcefile is 'forth.bin')
+        -i:imagefile (NB default imageFile is 'forth.bin')
         -l:loglevel (0=off, 1=debug, 2=trace - default is 0)
-        -? (prints usage info)
+        -? (prints this message)
 
 
 To build them, execute:
