@@ -583,18 +583,21 @@ LAST DICT.GetXT
 		Pad getLineFromFile
 		LEAVE
 	THEN
+
 	BEGIN
-		0 >IN @ C!
+		0 >IN @ C!     \ Null term
 		GETCH 
 
-		DUP 13 =
-		IF DROP Pad BL LEAVE THEN
+		DUP 13 = IF 
+			DROP Pad BL LEAVE 
+		THEN
 
-		DUP 8 = 
-		IF
-			\ .S
-			Pad C@ 0 >
-			IF 
+		DUP 9 = IF     \ Tab?
+			DROP 32    \ Change it into a BL
+		THEN
+		
+		DUP 8 = IF       \ Backspace?
+			Pad C@ 0 > IF 
 				Pad C--
 				>IN --
 				DUP EMIT BL EMIT
@@ -602,8 +605,7 @@ LAST DICT.GetXT
 				DROP
 			THEN
 		ELSE
-			DUP 32 127 BETWEEN
-			IF
+			DUP 32 127 BETWEEN IF
 				DUP EMIT
 				>IN @ C! 
 				>IN ++
@@ -806,7 +808,7 @@ LAST DICT.GetXT
 \ String literal
 \ example " 123"
 : " COMPILING-ONLY!				\ ( -- ) assume HERE = 1000, >IN points to " ABC"
-	7 C, HERE 0 C,				\ SLITERAL ( 1001 )
+	<asm> CPUSH SLITERAL </asm> C, HERE 0 C,				\ SLITERAL ( 1001 )
 	BEGIN 						
 		>IN @ C@				\ ( 1001 ch )
 		DUP 0= IF
