@@ -733,7 +733,8 @@ LAST DICT.GetXT
        S" cannot open " CT fn CT RESET
    THEN ;
 
-: dump CR BEGIN 2DUP < IF 2DROP LEAVE THEN DUP BL C@ HEX. 1+ AGAIN ;
+: dump ( start end -- ) CR 2DUP < IF SWAP THEN BEGIN 2DUP < IF 2DROP LEAVE THEN DUP BL C@ HEX. 1+ AGAIN ;
+: dump.num ( start num -- ) OVER + dump ;
 
 \ ------------------------------------------------------------------------------------
 \ A stack is comprised of 3 parts, [stack-pointer] [stack-last] [stack-data]
@@ -805,18 +806,48 @@ LAST DICT.GetXT
 		AGAIN
 	THEN  ;
 
-\ String literal
-\ example " 123"
-: " COMPILING-ONLY!				\ ( -- ) assume HERE = 1000, >IN points to " ABC"
-	<asm> CPUSH SLITERAL </asm> C, HERE 0 C,				\ SLITERAL ( 1001 )
+\ ******************************************************************************************
+: STR.EMPTY ( addr -- addr ) 0 OVER ! ; INLINE
+
+: STR.LEN ( addr -- addr len ) DUP C@ ; INLINE
+
+: STR.CATC   ( addr ch -- addr )
+    OVER
+    DUP C++        \ increment len
+    STR.LEN + 
+    0 OVER 1+ C!   \ null-terminate
+    C! ;
+
+: STR.NULLTERM ( addr -- addr ) DUP STR.LEN + 1+ 0 SWAP C! ;
+
+\ ******************************************************************************************
+\ String literals
+: I" 				 ( -- addr )
+    HERE 100 + STR.EMPTY
 	BEGIN 						
-		>IN @ C@				\ ( 1001 ch )
+		>IN @ C@		        \ ( 1001 ch )
+		DUP 0= IF
+			S" missing closing " CT 34 EMIT
+			RESET
+		THEN
+		>IN ++ 					\ ( 1001 ch )
+		DUP 34 = IF				\ 34 = '"'
+			DROP LEAVE 
+		THEN
+		STR.CATC
+	AGAIN ;
+
+: " ?COMPILING 0= IF I" LEAVE THEN
+	<asm> CPUSH SLITERAL </asm> C, HERE 
+	0 C,						\ count-byte
+	BEGIN 						
+		>IN @ C@
 		DUP 0= IF
 			DROP 1- DP !		\ reset HERE
 			S" missing closing '" CT 34 EMIT 39 EMIT
 			RESET
 		THEN
-		>IN ++ 					\ ( 1001 ch )
+		>IN ++
 		DUP 34 = IF				\ 34 = '"'
 			DROP HERE 0 C,		\ NT string ( 1001 1004 ) 
 			OVER - SWAP C!	\ 
@@ -826,8 +857,6 @@ LAST DICT.GetXT
 	AGAIN ; IMMEDIATE
 
 : ll S" loads.4th" load ;
-
-: bbb BYE ;
 
 CR
 .(MEM_SZ) 44 EMIT BL
