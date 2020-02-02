@@ -588,9 +588,19 @@ void Parse(char *line)
 				continue;
 			}
 
+			if (string_equals(word, "("))
+			{
+				while (true)
+				{
+					BYTE ch = *(line++);
+					if ((ch == ')') || (ch == NULL))
+						break;
+				}
+				continue;
+			}
+
 			if (string_equals(word, "S\""))
 			{
-				trace("SLITERAL");
 				CComma(SLITERAL);
 				int count = 0;
 				bool done = false;
@@ -600,28 +610,17 @@ void Parse(char *line)
 				while ((!done) && (!string_isEmpty(line)))
 				{
 					ch = *(line++);
-					trace("(1-%04lx)", cur_here);
-					// string_ccat(parsed, ch);
-					if (ch == 0)
-						ch = (BYTE)32;
-					
-					trace(" (%d, %04lx", ch, HERE);
 					if (ch == '\"')
 					{
 						done = true;
-						trace("(3-%04lx)", cur_here);
 					}
 					else
 					{
-						trace(", %ld, %04lx)", count, cur_here);
 						CComma(ch);
-						trace("(2-%04lx)", cur_here);
 						count++;
 					}
 				}
-				trace(") done. HERE=%04lx, cur_here=%04lx\n", HERE, cur_here);
 				CComma(0);
-				trace(") done. HERE=%04lx, cur_here=%04lx\n", HERE, cur_here);
 				CStore(cur_here, count);
 				continue;
 			}
