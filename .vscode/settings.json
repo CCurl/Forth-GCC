@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "shared.h": "c"
+        "shared.h": "c",
+        "forth-vm.h": "c",
+        "memory.h": "c",
+        "string.h": "c"
     }
 }

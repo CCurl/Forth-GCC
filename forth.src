@@ -784,27 +784,27 @@ LAST DICT.GetXT
 	Pad SWAP 200 SWAP
 	FREADLINE \ ( addr sz fp -- num-read )
 	Pad SWAP
+	\ Pad DUP . C@ . 65 EMIT
 ;
 
 : load 0 0 FOPEN 		\ ( filename -- ) 
-	IF
-		\ S" opened file!" CR CT
-		INPUT-FP !
-		BEGIN
-			INPUT-FP @ test-getLine
-			IF
-				>IN !
-				\ >IN @ CT CR
-				>IN ++
-				executeInput
-			ELSE
-				DROP
-				INPUT-FP @ FCLOSE
-				INPUT-FP OFF
-				LEAVE
-			THEN
-		AGAIN
-	THEN  ;
+	0= IF
+		S" Cannot open file. CT LEAVE
+	THEN
+	INPUT-FP !
+	BEGIN
+		INPUT-FP @ test-getLine
+		IF
+			1+ >IN !
+			\ >IN @ C@ .
+			executeInput
+		ELSE
+			DROP
+			INPUT-FP @ FCLOSE
+			INPUT-FP OFF
+			LEAVE
+		THEN
+	AGAIN ;
 
 \ ******************************************************************************************
 : STR.EMPTY ( addr -- addr ) 0 OVER ! ; INLINE

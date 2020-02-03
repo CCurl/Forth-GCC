@@ -9,6 +9,7 @@ goto unknown
 set output=forth-compiler
 set c-files=forth-compiler.c 
 set c-files=%c-files% forth-vm.c
+set c-files=%c-files% vminit.c
 set c-files=%c-files% logger.c
 set c-files=%c-files% ForthVM-Dis.c
 echo making %output% ...
@@ -25,6 +26,7 @@ set output=forth
 set c-files=forth.c
 set c-files=%c-files% forth-vm.c
 set c-files=%c-files% logger.c
+set c-files=%c-files% vminit.c
 echo making %output% ...
 echo gcc -g -o %output% %c-files%
 gcc -g -o tmp %c-files%

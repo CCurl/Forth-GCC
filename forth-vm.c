@@ -21,6 +21,9 @@ bool isBYE = false;
 BYTE *the_memory;
 long memory_size = 0;
 
+void init_vm_vectors();
+extern void (*funcs[])();
+
 // ------------------------------------------------------------------------------------------
 void create_vm(long memory_size)
 {
@@ -43,6 +46,7 @@ void destroy_vm()
 // ------------------------------------------------------------------------------------------
 void init_vm()
 {
+	init_vm_vectors();
 	create_vm(MEM_SZ);
 	dsp_init = (CELL *)&the_memory[DSP_INIT];
 	rsp_init = (CELL *)&the_memory[RSP_INIT];
@@ -60,59 +64,65 @@ CELL cpu_step()
 {
 	IR = the_memory[PC++];
 	trace("PC=%04lx, IR=%d - ", PC-1, (int)IR);
+	void (*f)() = funcs[IR];
+	if (f)
+	{
+		f();
+		return 0;
+	}
 
 	switch (IR)
 	{
 	case LITERAL:
-		arg1 = GETAT(PC);
-		PC += CELL_SZ;
-		push(arg1);
-		trace("PUSH(%0lx) - %ld\n", arg1, arg1);
+		// arg1 = GETAT(PC);
+		// PC += CELL_SZ;
+		// push(arg1);
+		// trace("PUSH(%0lx) - %ld\n", arg1, arg1);
 		return CELL_SZ;
 
 	case CLITERAL:
-		arg1 = the_memory[PC++];
-		push(arg1);
-		trace("CPUSH(%02lx) - %d\n", (int)arg1, (int)arg1);
+		// arg1 = the_memory[PC++];
+		// push(arg1);
+		// trace("CPUSH(%02lx) - %d\n", (int)arg1, (int)arg1);
 		return 1;
 
 	case FETCH:
-		arg1 = GETTOS();
-		arg2 = GETAT(arg1);
-		SETTOS(arg2);
-		trace("FETCH(%04lx)=%04lx (%ld)\n", arg1, arg2, arg2);
+		// arg1 = GETTOS();
+		// arg2 = GETAT(arg1);
+		// SETTOS(arg2);
+		// trace("FETCH(%04lx)=%04lx (%ld)\n", arg1, arg2, arg2);
 		return 0;
 
 	case STORE:
-		arg1 = pop();
-		arg2 = pop();
-		SETAT(arg1, arg2);
-		trace("STORE(%04lx, %04lx)\n", arg1, arg2);
+		// arg1 = pop();
+		// arg2 = pop();
+		// SETAT(arg1, arg2);
+		// trace("STORE(%04lx, %04lx)\n", arg1, arg2);
 		return 0;
 
 	case SWAP:
-		arg1 = GET2ND();
-		arg2 = GETTOS();
-		SET2ND(arg2);
-		SETTOS(arg1);
-		trace("SWAP (%04lx and %04lx)\n", arg1, arg2);
+		// arg1 = GET2ND();
+		// arg2 = GETTOS();
+		// SET2ND(arg2);
+		// SETTOS(arg1);
+		// trace("SWAP (%04lx and %04lx)\n", arg1, arg2);
 		return 0;
-
+		
 	case DROP:
-		arg1 = pop();
-		trace("DROP (TOS was %04lx)\n", arg1);
+		// arg1 = pop();
+		// trace("DROP (TOS was %04lx)\n", arg1);
 		return 0;
 
 	case DUP:
-		arg1 = GETTOS();
-		push(arg1);
-		trace("DUP (%04lx)\n", arg1);
+		// arg1 = GETTOS();
+		// push(arg1);
+		// trace("DUP (%04lx)\n", arg1);
 		return 0;
 
 	case OVER:
-		arg1 = GET2ND();
-		push(arg1);
-		trace("OVER (%04lx)\n", arg1);
+		// arg1 = GET2ND();
+		// push(arg1);
+		// trace("OVER (%04lx)\n", arg1);
 		return 0;
 
 	case PICK:
@@ -250,24 +260,24 @@ CELL cpu_step()
 		return PC-arg1;
 
 	case CFETCH:
-		arg1 = GETTOS();
-		arg2 = the_memory[arg1];
-		SETTOS(arg2);
-		trace("CFETCH(%04lx) = %02x (%d)\n", arg1, arg2, arg2);
+		// arg1 = GETTOS();
+		// arg2 = the_memory[arg1];
+		// SETTOS(arg2);
+		// trace("CFETCH(%04lx) = %02x (%d)\n", arg1, arg2, arg2);
 		return 0;
 
 	case CSTORE:
-		trace("CSTORE\n");
-		arg1 = pop();
-		arg2 = pop();
-		the_memory[arg1] = (BYTE)arg2;
+		// trace("CSTORE\n");
+		// arg1 = pop();
+		// arg2 = pop();
+		// the_memory[arg1] = (BYTE)arg2;
 		return 0;
 
 	case ADD:
-		arg1 = pop();
-		arg2 = pop();
-		push(arg2 + arg1);
-		trace("ADD %ld + %ld = %ld\n", arg2, arg1, arg2+arg1);
+		// arg1 = pop();
+		// arg2 = pop();
+		// push(arg2 + arg1);
+		// trace("ADD %ld + %ld = %ld\n", arg2, arg1, arg2+arg1);
 		return 0;
 
 	case SUB:
@@ -350,14 +360,16 @@ CELL cpu_step()
 			char *fileName = (char *)&the_memory[arg1 + 1];
 			char mode[4];
 			sprintf(mode, "%c%c", (arg2 == 0) ? 'r' : 'w', (arg3 == 0) ? 't' : 'b');
+			trace("FOPEN %s, %s\n", fileName, mode);
 			FILE *fp = fopen(fileName, mode);
-			push((int)fp);
+			arg1 = (CELL) fp;
+			push(arg1);
 			push(fp != NULL ? 1 : 0);
 		}
-		trace("FOPEN\n");
 		return 0;
 
 	case FREAD:			// ( addr num fp -- count ) - fp == 0 means STDIN
+		trace("FREAD\n");
 		arg3 = pop();
 		arg2 = pop();
 		arg1 = pop();
@@ -366,38 +378,37 @@ CELL cpu_step()
 			int num = fread(pBuf, sizeof(BYTE), arg2, (arg3 == 0) ? stdin : (FILE *)arg3);
 			push(num);
 		}
-		trace("FREAD\n");
 		return 0;
 
 	case FREADLINE:			// ( addr max-sz fp -- num-read )
 		// trace_on();
-		// trace("FREADLINE\n");
+		trace("(FREADLINE)");
 		arg3 = pop();		// FP - 0 means STDIN
 		arg2 = pop();		// max-sz
 		arg1 = pop();		// to-addr - NB: this is a COUNTED and NULL-TERMINATED string!
-		// trace("addr:%ld, sz=%ld, fp=%ld", arg1, arg2, arg3);
 		{
-			char *pBuf = (char *)&the_memory[arg1 + 1];
+			// char buf[200], *pBuf = buf;
+			char *tgt = (char *)&the_memory[arg1];
 			FILE *fp = arg3 ? (FILE *)arg3 : stdin;
-			if (fgets(pBuf, arg2, fp) != pBuf)
+			char *pBuf = tgt;
+			if (fgets((pBuf+1), arg2, fp) != (pBuf+1))
 			{
-				// trace("<EOF>\n");
-				*(pBuf-1) = 0;
-				*pBuf = (char)0;
+				trace("<EOF>");
+				*(pBuf) = 0;
 				*(pBuf+1) = (char)0;
 				push(0);
+				// debug_off();
 				return 0; // ZERO means <EOF>
 			}
-			// trace("%s\n", pBuf);
-			arg2 = (CELL)strlen(pBuf);
-			// trace("len=%ld", arg2);
+			arg2 = (CELL)strlen(pBuf+1);
 			// Strip off the trailing newline if there
-			if ((arg2 > 0) && (pBuf[arg2-1] == '\n'))
+			if ((arg2 > 0) && (pBuf[arg2] == '\n'))
 			{
-				pBuf[--arg2] = (char)NULL;
+				pBuf[arg2--] = (char)NULL;
 			}
-			*(pBuf-1) = (char)(arg2);
-			push((arg2 >= 1) ? arg2 : 1);
+			*(pBuf) = (char)(arg2);
+			push((arg2 > 0) ? arg2 : 1);
+			trace(".%d: [%s].", (int)pBuf[0], pBuf+1);
 		}
 		// debug_off();
 		return 0;
