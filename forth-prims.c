@@ -3,7 +3,7 @@
 #include "Shared.h"
 
 
-void (*funcs[257])();
+void (*vm_prims[257])();
 
 CELL arg1, arg2, arg3;
 
@@ -335,56 +335,56 @@ void f_BYE()
 
 void init_vm_vectors()
 {
-    memset(funcs, 0, sizeof(funcs));
-    // funcs[0] = f_BYE;
-	funcs[1] = f_LITERAL;
-	funcs[2] = f_FETCH;
-	funcs[3] = f_STORE;
-	funcs[4] = f_SWAP;
-	funcs[5] = f_DROP;
-	funcs[6] = f_DUP;
-	// funcs[7] = f_SLITERAL;
-	// funcs[8] = f_JMP;
-	// funcs[9] = f_JMPZ;
-	// funcs[10] = f_JMPNZ;
-	// funcs[11] = f_CALL;
-	// funcs[12] = f_RET;
-	// funcs[13] = f_ZTYPE;
-	funcs[14] = f_CLITERAL;
-	funcs[15] = f_CFETCH;
-	funcs[16] = f_CSTORE;
-	funcs[17] = f_ADD;
-	// funcs[18] = f_SUB;
-	// funcs[19] = f_MUL;
-	// funcs[20] = f_DIV;
-	// funcs[21] = f_LT;
-	// funcs[22] = f_EQ;
-	// funcs[23] = f_GT;
-	// funcs[24] = f_DICTP;
-	// funcs[25] = f_EMIT;
-	funcs[26] = f_OVER;
-	// funcs[27] = f_COMPARE;
-	// funcs[28] = f_FOPEN;
-	// funcs[29] = f_FREAD;
-	// funcs[30] = f_FREADLINE;
-	// funcs[31] = f_FWRITE;
-	// funcs[32] = f_FCLOSE;
-	// funcs[33] = f_DTOR;
-	// funcs[34] = f_RTOD;
-	// funcs[35] = f_UNUSED35;
-	// funcs[36] = f_UNUSED36;
-	// funcs[37] = f_PICK;
-	// funcs[38] = f_DEPTH;
-	// funcs[39] = f_GETCH;
-	// funcs[40] = f_UNUSED41;
-	// funcs[41] = f_UNUSED42;
-	// funcs[42] = f_AND;
-	// funcs[43] = f_OR;
-	// funcs[44] = f_BRANCH;
-	// funcs[45] = f_BRANCHZ;
-	// funcs[46] = f_BRANCHNZ;
-	// funcs[47] = f_COMPAREI;
-	// funcs[253] = f_BREAK;
-	// funcs[254] = f_RESET;
-	// funcs[255] = f_BYE;
+    memset(vm_prims, 0, sizeof(vm_prims));
+    // vm_prims[0] = f_BYE;
+	vm_prims[1] = f_LITERAL;
+	vm_prims[2] = f_FETCH;
+	vm_prims[3] = f_STORE;
+	vm_prims[4] = f_SWAP;
+	vm_prims[5] = f_DROP;
+	vm_prims[6] = f_DUP;
+	// vm_prims[7] = f_SLITERAL;
+	// vm_prims[8] = f_JMP;
+	// vm_prims[9] = f_JMPZ;
+	// vm_prims[10] = f_JMPNZ;
+	// vm_prims[11] = f_CALL;
+	// vm_prims[12] = f_RET;
+	// vm_prims[13] = f_ZTYPE;
+	vm_prims[14] = f_CLITERAL;
+	vm_prims[15] = f_CFETCH;
+	vm_prims[16] = f_CSTORE;
+	vm_prims[17] = f_ADD;
+	// vm_prims[18] = f_SUB;
+	// vm_prims[19] = f_MUL;
+	// vm_prims[20] = f_DIV;
+	// vm_prims[21] = f_LT;
+	// vm_prims[22] = f_EQ;
+	// vm_prims[23] = f_GT;
+	// vm_prims[24] = f_DICTP;
+	// vm_prims[25] = f_EMIT;
+	vm_prims[26] = f_OVER;
+	// vm_prims[27] = f_COMPARE;
+	// vm_prims[28] = f_FOPEN;
+	// vm_prims[29] = f_FREAD;
+	// vm_prims[30] = f_FREADLINE;
+	// vm_prims[31] = f_FWRITE;
+	// vm_prims[32] = f_FCLOSE;
+	// vm_prims[33] = f_DTOR;
+	// vm_prims[34] = f_RTOD;
+	// vm_prims[35] = f_UNUSED35;
+	// vm_prims[36] = f_UNUSED36;
+	// vm_prims[37] = f_PICK;
+	// vm_prims[38] = f_DEPTH;
+	// vm_prims[39] = f_GETCH;
+	// vm_prims[40] = f_UNUSED41;
+	// vm_prims[41] = f_UNUSED42;
+	// vm_prims[42] = f_AND;
+	// vm_prims[43] = f_OR;
+	// vm_prims[44] = f_BRANCH;
+	// vm_prims[45] = f_BRANCHZ;
+	// vm_prims[46] = f_BRANCHNZ;
+	// vm_prims[47] = f_COMPAREI;
+	// vm_prims[253] = f_BREAK;
+	// vm_prims[254] = f_RESET;
+	// vm_prims[255] = f_BYE;
 }

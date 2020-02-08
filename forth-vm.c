@@ -22,7 +22,7 @@ BYTE *the_memory;
 long memory_size = 0;
 
 void init_vm_vectors();
-extern void (*funcs[])();
+extern void (*vm_prims[])();
 
 // ------------------------------------------------------------------------------------------
 void create_vm(long mem_size)
@@ -76,7 +76,7 @@ CELL cpu_step()
 {
 	IR = the_memory[PC++];
 	trace("PC=%04lx, IR=%d - ", PC-1, (int)IR);
-	void (*f)() = funcs[IR];
+	void (*f)() = vm_prims[IR];
 	if (f)
 	{
 		f();
@@ -85,58 +85,6 @@ CELL cpu_step()
 
 	switch (IR)
 	{
-	case LITERAL:
-		// arg1 = GETAT(PC);
-		// PC += CELL_SZ;
-		// push(arg1);
-		// trace("PUSH(%0lx) - %ld\n", arg1, arg1);
-		return CELL_SZ;
-
-	case CLITERAL:
-		// arg1 = the_memory[PC++];
-		// push(arg1);
-		// trace("CPUSH(%02lx) - %d\n", (int)arg1, (int)arg1);
-		return 1;
-
-	case FETCH:
-		// arg1 = GETTOS();
-		// arg2 = GETAT(arg1);
-		// SETTOS(arg2);
-		// trace("FETCH(%04lx)=%04lx (%ld)\n", arg1, arg2, arg2);
-		return 0;
-
-	case STORE:
-		// arg1 = pop();
-		// arg2 = pop();
-		// SETAT(arg1, arg2);
-		// trace("STORE(%04lx, %04lx)\n", arg1, arg2);
-		return 0;
-
-	case SWAP:
-		// arg1 = GET2ND();
-		// arg2 = GETTOS();
-		// SET2ND(arg2);
-		// SETTOS(arg1);
-		// trace("SWAP (%04lx and %04lx)\n", arg1, arg2);
-		return 0;
-		
-	case DROP:
-		// arg1 = pop();
-		// trace("DROP (TOS was %04lx)\n", arg1);
-		return 0;
-
-	case DUP:
-		// arg1 = GETTOS();
-		// push(arg1);
-		// trace("DUP (%04lx)\n", arg1);
-		return 0;
-
-	case OVER:
-		// arg1 = GET2ND();
-		// push(arg1);
-		// trace("OVER (%04lx)\n", arg1);
-		return 0;
-
 	case PICK:
 		arg1 = pop();
 		arg2 = *(DSP - arg1);
@@ -267,30 +215,8 @@ CELL cpu_step()
 		{
 			arg2 = the_memory[PC++];
 		}
-		// PC++;
 		push(arg1);
 		return PC-arg1;
-
-	case CFETCH:
-		// arg1 = GETTOS();
-		// arg2 = the_memory[arg1];
-		// SETTOS(arg2);
-		// trace("CFETCH(%04lx) = %02x (%d)\n", arg1, arg2, arg2);
-		return 0;
-
-	case CSTORE:
-		// trace("CSTORE\n");
-		// arg1 = pop();
-		// arg2 = pop();
-		// the_memory[arg1] = (BYTE)arg2;
-		return 0;
-
-	case ADD:
-		// arg1 = pop();
-		// arg2 = pop();
-		// push(arg2 + arg1);
-		// trace("ADD %ld + %ld = %ld\n", arg2, arg1, arg2+arg1);
-		return 0;
 
 	case SUB:
 		arg1 = pop();
@@ -393,13 +319,11 @@ CELL cpu_step()
 		return 0;
 
 	case FREADLINE:			// ( addr max-sz fp -- num-read )
-		// trace_on();
 		trace("(FREADLINE)");
 		arg3 = pop();		// FP - 0 means STDIN
 		arg2 = pop();		// max-sz
 		arg1 = pop();		// to-addr - NB: this is a COUNTED and NULL-TERMINATED string!
 		{
-			// char buf[200], *pBuf = buf;
 			char *tgt = (char *)&the_memory[arg1];
 			FILE *fp = arg3 ? (FILE *)arg3 : stdin;
 			char *pBuf = tgt;
@@ -409,7 +333,6 @@ CELL cpu_step()
 				*(pBuf) = 0;
 				*(pBuf+1) = (char)0;
 				push(0);
-				// debug_off();
 				return 0; // ZERO means <EOF>
 			}
 			arg2 = (CELL)strlen(pBuf+1);
@@ -422,7 +345,6 @@ CELL cpu_step()
 			push((arg2 > 0) ? arg2 : 1);
 			trace(".%d: [%s].", (int)pBuf[0], pBuf+1);
 		}
-		// debug_off();
 		return 0;
 
 	case FWRITE:			// ( addr num fp -- count ) - fp == 0 means STDIN
