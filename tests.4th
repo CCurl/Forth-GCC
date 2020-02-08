@@ -53,7 +53,7 @@ next-test: ( 9 ) m@ 2222 = passed?
 here 100 +
 str.empty
 
-: doit >R strcatc strlen R> = passed? ;
+: doit >R str.catc str.len R> = passed? ;
 
 next-test: ( 10 ) 60  1 doit
 next-test: ( 11 ) 61  2 doit
@@ -79,7 +79,7 @@ next-test: ( 27 ) 77  8 doit
 next-test: ( 28 ) 78  9 doit
 next-test: ( 29 ) 79 10 doit
 
-next-test: str.empty strlen 0 = passed? ( 30 )
+next-test: str.empty str.len 0 = passed? ( 30 )
 
 DROP
 
