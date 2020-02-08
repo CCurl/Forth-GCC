@@ -57,6 +57,18 @@ void dis_range(CELL start, CELL end, char *bytes)
 		strcat(bytes, x);
 	}
 }
+// ------------------------------------------------------------------------------------------
+void dis_rangeCell(CELL start, CELL end, char *bytes)
+{
+	char x[8];
+	while (start <= end)
+	{
+		CELL val = GETAT(start);
+		start += 4;
+		sprintf(x, " %08lx", (CELL)val);
+		strcat(bytes, x);
+	}
+}
 
 // ------------------------------------------------------------------------------------------
 void dis_PC2(int num, char *bytes)
@@ -568,10 +580,18 @@ void dis_vm(FILE *write_to)
 	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
 
 	sprintf(bytes, "0005:");
-	dis_range(5, 31, bytes);
-	fprintf(write_to, "%s\n;\n", bytes);
+	dis_range(5, 7, bytes);
+	fprintf(write_to, "%s\n", bytes);
 
-	PC = 32;
+	sprintf(bytes, "0008:");
+	dis_rangeCell(0x08, 0x0f, bytes);
+	fprintf(write_to, "%s\n", bytes);
+
+	sprintf(bytes, "0010:");
+	dis_rangeCell(0x10, 0x1f, bytes);
+	fprintf(write_to, "%s\n", bytes);
+
+	PC = 0x0020;
 	// Code
 	while (PC < here)
 	{

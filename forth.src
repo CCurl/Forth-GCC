@@ -8,14 +8,17 @@
 \ NB: don't inline anything with a 12 in it ... that is RET
 \ ------------------------------------------------------------------------------------------
 
-.ORG 32
+.HEX
+.ORG 0020
 
 \ The compiler/dis-assembler is hard-coded to put these values here ...
-: CELL   7 C@ ; INLINE
-: DP       16 ; INLINE   \ Where the current HERE is stored
-: (LAST)   20 ; INLINE
-: BASE     24 ; INLINE
-: INPUT-FP 28 ; INLINE
+: BASE     0006    ; INLINE
+: CELL     0007 C@ ; INLINE
+: DP       0010    ; INLINE   \ Where the current HERE is stored
+: (LAST)   0014    ; INLINE
+: INPUT-FP 001c    ; INLINE
+
+.DECIMAL
 
 : HERE DP     @ ; INLINE
 : LAST (LAST) @ ; INLINE
@@ -185,10 +188,10 @@ tmp-init
 : getInput PAD 128 0 FREADLINE DROP PAD ; \ ( -- addr )
 : ?DUP DUP IF DUP THEN ;
 
-: HEX     16 BASE ! ;
-: DECIMAL 10 BASE ! ;
-: OCTAL    8 BASE ! ;
-: BINARY   2 BASE ! ;
+: HEX     16 BASE C! ;
+: DECIMAL 10 BASE C! ;
+: OCTAL    8 BASE C! ;
+: BINARY   2 BASE C! ;
 
 : skipWS               \ ( addr1 -- addr2 )
 	BEGIN
@@ -271,7 +274,7 @@ tmp-init
 	AGAIN
 ;
 
-: isHEX? BASE @ 16 = ;
+: isHEX? BASE C@ 16 = ;
 
 : isNumChar? \ ( ch -- val bool )
 	DUP 48 57 BETWEEN IF 48 - 1 LEAVE THEN
@@ -303,7 +306,7 @@ tmp-init
 
 		isNumChar? 
 		IF
-			R> BASE @ * + >R
+			R> BASE C@ * + >R
 			1+
 		ELSE
 			DROP R> 0 LEAVE
@@ -329,7 +332,7 @@ tmp-init
 	BEGIN
 		DUP
 		IF
-			BASE @ /MOD 
+			BASE C@ /MOD 
 			48 OVER 9 > IF 7 + THEN
 			+ SWAP
 		ELSE
@@ -344,9 +347,9 @@ tmp-init
 : . BL (.) ;
 
 HEX
-: HEX.     BASE @ SWAP HEX DUP 10 < IF 0 (.) THEN (.) BASE ! ; DECIMAL
-: DECIMAL. BASE @ SWAP DECIMAL (.) BASE ! ;
-: BINARY.  BASE @ SWAP BINARY  (.) BASE ! ;
+: HEX.     BASE C@ SWAP HEX DUP 10 < IF 0 (.) THEN (.) BASE C! ; DECIMAL
+: DECIMAL. BASE C@ SWAP DECIMAL (.) BASE C! ;
+: BINARY.  BASE C@ SWAP BINARY  (.) BASE C! ;
 
 : MIN 2DUP > IF SWAP THEN DROP ; 
 : MAX 2DUP < IF SWAP THEN DROP ; 

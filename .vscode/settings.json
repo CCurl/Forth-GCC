@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "shared.h": "c"
+        "shared.h": "c",
+        "ctype.h": "c",
+        "forth-vm.h": "c"
     }
 }

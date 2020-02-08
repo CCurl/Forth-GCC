@@ -21,8 +21,9 @@ extern BYTE *the_memory;
 extern long memory_size;
 
 // ------------------------------------------------------------------------------------------
-extern void create_vm(long memory_size);
+extern void create_vm(long);
 extern void destroy_vm();
-extern void init_vm();
+extern void init_vm(int);
+extern void reset_vm();
 extern CELL cpu_step();
 extern CELL cpu_loop();

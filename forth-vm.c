@@ -22,11 +22,13 @@ BYTE *the_memory;
 long memory_size = 0;
 
 // ------------------------------------------------------------------------------------------
-void create_vm(long memory_size)
+void create_vm(long mem_size)
 {
+	memory_size = mem_size;
 	if (the_memory == (BYTE*) NULL)
 	{
-		the_memory = malloc(memory_size);
+		the_memory = malloc(mem_size);
+		memset(the_memory, 0, mem_size);
 	}
 }
 
@@ -41,9 +43,18 @@ void destroy_vm()
 }
 
 // ------------------------------------------------------------------------------------------
-void init_vm()
+void init_vm(int vm_size)
 {
-	create_vm(MEM_SZ);
+	if (vm_size == 0)
+		vm_size = MEM_SZ;
+
+	create_vm(vm_size);
+	reset_vm();
+}
+
+// ------------------------------------------------------------------------------------------
+void reset_vm()
+{
 	dsp_init = (CELL *)&the_memory[DSP_INIT];
 	rsp_init = (CELL *)&the_memory[RSP_INIT];
 	DSP = dsp_init;
@@ -291,7 +302,7 @@ CELL cpu_step()
 		if (arg1 == 0)
 		{
 			printf("Divide by 0!");
-			init_vm();
+			reset_vm();
 		}
 		else
 		{

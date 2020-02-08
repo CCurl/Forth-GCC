@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "forth-vm.h"
 #include "Shared.h"
 #include "functions.h"
@@ -102,13 +103,13 @@ void SyncMem(bool isSet)
 	{
 		Store(ADDR_LAST, LAST);
 		Store(ADDR_HERE, HERE);
-		Store(ADDR_BASE, BASE);
+		CStore(ADDR_BASE, BASE);
 	}
 	else
 	{
 		LAST = Fetch(ADDR_LAST);
 		HERE = Fetch(ADDR_HERE);
-		BASE = Fetch(ADDR_BASE);
+		BASE = CFetch(ADDR_BASE);
 	}
 }
 
@@ -121,7 +122,7 @@ void Compile(FILE *fp_in)
 
 	Store(LAST, 0);
 	the_memory[ADDR_CELL] = CELL_SZ;
-	Store(ADDR_BASE, BASE);
+	CStore(ADDR_BASE, BASE);
 
 	// CW2A source(m_source);
 	// CW2A output(m_output);
@@ -230,6 +231,9 @@ bool MakeNumber(LPCTSTR word, CELL *the_num)
 	bool is_neg = false;
 	char *w = word;
 	CELL my_num = 0;
+	char *possible_chars = "0123456789abcdef";
+	char valid_chars[24];
+	strncpy(valid_chars, possible_chars, BASE);
 
 	// One leading minus sign is OK
 	if (*w == '-')
@@ -241,27 +245,13 @@ bool MakeNumber(LPCTSTR word, CELL *the_num)
 	while (*w)
 	{
 		char ch = *(w++);
-		CELL digit = -1;
-		if (('0' <= ch) && (ch <= '9'))
-		{
-			digit = ch - '0';
-		}
-
-		if (BASE == 16)
-		{
-			if (('A' <= ch) && (ch <= 'F'))
-			{
-				digit = (ch - 'A') + 10;
-			}
-			if (('a' <= ch) && (ch <= 'f'))
-			{
-				digit = (ch - 'a') + 10;
-			}
-		}
-		if (digit < 0)
+		ch = tolower(ch);
+		char *pos = strchr(valid_chars, ch);
+		if (pos == 0)
 		{
 			return false;
 		}
+		CELL digit = (CELL)(pos - valid_chars);
 		my_num = (my_num * BASE) + digit;
 	}
 
@@ -406,6 +396,20 @@ void Parse(char *line)
 			{
 				HERE = addr;
 			}
+			continue;
+		}
+
+		if (string_equals(word, ".HEX"))
+		{
+			BASE = 16;
+			CStore(ADDR_BASE, BASE);
+			continue;
+		}
+
+		if (string_equals(word, ".DECIMAL"))
+		{
+			BASE = 10;
+			CStore(ADDR_BASE, BASE);
 			continue;
 		}
 
@@ -794,7 +798,7 @@ void write_output_file()
 
 void CompilerInit()
 {
-	init_vm();
+	init_vm(MEM_SZ);
 	the_memory[0] = RET;
 	isEmbedded = true;
 }

@@ -24,7 +24,7 @@ bool load_vm()
 		return false;
 	}
 
-	fread(the_memory, 1, MEM_SZ, input_fp);
+	fread(the_memory, 1, memory_size, input_fp);
 	fclose(input_fp);
 	input_fp = NULL;
 	debug(" done.\n");
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
         }
     }
 
-	init_vm();
+	init_vm(0);
 	if (load_vm())
 	{
         if (strlen(load_fn) > 0)
