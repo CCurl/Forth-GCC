@@ -92,11 +92,6 @@ CELL cpu_step()
 		trace("PICK\n");
 		return 0;
 
-	case JMP:
-		PC = GETAT(PC);
-		trace("JMP\n");
-		return CELL_SZ;
-
 	case JMPZ:
 		trace("JMPZ %04lx\n", GETAT(PC));
 		if (pop() == 0)
@@ -266,19 +261,6 @@ CELL cpu_step()
 		arg1 = pop();
 		arg2 = pop();
 		push(arg2 > arg1 ? 1 : 0);
-		return 0;
-
-	case DICTP:
-		arg1 = GETAT(PC);
-		PC += CELL_SZ;
-		trace("DICTP %04lx", arg1);
-		trace(" ; %s\n", &(the_memory[arg1+10]));
-		return CELL_SZ;
-
-	case EMIT:
-		arg1 = pop();
-		putchar(arg1);
-		trace("EMIT %02x\n", (int)arg1);
 		return 0;
 
 	case ZTYPE:

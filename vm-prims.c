@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <memory.h>
 #include "Shared.h"
-
+#include "logger.h"
 
 void (*vm_prims[257])();
 
@@ -70,7 +70,8 @@ void prim_SLITERAL()
 // JMP - Doeswhat
 void prim_JMP()
 {
-	// code goes here
+	PC = GETAT(PC);
+	trace("JMP (to %04lx)\n", PC);
 }
 
 // JMPZ - Doeswhat
@@ -173,13 +174,18 @@ void prim_GT()
 // DICTP - Doeswhat
 void prim_DICTP()
 {
-	// code goes here
+	arg1 = GETAT(PC);
+	PC += CELL_SZ;
+	trace("DICTP %04lx", arg1);
+	trace(" ; %s\n", &(the_memory[arg1+10]));
 }
 
 // EMIT - Doeswhat
 void prim_EMIT()
 {
-	// code goes here
+	arg1 = pop();
+	putchar(arg1);
+	trace("EMIT %02x\n", (int)arg1);
 }
 
 // OVER - Doeswhat
@@ -344,7 +350,7 @@ void init_vm_vectors()
 	vm_prims[5] = prim_DROP;
 	vm_prims[6] = prim_DUP;
 	// vm_prims[7] = prim_SLITERAL;
-	// vm_prims[8] = prim_JMP;
+	vm_prims[8] = prim_JMP;
 	// vm_prims[9] = prim_JMPZ;
 	// vm_prims[10] = prim_JMPNZ;
 	// vm_prims[11] = prim_CALL;
@@ -360,8 +366,8 @@ void init_vm_vectors()
 	// vm_prims[21] = prim_LT;
 	// vm_prims[22] = prim_EQ;
 	// vm_prims[23] = prim_GT;
-	// vm_prims[24] = prim_DICTP;
-	// vm_prims[25] = prim_EMIT;
+	vm_prims[24] = prim_DICTP;
+	vm_prims[25] = prim_EMIT;
 	vm_prims[26] = prim_OVER;
 	// vm_prims[27] = prim_COMPARE;
 	// vm_prims[28] = prim_FOPEN;

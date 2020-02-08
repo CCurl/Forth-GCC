@@ -84,7 +84,8 @@ next-test: str.empty str.len 0 = passed? ( 30 )
 DROP
 
 \ ---------------------------------------------- TESTS END HERE -----------------------------------------------------
-
+words
+20 .lastx
 test-results
 forget-these
 .(HERE) 44 EMIT BL .(LAST) CR
