@@ -9,9 +9,7 @@
 #include "logger.h"
 
 char input_fn[256];
-char load_fn[256];
 FILE *input_fp = NULL;
-FILE *load_fp = NULL;
 
 // *********************************************************************
 bool load_vm()
@@ -24,7 +22,8 @@ bool load_vm()
 		return false;
 	}
 
-	fread(the_memory, 1, memory_size, input_fp);
+	int num_read = fread(the_memory, 1, memory_size, input_fp);
+    printf("%ld bytes read\n", num_read);
 	fclose(input_fp);
 	input_fp = NULL;
 	debug(" done.\n");
@@ -47,17 +46,11 @@ void process_arg(char *arg)
     {
         trace_on();
     }
-    else if (*arg == 'l') 
-    {
-        arg = arg+2;
-        strcpy(load_fn, arg);
-    }
     else if (*arg == '?') 
     {
         printf("usage forth [args]\n");
         printf("  -i:imagefile - Forth VM image\n");
         printf("     default imagefile is 'forth.bin'\n");
-        printf("  -l:file - Load/execute a file\n");
         printf("  -d - Turn on debug logging\n");
         printf("  -t - Turn on trace logging\n");
         printf("  -? - Prints this message\n");
@@ -73,7 +66,6 @@ void process_arg(char *arg)
 int main(int argc, char **argv)
 {
     strcpy(input_fn, "forth.bin");
-    strcpy(load_fn, "");
 
     for (int i = 1; i < argc; i++)
     {
@@ -86,12 +78,7 @@ int main(int argc, char **argv)
 
 	init_vm(0);
 	if (load_vm())
-	{
-        if (strlen(load_fn) > 0)
-        {
-            printf("  LoadFile (%s) is not implemented yet.\n", load_fn);
-        }
-		PC = 0;
+    {
 		cpu_loop();
 	}
 

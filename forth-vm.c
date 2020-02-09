@@ -25,13 +25,12 @@ void init_vm_vectors();
 extern void (*vm_prims[])();
 
 // ------------------------------------------------------------------------------------------
-void create_vm(long mem_size)
+void create_vm()
 {
-	memory_size = mem_size;
 	if (the_memory == (BYTE*) NULL)
 	{
-		the_memory = malloc(mem_size);
-		memset(the_memory, 0, mem_size);
+		the_memory = malloc(memory_size);
+		memset(the_memory, 0, memory_size);
 	}
 }
 
@@ -46,27 +45,29 @@ void destroy_vm()
 }
 
 // ------------------------------------------------------------------------------------------
-void init_vm(int vm_size)
-{
-	if (vm_size == 0)
-		vm_size = MEM_SZ;
-
-	create_vm(vm_size);
-	reset_vm();
-}
-
-// ------------------------------------------------------------------------------------------
 void reset_vm()
 {
-	init_vm_vectors();
-	create_vm(MEM_SZ);
-	dsp_init = (CELL *)&the_memory[DSP_INIT];
-	rsp_init = (CELL *)&the_memory[RSP_INIT];
 	DSP = dsp_init;
 	RSP = rsp_init;
 	isBYE = false;
 	isEmbedded = false;
 	PC = 0;
+}
+
+// ------------------------------------------------------------------------------------------
+void init_vm(int vm_size)
+{
+	memory_size = vm_size > 0 ? vm_size : MEM_SZ;
+
+	init_vm_vectors();
+	create_vm();
+
+	rsp_init = (CELL *)&the_memory[memory_size - RSTACK_SZ];
+	dsp_init = (CELL *)&the_memory[memory_size - RSTACK_SZ - DSTACK_SZ];
+
+	debug("dsp_init = %04lx, rsp_init = %04lx\n", memory_size - RSTACK_SZ, memory_size - RSTACK_SZ - DSTACK_SZ);
+
+	reset_vm();
 }
 
 // ------------------------------------------------------------------------------------------

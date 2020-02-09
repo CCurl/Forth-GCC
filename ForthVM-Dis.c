@@ -6,35 +6,6 @@
 #include "forth-vm.h"
 
 // ------------------------------------------------------------------------------------------
-// The VM
-// ------------------------------------------------------------------------------------------
-
-// CELL PC = 0;		// The "program counter"
-// BYTE IR = 0;		// The "instruction register"
-
-// CELL *dsp_init = NULL;
-// CELL *rsp_init = NULL;
-// CELL arg1, arg2, arg3;
-
-// CELL *RSP = NULL; // the return stack pointer
-// CELL *DSP = NULL; // the data stack pointer
-
-// bool isEmbedded = false;
-// bool isBYE = false;
-
-// ------------------------------------------------------------------------------------------
-// void init_vm()
-// {
-// 	dsp_init = (CELL *)&the_memory[DSP_INIT];
-// 	rsp_init = (CELL *)&the_memory[RSP_INIT];
-// 	DSP = dsp_init;
-// 	RSP = rsp_init;
-// 	isBYE = false;
-// 	isEmbedded = false;
-// 	PC = 0;
-// }
-
-// ------------------------------------------------------------------------------------------
 void dis_start(CELL start, int num, char *bytes)
 {
 	char x[8];
