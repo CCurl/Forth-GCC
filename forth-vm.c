@@ -27,11 +27,11 @@ extern void (*vm_prims[])();
 // ------------------------------------------------------------------------------------------
 void create_vm()
 {
-	if (the_memory == (BYTE*) NULL)
-	{
-		the_memory = malloc(memory_size);
-		memset(the_memory, 0, memory_size);
-	}
+	if (the_memory != (BYTE*) NULL)
+		free(the_memory);
+
+	the_memory = malloc(memory_size);
+	memset(the_memory, 0, memory_size);
 }
 
 // ------------------------------------------------------------------------------------------

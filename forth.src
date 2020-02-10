@@ -9,7 +9,7 @@
 \ ------------------------------------------------------------------------------------------
 
 .HEX
-.ORG 0020
+.ORG 0040
 
 \ The compiler/dis-assembler is hard-coded to put these values here ...
 : BASE     0006    ; INLINE
@@ -376,19 +376,18 @@ HEX
 : .(LAST) LAST DUP S" LAST: " CT HEX. S"  (" CT . BL S" )" CT ;
 
 : .WORD-SHORT DUP DICT>NAME CT BL @ ;
+: WORDS LAST BEGIN DUP @ 0= IF DROP CRLF LEAVE THEN .WORD-SHORT AGAIN ;
+
 : .WORD-LONG  
-		DUP HEX. S" :" CT BL
+		DUP HEX. 58 EMIT BL
 		DUP DICT>NAME CT BL
 		DUP DICT.GetXT 40 EMIT HEX. 41 EMIT \ DEBUG
 		DUP DICT>FLAGS C@ \ DEBUG
 		DUP S" , Flags: " CT HEX. \ DEBUG
 		DUP FLAGS.ISINLINE? IF S"  (INLINE)" CT THEN \ DEBUG
 		FLAGS.ISIMMEDIATE? IF S"  (IMMEDIATE)" CT THEN \ DEBUG
-		CRLF @
-;
-
-: WORDS               LAST BEGIN DUP 0 = IF DROP CRLF LEAVE THEN .WORD-SHORT AGAIN ;
-: WORDSV .(LAST) CRLF LAST BEGIN DUP 0 = IF DROP CRLF LEAVE THEN .WORD-LONG  AGAIN ;
+		CRLF @ ;
+: WORDSV .(LAST) CRLF LAST BEGIN DUP @ 0= IF DROP CRLF LEAVE THEN .WORD-LONG  AGAIN ;
 
 : WORDS-OLD \ ( -- )
 	LAST DUP HEX. 58 EMIT BL
@@ -398,8 +397,7 @@ HEX
 			DROP CRLF LEAVE
 		THEN
 		@
-	AGAIN
-;
+	AGAIN ;
 
 \ Prints the last <x> words
 : .lastx CR LAST SWAP 0

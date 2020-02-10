@@ -562,7 +562,15 @@ void dis_vm(FILE *write_to)
 	dis_rangeCell(0x10, 0x1f, bytes);
 	fprintf(write_to, "%s\n", bytes);
 
-	PC = 0x0020;
+	sprintf(bytes, "0020:");
+	dis_rangeCell(0x20, 0x2f, bytes);
+	fprintf(write_to, "%s\n", bytes);
+
+	sprintf(bytes, "0030:");
+	dis_rangeCell(0x30, 0x3f, bytes);
+	fprintf(write_to, "%s\n", bytes);
+
+	PC = 0x0040;
 	// Code
 	while (PC < here)
 	{

@@ -22,6 +22,14 @@ bool load_vm()
 		return false;
 	}
 
+    fseek(input_fp, 0L, SEEK_END);
+    long file_sz = ftell(input_fp);
+    printf("file_sz: %ld bytes, ", file_sz);
+    fseek(input_fp, 0L, SEEK_SET);
+
+    memory_size = file_sz;
+    init_vm(file_sz);
+
 	int num_read = fread(the_memory, 1, memory_size, input_fp);
     printf("%ld bytes read\n", num_read);
 	fclose(input_fp);
@@ -76,7 +84,6 @@ int main(int argc, char **argv)
         }
     }
 
-	init_vm(0);
 	if (load_vm())
     {
 		cpu_loop();
