@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-int __DEBUG__ = 1;
+int __DEBUG__ = 0;
 
 // *********************************************************************
 void trace_on()
