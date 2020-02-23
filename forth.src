@@ -31,7 +31,7 @@
 : isNeg     <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 
 : MEM_SZ (MEM_K) @ 1024 * ;
-16 (MEM_K) !
+64 (MEM_K) !
 
 \ : STDIN <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 
@@ -68,6 +68,7 @@
 : DROP <asm> DROP </asm> ; INLINE
 : OVER <asm> OVER </asm> ; INLINE
 : PICK <asm> PICK </asm> ; INLINE
+: LOGLEVEL <asm> LOGLEVEL </asm> ; INLINE
 
 : DEPTH <asm> DEPTH </asm> ; INLINE
 : RESET <asm> RESET </asm> ; INLINE
@@ -233,7 +234,7 @@ tmp-init
 : FLAGS>DICT  2 CELLS - ;
 : NAME>DICT   1- 2 CELLS - ;
 
-: DICT.GetXT DICT>XT @ ;
+: DICT.GetXT DICT>XT @ ; 1 DROP
 : DICT.GetFLAGS DICT>FLAGS C@ ;
 
 : DICTP>NAME 1+ @ DICT>NAME ;
@@ -480,21 +481,21 @@ HEX
 	THEN
 ;
 
-: isPostpone <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+\ : isPostpone <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 
-: POSTPONE.rt
-	R@ @ DICT.GetXT
-	R@ @ DICT.GetFLAGS
-	R> CELL + >R
-	[COMPILE]
-;
+\ : POSTPONE.rt
+\	R@ @ DICT.GetXT
+\	R@ @ DICT.GetFLAGS
+\	R> CELL + >R
+\	[COMPILE]
+\ ;
 
-LAST DICT.GetXT
-: POSTPONE  \ compile call to POSTPONE.rt
-	<asm> CPUSH CALL </asm> C,
-	<asm> PUSH , </asm> ,
-	isPostpone ON
-; IMMEDIATE
+\ LAST DICT.GetXT
+\ :  POSTPONE  \ compile call to POSTPONE.rt
+\	<asm> CPUSH CALL </asm> C,
+\	<asm> PUSH , </asm> ,
+\	isPostpone ON
+\ ; IMMEDIATE
 
 : executeWord  \ ( addr -- )
 	>R R@ findInDict \ ( addr -- XT FLAGS found )
@@ -502,18 +503,18 @@ LAST DICT.GetXT
 		RDROP
 		?COMPILING
 		IF
-			isPostpone @ 
-			IF
-				DROP XT.GetDICTP ,
-				isPostpone OFF
-			ELSE
+			\ isPostpone @ 
+			\ IF
+			\	DROP XT.GetDICTP ,
+			\	isPostpone OFF
+			\ ELSE
 				DUP FLAGS.ISIMMEDIATE? \ Immediate?
 				IF
 					DROP EXECUTE
 				ELSE
 					[COMPILE]
 				THEN
-			THEN
+			\ THEN
 		ELSE
 			DROP EXECUTE
 		THEN
@@ -523,18 +524,18 @@ LAST DICT.GetXT
 		IF
 			?COMPILING
 			IF
-				isPostpone @ 
-				IF
-					RESET	\ POSTPONE for literals not implemented yet
-					isPostpone OFF
-				ELSE
+				\ isPostpone @ 
+				\ IF
+				\	RESET	\ POSTPONE for literals not implemented yet
+				\	isPostpone OFF
+				\ ELSE
 					DUP 0 255 BETWEEN
 					IF
 						<asm> CPUSH CPUSH </asm> C, C,
 					ELSE
 						<asm> CPUSH PUSH </asm> C, ,
 					THEN
-				THEN
+				\ THEN
 			THEN
 		ELSE
 			\ . LAST . \ debug
@@ -691,7 +692,7 @@ LAST DICT.GetXT
 : resetState ?COMPILING 
 	IF (FL) THEN 
 	STATE OFF
-	isPostpone OFF
+	\ isPostpone OFF
 	DECIMAL
 ;
 
@@ -790,7 +791,7 @@ LAST DICT.GetXT
 
 : load 0 0 FOPEN 		\ ( filename -- ) 
 	0= IF
-		S" Cannot open file. CT LEAVE
+		S" Cannot open file." CT LEAVE
 	THEN
 	INPUT-FP !
 	BEGIN
@@ -839,8 +840,8 @@ LAST DICT.GetXT
 	AGAIN ;
 
 : " ?COMPILING 0= IF I" LEAVE THEN
-	<asm> CPUSH SLITERAL </asm> C, HERE 
-	0 C,						\ count-byte
+	<asm> CPUSH SLITERAL </asm> C,
+	HERE 0 C,						\ count-byte placeholder
 	BEGIN 						
 		>IN @ C@
 		DUP 0= IF
@@ -851,7 +852,7 @@ LAST DICT.GetXT
 		>IN ++
 		DUP 34 = IF				\ 34 = '"'
 			DROP HERE 0 C,		\ NT string ( 1001 1004 ) 
-			OVER - SWAP C!	\ 
+			OVER - 1- SWAP C!	\ 
 			LEAVE 
 		THEN
 		C,
@@ -859,7 +860,7 @@ LAST DICT.GetXT
 
 : ll S" loads.4th" load ;
 
-CR
+CR 111 . CR
 .(MEM_SZ) 44 EMIT BL
 .(HERE)   44 EMIT BL 
 .(LAST)   44 EMIT BL 

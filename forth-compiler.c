@@ -11,19 +11,17 @@
 
 void Parse(char *);
 DICT_T *FindWord(char *word);
-CELL DisOpcode(CELL PC, FILE *fp);
-CELL DisDict(CELL PC, FILE *fp);
-extern void dis_vm(FILE *);
 
 char input_fn[256];
 char output_fn[256];
-char assembly_fn[256];
 FILE *input_fp = NULL;
 FILE *output_fp = NULL;
-bool fatal_error = false;
-bool isTailJmpSafe;
+
 CELL HERE, LAST, STATE;
 CELL BASE = 10;
+CELL ORG = 0;
+
+extern int _QUIT_HIT;
 
 // ------------------------------------------------------------------------------------------
 OPCODE_T opcodes[] = {
@@ -41,9 +39,6 @@ OPCODE_T opcodes[] = {
 	, { _T("JMP"), JMP, _T("JMP") }
 	, { _T("JMPZ"), JMPZ, _T("JMPZ") }
 	, { _T("JMPNZ"), JMPNZ, _T("JMPNZ") }
-	, { _T("BRANCH"), BRANCH, _T("BRANCH") }
-	, { _T("BRANCHZ"), BRANCHZ, _T("BRANCHZ") }
-	, { _T("BRANCHNZ"), BRANCHNZ, _T("BRANCHNZ") }
 	, { _T("CALL"), CALL, _T("") }
 	, { _T("RET"), RET, _T("LEAVE") }
 	, { _T("COMPARE"), COMPARE, _T("COMPARE") }
@@ -67,6 +62,7 @@ OPCODE_T opcodes[] = {
 	, { _T("DTOR"), DTOR, _T(">R") }
 	, { _T("RTOD"), RTOD, _T("R>") }
 	, { _T("PICK"), PICK, _T("PICK") }
+	, { _T("LOGLEVEL"), LOGLEVEL, _T("LOGLEVEL") }
 	, { _T("DEPTH"), DEPTH, _T("DEPTH") }
 	, { _T("AND"), AND, _T("AND") }
 	, { _T("OR"), OR, _T("OR") }
@@ -79,11 +75,13 @@ OPCODE_T opcodes[] = {
 // ------------------------------------------------------------------------------------------
 void Store(CELL loc, CELL num)
 {
+	//trace("storing %4lx to %04lx", num, loc);
 	*(CELL *)(&the_memory[loc]) = num;
 }
 
 void CStore(CELL loc, BYTE num)
 {
+	//trace("storing %d to %04lx", num, loc);
 	the_memory[loc] = num;
 }
 
@@ -116,7 +114,7 @@ void SyncMem(bool isSet)
 void Compile(FILE *fp_in)
 {
 	HERE = 0;
-	LAST = (DSP_BASE) - (CELL_SZ);
+	LAST = MEM_SZ - STACKS_SZ - CELL_SZ;
 	STATE = 0;
 	int line_no = 0;
 
@@ -136,6 +134,8 @@ void Compile(FILE *fp_in)
         ++line_no;
         strcpy(line, buf);
         Parse(buf);
+		if (_QUIT_HIT == 1)
+			break;
     }
     fclose(fp_in);
 
@@ -200,7 +200,7 @@ BYTE FindForthPrim(LPCTSTR word)
 
 DICT_T *FindWord(LPCTSTR word)
 {
-	debug(" looking for word [%s]\n", word);
+	trace(" looking for word [%s]\n", word);
 	DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
 	while (dp->next > 0)
 	{
@@ -267,6 +267,7 @@ void DefineWord(LPCTSTR word, BYTE flags)
 {
 	CELL tmp = LAST;
 	LAST -= ((CELL_SZ*2) + 3 + string_len(word));
+	debug("Defining word [%s] at %04lx, HERE=%04lx\n", word, LAST, HERE);
 
 	DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
 	dp->next = tmp;
@@ -292,6 +293,7 @@ void Comma(CELL num)
 	// }
 	if ((0 <= HERE) && (HERE < LAST))
 	{
+		trace(", %04lx (%04lx)", num, HERE);
 		Store(HERE, num);
 		HERE += CELL_SZ;
 	}
@@ -309,6 +311,7 @@ void CComma(BYTE num)
 	// }
 	if (HERE < LAST)
 	{
+		trace("C, %02lx (%04lx)", num, HERE);
 		the_memory[HERE] = num;
 		HERE += 1;
 	}
@@ -345,21 +348,6 @@ char *GetWord(char *line, char *word)
     return line;
 }
 
-bool IsTailJmpSafe()
-{
-	return isTailJmpSafe;
-}
-
-void MakeTailJmpSafe()
-{
-	isTailJmpSafe = true;
-}
-
-void MakeTailJmpUnSafe()
-{
-	isTailJmpSafe = false;
-}
-
 void Parse(char *line)
 {
 	char *source = line;
@@ -367,6 +355,18 @@ void Parse(char *line)
 	char word[128];
 
 	trace("Parse(): line=[%s]\n", line);
+
+	// // for debugging
+	// if (0x05c8 < HERE)
+	// {
+	// 	trace_on();
+	// }
+
+	// // for debugging
+	// if (0x0680 < HERE)
+	// {
+	// 	debug_off();
+	// }
 
 	while (string_len(line) > 0)
 	{
@@ -388,12 +388,44 @@ void Parse(char *line)
 		}
 
 		trace("Parse(): word=[%s], HERE=%04lx, LAST=%04lx, STATE=%ld\n", word, HERE, LAST, STATE);
+
+		if (string_equals(word, ".QUIT"))
+		{
+			_QUIT_HIT = 1;
+			return;
+		}
+
+		if (string_equals(word, ".DEBUG-ON"))
+		{
+			debug_on();
+			continue;
+		}
+
+		if (string_equals(word, ".DEBUG-OFF"))
+		{
+			debug_off();
+			continue;
+		}
+
+		if (string_equals(word, ".TRACE-ON"))
+		{
+			trace_on();
+			continue;
+		}
+
+		if (string_equals(word, ".TRACE-OFF"))
+		{
+			debug_off();
+			continue;
+		}
+
 		if (string_equals(word, ".ORG"))
 		{
 			GetWord(line, word);
 			CELL addr = 0;
 			if (MakeNumber(word, &addr))
 			{
+				ORG = addr;
 				HERE = addr;
 			}
 			continue;
@@ -425,7 +457,6 @@ void Parse(char *line)
 			line = GetWord(line, word);
 			strcat(parsed, word);
 			trace("\n");
-			debug("Defining word [%s]...\n", word);
 			DefineWord(word, 0);
 			CComma(DICTP);
 			Comma(LAST);
@@ -443,11 +474,6 @@ void Parse(char *line)
 		{
 			DICT_T *dp = (DICT_T *)&the_memory[LAST];
 			dp->flags |= IS_INLINE;
-			if (IsTailJmpSafe() && (the_memory[HERE - CELL_SZ - 1] == JMP))
-			{
-				the_memory[HERE - CELL_SZ - 1] = CALL;
-				CComma(RET);
-			}
 			continue;
 		}
 
@@ -505,90 +531,60 @@ void Parse(char *line)
 		{
 			if (string_equals(word, ";"))
 			{
-				if (IsTailJmpSafe() && (the_memory[HERE - CELL_SZ - 1] == CALL))
-				{
-					the_memory[HERE - CELL_SZ - 1] = JMP;
-				}
-				else
-				{
-					CComma(RET);
-				}
+				CComma(RET);
 				STATE = 0;
 				continue;
 			}
 
 			if (strcmp(word, "IF") == 0)
 			{
-				CComma(BRANCHZ);
+				CComma(JMPZ);
 				push(HERE);
 				Comma(0);
-				MakeTailJmpUnSafe();
 				continue;
 			}
 
 			if (strcmp(word, "ELSE") == 0)
 			{
 				CELL tmp = pop();
-				CComma(BRANCH);
+				CComma(JMP);
 				push(HERE);
 				Comma(0);
-				//Store(tmp, HERE);
-				CELL offset = HERE - tmp;
-				Store(tmp, offset);
-				MakeTailJmpUnSafe();
+				Store(tmp, HERE);
 				continue;
 			}
 
 			if (strcmp(word, "THEN") == 0)
 			{
 				CELL tmp = pop();
-				//Store(tmp, HERE);
-				CELL offset = HERE - tmp;
-				Store(tmp, offset);
-				MakeTailJmpUnSafe();
+				Store(tmp, HERE);
 				continue;
 			}
 
 			if (strcmp(word, "BEGIN") == 0)
 			{
 				push(HERE);
-				MakeTailJmpUnSafe();
 				continue;
 			}
 
 			if (strcmp(word, "AGAIN") == 0)
 			{
-				//CComma(JMP);
-				//Comma(Pop());
-				CComma(BRANCH);
-				CELL tgt = pop();
-				CELL offset = tgt - HERE;
-				Comma(offset);
-				MakeTailJmpUnSafe();
+				CComma(JMP);
+				Comma(pop());
 				continue;
 			}
 
 			if (strcmp(word, "WHILE") == 0)
 			{
-				//CComma(JMPNZ);
-				//Comma(Pop());
-				CComma(BRANCHNZ);
-				CELL tgt = pop();
-				CELL offset = tgt - HERE;
-				Comma(offset);
-				MakeTailJmpUnSafe();
+				CComma(JMPNZ);
+				Comma(pop());
 				continue;
 			}
 
 			if (strcmp(word, "UNTIL") == 0)
 			{
-				//CComma(JMPZ);
-				//Comma(Pop());
-				CComma(BRANCHZ);
-				CELL tgt = pop();
-				CELL offset = tgt - HERE;
-				Comma(offset);
-				MakeTailJmpUnSafe();
+				CComma(JMPZ);
+				Comma(pop());
 				continue;
 			}
 
@@ -667,8 +663,6 @@ void Parse(char *line)
 			continue;
 		}
 
-		MakeTailJmpUnSafe();
-
 		DICT_T *dp = FindWord(word);
 		if (dp != NULL)
 		{
@@ -699,7 +693,6 @@ void Parse(char *line)
 				{
 					CComma(CALL);
 					Comma(dp->XT);
-					MakeTailJmpSafe();
 				}
 			}
 			else
@@ -742,51 +735,18 @@ void Parse(char *line)
 		}
 
 		printf("ERROR: %s: '%s'??\n", source, word);
-		// fatal_error = true;
 	}
-}
-
-void write_assembly_file()
-{
-    if (fatal_error)
-    {
-        return;
-    }
-
-    printf("\nwriting assembly file %s... ", assembly_fn);
-
-    output_fp = fopen(assembly_fn, "wt");
-    if (!output_fp)
-    {
-		fatal_error = true;
-        printf("ERROR: Can't open assembly file.\n");
-        return;
-    }
-
-    fprintf(output_fp, ";memory-size: %04lx (hex)\n;\n", (long)MEM_SZ);
-	dis_vm(output_fp);
-
-    fclose(output_fp);
-    output_fp = NULL;
-
-    printf("done.\n");
 }
 
 void write_output_file()
 {
-    if (fatal_error)
-    {
-        return;
-    }
-
-    printf("writing output file %s... ", output_fn);
+    printf("writing output file %s ... ", output_fn);
 
     output_fp = fopen(output_fn, "wb");
     if (!output_fp)
     {
-		// fatal_error = true;
-        printf("ERROR: Can't open output file.\n");
-        return;
+        printf("ERROR: Can't open output file!");
+        exit(1);
     }
 
 	fwrite(the_memory, 1, MEM_SZ, output_fp);
@@ -810,16 +770,15 @@ void do_compile()
     input_fp = fopen(input_fn, "rt");
     if (!input_fp)
     {
-		fatal_error = true;
-        printf("FATAL: Can't open input file.\n");
-        return;
+        printf("can't open input file!");
+        exit(1);
     }
 
 	Compile(input_fp);
     fclose(input_fp);
     input_fp = NULL;
 
-    printf("done.\n");
+    printf(" done.\n");
 }
 
 // *********************************************************************
@@ -834,11 +793,6 @@ void process_arg(char *arg)
     {
         arg = arg+2;
         strcpy(output_fn, arg);
-    }
-    else if (*arg == 'a') 
-    {
-        arg = arg+2;
-        strcpy(assembly_fn, arg);
     }
     else if (*arg == 't') 
     {
@@ -855,8 +809,6 @@ void process_arg(char *arg)
         printf("usage: forth-compiler [args]\n");
         printf("  -i:inputFile (full or relative path)\n");
         printf("      default inputFile is forth.src\n");
-        printf("  -a:assemblyFile (full or relative path)\n");
-        printf("      default assemblyFile is forth.asm\n");
         printf("  -o:outputFile (full or relative path)\n");
         printf("      default outputFile is forth.bin\n");
         printf("  -t (set log level to trace)\n");
@@ -874,7 +826,6 @@ int main (int argc, char **argv)
 {
     strcpy(input_fn, "forth.src");
     strcpy(output_fn, "forth.bin");
-	strcpy(assembly_fn, "forth.asm");
 	debug_off();
 
     for (int i = 1; i < argc; i++)
@@ -888,14 +839,6 @@ int main (int argc, char **argv)
 
     do_compile();
 	write_output_file();
-	write_assembly_file();
 
-    if (input_fp)
-        fclose(input_fp);
-
-    if (output_fp)
-        fclose(output_fp);
-
-	printf("all done.");
     return 0;
 }

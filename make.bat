@@ -1,6 +1,7 @@
 @echo off
 
 if "--%1%--" == "--fc--" goto make-fc
+if "--%1%--" == "--fd--" goto make-fd
 if "--%1%--" == "--forth--" goto make-forth
 if "--%1%--" == "--bd--" goto make-bin-dump
 goto unknown
@@ -11,7 +12,6 @@ set c-files=forth-compiler.c
 set c-files=%c-files% forth-vm.c
 set c-files=%c-files% vm-prims.c
 set c-files=%c-files% logger.c
-set c-files=%c-files% ForthVM-Dis.c
 echo making %output% ...
 echo gcc -g -o %output% %c-files%
 rem gcc -g -o %output% %c-files%
@@ -33,6 +33,20 @@ gcc -g -o tmp %c-files%
 strip -o %output%.exe -g -S -d -X tmp.exe
 del tmp.exe
 if "--%2%--" == "--1--" forth
+goto done
+
+:make-fd
+set output=forth-dis
+set c-files=forth-dis.c 
+set c-files=%c-files% forth-vm.c
+set c-files=%c-files% vm-prims.c
+set c-files=%c-files% logger.c
+echo making %output% ...
+echo gcc -g -o %output% %c-files%
+gcc -g -o tmp %c-files%
+strip -o %output%.exe -g -S -d -X tmp.exe
+del tmp.exe
+if "--%2%--" == "--1--" forth-dis
 goto done
 
 :make-bin-dump

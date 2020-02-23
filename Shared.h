@@ -37,9 +37,9 @@
 #define FWRITE    31	// 1F  ( addr num fp -- ) - fp == 0 means STDIN
 #define FCLOSE    32	// 20  ( fp -- )
 #define DTOR      33	// 21  >R (Data To Return)
-#define RTOD      34	// 23  R> (Return To Data)
-#define UNUSED35  35    // 24  Was R@, redefined to : R@ >R DUP >R ;
-#define UNUSED36  36
+#define RTOD      34	// 22  R> (Return To Data)
+#define LOGLEVEL  35    // 23
+#define UNUSED36  36    // 24
 #define PICK      37	// 25
 #define DEPTH     38	// 26
 #define GETCH     39	// 27
@@ -47,9 +47,9 @@
 #define UNUSED42  41
 #define AND       42	// 2A
 #define OR		  43	// 2B
-#define BRANCH    44	// 2C
-#define BRANCHZ   45	// 2D
-#define BRANCHNZ  46	// 2E
+#define UNUSED44  44	// 2C
+#define UNUSED45  45	// 2D
+#define UNUSED46  46	// 2E
 #define COMPAREI  47	// 2F ( addr1 addr2 -- bool )
 #define BREAK    253	// FD
 #define RESET    254	// FE
@@ -89,6 +89,7 @@ typedef struct {
 
 #define DSTACK_SZ (CELL_SZ * 64)
 #define RSTACK_SZ (CELL_SZ * 64)
+#define STACKS_SZ (DSTACK_SZ + RSTACK_SZ)
 
 #define STACK_BUF_CELLS 2
 #define STACK_BUF_SZ (STACK_BUF_CELLS * CELL_SZ)
@@ -102,25 +103,25 @@ typedef struct {
 #define ONE_MB (ONE_KB * ONE_KB)
 #define MEM_SZ (64*ONE_KB)
 
-#define RSP_BASE (MEM_SZ - RSTACK_SZ)				// Start address of the return stack
-#define RSP_INIT (MEM_SZ - STACK_BUF_SZ)			// Initial value of the return stack pointer
+//#define RSP_BASE (MEM_SZ - RSTACK_SZ)				// Start address of the return stack
+//#define RSP_INIT (MEM_SZ - STACK_BUF_SZ)			// Initial value of the return stack pointer
 
-#define DSP_BASE ((MEM_SZ) - RSTACK_SZ - DSTACK_SZ)	// Start address of the data stack
-#define DSP_INIT (DSP_BASE + STACK_BUF_SZ)			// Initial value of the data stack pointer
+//#define DSP_BASE ((MEM_SZ) - RSTACK_SZ - DSTACK_SZ)	// Start address of the data stack
+//#define DSP_INIT (DSP_BASE + STACK_BUF_SZ)			// Initial value of the data stack pointer
 
 #define GETAT(loc) *(CELL *)(&the_memory[loc])
 #define SETAT(loc, val) *(CELL *)(&the_memory[loc]) = val
 
-#define GETTOS() *(DSP)
-#define GET2ND() *(DSP-1)
-#define SETTOS(val) *(DSP) = (val)
-#define SET2ND(val) *(DSP-1) = (val)
+#define GETTOS() *(DSP-1)
+#define GET2ND() *(DSP-2)
+#define SETTOS(val) *(DSP-1) = (val)
+#define SET2ND(val) *(DSP-2) = (val)
 
-#define push(val) *(++DSP) = (CELL)(val)
-#define pop() *(DSP--)
+// #define push(val) *(++DSP) = (CELL)(val)
+// #define pop() *(DSP--)
 
-#define rpush(val) *(--RSP) = (CELL)(val)
-#define rpop() *(RSP++)
+// #define rpush(val) *(--RSP) = (CELL)(val)
+// #define rpop() *(RSP++)
 
 #define _T(x) x
 

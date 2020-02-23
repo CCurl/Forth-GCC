@@ -21,6 +21,8 @@ bool isBYE = false;
 BYTE *the_memory;
 long memory_size = 0;
 
+int _QUIT_HIT = 0;
+
 void init_vm_vectors();
 extern void (*vm_prims[])();
 
@@ -47,10 +49,10 @@ void destroy_vm()
 // ------------------------------------------------------------------------------------------
 void reset_vm()
 {
-	DSP = dsp_init;
+	dsp_init = (CELL *)&the_memory[memory_size - STACKS_SZ];
+	rsp_init = (CELL *)&the_memory[memory_size - CELL_SZ];
 	RSP = rsp_init;
-	isBYE = false;
-	isEmbedded = false;
+	DSP = dsp_init;
 	PC = 0;
 }
 
@@ -61,13 +63,70 @@ void init_vm(int vm_size)
 
 	init_vm_vectors();
 	create_vm();
-
-	rsp_init = (CELL *)&the_memory[memory_size - RSTACK_SZ];
-	dsp_init = (CELL *)&the_memory[memory_size - RSTACK_SZ - DSTACK_SZ];
-
-	debug("dsp_init = %04lx, rsp_init = %04lx\n", memory_size - RSTACK_SZ, memory_size - RSTACK_SZ - DSTACK_SZ);
-
 	reset_vm();
+}
+
+// The data stack starts at (MEM_SZ - STACKS_SZ) and grows upwards towards the return stack
+void push(CELL val)
+{
+	trace(" push(%ld, DSP=0x%08lx)\n", val, DSP);
+	if (RSP <= DSP)
+	{
+		printf(" stack overflow!");
+		reset_vm();
+		_QUIT_HIT = 1;
+		isBYE = 1;
+		return;
+	}
+	*(DSP) = (CELL)(val);
+	++DSP;
+}
+
+CELL pop() 
+{
+	if (DSP <= dsp_init)
+	{
+		printf(" stack underflow!");
+		reset_vm();
+		_QUIT_HIT = 1;
+		isBYE = 1;
+		return 0;
+	}
+	DSP--;
+	trace(" pop(%ld, DSP=0x%08lx)\n", *(DSP), DSP);
+	return *(DSP);
+}
+
+// The return stack starts at (MEM_SZ) and grows downwards towards the data stack
+void rpush(CELL val)
+{
+	if (RSP <= DSP)
+	{
+		printf(" return stack overflow!");
+		reset_vm();
+		_QUIT_HIT = 1;
+		isBYE = 1;
+		return;
+	}
+	trace(" rpushing %ld", val);
+	--RSP;
+	*(RSP) = (CELL)(val);
+}
+
+CELL rpop()
+{
+	if (RSP >= rsp_init)
+	{
+		printf(" return stack underflow! (at PC=0x%04lx)", PC-1);
+		reset_vm();
+		_QUIT_HIT = 1;
+		isBYE = 1;
+		return PC;
+	}
+	CELL val = *(RSP);
+	trace(" rpop(%ld)", val);
+	RSP++;
+	return val;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -87,96 +146,25 @@ CELL cpu_step()
 	switch (IR)
 	{
 	case PICK:
-		arg1 = pop();
+		arg1 = pop() + 1;
 		arg2 = *(DSP - arg1);
 		push(arg2);
 		trace("PICK\n");
 		return 0;
 
-	case JMPZ:
-		trace("JMPZ %04lx\n", GETAT(PC));
-		if (pop() == 0)
-		{
-			PC = GETAT(PC);
-		}
-		else
-		{
-			PC += CELL_SZ;
-		}
-		return CELL_SZ;
-
-	case JMPNZ:
-		trace("JMPNZ %04lx\n", GETAT(PC));
-		arg1 = pop();
-		if (arg1 != 0)
-		{
-			PC = GETAT(PC);
-		}
-		else
-		{
-			PC += CELL_SZ;
-		}
-		return CELL_SZ;
-
-	case BRANCH:
-		arg1 = GETAT(PC);
-		trace("BRANCH %04lx\n", arg1);
-		PC += arg1;
-		return CELL_SZ;
-
-	case BRANCHZ:
-		arg1 = GETAT(PC);
-		trace("BRANCHZ %04lx\n", arg1);
-		if (pop() == 0)
-		{
-			arg1 = GETAT(PC);
-			PC += arg1;
-		}
-		else
-		{
-			PC += CELL_SZ;
-		}
-		return CELL_SZ;
-
-	case BRANCHNZ:
-		arg1 = GETAT(PC);
-		trace("BRANCHNZ %04lx\n", arg1);
-		if (pop() != 0)
-		{
-			arg1 = GETAT(PC);
-			PC += arg1;
-		}
-		else
-		{
-			PC += CELL_SZ;
-		}
-		return CELL_SZ;
-
-	case CALL:
-		arg1 = GETAT(PC);
-		trace("CALL %04lx\n", arg1);
-		PC += CELL_SZ;
-		rpush(PC);
-		PC = arg1;
-		return CELL_SZ;
-
 	case RET:
-		if (RSP == rsp_init)
+		trace("RET\n");
+		// Empty return stack means done when embedded
+		if ((RSP >= rsp_init) && (isEmbedded))
 		{
-			if (isEmbedded)
-			{
-				isBYE = true;
-			}
-			else
-			{
-				PC = 0;
-			}
+			trace(" embedded BYE");
+			isBYE = true;
+			PC = 0;
 		}
 		else
 		{
 			PC = rpop();
 		}
-		trace("RET\n");
 		return 0;
 
 	case COMPARE:
@@ -205,13 +193,10 @@ CELL cpu_step()
 
 	case SLITERAL:
 		trace("SLITERAL\n");
-		arg1 = PC++;
-		arg2 = the_memory[PC++];
-		while (arg2)
-		{
-			arg2 = the_memory[PC++];
-		}
+		arg1 = PC; // addr
+		arg2 = the_memory[PC]; // count byte
 		push(arg1);
+		PC += (arg2 + 2); // +2: count byte, NULL terminator
 		return PC-arg1;
 
 	case SUB:
@@ -357,34 +342,34 @@ CELL cpu_step()
 
 	case DTOR:
 		arg1 = pop();
+		trace("DTOR (%d)\n", arg1);
 		rpush(arg1);
-		trace("DTOR\n");
 		return 0;
 
 	case RTOD:
+		trace("RTOD\n");
 		arg1 = rpop();
 		push(arg1);
-		trace("RTOD\n");
 		return 0;
 
 	case DEPTH:
 		arg1 = DSP - dsp_init;
+		trace("DEPTH (%ld)\n", arg1);
 		push(arg1);
-		trace("DEPTH\n");
 		return 0;
 
 	case AND:
 		arg1 = pop();
 		arg2 = pop();
+		trace("AND (%04x & %04x)\n", arg1, arg2);
 		push(arg2 & arg1);
-		trace("AND\n");
 		return 0;
 
 	case OR:
 		arg1 = pop();
 		arg2 = pop();
+		trace("OR (%04x & %04x)\n", arg1, arg2);
 		push(arg2 | arg1);
-		trace("OR\n");
 		return 0;
 
 	case BREAK:
@@ -404,10 +389,9 @@ CELL cpu_step()
 
 	case RESET:
 	default:
-		DSP = dsp_init;
-		RSP = rsp_init;
-		PC = 0;
 		isBYE = isEmbedded;
+		reset_vm();
+		isEmbedded = isBYE;
 		trace("RESET\n");
 		return 0;
 	}
@@ -417,6 +401,7 @@ CELL cpu_step()
 // ------------------------------------------------------------------------------------------
 CELL cpu_loop()
 {
+	isBYE = false;
 	// debug("Running (PC=%04lx) ... ", PC);
 	// int i = 0;
 	// while (++i < 100)
