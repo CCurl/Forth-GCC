@@ -52,7 +52,6 @@ OPCODE_T opcodes[] = {
 	, { _T("GT"), GT, _T(">") }
 	, { _T("DICTP"), DICTP, _T("DICTP") }
 	, { _T("EMIT"), EMIT, _T("EMIT") }
-	, { _T("ZTYPE"), ZTYPE, _T("ZTYPE") }
 	, { _T("FOPEN"), FOPEN, _T("FOPEN") }
 	, { _T("FREAD"), FREAD, _T("FREAD") }
 	, { _T("FREADLINE"), FREADLINE, _T("FREADLINE") }
