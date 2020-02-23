@@ -76,7 +76,6 @@
 : BYE   <asm> BYE   </asm> ; INLINE
 
 : EMIT  <asm> EMIT  </asm> ; INLINE
-: ZTYPE <asm> ZTYPE </asm> ; INLINE
 : GETCH <asm> GETCH </asm> ; INLINE
 
 : FOPEN     <asm> FOPEN     </asm> ; INLINE
@@ -540,7 +539,7 @@ HEX
 		ELSE
 			\ . LAST . \ debug
 			DROP
-			R@ ZTYPE S" ??" CT RESET     \ TODO: error
+			S" ??" CT RESET     \ TODO: error
 		THEN
 		RDROP
 	THEN

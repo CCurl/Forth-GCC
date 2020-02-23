@@ -325,16 +325,6 @@ CELL dis_one(char *bytes, char *desc)
 		sprintf(desc, "EMIT");
 		return 0;
 
-	case ZTYPE:
-		// TOS is addr of a NULL terminated string, NO count
-		// arg1 = pop();
-		// {
-		// 	char *cp = (char *)&the_memory[arg1];
-		// 	printf("%s", cp);
-		// }
-		sprintf(desc, "ZTYPE");
-		return 0;
-
 	case FOPEN:
 		// ( name mode -- fp status ) - mode: 0 = read, 1 = write
 		// arg2 = pop();

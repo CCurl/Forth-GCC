@@ -16,7 +16,7 @@
 #define JMPNZ     10	// 0A
 #define CALL      11	// 0B
 #define RET       12	// 0C
-#define ZTYPE     13	// 0D
+#define UNUSED13  13	// 0D
 #define CLITERAL  14	// 0E
 #define CFETCH    15	// 0F
 #define CSTORE    16	// 10

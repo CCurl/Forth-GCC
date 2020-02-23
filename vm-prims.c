@@ -120,8 +120,8 @@ void prim_RET()
 	// code goes here
 }
 
-// ZTYPE - Doeswhat
-void prim_ZTYPE()
+// UNUSED13 - Doeswhat
+void prim_UNUSED13()
 {
 	// code goes here
 }
@@ -384,7 +384,7 @@ void init_vm_vectors()
 	vm_prims[10] = prim_JMPNZ;
 	vm_prims[11] = prim_CALL;
 	// vm_prims[12] = prim_RET;
-	// vm_prims[13] = prim_ZTYPE;
+	// vm_prims[13] = prim_UNUSED13;
 	vm_prims[14] = prim_CLITERAL;
 	vm_prims[15] = prim_CFETCH;
 	vm_prims[16] = prim_CSTORE;

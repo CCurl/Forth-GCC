@@ -249,15 +249,6 @@ CELL cpu_step()
 		push(arg2 > arg1 ? 1 : 0);
 		return 0;
 
-	case ZTYPE:
-		arg1 = pop();		// addr
-		{
-			char *cp = (char *)&the_memory[arg1];
-			printf("%s", cp);
-		}
-		trace("ZTYPE\n");
-		return 0;
-
 	case FOPEN:         // ( name mode type -- fp success )
 		arg3 = pop();   // type: 0 => text, 1 => binary
 		arg2 = pop();   // mode: 0 => read, 1 => write
