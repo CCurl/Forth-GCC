@@ -393,10 +393,13 @@ void prim_LOGLEVEL()
 	printf("LOGLEVEL (set to %d)", arg1);
 }
 
-// UNUSED36 - Doeswhat
-void prim_UNUSED36()
+// AND - Doeswhat
+void prim_AND()
 {
-	// code goes here
+		arg1 = pop();
+		arg2 = pop();
+		trace("AND (%04x & %04x)\n", arg1, arg2);
+		push(arg2 & arg1);
 }
 
 // PICK - Doeswhat
@@ -435,15 +438,6 @@ void prim_COMPAREI()
 		arg3 = _strcmpi(cp1, cp2) ? 0 : 1;
 		push(arg3);
 	}
-}
-
-// AND - Doeswhat
-void prim_AND()
-{
-		arg1 = pop();
-		arg2 = pop();
-		trace("AND (%04x & %04x)\n", arg1, arg2);
-		push(arg2 & arg1);
 }
 
 // BREAK - Doeswhat
@@ -503,12 +497,11 @@ void init_vm_vectors()
 	vm_prims[33] = prim_DTOR;
 	vm_prims[34] = prim_RTOD;
 	vm_prims[35] = prim_LOGLEVEL;
-	// vm_prims[36] = prim_UNUSED36;
+	vm_prims[36] = prim_AND;
 	vm_prims[37] = prim_PICK;
 	vm_prims[38] = prim_DEPTH;
 	vm_prims[39] = prim_GETCH;
 	vm_prims[40] = prim_COMPAREI;
-	vm_prims[41] = prim_AND;
 	// vm_prims[253] = prim_BREAK;
 	// vm_prims[254] = prim_RESET;
 	// vm_prims[255] = prim_BYE;

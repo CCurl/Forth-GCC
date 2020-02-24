@@ -39,12 +39,11 @@
 #define DTOR      33	// 21  >R (Data To Return)
 #define RTOD      34	// 22  R> (Return To Data)
 #define LOGLEVEL  35    // 23
-#define UNUSED36  36    // 24
+#define AND       36	// 24
 #define PICK      37	// 25
 #define DEPTH     38	// 26
 #define GETCH     39	// 27
 #define COMPAREI  40	// 28 ( addr1 addr2 -- bool )
-#define AND       41	// 2A
 #define BREAK    253	// FD
 #define RESET    254	// FE
 #define BYE      255	// FF
