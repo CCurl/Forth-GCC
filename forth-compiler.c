@@ -347,21 +347,373 @@ char *GetWord(char *line, char *word)
     return line;
 }
 
+char *ParseWord(char *word, char *line)
+{
+	trace("Parse(): word=[%s], HERE=%04lx, LAST=%04lx, STATE=%ld\n", word, HERE, LAST, STATE);
+
+	if (string_equals(word, ".QUIT"))
+	{
+		_QUIT_HIT = 1;
+		return line;
+	}
+
+	if (string_equals(word, ".TRACE-ON"))
+	{
+		trace_on();
+		return line;
+	}
+
+	if (string_equals(word, ".DEBUG-ON"))
+	{
+		debug_on();
+		return line;
+	}
+
+	if (string_equals(word, ".DEBUG-OFF"))
+	{
+		debug_off();
+		return line;
+	}
+
+	if (string_equals(word, ".TRACE-OFF"))
+	{
+		debug_off();
+		return line;
+	}
+
+	if (string_equals(word, ".ORG"))
+	{
+		GetWord(line, word);
+		CELL addr = 0;
+		if (MakeNumber(word, &addr))
+		{
+			ORG = addr;
+			HERE = addr;
+		}
+		return line;
+	}
+
+	if (string_equals(word, ".HEX"))
+	{
+		BASE = 16;
+		CStore(ADDR_BASE, BASE);
+		return line;
+	}
+
+	if (string_equals(word, ".DECIMAL"))
+	{
+		BASE = 10;
+		CStore(ADDR_BASE, BASE);
+		return line;
+	}
+
+	if ((STATE < 0) || (STATE > 2))
+	{
+		printf("STATE (%ld) is messed up!\n", STATE);
+		STATE = 0;
+	}
+
+	if (string_equals(word, ":"))
+	{
+		trace("\n");
+		line = GetWord(line, word);
+		STATE = 1;
+		DefineWord(word, 0);
+		CComma(DICTP);
+		Comma(LAST);
+		return line;
+	}
+
+	if (string_equals(word, "IMMEDIATE"))
+	{
+		DICT_T *dp = (DICT_T *)&the_memory[LAST];
+		dp->flags |= IS_IMMEDIATE;
+		return line;
+	}
+
+	if (string_equals(word, "INLINE"))
+	{
+		DICT_T *dp = (DICT_T *)&the_memory[LAST];
+		dp->flags |= IS_INLINE;
+		return line;
+	}
+
+	if (string_equals(word, "<asm>"))
+	{
+		STATE = 2;
+		return line;
+	}
+
+	if (string_equals(word, "</asm>"))
+	{
+		STATE = 1;
+		return line;
+	}
+
+	if (string_equals(word, ".HERE"))
+	{
+		push(HERE);
+		if (STATE == 1)
+		{
+			CComma(LITERAL);
+			Comma(pop());
+		}
+		return line;
+	}
+
+	if (string_equals(word, ".CELL"))
+	{
+		push(CELL_SZ);
+		return line;
+	}
+
+	if (string_equals(word, ".LITERAL"))
+	{
+		CComma(LITERAL);
+		Comma(pop());
+		return line;
+	}
+
+	if (string_equals(word, ".CLITERAL"))
+	{
+		CComma(CLITERAL);
+		CComma((BYTE)pop());
+		return line;
+	}
+
+	if (string_equals(word, ".COMMA"))
+	{
+		Comma(pop());
+		return line;
+	}
+
+	if (string_equals(word, "("))
+	{
+		while (true)
+		{
+			BYTE ch = *(line++);
+			if ((ch == ')') || (ch == NULL))
+				break;
+		}
+		return line;
+	}
+
+	// These words are only for : definitions
+	if (STATE == 1)
+	{
+		if (string_equals(word, ";"))
+		{
+			CComma(RET);
+			STATE = 0;
+			return line;
+		}
+
+		if (strcmp(word, "IF") == 0)
+		{
+			CComma(JMPZ);
+			push(HERE);
+			Comma(0);
+			return line;
+		}
+
+		if (strcmp(word, "ELSE") == 0)
+		{
+			CELL tmp = pop();
+			CComma(JMP);
+			push(HERE);
+			Comma(0);
+			Store(tmp, HERE);
+			return line;
+		}
+
+		if (strcmp(word, "THEN") == 0)
+		{
+			CELL tmp = pop();
+			Store(tmp, HERE);
+			return line;
+		}
+
+		if (strcmp(word, "BEGIN") == 0)
+		{
+			push(HERE);
+			return line;
+		}
+
+		if (strcmp(word, "AGAIN") == 0)
+		{
+			CComma(JMP);
+			Comma(pop());
+			return line;
+		}
+
+		if (strcmp(word, "WHILE") == 0)
+		{
+			CComma(JMPNZ);
+			Comma(pop());
+			return line;
+		}
+
+		if (strcmp(word, "UNTIL") == 0)
+		{
+			CComma(JMPZ);
+			Comma(pop());
+			return line;
+		}
+
+		if (string_equals(word, "S\""))
+		{
+			CComma(SLITERAL);
+			int count = 0;
+			bool done = false;
+			line += 1;
+			CELL cur_here = HERE++;
+			BYTE ch;
+			while ((!done) && (!string_isEmpty(line)))
+			{
+				ch = *(line++);
+				if (ch == '\"')
+				{
+					done = true;
+				}
+				else
+				{
+					CComma(ch);
+					count++;
+				}
+			}
+			CComma(0);
+			CStore(cur_here, count);
+			return line;
+		}
+	}
+
+	BYTE opcode = FindAsm(word);
+	//if ((STATE == 0) || (STATE == 2))
+	if (0 < opcode)
+	{
+		trace("[%s] Is an ASM keyword: opcode=%d\n", word, opcode);
+		if (STATE == 0)
+		{
+			if (! ExecuteOpcode(opcode))
+			{
+				printf("\n%s: unsupported opcode %d", word, opcode);
+				_QUIT_HIT = 1;
+			}
+		}
+		else 
+		{
+			CComma(opcode);
+		}
+		return line;
+	}
+
+	opcode = FindForthPrim(word);
+	if (0 < opcode)
+	{
+		trace("[%s] Is a FORTH primitive: opcode=%d\n", word, opcode);
+		if (STATE == 1)
+		{
+			CComma(opcode);
+		}
+		else
+		{
+			if (!ExecuteOpcode(opcode))
+			{
+				printf("\n%s: unsupported opcode %d", word, opcode);
+			}
+		}
+		return line;
+	}
+
+	DICT_T *dp = FindWord(word);
+	if (dp != NULL)
+	{
+		debug("FORTH word [%s]. STATE=%ld ... ", dp->name, STATE);
+		if (STATE == 1)
+		{
+			debug("compiling into current word\n", dp->name, dp->XT, STATE);
+			if (dp->flags & IS_INLINE)
+			{
+				// Skip the DICTP instruction
+				CELL addr = dp->XT + CELL_SZ + 1;
+
+				// Copy bytes until the first RET
+				while (true)
+				{
+					BYTE b = the_memory[addr++];
+					if (b != RET)
+					{
+						CComma(b);
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+			else
+			{
+				CComma(CALL);
+				Comma(dp->XT);
+			}
+		}
+		else
+		{
+			debug("executing it ...\n");
+			ExecuteXT(dp->XT);
+		}
+		return line;
+	}
+
+	CELL num = 0;
+	if (MakeNumber(word, &num))
+	{
+		trace("IsNumber: %ld (%04lx), STATE=%ld\n", num, num, STATE);
+		if (STATE == 0) // Interactive
+		{
+			push(num);
+			return line;
+		}
+		else if (STATE == 1) // Compiling
+		{
+			if ((0 <= num) && (num <= 0xFF))
+			{
+				CComma(CLITERAL);
+				CComma((BYTE)num);
+			}
+			else
+			{
+				CComma(LITERAL);
+				Comma(num);
+			}
+		}
+		else  if (STATE == 2) // <ASM>
+		{
+			push(num);
+			return line;
+		}
+		return line;
+	}
+
+	_QUIT_HIT = 1;
+	printf("ERROR: '%s'??\n", word);
+	return line;
+}
+
 void Parse(char *line)
 {
 	char *source = line;
-	char parsed[128];
 	char word[128];
 
 	trace("Parse(): line=[%s]\n", line);
 
-	// // for debugging
+	// for debugging
 	// if (0x05c8 < HERE)
 	// {
 	// 	trace_on();
 	// }
 
-	// // for debugging
+	// for debugging
 	// if (0x0680 < HERE)
 	// {
 	// 	debug_off();
@@ -370,12 +722,6 @@ void Parse(char *line)
 	while (string_len(line) > 0)
 	{
 		line = GetWord(line, word);
-		if (string_len(parsed) > 0)
-		{
-			string_cat(parsed, " ");
-		}
-		string_cat(parsed, word);
-
 		if (string_equals(word, "\\"))
 		{
 			return;
@@ -386,354 +732,7 @@ void Parse(char *line)
 			return;
 		}
 
-		trace("Parse(): word=[%s], HERE=%04lx, LAST=%04lx, STATE=%ld\n", word, HERE, LAST, STATE);
-
-		if (string_equals(word, ".QUIT"))
-		{
-			_QUIT_HIT = 1;
-			return;
-		}
-
-		if (string_equals(word, ".DEBUG-ON"))
-		{
-			debug_on();
-			continue;
-		}
-
-		if (string_equals(word, ".DEBUG-OFF"))
-		{
-			debug_off();
-			continue;
-		}
-
-		if (string_equals(word, ".TRACE-ON"))
-		{
-			trace_on();
-			continue;
-		}
-
-		if (string_equals(word, ".TRACE-OFF"))
-		{
-			debug_off();
-			continue;
-		}
-
-		if (string_equals(word, ".ORG"))
-		{
-			GetWord(line, word);
-			CELL addr = 0;
-			if (MakeNumber(word, &addr))
-			{
-				ORG = addr;
-				HERE = addr;
-			}
-			continue;
-		}
-
-		if (string_equals(word, ".HEX"))
-		{
-			BASE = 16;
-			CStore(ADDR_BASE, BASE);
-			continue;
-		}
-
-		if (string_equals(word, ".DECIMAL"))
-		{
-			BASE = 10;
-			CStore(ADDR_BASE, BASE);
-			continue;
-		}
-
-		if ((STATE < 0) || (STATE > 2))
-		{
-			printf("STATE (%ld) is messed up!\n", STATE);
-			STATE = 0;
-		}
-
-		if (string_equals(word, ":"))
-		{
-			STATE = 1;
-			line = GetWord(line, word);
-			strcat(parsed, word);
-			trace("\n");
-			DefineWord(word, 0);
-			CComma(DICTP);
-			Comma(LAST);
-			continue;
-		}
-
-		if (string_equals(word, "IMMEDIATE"))
-		{
-			DICT_T *dp = (DICT_T *)&the_memory[LAST];
-			dp->flags |= IS_IMMEDIATE;
-			continue;
-		}
-
-		if (string_equals(word, "INLINE"))
-		{
-			DICT_T *dp = (DICT_T *)&the_memory[LAST];
-			dp->flags |= IS_INLINE;
-			continue;
-		}
-
-		if (string_equals(word, "<asm>"))
-		{
-			STATE = 2;
-			continue;
-		}
-
-		if (string_equals(word, "</asm>"))
-		{
-			STATE = 1;
-			continue;
-		}
-
-		if (string_equals(word, ".HERE"))
-		{
-			push(HERE);
-			if (STATE == 1)
-			{
-				CComma(LITERAL);
-				Comma(pop());
-			}
-			continue;
-		}
-
-		if (string_equals(word, ".CELL"))
-		{
-			push(CELL_SZ);
-			continue;
-		}
-
-		if (string_equals(word, ".LITERAL"))
-		{
-			CComma(LITERAL);
-			Comma(pop());
-			continue;
-		}
-
-		if (string_equals(word, ".CLITERAL"))
-		{
-			CComma(CLITERAL);
-			CComma((BYTE)pop());
-			continue;
-		}
-
-		if (string_equals(word, ".COMMA"))
-		{
-			Comma(pop());
-			continue;
-		}
-
-		// These words are only for : definitions
-		if (STATE == 1)
-		{
-			if (string_equals(word, ";"))
-			{
-				CComma(RET);
-				STATE = 0;
-				continue;
-			}
-
-			if (strcmp(word, "IF") == 0)
-			{
-				CComma(JMPZ);
-				push(HERE);
-				Comma(0);
-				continue;
-			}
-
-			if (strcmp(word, "ELSE") == 0)
-			{
-				CELL tmp = pop();
-				CComma(JMP);
-				push(HERE);
-				Comma(0);
-				Store(tmp, HERE);
-				continue;
-			}
-
-			if (strcmp(word, "THEN") == 0)
-			{
-				CELL tmp = pop();
-				Store(tmp, HERE);
-				continue;
-			}
-
-			if (strcmp(word, "BEGIN") == 0)
-			{
-				push(HERE);
-				continue;
-			}
-
-			if (strcmp(word, "AGAIN") == 0)
-			{
-				CComma(JMP);
-				Comma(pop());
-				continue;
-			}
-
-			if (strcmp(word, "WHILE") == 0)
-			{
-				CComma(JMPNZ);
-				Comma(pop());
-				continue;
-			}
-
-			if (strcmp(word, "UNTIL") == 0)
-			{
-				CComma(JMPZ);
-				Comma(pop());
-				continue;
-			}
-
-			if (string_equals(word, "("))
-			{
-				while (true)
-				{
-					BYTE ch = *(line++);
-					if ((ch == ')') || (ch == NULL))
-						break;
-				}
-				continue;
-			}
-
-			if (string_equals(word, "S\""))
-			{
-				CComma(SLITERAL);
-				int count = 0;
-				bool done = false;
-				line += 1;
-				CELL cur_here = HERE++;
-				BYTE ch;
-				while ((!done) && (!string_isEmpty(line)))
-				{
-					ch = *(line++);
-					if (ch == '\"')
-					{
-						done = true;
-					}
-					else
-					{
-						CComma(ch);
-						count++;
-					}
-				}
-				CComma(0);
-				CStore(cur_here, count);
-				continue;
-			}
-		}
-
-		BYTE opcode = FindAsm(word);
-		//if ((STATE == 0) || (STATE == 2))
-		if (0 < opcode)
-		{
-			trace("[%s] Is an ASM keyword: opcode=%d\n", word, opcode);
-			if (STATE == 0)
-			{
-				if (! ExecuteOpcode(opcode))
-				{
-					printf("\n%s: unsupported opcode %d", (LPCTSTR)source, opcode);
-				}
-			}
-			else 
-			{
-				CComma(opcode);
-			}
-			continue;
-		}
-
-		opcode = FindForthPrim(word);
-		if (0 < opcode)
-		{
-			trace("[%s] Is a FORTH primitive: opcode=%d\n", word, opcode);
-			if (STATE == 1)
-			{
-				CComma(opcode);
-			}
-			else
-			{
-				if (!ExecuteOpcode(opcode))
-				{
-					printf("\n%s: unsupported opcode %d", (LPCTSTR)source, opcode);
-				}
-			}
-			continue;
-		}
-
-		DICT_T *dp = FindWord(word);
-		if (dp != NULL)
-		{
-			debug("FORTH word [%s]. STATE=%ld ... ", dp->name, STATE);
-			if (STATE == 1)
-			{
-				debug("compiling into current word\n", dp->name, dp->XT, STATE);
-				if (dp->flags & IS_INLINE)
-				{
-					// Skip the DICTP instruction
-					CELL addr = dp->XT + CELL_SZ + 1;
-
-					// Copy bytes until the first RET
-					while (true)
-					{
-						BYTE b = the_memory[addr++];
-						if (b != RET)
-						{
-							CComma(b);
-						}
-						else
-						{
-							break;
-						}
-					}
-				}
-				else
-				{
-					CComma(CALL);
-					Comma(dp->XT);
-				}
-			}
-			else
-			{
-				debug("executing it ...\n");
-				ExecuteXT(dp->XT);
-				//wprintf(_T("%s: cannot execute '%s'!\n"), (LPCTSTR)source, (LPCTSTR)word);
-			}
-			continue;
-		}
-
-		CELL num = 0;
-		if (MakeNumber(word, &num))
-		{
-			trace("IsNumber: %ld (%04lx), STATE=%ld\n", num, num, STATE);
-			if (STATE == 0) // Interactive
-			{
-				push(num);
-				continue;
-			}
-			else if (STATE == 1) // Compiling
-			{
-				if ((0 <= num) && (num <= 255))
-				{
-					CComma(CLITERAL);
-					CComma((BYTE)num);
-				}
-				else
-				{
-					CComma(LITERAL);
-					Comma(num);
-				}
-			}
-			else  if (STATE == 2) // <ASM>
-			{
-				push(num);
-				continue;
-			}
-			continue;
-		}
-
-		printf("ERROR: %s: '%s'??\n", source, word);
+		line = ParseWord(word, line);
 	}
 }
 
