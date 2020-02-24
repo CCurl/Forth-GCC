@@ -16,7 +16,7 @@
 #define JMPNZ     10	// 0A
 #define CALL      11	// 0B
 #define RET       12	// 0C
-#define UNUSED13  13	// 0D
+#define OR		  13	// 0D
 #define CLITERAL  14	// 0E
 #define CFETCH    15	// 0F
 #define CSTORE    16	// 10
@@ -43,14 +43,8 @@
 #define PICK      37	// 25
 #define DEPTH     38	// 26
 #define GETCH     39	// 27
-#define UNUSED41  40
-#define UNUSED42  41
-#define AND       42	// 2A
-#define OR		  43	// 2B
-#define UNUSED44  44	// 2C
-#define UNUSED45  45	// 2D
-#define UNUSED46  46	// 2E
-#define COMPAREI  47	// 2F ( addr1 addr2 -- bool )
+#define COMPAREI  40	// 28 ( addr1 addr2 -- bool )
+#define AND       41	// 2A
 #define BREAK    253	// FD
 #define RESET    254	// FE
 #define BYE      255	// FF
