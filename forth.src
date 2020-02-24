@@ -31,7 +31,7 @@
 : isNeg     <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 
 : MEM_SZ (MEM_K) @ 1024 * ;
-64 (MEM_K) !
+256 (MEM_K) !
 
 \ : STDIN <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
 

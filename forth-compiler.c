@@ -167,6 +167,7 @@ CELL ExecuteXT(CELL XT)
 	SyncMem(true);
 	PC = XT;
 	isBYE = false;
+	isEmbedded = true;
 	CELL ret = cpu_loop();
 	SyncMem(false);
 
@@ -211,18 +212,6 @@ DICT_T *FindWord(LPCTSTR word)
 	}
 
 	return 0;
-}
-
-OPCODE_T *FindOpcode(BYTE opcode)
-{
-	for (int i = 0; opcodes[i].opcode != 0; i++)
-	{
-		if (opcodes[i].opcode == opcode)
-		{
-			return &opcodes[i];
-		}
-	}
-	return NULL;
 }
 
 bool MakeNumber(LPCTSTR word, CELL *the_num)
@@ -286,10 +275,6 @@ void DefineWord(LPCTSTR word, BYTE flags)
 
 void Comma(CELL num)
 {
-	// if ((HERE >= 0x03b5) && (HERE <= 0x03c4))
-	// {
-	// 	debug("\n%04lx:Comma(%04x)", HERE, num);
-	// }
 	if ((0 <= HERE) && (HERE < LAST))
 	{
 		trace(", %04lx (%04lx)", num, HERE);
@@ -304,10 +289,6 @@ void Comma(CELL num)
 
 void CComma(BYTE num)
 {
-	// if ((HERE >= 0x03b5) && (HERE <= 0x03c4))
-	// {
-	// 	debug("\n%04lx:CComma(%02x)", HERE, (int)num);
-	// }
 	if (HERE < LAST)
 	{
 		trace("C, %02lx (%04lx)", num, HERE);
@@ -338,11 +319,6 @@ char *GetWord(char *line, char *word)
 		*(cp++) = *(line++);
 	}
 	*cp = NULL;
-
-	// if ((HERE >= 0x03b5) && (HERE <= 0x03c4))
-	// {
-	// 	debug("\nHERE:%04lx: GetWord([%s], [%s])", HERE, word, line);
-	// }
 
     return line;
 }
@@ -588,7 +564,7 @@ char *ParseWord(char *word, char *line)
 	}
 
 	BYTE opcode = FindAsm(word);
-	//if ((STATE == 0) || (STATE == 2))
+
 	if (0 < opcode)
 	{
 		trace("[%s] Is an ASM keyword: opcode=%d\n", word, opcode);

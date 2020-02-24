@@ -53,5 +53,4 @@ dkms.conf
 
 # forth
 *.bin
-*.asm
 *.bak

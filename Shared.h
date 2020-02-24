@@ -94,7 +94,7 @@ typedef struct {
 
 #define ONE_KB (1024)
 #define ONE_MB (ONE_KB * ONE_KB)
-#define MEM_SZ (64*ONE_KB)
+#define MEM_SZ (256*ONE_KB)
 
 //#define RSP_BASE (MEM_SZ - RSTACK_SZ)				// Start address of the return stack
 //#define RSP_INIT (MEM_SZ - STACK_BUF_SZ)			// Initial value of the return stack pointer
