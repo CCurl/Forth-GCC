@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <memory.h>
+#include <conio.h>
 #include "Shared.h"
 #include "logger.h"
 #include "forth-vm.h"
@@ -11,6 +12,8 @@ CELL arg1, arg2, arg3;
 extern CELL *RSP; // the return stack pointer
 extern CELL *DSP; // the data stack pointer
 extern CELL PC;
+extern CELL *rsp_init;
+extern CELL *dsp_init;
 
 extern bool isBYE;
 extern BYTE *the_memory;
@@ -71,7 +74,11 @@ void prim_DUP()
 // SLITERAL - Doeswhat
 void prim_SLITERAL()
 {
-	// code goes here
+	trace("SLITERAL\n");
+	arg1 = PC; // addr
+	arg2 = the_memory[PC]; // count-byte
+	push(arg1);
+	PC += (arg2 + 2); // +2 => count-byte and NULL-terminator
 }
 
 // JMP - Doeswhat
@@ -117,13 +124,27 @@ void prim_CALL()
 // RET - Doeswhat
 void prim_RET()
 {
-	// code goes here
+	// Empty return stack means done when embedded
+	if ((RSP >= rsp_init) && (isEmbedded))
+	{
+		trace("RET embedded BYE\n");
+		isBYE = true;
+		PC = 0;
+	}
+	else
+	{
+		trace("RET\n");
+		PC = rpop();
+	}
 }
 
-// UNUSED13 - Doeswhat
-void prim_UNUSED13()
+// OR - Doeswhat
+void prim_OR()
 {
-	// code goes here
+	arg1 = pop();
+	arg2 = pop();
+	trace("OR (%04x & %04x)\n", arg1, arg2);
+	push(arg2 | arg1);
 }
 
 // CLITERAL - Doeswhat
@@ -164,37 +185,63 @@ void prim_ADD()
 // SUB - Doeswhat
 void prim_SUB()
 {
-	// code goes here
+	arg1 = pop();
+	arg2 = pop();
+	trace("SUB (%ld - %ld = %ld)\n", arg1, arg2, arg2-arg1);
+	push(arg2 - arg1);
 }
 
 // MUL - Doeswhat
 void prim_MUL()
 {
-	// code goes here
+	arg2 = pop();
+	arg1 = pop();
+	trace("SUB (%ld * %ld = %ld)\n", arg1, arg2, arg1*arg2);
+	push(arg1 * arg2);
 }
 
 // DIV - Doeswhat
 void prim_DIV()
 {
-	// code goes here
+	arg1 = pop();
+	arg2 = pop();
+	if (arg1 == 0)
+	{
+		printf("Divide by 0!");
+		reset_vm();
+	}
+	else
+	{
+		trace("DIV\n");
+		push(arg2 / arg1);
+	}
 }
 
 // LT - Doeswhat
 void prim_LT()
 {
-	// code goes here
+	trace("LT\n");
+	arg1 = pop();
+	arg2 = pop();
+	push(arg2 < arg1 ? 1 : 0);
 }
 
 // EQ - Doeswhat
 void prim_EQ()
 {
-	// code goes here
+	trace("EQ\n");
+	arg1 = pop();
+	arg2 = pop();
+	push(arg2 == arg1 ? 1 : 0);
 }
 
 // GT - Doeswhat
 void prim_GT()
 {
-	// code goes here
+	trace("GT\n");
+	arg1 = pop();
+	arg2 = pop();
+	push(arg2 > arg1 ? 1 : 0);
 }
 
 // DICTP - Doeswhat
@@ -225,49 +272,117 @@ void prim_OVER()
 // COMPARE - Doeswhat
 void prim_COMPARE()
 {
-	// code goes here
+	trace("COMPARE\n");
+	arg2 = pop();
+	arg1 = pop();
+	{
+		char *cp1 = (char *)&the_memory[arg1];
+		char *cp2 = (char *)&the_memory[arg2];
+		arg3 = strcmp(cp1, cp2) ? 0 : 1;
+		push(arg3);
+	}
 }
 
-// FOPEN - Doeswhat
+// FOPEN:         // ( name mode type -- fp success )
 void prim_FOPEN()
 {
-	// code goes here
+	arg3 = pop();   // type: 0 => text, 1 => binary
+	arg2 = pop();   // mode: 0 => read, 1 => write
+	arg1 = pop();   // name
+	{
+		char *fileName = (char *)&the_memory[arg1 + 1];
+		char mode[4];
+		sprintf(mode, "%c%c", (arg2 == 0) ? 'r' : 'w', (arg3 == 0) ? 't' : 'b');
+		trace("FOPEN %s, %s\n", fileName, mode);
+		FILE *fp = fopen(fileName, mode);
+		arg1 = (CELL) fp;
+		push(arg1);
+		push(fp != NULL ? 1 : 0);
+	}
 }
 
-// FREAD - Doeswhat
+// FREAD:			// ( addr num fp -- count ) - fp == 0 means STDIN
 void prim_FREAD()
 {
-	// code goes here
+	trace("FREAD\n");
+	arg3 = pop();
+	arg2 = pop();
+	arg1 = pop();
+	{
+		BYTE *pBuf = (BYTE *)&the_memory[arg1 + 1];
+		int num = fread(pBuf, sizeof(BYTE), arg2, (arg3 == 0) ? stdin : (FILE *)arg3);
+		push(num);
+	}
 }
 
-// FREADLINE - Doeswhat
+// FREADLINE:			// ( addr max-sz fp -- num-read )
 void prim_FREADLINE()
 {
-	// code goes here
+	trace("FREADLINE ");
+	arg3 = pop();		// FP - 0 means STDIN
+	arg2 = pop();		// max-sz
+	arg1 = pop();		// to-addr - NB: this is a COUNTED and NULL-TERMINATED string!
+	{
+		char *tgt = (char *)&the_memory[arg1];
+		FILE *fp = arg3 ? (FILE *)arg3 : stdin;
+		char *pBuf = tgt;
+		if (fgets((pBuf+1), arg2, fp) != (pBuf+1))
+		{
+			trace("<EOF>\n");
+			*(pBuf) = 0;
+			*(pBuf+1) = (char)0;
+			push(0);
+			return;
+		}
+		arg2 = (CELL)strlen(pBuf+1);
+		// Strip off the trailing newline if there
+		if ((arg2 > 0) && (pBuf[arg2] == '\n'))
+		{
+			pBuf[arg2--] = (char)NULL;
+		}
+		*(pBuf) = (char)(arg2);
+		push((arg2 > 0) ? arg2 : 1);
+		trace("%d: [%s]\n", (int)pBuf[0], pBuf+1);
+	}
 }
 
 // FWRITE - Doeswhat
 void prim_FWRITE()
 {
-	// code goes here
+	arg3 = pop();
+	arg2 = pop();
+	arg1 = pop();
+	{
+		BYTE *pBuf = (BYTE *)&the_memory[arg1];
+		int num = fwrite(pBuf, sizeof(BYTE), arg2, arg3 == 0 ? stdin : (FILE *)arg3);
+		push(num);
+	}
+	trace("FWRITE\n");
 }
 
 // FCLOSE - Doeswhat
 void prim_FCLOSE()
 {
-	// code goes here
+	trace("FCLOSE\n");
+	arg1 = pop();
+	if (arg1 != 0)
+		fclose((FILE *)arg1);
 }
 
 // DTOR - Doeswhat
 void prim_DTOR()
 {
-	// code goes here
+	arg1 = pop();
+	trace("DTOR (%d)\n", arg1);
+	rpush(arg1);
 }
 
 // RTOD - Doeswhat
 void prim_RTOD()
 {
-	// code goes here
+	trace("RTOD\n");
+	arg1 = rpop();
+	push(arg1);
 }
 
 // LOGLEVEL - Doeswhat
@@ -287,67 +402,48 @@ void prim_UNUSED36()
 // PICK - Doeswhat
 void prim_PICK()
 {
-	// code goes here
+	arg1 = pop() + 1;
+	arg2 = *(DSP - arg1);
+	push(arg2);
+	trace("PICK\n");
 }
 
 // DEPTH - Doeswhat
 void prim_DEPTH()
 {
-	// code goes here
+	arg1 = DSP - dsp_init;
+	trace("DEPTH (%ld)\n", arg1);
+	push(arg1);
 }
 
 // GETCH - Doeswhat
 void prim_GETCH()
 {
-	// code goes here
-}
-
-// UNUSED41 - Doeswhat
-void prim_UNUSED41()
-{
-	// code goes here
-}
-
-// UNUSED42 - Doeswhat
-void prim_UNUSED42()
-{
-	// code goes here
-}
-
-// AND - Doeswhat
-void prim_AND()
-{
-	// code goes here
-}
-
-// OR - Doeswhat
-void prim_OR()
-{
-	// code goes here
-}
-
-// UNUSED - Doeswhat
-void prim_UNUSED44()
-{
-	// code goes here
-}
-
-// UNUSED - Doeswhat
-void prim_UNUSED45()
-{
-	// code goes here
-}
-
-// UNUSED - Doeswhat
-void prim_UNUSED46()
-{
-	// code goes here
+	arg1 = getch();
+	push(arg1);
 }
 
 // COMPAREI - Doeswhat
 void prim_COMPAREI()
 {
-	// code goes here
+	trace("COMPAREI\n");
+	arg2 = pop();
+	arg1 = pop();
+	{
+		char *cp1 = (char *)&the_memory[arg1];
+		char *cp2 = (char *)&the_memory[arg2];
+		arg3 = _strcmpi(cp1, cp2) ? 0 : 1;
+		push(arg3);
+	}
+}
+
+// AND - Doeswhat
+void prim_AND()
+{
+		arg1 = pop();
+		arg2 = pop();
+		trace("AND (%04x & %04x)\n", arg1, arg2);
+		push(arg2 & arg1);
 }
 
 // BREAK - Doeswhat
@@ -378,47 +474,41 @@ void init_vm_vectors()
 	vm_prims[4] = prim_SWAP;
 	vm_prims[5] = prim_DROP;
 	vm_prims[6] = prim_DUP;
-	// vm_prims[7] = prim_SLITERAL;
+	vm_prims[7] = prim_SLITERAL;
 	vm_prims[8] = prim_JMP;
 	vm_prims[9] = prim_JMPZ;
 	vm_prims[10] = prim_JMPNZ;
 	vm_prims[11] = prim_CALL;
-	// vm_prims[12] = prim_RET;
-	// vm_prims[13] = prim_UNUSED13;
+	vm_prims[12] = prim_RET;
+	vm_prims[13] = prim_OR;
 	vm_prims[14] = prim_CLITERAL;
 	vm_prims[15] = prim_CFETCH;
 	vm_prims[16] = prim_CSTORE;
 	vm_prims[17] = prim_ADD;
-	// vm_prims[18] = prim_SUB;
-	// vm_prims[19] = prim_MUL;
-	// vm_prims[20] = prim_DIV;
-	// vm_prims[21] = prim_LT;
-	// vm_prims[22] = prim_EQ;
-	// vm_prims[23] = prim_GT;
+	vm_prims[18] = prim_SUB;
+	vm_prims[19] = prim_MUL;
+	vm_prims[20] = prim_DIV;
+	vm_prims[21] = prim_LT;
+	vm_prims[22] = prim_EQ;
+	vm_prims[23] = prim_GT;
 	vm_prims[24] = prim_DICTP;
 	vm_prims[25] = prim_EMIT;
 	vm_prims[26] = prim_OVER;
-	// vm_prims[27] = prim_COMPARE;
-	// vm_prims[28] = prim_FOPEN;
-	// vm_prims[29] = prim_FREAD;
-	// vm_prims[30] = prim_FREADLINE;
-	// vm_prims[31] = prim_FWRITE;
-	// vm_prims[32] = prim_FCLOSE;
-	// vm_prims[33] = prim_DTOR;
-	// vm_prims[34] = prim_RTOD;
+	vm_prims[27] = prim_COMPARE;
+	vm_prims[28] = prim_FOPEN;
+	vm_prims[29] = prim_FREAD;
+	vm_prims[30] = prim_FREADLINE;
+	vm_prims[31] = prim_FWRITE;
+	vm_prims[32] = prim_FCLOSE;
+	vm_prims[33] = prim_DTOR;
+	vm_prims[34] = prim_RTOD;
 	vm_prims[35] = prim_LOGLEVEL;
 	// vm_prims[36] = prim_UNUSED36;
-	// vm_prims[37] = prim_PICK;
-	// vm_prims[38] = prim_DEPTH;
-	// vm_prims[39] = prim_GETCH;
-	// vm_prims[40] = prim_UNUSED41;
-	// vm_prims[41] = prim_UNUSED42;
-	// vm_prims[42] = prim_AND;
-	// vm_prims[43] = prim_OR;
-	// vm_prims[44] = prim_UNUSED44;
-	// vm_prims[45] = prim_UNUSED45;
-	// vm_prims[46] = prim_UNUSED46;
-	// vm_prims[47] = prim_COMPAREI;
+	vm_prims[37] = prim_PICK;
+	vm_prims[38] = prim_DEPTH;
+	vm_prims[39] = prim_GETCH;
+	vm_prims[40] = prim_COMPAREI;
+	vm_prims[41] = prim_AND;
 	// vm_prims[253] = prim_BREAK;
 	// vm_prims[254] = prim_RESET;
 	// vm_prims[255] = prim_BYE;
