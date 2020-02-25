@@ -309,7 +309,7 @@ tmp-init
 : . BL (.) ;
 
 HEX
-: HEX.     BASE C@ SWAP HEX DUP 10 < IF 0 (.) THEN (.) BASE C! ; DECIMAL
+: HEX.     BASE C@ SWAP HEX DUP 10 < IF 30 EMIT THEN (.) BASE C! ; DECIMAL
 : DECIMAL. BASE C@ SWAP DECIMAL (.) BASE C! ;
 : BINARY.  BASE C@ SWAP BINARY  (.) BASE C! ;
 
@@ -820,10 +820,11 @@ HEX
 
 : ll S" loads.4th" load ;
 
-CR 111 . CR
-.(MEM_SZ) 44 EMIT BL
-.(HERE)   44 EMIT BL 
-.(LAST)   44 EMIT BL 
-FREE? CR
+: sys-stats
+	.(MEM_SZ) 44 EMIT BL
+	.(HERE)   44 EMIT BL 
+	.(LAST)   44 EMIT BL
+	FREE? CR ;
 
+sys-stats
 99 STATE !

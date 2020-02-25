@@ -644,12 +644,7 @@ char *ParseWord(char *word, char *line)
 	if (MakeNumber(word, &num))
 	{
 		trace("IsNumber: %ld (%04lx), STATE=%ld\n", num, num, STATE);
-		if (STATE == 0) // Interactive
-		{
-			push(num);
-			return line;
-		}
-		else if (STATE == 1) // Compiling
+		if (STATE == 1) // Compiling
 		{
 			if ((0 <= num) && (num <= 0xFF))
 			{
@@ -662,7 +657,7 @@ char *ParseWord(char *word, char *line)
 				Comma(num);
 			}
 		}
-		else  if (STATE == 2) // <ASM>
+		else 
 		{
 			push(num);
 			return line;
@@ -830,7 +825,7 @@ void write_output_file()
 	fwrite(the_memory, 1, MEM_SZ, output_fp);
     fclose(output_fp);
     output_fp = NULL;
-    printf("done.\n");
+    printf("done.");
 }
 
 void CompilerInit()
@@ -850,7 +845,7 @@ void CompilerInit()
 
 void do_compile()
 {
-    printf("compiling from %s... ", input_fn);
+    printf("compiling from %s...\n", input_fn);
 	CompilerInit();
 
 	generate_PlusPlus();
@@ -870,8 +865,6 @@ void do_compile()
 	Compile(input_fp);
     fclose(input_fp);
     input_fp = NULL;
-
-    printf(" done.\n");
 }
 
 // *********************************************************************

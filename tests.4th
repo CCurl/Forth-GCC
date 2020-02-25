@@ -11,7 +11,7 @@ variable tl tl !
 
 here
 : test 1 1 = if 255 drop else 254 drop then ;
-here 1- dump cr
+here 1- .S dump cr
 
 variable ms
 decimal 3 ms stk-init
