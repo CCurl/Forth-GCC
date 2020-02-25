@@ -8,43 +8,46 @@
 \ NB: don't inline anything with a 12 in it ... that is RET
 \ ------------------------------------------------------------------------------------------
 
-.HEX
-.ORG 0040
+\ The compiler does these things ...
+\ - it generates the following words: += , C, ?CODING
+\ - it generates the opcodes as words, e.g. "a.JMPNZ"
+\ - it generates the forth primitives as INLINE words, e.g. @, C@ !, C!, SWAP, DUP, ...
 
-\ The compiler/dis-assembler is hard-coded to put these values here ...
+\ The compiler is hard-coded to put these values here ...
+.HEX
 : BASE     0006    ; INLINE
 : CELL     0007 C@ ; INLINE
-: DP       0010    ; INLINE   \ Where the current HERE is stored
+: DP       0010    ; INLINE   \ DataStack-Pointer: where the current HERE is stored
 : (LAST)   0014    ; INLINE
 : INPUT-FP 001c    ; INLINE
+: STATE    0020    ; INLINE
+\
+\ End of what the compiler is hard-coded for
 
 .DECIMAL
+
+: TRACE-ON  2 LOGLEVEL ; IMMEDIATE 
+: TRACE-OFF 0 LOGLEVEL ; IMMEDIATE 
+: DEBUG-ON  1 LOGLEVEL ; IMMEDIATE 
+: DEBUG-OFF 0 LOGLEVEL ; IMMEDIATE 
+
+\ TRACE-ON 1 DROP TRACE-OFF
 
 : HERE DP     @ ; INLINE
 : LAST (LAST) @ ; INLINE
 
 : CELLS CELL * ; \ ( num1 -- num2 )
 
-: (MEM_K)   <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
-: STATE     <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
-: >IN       <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
-: isNeg     <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+: ?COMPILING STATE @ ;
+: [ 0 STATE ! ; IMMEDIATE
+: ] 1 STATE ! ; IMMEDIATE
+
+: (MEM_K)  [ HERE 2 + CELL + a.PUSH , ] ; 0 ,
+: >IN      [ HERE 2 + CELL + a.PUSH , ] ; 0 ,
+: isNeg    [ HERE 2 + CELL + a.PUSH , ] ; 0 ,
 
 : MEM_SZ (MEM_K) @ 1024 * ;
 256 (MEM_K) !
-
-\ : STDIN <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
-
-: !  <asm> STORE  </asm> ; INLINE
-: C! <asm> CSTORE </asm> ; INLINE
-
-: @  <asm> FETCH  </asm> ; INLINE
-: C@ <asm> CFETCH </asm> ; INLINE
-
-: + <asm> ADD </asm> ; INLINE
-: - <asm> SUB </asm> ; INLINE
-: * <asm> MUL </asm> ; INLINE
-: / <asm> DIV </asm> ; INLINE
 
 : 1+ 1 + ; INLINE
 : 1- 1 - ; INLINE
@@ -52,40 +55,7 @@
 : 2* 2 * ; INLINE 
 : 2/ 2 / ; INLINE
 
-: AND <asm> AND </asm> ; INLINE
-: OR  <asm> OR  </asm> ; INLINE
-
-: >R <asm> DTOR   </asm> ; INLINE
-: R> <asm> RTOD   </asm> ; INLINE
 : R@ R> DUP >R ; INLINE
-
-: < <asm> LT </asm> ; INLINE
-: = <asm> EQ </asm> ; INLINE
-: > <asm> GT </asm> ; INLINE
-
-: DUP  <asm> DUP  </asm> ; INLINE
-: SWAP <asm> SWAP </asm> ; INLINE
-: DROP <asm> DROP </asm> ; INLINE
-: OVER <asm> OVER </asm> ; INLINE
-: PICK <asm> PICK </asm> ; INLINE
-: LOGLEVEL <asm> LOGLEVEL </asm> ; INLINE
-
-: DEPTH <asm> DEPTH </asm> ; INLINE
-: RESET <asm> RESET </asm> ; INLINE
-: BREAK <asm> BREAK </asm> ; INLINE
-: BYE   <asm> BYE   </asm> ; INLINE
-
-: EMIT  <asm> EMIT  </asm> ; INLINE
-: GETCH <asm> GETCH </asm> ; INLINE
-
-: FOPEN     <asm> FOPEN     </asm> ; INLINE
-: FREAD     <asm> FREAD     </asm> ; INLINE
-: FREADLINE <asm> FREADLINE </asm> ; INLINE
-: FWRITE    <asm> FWRITE    </asm> ; INLINE
-: FCLOSE    <asm> FCLOSE    </asm> ; INLINE
-
-: COMPARE <asm> COMPARE </asm> ; INLINE
-: COMPAREI <asm> COMPAREI </asm> ; INLINE
 
 : RDROP R> DROP   ; INLINE
 : TUCK  SWAP OVER ; INLINE
@@ -93,7 +63,6 @@
 : ROT   >R SWAP R> SWAP ;
 : -ROT  SWAP >R SWAP R> ;
 
-: += OVER @        + SWAP ! ;   \ ( addr n -- )
 : -= OVER @   SWAP - SWAP ! ;   \ ( addr n -- )
 
 : ++ 1 += ;   \ ( addr -- )
@@ -104,9 +73,6 @@
 
 : +!  TUCK @  + SWAP !  ;
 : C+! TUCK C@ + SWAP C! ;
-
-: ,  HERE !  CELL DP +! ;
-: C, HERE C!      DP ++ ;
 
 : 0= 0 =  ; INLINE
 : <> = 0= ; INLINE
@@ -133,10 +99,6 @@
 
 : CT COUNT TYPE ;
 
-: ?COMPILING STATE @ ;
-: [ 0 STATE ! ; IMMEDIATE
-: ] 1 STATE ! ; IMMEDIATE
-
 : COMPILING-ONLY!
 	?COMPILING NOT IF
 		S"  compiling only!" CT RESET 
@@ -144,14 +106,14 @@
 
 : LEAVE COMPILING-ONLY! <asm> CPUSH RET </asm> C, ; IMMEDIATE
 
-: IF   ?COMPILING IF <asm> CPUSH JMPZ </asm> C, HERE 0 , THEN ; IMMEDIATE
-: ELSE ?COMPILING IF <asm> CPUSH JMP  </asm> C, HERE SWAP 0 , HERE SWAP ! THEN ; IMMEDIATE
+: IF   ?COMPILING IF a.CPUSH a.JMPZ C, HERE 0 , THEN ; IMMEDIATE
+: ELSE ?COMPILING IF a.CPUSH a.JMP  C, HERE SWAP 0 , HERE SWAP ! THEN ; IMMEDIATE
 : THEN ?COMPILING IF HERE SWAP ! THEN ; IMMEDIATE
 
 : BEGIN ?COMPILING IF HERE THEN ; IMMEDIATE
-: AGAIN ?COMPILING IF <asm> CPUSH JMP   </asm> C, , THEN ; IMMEDIATE
-: WHILE ?COMPILING IF <asm> CPUSH JMPNZ </asm> C, , THEN ; IMMEDIATE
-: UNTIL ?COMPILING IF <asm> CPUSH JMPZ  </asm> C, , THEN ; IMMEDIATE
+: AGAIN ?COMPILING IF a.CPUSH a.JMP   C, , THEN ; IMMEDIATE
+: WHILE ?COMPILING IF a.CPUSH a.JMPNZ C, , THEN ; IMMEDIATE
+: UNTIL ?COMPILING IF a.CPUSH a.JMPZ  C, , THEN ; IMMEDIATE
 
 : \ 0 >IN @ C! ; IMMEDIATE
 
@@ -178,7 +140,7 @@
 	< 0=
 ;
 
-: (tmp) <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+: (tmp) [ HERE 2 + CELL + a.PUSH , ] ; 0 ,
 : tmp-init LAST (tmp) ! ;				\ ( -- )
 : tmp-cur (tmp) @ ;
 : tmp-alloc (tmp) TUCK @ SWAP - SWAP ! tmp-cur ; \ ( size -- addr )
@@ -371,9 +333,9 @@ HEX
 	AGAIN
 ;
 
-: .(MEM_SZ) S" Memory: " CT MEM_SZ DUP HEX. S"  (" CT . BL S" )" CT ;
-: .(HERE) S" HERE: " CT HERE DUP HEX. S"  (" CT . BL S" )" CT ;
-: .(LAST) LAST DUP S" LAST: " CT HEX. S"  (" CT . BL S" )" CT ;
+: .(MEM_SZ) S" Memory: " CT MEM_SZ DUP HEX. S"  (" CT (.) S" )" CT ;
+: .(HERE)   S" HERE: "   CT HERE   DUP HEX. S"  (" CT (.) S" )" CT ;
+: .(LAST)   S" LAST: "   CT LAST   DUP HEX. S"  (" CT (.) S" )" CT ;
 
 : .WORD-SHORT DUP DICT>NAME CT BL @ ;
 : WORDS LAST BEGIN DUP @ 0= IF DROP CRLF LEAVE THEN .WORD-SHORT AGAIN ;
@@ -706,7 +668,7 @@ HEX
 : C? C@ . ; \ ( addr -- )
 
 : FREE LAST HERE - ;
-: FREE? FREE . S"  bytes free." CT ;
+: FREE? FREE (.) S"  bytes free." CT ;
 
 : ascii. DUP HEX. BL DUP DECIMAL. BL EMIT ;
 : ascii 2DUP < IF SWAP THEN BEGIN CRLF DUP ascii. 1+ 2DUP > WHILE 2DROP ;
@@ -720,7 +682,6 @@ HEX
 		executeInput BL 
 	AGAIN ;
 
-99 STATE !
 : main STATE @ 99 = IF STATE OFF S" Hello." CT THEN mainLoop ;
 
 : fn S" img-4th.bin" ;
@@ -864,3 +825,5 @@ CR 111 . CR
 .(HERE)   44 EMIT BL 
 .(LAST)   44 EMIT BL 
 FREE? CR
+
+99 STATE !

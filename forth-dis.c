@@ -71,7 +71,7 @@ CELL dis_one(char *bytes, char *desc)
 		// PC += CELL_SZ;
 		// push(arg1);
 		dis_PC2(CELL_SZ, bytes);
-		sprintf(desc, "PUSH %ld (%0lx)", arg1, arg1);
+		sprintf(desc, "LITERAL %ld (%0lx)", arg1, arg1);
 		return CELL_SZ;
 
 	case CLITERAL:
@@ -79,7 +79,7 @@ CELL dis_one(char *bytes, char *desc)
 		// PC++;
 		// push(arg1);
 		dis_PC2(1, bytes);
-		sprintf(desc, "CPUSH %ld", arg1);
+		sprintf(desc, "CLITERAL %ld", arg1);
 		return 1;
 
 	case FETCH:
@@ -528,6 +528,7 @@ void dis_vm(FILE *write_to)
 		PC += 0x10;
 	}
 
+	fprintf(write_to, ";\n", bytes);
 	fflush(write_to);
 
 	// Code

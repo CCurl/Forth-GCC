@@ -7,6 +7,11 @@ variable th th !
 variable tl tl !
 
 : forget-these tl @ (last) ! th @ dp ! ;
+: mith " *made-it-to-here*" CT ;
+
+here
+: test 1 1 = if 255 drop else 254 drop then ;
+here 1- dump cr
 
 variable ms
 decimal 3 ms stk-init
@@ -33,6 +38,7 @@ variable passed
         " ***Test #" CT num-tests @ (.) "  FAILED***" CT CR
     then
     passed +! ;
+
 
 : next-test: num-tests ++ ;
 

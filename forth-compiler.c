@@ -25,8 +25,7 @@ extern int _QUIT_HIT;
 
 // ------------------------------------------------------------------------------------------
 OPCODE_T opcodes[] = {
-	{ _T("RESET"), RESET, _T("RESET") }
-	, { _T("PUSH"), LITERAL, _T("") }
+	{ _T("PUSH"), LITERAL, _T("") }
 	, { _T("CPUSH"), CLITERAL, _T("") }
 	, { _T("FETCH"), FETCH, _T("@") }
 	, { _T("STORE"), STORE, _T("!") }
@@ -36,9 +35,9 @@ OPCODE_T opcodes[] = {
 	, { _T("DROP"), DROP, _T("DROP") }
 	, { _T("DUP"), DUP, _T("DUP") }
 	, { _T("OVER"), OVER, _T("OVER") }
-	, { _T("JMP"), JMP, _T("JMP") }
-	, { _T("JMPZ"), JMPZ, _T("JMPZ") }
-	, { _T("JMPNZ"), JMPNZ, _T("JMPNZ") }
+	, { _T("JMP"), JMP, _T("") }
+	, { _T("JMPZ"), JMPZ, _T("") }
+	, { _T("JMPNZ"), JMPNZ, _T("") }
 	, { _T("CALL"), CALL, _T("") }
 	, { _T("RET"), RET, _T("LEAVE") }
 	, { _T("COMPARE"), COMPARE, _T("COMPARE") }
@@ -50,7 +49,7 @@ OPCODE_T opcodes[] = {
 	, { _T("LT"), LT, _T("<") }
 	, { _T("EQ"), EQ, _T("=") }
 	, { _T("GT"), GT, _T(">") }
-	, { _T("DICTP"), DICTP, _T("DICTP") }
+	, { _T("DICTP"), DICTP, _T("") }
 	, { _T("EMIT"), EMIT, _T("EMIT") }
 	, { _T("FOPEN"), FOPEN, _T("FOPEN") }
 	, { _T("FREAD"), FREAD, _T("FREAD") }
@@ -61,12 +60,13 @@ OPCODE_T opcodes[] = {
 	, { _T("DTOR"), DTOR, _T(">R") }
 	, { _T("RTOD"), RTOD, _T("R>") }
 	, { _T("PICK"), PICK, _T("PICK") }
-	, { _T("LOGLEVEL"), LOGLEVEL, _T("LOGLEVEL") }
+	, { _T("LOGLEVEL"), LOGLEVEL, _T("") }
 	, { _T("DEPTH"), DEPTH, _T("DEPTH") }
 	, { _T("AND"), AND, _T("AND") }
 	, { _T("OR"), OR, _T("OR") }
 	, { _T("GETCH"), GETCH, _T("GETCH") }
 	, { _T("BREAK"), BREAK, _T("BREAK") }
+	, { _T("RESET"), RESET, _T("RESET") }
 	, { _T("BYE"), BYE, _T("BYE") }
 	, { _T(""), 0, _T("") }
 };
@@ -101,25 +101,20 @@ void SyncMem(bool isSet)
 		Store(ADDR_LAST, LAST);
 		Store(ADDR_HERE, HERE);
 		CStore(ADDR_BASE, BASE);
+		Store(ADDR_STATE, STATE);
 	}
 	else
 	{
 		LAST = Fetch(ADDR_LAST);
 		HERE = Fetch(ADDR_HERE);
 		BASE = CFetch(ADDR_BASE);
+		STATE = Fetch(ADDR_STATE);
 	}
 }
 
 void Compile(FILE *fp_in)
 {
-	HERE = 0;
-	LAST = MEM_SZ - STACKS_SZ - CELL_SZ;
-	STATE = 0;
 	int line_no = 0;
-
-	Store(LAST, 0);
-	the_memory[ADDR_CELL] = CELL_SZ;
-	CStore(ADDR_BASE, BASE);
 
 	// CW2A source(m_source);
 	// CW2A output(m_output);
@@ -608,7 +603,11 @@ char *ParseWord(char *word, char *line)
 		if (STATE == 1)
 		{
 			debug("compiling into current word\n", dp->name, dp->XT, STATE);
-			if (dp->flags & IS_INLINE)
+			if (dp->flags & IS_IMMEDIATE)
+			{
+				ExecuteXT(dp->XT);
+			}
+			else if (dp->flags & IS_INLINE)
 			{
 				// Skip the DICTP instruction
 				CELL addr = dp->XT + CELL_SZ + 1;
@@ -616,7 +615,7 @@ char *ParseWord(char *word, char *line)
 				// Copy bytes until the first RET
 				while (true)
 				{
-					BYTE b = the_memory[addr++];
+					BYTE b = CFetch(addr++);
 					if (b != RET)
 					{
 						CComma(b);
@@ -712,6 +711,111 @@ void Parse(char *line)
 	}
 }
 
+CELL PlusPlus_XT = 0;
+void generate_PlusPlus()
+{
+	DefineWord("+=", 0);
+	PlusPlus_XT = HERE;
+	CComma(DICTP);
+	Comma(LAST);
+	CComma(OVER);
+	CComma(FETCH);
+	CComma(ADD);
+	CComma(SWAP);
+	CComma(STORE);
+	CComma(RET);
+}
+
+CELL CComma_XT = 0;
+void generate_CComma()
+{
+	DefineWord("C,", 0);
+	CComma_XT = HERE;
+	CComma(DICTP);
+	Comma(LAST);
+	CComma(CLITERAL);
+	CComma(ADDR_HERE);
+	CComma(FETCH);
+	CComma(CSTORE);
+	CComma(CLITERAL);
+	CComma(ADDR_HERE);
+	CComma(CLITERAL);
+	CComma(1);
+	CComma(JMP);
+	Comma(PlusPlus_XT);
+}
+
+CELL Comma_XT = 0;
+void generate_Comma()
+{
+	DefineWord(",", 0);
+	Comma_XT = HERE;
+	CComma(DICTP);
+	Comma(LAST);
+	CComma(CLITERAL);
+	CComma(ADDR_HERE);
+	CComma(FETCH);
+	CComma(STORE);
+	CComma(CLITERAL);
+	CComma(ADDR_HERE);
+	CComma(CLITERAL);
+	CComma(CELL_SZ);
+	CComma(JMP);
+	Comma(PlusPlus_XT);
+}
+
+CELL QCoding_XT = 0;
+void generate_QCoding()
+{
+	DefineWord("?CODING", 0);
+	QCoding_XT = HERE;
+	CComma(DICTP);
+	Comma(LAST);
+	CComma(CLITERAL);
+	CComma(ADDR_STATE);
+	CComma(FETCH);
+	CComma(JMPNZ);
+	Comma(HERE + 5);
+	CComma(RESET);
+	CComma(RET);
+}
+
+void generate_asm_words()
+{
+	char tmp[64];
+	for (int i = 0; opcodes[i].opcode != 0; i++)
+	{
+		OPCODE_T *op = &(opcodes[i]);
+		sprintf(tmp, "a.%s", op->asm_instr);
+		DefineWord(tmp, IS_IMMEDIATE);
+		CComma(DICTP);
+		Comma(LAST);
+		// CComma(CALL);
+		// Comma(QCoding_XT);
+		CComma(CLITERAL);
+		CComma(opcodes[i].opcode);
+		CComma(CALL);
+		Comma(CComma_XT);
+		CComma(RET);
+	}
+}
+
+void generate_forth_prims()
+{
+	for (int i = 0; opcodes[i].opcode != 0; i++)
+	{
+		OPCODE_T *op = &(opcodes[i]);
+		if (strlen(op->forth_prim) > 0)
+		{
+			DefineWord(op->forth_prim, IS_INLINE);
+			CComma(DICTP);
+			Comma(LAST);
+			CComma(op->opcode);
+			CComma(RET);
+		}
+	}
+}
+
 void write_output_file()
 {
     printf("writing output file %s ... ", output_fn);
@@ -734,12 +838,27 @@ void CompilerInit()
 	init_vm(MEM_SZ);
 	the_memory[0] = RET;
 	isEmbedded = true;
+
+	HERE = 0x0040;
+	LAST = MEM_SZ - STACKS_SZ - CELL_SZ;
+	STATE = 0;
+
+	Store(LAST, 0);
+	CStore(ADDR_CELL, CELL_SZ);
+	CStore(ADDR_BASE, BASE);
 }
 
 void do_compile()
 {
     printf("compiling from %s... ", input_fn);
 	CompilerInit();
+
+	generate_PlusPlus();
+	generate_Comma();
+	generate_CComma();
+	generate_QCoding();
+	generate_asm_words();
+	generate_forth_prims();
 
     input_fp = fopen(input_fn, "rt");
     if (!input_fp)

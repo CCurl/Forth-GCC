@@ -91,16 +91,11 @@ typedef struct {
 #define ADDR_CELL  0x07
 #define ADDR_HERE  0x10
 #define ADDR_LAST  0x14
+#define ADDR_STATE 0x20
 
 #define ONE_KB (1024)
 #define ONE_MB (ONE_KB * ONE_KB)
 #define MEM_SZ (256*ONE_KB)
-
-//#define RSP_BASE (MEM_SZ - RSTACK_SZ)				// Start address of the return stack
-//#define RSP_INIT (MEM_SZ - STACK_BUF_SZ)			// Initial value of the return stack pointer
-
-//#define DSP_BASE ((MEM_SZ) - RSTACK_SZ - DSTACK_SZ)	// Start address of the data stack
-//#define DSP_INIT (DSP_BASE + STACK_BUF_SZ)			// Initial value of the data stack pointer
 
 #define GETAT(loc) *(CELL *)(&the_memory[loc])
 #define SETAT(loc, val) *(CELL *)(&the_memory[loc]) = val
@@ -109,12 +104,6 @@ typedef struct {
 #define GET2ND() *(DSP-2)
 #define SETTOS(val) *(DSP-1) = (val)
 #define SET2ND(val) *(DSP-2) = (val)
-
-// #define push(val) *(++DSP) = (CELL)(val)
-// #define pop() *(DSP--)
-
-// #define rpush(val) *(--RSP) = (CELL)(val)
-// #define rpop() *(RSP++)
 
 #define _T(x) x
 
