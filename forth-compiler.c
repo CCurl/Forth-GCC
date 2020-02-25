@@ -706,21 +706,6 @@ void Parse(char *line)
 	}
 }
 
-CELL PlusPlus_XT = 0;
-void generate_PlusPlus()
-{
-	DefineWord("+=", 0);
-	PlusPlus_XT = HERE;
-	CComma(DICTP);
-	Comma(LAST);
-	CComma(OVER);
-	CComma(FETCH);
-	CComma(ADD);
-	CComma(SWAP);
-	CComma(STORE);
-	CComma(RET);
-}
-
 CELL CComma_XT = 0;
 void generate_CComma()
 {
@@ -734,44 +719,13 @@ void generate_CComma()
 	CComma(CSTORE);
 	CComma(CLITERAL);
 	CComma(ADDR_HERE);
+	CComma(FETCH);
 	CComma(CLITERAL);
 	CComma(1);
-	CComma(JMP);
-	Comma(PlusPlus_XT);
-}
-
-CELL Comma_XT = 0;
-void generate_Comma()
-{
-	DefineWord(",", 0);
-	Comma_XT = HERE;
-	CComma(DICTP);
-	Comma(LAST);
+	CComma(ADD);
 	CComma(CLITERAL);
 	CComma(ADDR_HERE);
-	CComma(FETCH);
 	CComma(STORE);
-	CComma(CLITERAL);
-	CComma(ADDR_HERE);
-	CComma(CLITERAL);
-	CComma(CELL_SZ);
-	CComma(JMP);
-	Comma(PlusPlus_XT);
-}
-
-CELL QCoding_XT = 0;
-void generate_QCoding()
-{
-	DefineWord("?CODING", 0);
-	QCoding_XT = HERE;
-	CComma(DICTP);
-	Comma(LAST);
-	CComma(CLITERAL);
-	CComma(ADDR_STATE);
-	CComma(FETCH);
-	CComma(JMPNZ);
-	Comma(HERE + 5);
-	CComma(RESET);
 	CComma(RET);
 }
 
@@ -785,8 +739,6 @@ void generate_asm_words()
 		DefineWord(tmp, IS_IMMEDIATE);
 		CComma(DICTP);
 		Comma(LAST);
-		// CComma(CALL);
-		// Comma(QCoding_XT);
 		CComma(CLITERAL);
 		CComma(opcodes[i].opcode);
 		CComma(CALL);
@@ -848,10 +800,8 @@ void do_compile()
     printf("compiling from %s...\n", input_fn);
 	CompilerInit();
 
-	generate_PlusPlus();
-	generate_Comma();
+	// generate_Comma();
 	generate_CComma();
-	generate_QCoding();
 	generate_asm_words();
 	generate_forth_prims();
 
