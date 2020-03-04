@@ -18,9 +18,18 @@ FILE *output_fp = NULL;
 
 CELL HERE, LAST, STATE;
 CELL BASE = 10;
-CELL ORG = 0;
 
 extern int _QUIT_HIT;
+
+/*
+NB build this in somehow to enable usage of VT100 ECSAPE sequences to control the screen
+
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	DWORD dwMode = 0;
+	GetConsoleMode(hOut, &dwMode);
+	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+	SetConsoleMode(hOut, dwMode);
+*/
 
 // ------------------------------------------------------------------------------------------
 OPCODE_T opcodes[] = {
@@ -93,6 +102,34 @@ CELL CFetch(CELL loc)
 	return (CELL)the_memory[loc];
 }
 
+void Comma(CELL num)
+{
+	if ((0 <= HERE) && (HERE < LAST))
+	{
+		trace(", %04lx (%04lx)", num, HERE);
+		Store(HERE, num);
+		HERE += CELL_SZ;
+	}
+	else
+	{
+		printf("Comma(%04lx): out of memory!", num);
+	}
+}
+
+void CComma(BYTE num)
+{
+	if (HERE < LAST)
+	{
+		trace("C, %02lx (%04lx)", num, HERE);
+		the_memory[HERE] = num;
+		HERE += 1;
+	}
+	else
+	{
+		printf("CComma(%02x): out of memory!", (int)num);
+	}
+}
+
 void SyncMem(bool isSet)
 {
 	if (isSet)
@@ -114,13 +151,9 @@ void SyncMem(bool isSet)
 void Compile(FILE *fp_in)
 {
 	int line_no = 0;
-
-	// CW2A source(m_source);
-	// CW2A output(m_output);
-	// CW2A binary(m_binary);
-
 	char buf[128];
 	char line[128];
+
     while (fgets(buf, sizeof(buf), fp_in) == buf)
     {
 		string_rtrim(buf);
@@ -211,52 +244,17 @@ bool MakeNumber(LPCTSTR word, CELL *the_num)
 
 void DefineWord(LPCTSTR word, BYTE flags)
 {
-	CELL tmp = LAST;
+	CELL curLAST = LAST;
 	LAST -= ((CELL_SZ*2) + 3 + string_len(word));
 	debug("Defining word [%s] at %04lx, HERE=%04lx\n", word, LAST, HERE);
 
 	DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
-	dp->next = tmp;
+	dp->next = curLAST;
 	dp->XT = HERE;
 	dp->flags = flags;
 	dp->len = string_len(word);
-
-	tmp = 0;
-	char *cp = word;
-	while (*cp)
-	{
-		dp->name[tmp++] = *(cp++);
-	}
-	dp->name[tmp++] = NULL;
+	strcpy(dp->name, word);
 	SyncMem(true);
-}
-
-void Comma(CELL num)
-{
-	if ((0 <= HERE) && (HERE < LAST))
-	{
-		trace(", %04lx (%04lx)", num, HERE);
-		Store(HERE, num);
-		HERE += CELL_SZ;
-	}
-	else
-	{
-		printf("Comma(%04lx): out of memory!", num);
-	}
-}
-
-void CComma(BYTE num)
-{
-	if (HERE < LAST)
-	{
-		trace("C, %02lx (%04lx)", num, HERE);
-		the_memory[HERE] = num;
-		HERE += 1;
-	}
-	else
-	{
-		printf("CComma(%02x): out of memory!", (int)num);
-	}
 }
 
 // Returns a pointer to the first char after the first word in the line
@@ -301,10 +299,10 @@ char *ParseWord(char *word, char *line)
 	{
 		trace("\n");
 		line = GetWord(line, word);
-		STATE = 1;
 		DefineWord(word, 0);
 		CComma(DICTP);
 		Comma(LAST);
+		STATE = 1;
 		return line;
 	}
 
@@ -395,20 +393,17 @@ char *ParseWord(char *word, char *line)
 			else if (dp->flags & IS_INLINE)
 			{
 				// Skip the DICTP instruction
-				CELL addr = dp->XT + CELL_SZ + 1;
+				CELL addr = dp->XT + 1 + CELL_SZ;
 
 				// Copy bytes until the first RET
 				while (true)
 				{
 					BYTE b = CFetch(addr++);
-					if (b != RET)
-					{
-						CComma(b);
-					}
-					else
+					if (b == RET)
 					{
 						break;
 					}
+					CComma(b);
 				}
 			}
 			else

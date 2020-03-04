@@ -14,21 +14,33 @@
 \ NB: don't inline anything with a 12 in it ... that is RET
 \ -----------------------------------------------------------------------------------------------
 
-: FLAG_IMMEDIATE 1 ;
-: IMMEDIATE (LAST) @  8 + DUP C@ FLAG_IMMEDIATE OR SWAP C! ;
+: INLINE    (LAST) @ 2 CELL * + DUP C@ 2 OR SWAP C! ;
+: CELLS CELL * ; INLINE
 
-: FLAG_INLINE    2 ;
-: INLINE    (LAST) @ 8 + DUP C@ FLAG_INLINE    OR SWAP C! ;
+: FLAG_IMMEDIATE 1 ; INLINE
+: FLAG_INLINE    2 ; INLINE
+
+: IMMEDIATE (LAST) @  2 CELLS + DUP C@ FLAG_IMMEDIATE OR SWAP C! ;
 
 : LAST (LAST) @ ; INLINE
 : HERE DP     @ ; INLINE
 
 : , HERE ! HERE CELL + DP ! ;
 
-: TRACE-ON  2 a.LOGLEVEL ; IMMEDIATE 
-: TRACE-OFF 0 a.LOGLEVEL ; IMMEDIATE 
-: DEBUG-ON  1 a.LOGLEVEL ; IMMEDIATE 
-: DEBUG-OFF 0 a.LOGLEVEL ; IMMEDIATE 
+: LOGLEVEL a.LOGLEVEL ; INLINE
+
+: TRACE-ON  2 LOGLEVEL ;
+: TRACE-OFF 0 LOGLEVEL ;
+: DEBUG-ON  1 LOGLEVEL ;
+: DEBUG-OFF 0 LOGLEVEL ;
+
+: HEX     16 BASE C! ;
+: DECIMAL 10 BASE C! ;
+: OCTAL    8 BASE C! ;
+: BINARY   2 BASE C! ;
+
+: ON 1 SWAP ! ;
+: OFF 0 SWAP ! ;
 
 : [ 0 STATE ! ; IMMEDIATE
 : ] 1 STATE ! ; IMMEDIATE
@@ -38,12 +50,10 @@
 : IF   ?COMPILING .IF a.CPUSH a.JMPZ C, HERE 0 , .THEN ; IMMEDIATE
 : ELSE ?COMPILING .IF a.CPUSH a.JMP  C, HERE SWAP 0 , HERE SWAP ! .THEN ; IMMEDIATE
 
-: CELLS CELL * ; \ ( num1 -- num2 )
-
-: (MEM_K)  [ a.PUSH HERE 1 + CELL + , ] ; 0 , a.RET
 : >IN      [ a.PUSH HERE 1 + CELL + , ] ; 0 , a.RET
 : isNeg    [ a.PUSH HERE 1 + CELL + , ] ; 0 , a.RET
 
+: (MEM_K)  [ a.PUSH HERE 1 + CELL + , ] ; 0 , a.RET
 : MEM_SZ (MEM_K) @ 1024 * ;
 256 (MEM_K) !
 
@@ -60,6 +70,7 @@
 : NIP   SWAP DROP ; INLINE
 : ROT   >R SWAP R> SWAP ;
 : -ROT  SWAP >R SWAP R> ;
+: ?DUP DUP IF DUP THEN ;
 
 : += ( addr n -- ) OVER @ + SWAP ! ;
 : -= OVER @   SWAP - SWAP ! ;   \ ( addr n -- )
@@ -122,28 +133,19 @@
 : CR CRLF ;
 : BL 32 EMIT ; INLINE
 
-: ON 1 SWAP ! ; : OFF 0 SWAP ! ;
-
 : BETWEEN				\ ( num min max -- bool )
 	2 PICK 
-	< IF 2DROP 0 LEAVE THEN
+	< IF 2DROP FALSE LEAVE THEN
 	< 0=
 ;
 
-: (tmp) [ HERE 2 + CELL + a.PUSH , ] ; 0 ,
+: (tmp) [ a.PUSH HERE 1 + CELL + , ] ; 0 ,
 : tmp-init LAST (tmp) ! ;				\ ( -- )
 : tmp-cur (tmp) @ ;
 : tmp-alloc (tmp) TUCK @ SWAP - SWAP ! tmp-cur ; \ ( size -- addr )
-tmp-init
 
 : PAD tmp-init 200 tmp-alloc ;
 : getInput PAD 128 0 FREADLINE DROP PAD ; \ ( -- addr )
-: ?DUP DUP IF DUP THEN ;
-
-: HEX     16 BASE C! ;
-: DECIMAL 10 BASE C! ;
-: OCTAL    8 BASE C! ;
-: BINARY   2 BASE C! ;
 
 : skipWS               \ ( addr1 -- addr2 )
 	BEGIN
@@ -340,17 +342,7 @@ HEX
 
 : WORDSV .(LAST) CRLF LAST BEGIN DUP @ 0= IF DROP CRLF LEAVE THEN .WORD-LONG  AGAIN ;
 
-: NUM-WORDS 0 >R LAST BEGIN DUP @ 0= IF DROP R> . CRLF LEAVE THEN R> 1+ >R @ AGAIN ;
-
-: WORDS-OLD \ ( -- )
-	LAST DUP HEX. 58 EMIT BL
-	BEGIN
-		DUP 0 =
-		IF
-			DROP CRLF LEAVE
-		THEN
-		@
-	AGAIN ;
+: NUM-WORDS 0 >R LAST BEGIN DUP @ 0= IF DROP R> CRLF LEAVE THEN R> 1+ >R @ AGAIN ;
 
 \ Prints the last <x> words
 : .lastx CR LAST SWAP 0
@@ -420,16 +412,11 @@ HEX
 ;
 
 : [COMPILE] \ ( XT flags -- )
-	DUP FLAGS.ISIMMEDIATE? \ Immediate?
+	FLAGS.ISINLINE? 
 	IF
-		DROP EXECUTE
+		Copy.INLINE
 	ELSE
-		FLAGS.ISINLINE? 
-		IF
-			Copy.INLINE
-		ELSE
-			a.CPUSH a.CALL C, ,
-		THEN
+		a.CPUSH a.CALL C, ,
 	THEN
 ;
 
@@ -518,6 +505,10 @@ HEX
 		DUP 9 = IF     \ Tab?
 			DROP 32    \ Change it into a BL
 		THEN
+
+		DUP 3 = IF
+			BYE
+		THEN
 		
 		DUP 8 = IF       \ Backspace?
 			Pad C@ 0 > IF 
@@ -588,47 +579,29 @@ HEX
 : : CREATE-NAME STATE ON ;
 : :NONAME HERE STATE ON ;
 
-: ; \ ( -- )
-	?COMPILING 
-	IF
-		a.CPUSH a.RET C,
-		STATE OFF
-	ELSE
-		RESET
-	THEN
+: ;
+	a.CPUSH a.RET C,
+	STATE OFF
 ; IMMEDIATE
 
-: LAST? LAST DICT>NAME COUNT TYPE ;
-
-: (FL) \ Forgets the last word
+: ForgetLast \ Forgets the last word
 	LAST CELL + @ DP ! 
 	LAST @ (LAST) ! 
 ;
 
-: .fl (FL) LAST? ;
-
 : resetState ?COMPILING 
-	IF (FL) THEN 
+	IF ForgetLast THEN 
 	STATE OFF
-	\ isPostpone OFF
 	DECIMAL
 ;
 
 : ALLOT HERE + DP ! ;
-
-: (const) a.CPUSH a.PUSH C, , a.CPUSH a.RET C, ;
-: CONSTANT CREATE-NAME (const) ; INLINE
-: VARIABLE CREATE-NAME HERE 2 + CELL + (const) 0 , ; INLINE
-: CVARIABLE CREATE-NAME HERE 2 + 1 + (const) 0 C, ; INLINE
 
 : ? @ . ; \ ( addr -- )
 : C? C@ . ; \ ( addr -- )
 
 : FREE LAST HERE - ;
 : FREE? FREE (.) S"  bytes free." CT ;
-
-: ascii. DUP HEX. BL DUP DECIMAL. BL EMIT ;
-: ascii 2DUP < IF SWAP THEN BEGIN CRLF DUP ascii. 1+ 2DUP > WHILE 2DROP ;
 
 : mainLoop 
 	resetState 
@@ -641,69 +614,12 @@ HEX
 
 : main STATE @ 99 = IF STATE OFF S" Hello." CT THEN mainLoop ;
 
-: fn S" img-4th.bin" ;
-: img-save 
-   fn 1 1 FOPEN IF
-       >R
-       0 MEM_SZ R@ FWRITE 
-	   . S"  bytes written." CT
-       R> FCLOSE
-   ELSE
-       S" cannot open " CT fn CT RESET
-   THEN ;
-
-: dump ( start end -- ) CR 2DUP < IF SWAP THEN BEGIN 2DUP < IF 2DROP LEAVE THEN DUP BL C@ HEX. 1+ AGAIN ;
-: dump.num ( start num -- ) OVER + dump ;
-
-\ ------------------------------------------------------------------------------------
-\ A stack is comprised of 3 parts, [stack-pointer] [stack-last] [stack-data]
-\ The stack "bottom" is the first CELL after the stack-pointer
-\
-: (stk-ptr) ;                                   \ ( stk -- stk-ptr-addr )
-: (stk-top) CELL + ;		        	        \ ( stk -- last-cell-addr )
-
-: stk-bottom CELL DUP + + ;                     \ ( stk -- bottom )
-: stk-top (stk-top) @ ;			                \ ( stk -- last-cell-addr )
-: stk-ptr (stk-ptr) @ ;                         \ ( stk -- stk-ptr )
-: stk-reset DUP stk-bottom SWAP (stk-ptr) ! ;   \ ( stk -- )
-: stk-depth DUP stk-ptr                         \ ( stk -- depth )
-    SWAP stk-bottom - CELL / ;
-
-: stk-init 								        \ ( sz stk -- )
-    SWAP CELLS ALLOT
-    HERE OVER (stk-top) !
-    CELL ALLOT stk-reset ;
-
-: stk-over?                                     \ ( stk -- )
-    DUP stk-top OVER stk-ptr <
-    IF
-        S" Stack overflow." CT
-	    DROP RESET
-    THEN 
-    DROP ;
-
-: stk-under?                                    \ ( stk -- )
-    DUP stk-ptr OVER stk-bottom <=
-    IF
-		S" Stack empty." CT
-	     stk-reset RESET
-    THEN 
-    DROP ;
-
-: >stk DUP stk-over? (stk-ptr) TUCK @ !	        \ ( val stk -- )
-    CELL += ;
-
-: stk@ DUP stk-under? stk-ptr CELL - @ ;        \ ( stk -- val )
-
-: stk> DUP stk@ SWAP                            \ ( stk -- val )
-    (stk-ptr) CELL -= ;
-
 \ ------------------------------------------------------------------------------------
 : test-getLine \ ( fp -- addr num-read )
 	Pad SWAP 200 SWAP
 	FREADLINE \ ( addr sz fp -- num-read )
 	Pad SWAP
-	\ Pad DUP . C@ . 65 EMIT
+	Pad CT CR \ DEBUG
 ;
 
 : load 0 0 FOPEN 		\ ( filename -- ) 
@@ -756,7 +672,10 @@ HEX
 		STR.CATC
 	AGAIN ;
 
-: " ?COMPILING 0= IF I" LEAVE THEN
+: " ?COMPILING 0= IF 
+		I" LEAVE 
+	THEN
+	
 	a.CPUSH a.SLITERAL C,
 	HERE 0 C,						\ count-byte placeholder
 	BEGIN 						

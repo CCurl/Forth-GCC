@@ -71,7 +71,7 @@ void init_vm(int vm_size)
 // The data stack starts at (MEM_SZ - STACKS_SZ) and grows upwards towards the return stack
 void push(CELL val)
 {
-	trace(" push(%ld, DSP=0x%08lx)\n", val, DSP);
+	trace(" push(%ld, DSP=0x%08lx) ", val, DSP);
 	if (RSP <= DSP)
 	{
 		printf(" stack overflow!");
@@ -95,7 +95,7 @@ CELL pop()
 		return 0;
 	}
 	DSP--;
-	trace(" pop(%ld, DSP=0x%08lx)\n", *(DSP), DSP);
+	trace(" pop(%ld, DSP=0x%08lx) ", *(DSP), DSP);
 	return *(DSP);
 }
 
@@ -110,7 +110,7 @@ void rpush(CELL val)
 		isBYE = 1;
 		return;
 	}
-	trace(" rpushing %ld", val);
+	trace(" rpush %ld ", val);
 	--RSP;
 	*(RSP) = (CELL)(val);
 }
@@ -126,7 +126,7 @@ CELL rpop()
 		return PC;
 	}
 	CELL val = *(RSP);
-	trace(" rpop(%ld)", val);
+	trace(" rpop(%ld) ", val);
 	RSP++;
 	return val;
 }
