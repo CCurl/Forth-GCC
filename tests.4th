@@ -92,17 +92,17 @@ DROP
 wordsv
 
 : ttt 
-    " counting to" ct dup . "  ... " ct
+    " counting to" ct dup . bl
     0 
     begin 
         2dup < 
         if
-            " done." ct cr
+            "  done." ct cr
             2drop leave
         then 
-        >R >R 
-            1 2 3 + + drop
-        R> R>  1+ 
+        tuck >R >R 
+            50000 mod 0= if 46 emit then
+        R> R> 1+ 
     again ;
 
 1000 1000 5 * * ttt

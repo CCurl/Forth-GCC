@@ -129,9 +129,9 @@
 	THEN
 	AGAIN ; IMMEDIATE
 
-: CRLF 13 EMIT 10 EMIT ;
-: CR CRLF ;
 : BL 32 EMIT ; INLINE
+: CRLF 13 EMIT 10 EMIT ; INLINE
+: CR CRLF ; INLINE
 
 : BETWEEN				\ ( num min max -- bool )
 	2 PICK 
