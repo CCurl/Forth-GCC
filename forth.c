@@ -4,7 +4,6 @@
 #include <string.h>
 #include "Shared.h"
 #include "forth-vm.h"
-#include "functions.h"
 #include "string.h"
 #include "logger.h"
 

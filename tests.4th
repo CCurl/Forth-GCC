@@ -1,12 +1,12 @@
 \ UNIT tests
 
-CR .(HERE) 44 EMIT BL .(LAST) CR
-
+CR sys-stats
 last here
 variable th th !
 variable tl tl !
-
 : forget-these tl @ (last) ! th @ dp ! ;
+
+\ ---------------------------------------------- TESTS START HERE -----------------------------------------------------
 : mith " *made-it-to-here*" CT ;
 
 here
@@ -89,9 +89,27 @@ next-test: str.empty str.len 0 = passed? ( 30 )
 
 DROP
 
-\ ---------------------------------------------- TESTS END HERE -----------------------------------------------------
-words
+wordsv
+
+: ttt 
+    " counting to" ct dup . "  ... " ct
+    0 
+    begin 
+        2dup < 
+        if
+            " done." ct cr
+            2drop leave
+        then 
+        >R >R 
+            1 2 3 + + drop
+        R> R>  1+ 
+    again ;
+
+1000 1000 5 * * ttt
+
 20 .lastx
-test-results
+CR test-results
+
+\ ---------------------------------------------- TESTS END HERE -----------------------------------------------------
 forget-these
-.(HERE) 44 EMIT BL .(LAST) CR
+CR sys-stats
