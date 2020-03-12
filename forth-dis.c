@@ -631,7 +631,7 @@ void process_arg(char *arg)
         printf("  -i:inputFile (full or relative path)\n");
         printf("      default inputFile is forth.bin\n");
         printf("  -o:outputFile (full or relative path)\n");
-        printf("      default outputFile is forth.asm\n");
+        printf("      default outputFile is forth.lst\n");
         printf("  -t (set log level to trace)\n");
         printf("  -d (set log level to debug)\n");
         printf("  -? (prints this message)\n");
@@ -646,7 +646,7 @@ void process_arg(char *arg)
 int main (int argc, char **argv)
 {
     strcpy(input_fn, "forth.bin");
-	strcpy(output_fn, "forth.asm");
+	strcpy(output_fn, "forth.lst");
 	debug_off();
 
     for (int i = 1; i < argc; i++)

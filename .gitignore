@@ -54,3 +54,4 @@ dkms.conf
 # forth
 *.bin
 *.bak
+output.txt
