@@ -13,15 +13,6 @@ here
 : test 1 1 = if 255 drop else 254 drop then ;
 here 1- .S dump cr
 
-variable ms
-decimal 3 ms stk-init
-
-: >m ms >stk ; 
-: m> ms stk> ; 
-: m@ ms stk@ ;
-: mdepth ms stk-depth ;
-: mdrop ms stk> DROP ;
-
 variable num-tests
 variable passed
 0 num-tests ! 0 passed !
@@ -44,6 +35,41 @@ variable passed
 
 \ ---------------------------------------------- TESTS START HERE -----------------------------------------------------
 \ Stack tests ...
+
+variable ms
+decimal 20 ms stk-init
+: >m ms >stk ; 
+: m> ms stk> ; 
+: m@ ms stk@ ;
+: mdepth ms stk-depth ;
+: mdrop ms stk> DROP ;
+: m1 ms @ cell - @ ;
+: m2 ms @ 2 cells - @ ;
+: m3 ms @ 3 cells - @ ;
+: m4 ms @ 4 cells - @ ;
+: >>m 
+    1 begin 
+        2dup < 
+        if
+            2drop leave
+        then 
+        tuck >R >R 
+            >m
+        R> R> 1+ 
+    again ;
+
+: m>>
+    1 begin 
+        2dup < 
+        if
+            2drop leave
+        then 
+        tuck >R >R 
+            mdrop
+        R> R> 1+ 
+    again ;
+
+
 next-test: ( 1 ) 444 >m 555 >m mdepth 2 = passed?
 next-test: ( 2 ) m> 555 = passed?
 next-test: ( 3 ) m@ 444 = passed?

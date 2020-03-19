@@ -3,7 +3,6 @@
 if "--%1%--" == "--fc--" goto make-fc
 if "--%1%--" == "--fd--" goto make-fd
 if "--%1%--" == "--forth--" goto make-forth
-if "--%1%--" == "--bd--" goto make-bin-dump
 goto unknown
 
 :make-fc
@@ -47,15 +46,6 @@ gcc -g -o tmp %c-files%
 strip -o %output%.exe -g -S -d -X tmp.exe
 del tmp.exe
 if "--%2%--" == "--1--" forth-dis
-goto done
-
-:make-bin-dump
-set output=bin-dump
-set c-files=bin-dump.c
-set c-files=%c-files% bin-dump-main.c
-echo making %output% ...
-echo gcc -g -o %output% %c-files%
-gcc -g -o %output% %c-files%
 goto done
 
 :unknown

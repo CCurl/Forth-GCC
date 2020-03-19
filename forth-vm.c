@@ -71,13 +71,13 @@ void init_vm(int vm_size)
 // The data stack starts at (MEM_SZ - STACKS_SZ) and grows upwards towards the return stack
 void push(CELL val)
 {
-	trace(" push(%ld, DSP=0x%08lx) ", val, DSP);
+	// trace(" push(%ld, DSP=0x%08lx) ", val, DSP);
 	if (RSP <= DSP)
 	{
 		printf(" stack overflow!");
 		reset_vm();
-		_QUIT_HIT = 1;
-		isBYE = 1;
+		// _QUIT_HIT = 1;
+		// isBYE = 1;
 		return;
 	}
 	*(DSP) = (CELL)(val);
@@ -90,12 +90,12 @@ CELL pop()
 	{
 		printf(" stack underflow!");
 		reset_vm();
-		_QUIT_HIT = 1;
-		isBYE = 1;
+		// _QUIT_HIT = 1;
+		// isBYE = 1;
 		return 0;
 	}
 	DSP--;
-	trace(" pop(%ld, DSP=0x%08lx) ", *(DSP), DSP);
+	// trace(" pop(%ld, DSP=0x%08lx) ", *(DSP), DSP);
 	return *(DSP);
 }
 
@@ -106,11 +106,11 @@ void rpush(CELL val)
 	{
 		printf(" return stack overflow!");
 		reset_vm();
-		_QUIT_HIT = 1;
-		isBYE = 1;
+		// _QUIT_HIT = 1;
+		// isBYE = 1;
 		return;
 	}
-	trace(" rpush %ld ", val);
+	// trace(" rpush %ld ", val);
 	--RSP;
 	*(RSP) = (CELL)(val);
 }
@@ -121,12 +121,12 @@ CELL rpop()
 	{
 		printf(" return stack underflow! (at PC=0x%04lx)", PC-1);
 		reset_vm();
-		_QUIT_HIT = 1;
-		isBYE = 1;
+		// _QUIT_HIT = 1;
+		// isBYE = 1;
 		return PC;
 	}
 	CELL val = *(RSP);
-	trace(" rpop(%ld) ", val);
+	// trace(" rpop(%ld) ", val);
 	RSP++;
 	return val;
 }
