@@ -13,6 +13,18 @@ FILE *input_fp = NULL;
 FILE *output_fp = NULL;
 
 // ------------------------------------------------------------------------------------------
+CELL Fetch(CELL loc)
+{
+	return *(CELL *)(&the_memory[loc]);
+}
+
+// ------------------------------------------------------------------------------------------
+BYTE CFetch(CELL loc)
+{
+	return the_memory[loc];
+}
+
+// ------------------------------------------------------------------------------------------
 void dis_range(CELL start, CELL end, char *bytes)
 {
 	char x[8];
@@ -176,13 +188,13 @@ CELL dis_one(char *bytes, char *desc)
 		return CELL_SZ;
 
 	case CALL:
-		arg1 = GETAT(PC);
+		arg1 = Fetch(PC);
 		// PC += CELL_SZ;
 		// rpush(PC);
 		// PC = arg1;
-		arg2 = GETAT(arg1+1);
-		DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
-		sprintf(desc, "CALL %s (%04lx)", dp->name, arg1);
+		// arg2 = GETAT(arg1+1);
+		// DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
+		sprintf(desc, "CALL (%04lx)",  arg1);
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
 
@@ -464,40 +476,46 @@ CELL dis_one(char *bytes, char *desc)
 }
 
 // ------------------------------------------------------------------------------------------
-void dis_dict(FILE *write_to, CELL dict_addr)
+CELL dis_dict(FILE *write_to)
 {
 	char bytes[128], desc[128];
-	DICT_T *dp = (DICT_T *)&the_memory[dict_addr];
-	DICT_T *next_dp = (DICT_T *)&the_memory[dp->next];
-	CELL addr = dict_addr;
+    char *name = (char *)&(the_memory[PC+10]);
 
-	if (dp->next == 0)
-	{
-		sprintf(bytes, "%04lx:", addr);
-		dis_start(addr, CELL_SZ, bytes);
-		fprintf(write_to, "%-32s ; End.\n", bytes);
-		return;
-	}
+	// Prev
+	sprintf(bytes, ";\n%04lx:", PC);
+	dis_start(PC, CELL_SZ, bytes);
+	sprintf(desc, "prev: %04lx - %s", Fetch(PC), name);
+	fprintf(write_to, "%-34s ; %s\n", bytes, desc);
+	fflush(write_to);
+	PC += CELL_SZ;
 
 	// Next
-	sprintf(bytes, "%04lx:", addr);
-	dis_start(addr, CELL_SZ, bytes);
-	sprintf(desc, "%s - (next: %04lx %s)", dp->name, dp->next, (next_dp->next > 0) ? next_dp->name : "<end>");
+	sprintf(bytes, "%04lx:", PC);
+    CELL next = Fetch(PC);
+	dis_start(PC, CELL_SZ, bytes);
+	sprintf(desc, "next: %04lx", next);
 	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
-	addr += CELL_SZ;
+	fflush(write_to);
+	PC += CELL_SZ;
 
-	// XT, Flags
-	sprintf(bytes, "%04lx:", addr);
-	dis_start(addr, CELL_SZ+1, bytes);
-	sprintf(desc, "XT=%04lx, flags=%02x", dp->XT, dp->flags);
+	// Flags. Length
+	sprintf(bytes, "%04lx:", PC);
+	dis_start(PC, 1, bytes);
+	sprintf(desc, "flags: %02d", CFetch(PC++));
 	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
-	addr += CELL_SZ+1;
+	fflush(write_to);
 
 	// Name
-	sprintf(bytes, "%04lx: %02x", addr++, dp->len);
-	dis_start(addr, dp->len+1, bytes);
-	sprintf(desc, "%d, %s", (int)dp->len, dp->name);
-	fprintf(write_to, "%-32s ; %s\n;\n", bytes, desc);
+    int len = CFetch(PC);
+	sprintf(bytes, "%04lx:", PC);
+	dis_start(PC, len+2, bytes);
+	sprintf(desc, "%d, %s", len, name);
+	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
+	fflush(write_to);
+
+	PC += (len + 2);
+
+    return next;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -528,28 +546,20 @@ void dis_vm(FILE *write_to)
 		PC += 0x10;
 	}
 
-	fprintf(write_to, ";\n", bytes);
-	fflush(write_to);
-
 	// Code
 	PC = ORG;
 	while (PC < here)
 	{
-		dis_one(bytes, desc);
-		fprintf(write_to, "%-32s ; %s\n", bytes, desc);
-		fflush(write_to);
-	}
-
-	fprintf(write_to, ";\n; End of code, Dictionary:\n;\n");
-
-	// Dictionary
-	PC = GETAT(ADDR_LAST);
-	while (PC > 0)
-	{
-		dis_dict(write_to, PC);
-		fflush(write_to);
-		PC = GETAT(PC);
-	}
+    	CELL next = dis_dict(write_to);
+		next = (next == 0) ? here : next;
+        while (PC < next)
+        {
+            dis_one(bytes, desc);
+            fprintf(write_to, "%-32s ; %s\n", bytes, desc);
+            fflush(write_to);
+        }
+		PC = next;
+    }
 }
 
 // *********************************************************************
@@ -631,7 +641,7 @@ void process_arg(char *arg)
         printf("  -i:inputFile (full or relative path)\n");
         printf("      default inputFile is forth.bin\n");
         printf("  -o:outputFile (full or relative path)\n");
-        printf("      default outputFile is forth.lst\n");
+        printf("      default outputFile is forth.asm\n");
         printf("  -t (set log level to trace)\n");
         printf("  -d (set log level to debug)\n");
         printf("  -? (prints this message)\n");
@@ -646,7 +656,7 @@ void process_arg(char *arg)
 int main (int argc, char **argv)
 {
     strcpy(input_fn, "forth.bin");
-	strcpy(output_fn, "forth.lst");
+	strcpy(output_fn, "forth.asm");
 	debug_off();
 
     for (int i = 1; i < argc; i++)
