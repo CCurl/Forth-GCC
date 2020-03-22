@@ -70,9 +70,8 @@
 : NIP   SWAP DROP ; INLINE
 : ROT   >R SWAP R> SWAP ;
 : -ROT  SWAP >R SWAP R> ;
-: ?DUP DUP IF DUP THEN ;
 
-: += ( addr n -- ) OVER @ + SWAP ! ;
+: += OVER @ + SWAP ! ;   \ ( addr n -- )
 : -= OVER @   SWAP - SWAP ! ;   \ ( addr n -- )
 
 : ++ 1 += ;   \ ( addr -- )
@@ -105,7 +104,7 @@
 : WHILE ?COMPILING IF a.CPUSH a.JMPNZ C, , THEN ; IMMEDIATE
 : UNTIL ?COMPILING IF a.CPUSH a.JMPZ  C, , THEN ; IMMEDIATE
 
-: TYPE \ ( addr count -- ) 
+: TYPE			\ ( addr count -- ) 
     BEGIN
 	    DUP 0=
 		IF
@@ -133,19 +132,19 @@
 : CR CRLF ;
 : BL 32 EMIT ; INLINE
 
-: BETWEEN				\ ( num min max -- bool )
+: BETWEEN											\ ( num min max -- bool )
 	2 PICK 
 	< IF 2DROP FALSE LEAVE THEN
 	< 0=
 ;
 
-: (tmp) [ a.PUSH HERE 1 + CELL + , ] ; 0 ,
-: tmp-init LAST (tmp) ! ;				\ ( -- )
+: (tmp) [ a.PUSH HERE 1 + CELL + , ] ; 0 , a.RET
+: tmp-init LAST (tmp) ! ;							\ ( -- )
 : tmp-cur (tmp) @ ;
-: tmp-alloc (tmp) TUCK @ SWAP - SWAP ! tmp-cur ; \ ( size -- addr )
+: tmp-alloc (tmp) TUCK @ SWAP - SWAP ! tmp-cur ;	\ ( size -- addr )
 
 : PAD tmp-init 200 tmp-alloc ;
-: getInput PAD 128 0 FREADLINE DROP PAD ; \ ( -- addr )
+: getInput PAD 128 0 FREADLINE DROP PAD ;			\ ( -- addr )
 
 : skipWS               \ ( addr1 -- addr2 )
 	BEGIN
@@ -159,8 +158,9 @@
 	AGAIN
 ;
 
-\ NB: this word assumes that leading WS has already been skipped.
-: getOneWord \ ( addr1 -- word-addr addr2 )
+: getOneWord							\ ( addr1 -- word-addr addr2 )
+	\ NB: this word assumes that 
+	\ leading WS has already been skipped.
 	DUP >R >R
 	BEGIN
 		R@ C@ 32 > IF
@@ -192,7 +192,7 @@
 
 : DICTP>NAME 1+ @ DICT>NAME ;
 
-: XT.GetDICTP \ ( XT -- dictp )
+: XT.GetDICTP 						\ ( XT -- dictp )
 	DUP C@ a.CPUSH a.DICTP = 
 	IF
 		1+ @
@@ -208,7 +208,7 @@
 : DICT.GetIMMEDIATE DICT.GetFLAGS FLAGS.ISIMMEDIATE? ;
 : DICT.GetINLINE    DICT.GetFLAGS FLAGS.ISINLINE? ;
 
-: findInDict \ ( addr -- XT IMM bool )
+: findInDict		\ ( addr -- XT IMM bool )
 	LAST >R
 	BEGIN
 		R@ DUP
@@ -228,7 +228,7 @@
 
 : isHEX? BASE C@ 16 = ;
 
-: isNumChar? \ ( ch -- val bool )
+: isNumChar?		\ ( ch -- val bool )
 	DUP 48 57 BETWEEN IF 48 - 1 LEAVE THEN
 	isHEX? 
 	IF
@@ -241,7 +241,7 @@
 : NEGATE 0 SWAP - ;
 : ABS DUP 0 < IF NEGATE THEN ;
 
-: isNumber? \ ( addr -- num bool )
+: isNumber?			\ ( addr -- num bool )
 	\ find out if it is negative
 	DUP C@ 45 = DUP isNeg C! IF 1+ THEN
 	
@@ -268,11 +268,11 @@
 
 : MOD 2DUP / * - ;
 
-: /MOD \ ( num1 num2 -- num3 mod )
+: /MOD			\ ( num1 num2 -- num3 mod )
 	2DUP / >R R@ * - R> SWAP
 ;
 
-: (.)  \ ( num -- )
+: (.)			\ ( num -- )
 	DUP 0 = 
 	IF
 		DROP 48 EMIT LEAVE
@@ -354,10 +354,9 @@ HEX
         THEN
     AGAIN ;
 
-: EXECUTE RDROP >R ; \ ( addr -- )
+: EXECUTE RDROP >R ;		\ ( addr -- )
 
-\ ( addr1 -- addr2 )
-: find.ret
+: find.ret			\ ( addr1 -- addr2 )
 	BEGIN
 		DUP C@ 
 		a.CPUSH a.RET =
@@ -368,7 +367,7 @@ HEX
 	AGAIN
 ;
 
-: (inline) \ ( from to -- )
+: (inline)		\ ( from to -- )
 	2DUP < IF SWAP THEN
 	BEGIN
 		DUP C@ C,
@@ -384,7 +383,7 @@ HEX
 	(inline)
 ;
 
-: Copy.INLINE \ ( XT -- )
+: Copy.INLINE		\ ( XT -- )
 	\ Skip over the DICTP
 	DUP C@ a.CPUSH a.DICTP =
 	IF 
@@ -405,13 +404,13 @@ HEX
 	NIP
 ;
 
-: cstr, \ ( start -- )
+: cstr,			\ ( start -- )
 	DUP C@ 
 	OVER + 1+ 1+
 	(inline)
 ;
 
-: [COMPILE] \ ( XT flags -- )
+: [COMPILE]		\ ( XT flags -- )
 	FLAGS.ISINLINE? 
 	IF
 		Copy.INLINE
@@ -420,7 +419,7 @@ HEX
 	THEN
 ;
 
-: executeWord  \ ( addr -- )
+: executeWord		\ ( addr -- )
 	>R R@ findInDict \ ( addr -- XT FLAGS found )
 	IF
 		RDROP
@@ -475,9 +474,9 @@ HEX
 	THEN
 ; 
 
-: LoadingFromFile? INPUT-FP @ ; \ ( -- bool ) 
+: LoadingFromFile? INPUT-FP @ ;		\ ( -- bool ) 
 
-: getLineFromFile \ ( addr sz fp -- )
+: getLineFromFile		\ ( addr sz fp -- )
 	\ DROP 0 LEAVE
 	200 INPUT-FP @ FREADLINE 0 =
 	IF 
@@ -485,7 +484,7 @@ HEX
 	THEN
 ;
 
-: getLine \ ( -- addr )
+: getLine			\ ( -- addr )
 	\ tmp-init 200 tmp-alloc (Pad) !
 	0 Pad DUP 1+ >IN ! C!
 
@@ -531,7 +530,7 @@ HEX
 	AGAIN
 ;
 
-: strcpy2c \ ( from to -- ) from is NOT counted, to is to get count byte
+: strcpy2c			\ ( from to -- ) from is NOT counted, to is to get count byte
 	\ 65 EMIT OVER . DUP . \ DEBUG
 	DUP >R					\ from to
 	0 OVER C!				\ from to (init count)
@@ -550,7 +549,7 @@ HEX
 	AGAIN
 ;
 
-: Define-Word \ ( addr -- )
+: Define-Word		\ ( addr -- )
 	LAST OVER strlen 2 CELLS 3 + + - 
 	DUP >R >R					\ Save new LAST
 	LAST R@  !  R> CELL + >R	\ NEXT
@@ -560,7 +559,7 @@ HEX
 	R> (LAST) !
 ;
 
-: CREATE-NAME \ ( -- )
+: CREATE-NAME		\ ( -- )
 	>IN @ skipWS >IN ! 
 	>IN @ C@ 
 	IF
@@ -597,8 +596,8 @@ HEX
 
 : ALLOT HERE + DP ! ;
 
-: ? @ . ; \ ( addr -- )
-: C? C@ . ; \ ( addr -- )
+: ? @ . ;		\ ( addr -- )
+: C? C@ . ;		\ ( addr -- )
 
 : FREE LAST HERE - ;
 : FREE? FREE (.) S"  bytes free." CT ;
@@ -615,11 +614,11 @@ HEX
 : main STATE @ 99 = IF STATE OFF S" Hello." CT THEN mainLoop ;
 
 \ ------------------------------------------------------------------------------------
-: test-getLine \ ( fp -- addr num-read )
+: file-getLine		\ ( fp -- addr num-read )
 	Pad SWAP 200 SWAP
 	FREADLINE \ ( addr sz fp -- num-read )
 	Pad SWAP
-	Pad CT CR \ DEBUG
+	\ Pad CT CR \ DEBUG
 ;
 
 : load 0 0 FOPEN 		\ ( filename -- ) 
@@ -628,7 +627,7 @@ HEX
 	THEN
 	INPUT-FP !
 	BEGIN
-		INPUT-FP @ test-getLine
+		INPUT-FP @ file-getLine
 		IF
 			1+ >IN !
 			\ >IN @ C@ .
@@ -642,22 +641,22 @@ HEX
 	AGAIN ;
 
 \ ******************************************************************************************
-: STR.EMPTY ( addr -- addr ) 0 OVER ! ; INLINE
+: STR.EMPTY 0 OVER ! ; INLINE		\ ( addr -- addr )
 
-: STR.LEN ( addr -- addr len ) DUP C@ ; INLINE
+: STR.LEN DUP C@ ; INLINE		\ ( addr -- addr len )
 
-: STR.CATC   ( addr ch -- addr )
+: STR.CATC			\ ( addr ch -- addr )
     OVER
     DUP C++        \ increment len
     STR.LEN + 
     0 OVER 1+ C!   \ null-terminate
     C! ;
 
-: STR.NULLTERM ( addr -- addr ) DUP STR.LEN + 1+ 0 SWAP C! ;
+: STR.NULLTERM DUP STR.LEN + 1+ 0 SWAP C! ;			\ ( addr -- addr )
 
 \ ******************************************************************************************
 \ String literals
-: I" 				 ( -- addr )
+: I" 				 \ ( -- addr )
     HERE 100 + STR.EMPTY
 	BEGIN 						
 		>IN @ C@		        \ ( 1001 ch )

@@ -306,17 +306,6 @@ char *ParseWord(char *word, char *line)
 		return line;
 	}
 
-	if (string_equals(word, "("))
-	{
-		while (true)
-		{
-			BYTE ch = *(line++);
-			if ((ch == ')') || (ch == NULL))
-				break;
-		}
-		return line;
-	}
-
 	// These words are only for : definitions
 	if (STATE == 1)
 	{

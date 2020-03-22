@@ -1,3 +1,4 @@
+: ?DUP DUP IF DUP THEN ;
 : (const) a.CPUSH a.PUSH C, , a.CPUSH a.RET C, ;
 : CONSTANT CREATE-NAME (const) ; INLINE
 : VARIABLE CREATE-NAME HERE 2 + CELL + (const) 0 , ; INLINE
