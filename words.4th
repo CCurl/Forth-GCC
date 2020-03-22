@@ -43,9 +43,10 @@
 : stk-reset DUP stk-bottom SWAP (stk-ptr) ! ;   \ ( stk -- )
 : stk-depth DUP stk-ptr                         \ ( stk -- depth )
     SWAP stk-bottom - CELL / ;
+: stk-pick @ swap cells - @ ;                   \ ( n1 stk -- n2 )
 
 : stk-init 								        \ ( sz stk -- )
-    SWAP CELLS ALLOT
+    SWAP 1+ CELLS ALLOT
     HERE OVER (stk-top) !
     CELL ALLOT stk-reset ;
 
@@ -72,4 +73,39 @@
 
 : stk> DUP stk@ SWAP                            \ ( stk -- val )
     (stk-ptr) CELL -= ;
-	
+
+\ --------------------------------------------------------------------------------
+variable ps
+decimal 24 ps stk-init
+: >p ps >stk ; 
+: p> ps stk> ; 
+: p@ ps stk@ ;
+: pdepth ps stk-depth ;
+: pdrop ps stk> DROP ;
+: ppick ps @ swap cells - @ ;
+: pclear ps stk-reset ;
+: p1 1 ps stk-pick ;
+: p2 2 ps stk-pick ;
+: p3 3 ps stk-pick ;
+: p4 4 ps stk-pick ;
+: p5 5 ps stk-pick ;
+: >>p
+    1 begin 
+        2dup < if 2drop leave then 
+        >R >R 
+            >p
+        R> R> 1+ 
+    again ;
+: p>>
+    1 begin 
+        2dup < if 2drop leave then 
+        >R >R 
+            pdrop
+        R> R> 1+ 
+    again ;
+
+\ --------------------------------------------------------------------------------
+\ very rudimentary floating point division	
+variable mb
+100000 mb !
+: m/ over mb @ * over / -rot / . mb @ mod 46 emit (.) ;

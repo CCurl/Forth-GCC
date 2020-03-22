@@ -3,7 +3,6 @@
 if "--%1%--" == "--fc--" goto make-fc
 if "--%1%--" == "--fd--" goto make-fd
 if "--%1%--" == "--forth--" goto make-forth
-if "--%1%--" == "--bd--" goto make-bin-dump
 if "--%1%--" == "--nc--" goto make-nc
 if "--%1%--" == "--nd--" goto make-nd
 goto unknown
@@ -80,20 +79,13 @@ del tmp.exe
 if "--%2%--" == "--1--" newfd
 goto done
 
-:make-bin-dump
-set output=bin-dump
-set c-files=bin-dump.c
-set c-files=%c-files% bin-dump-main.c
-echo making %output% ...
-echo gcc -g -o %output% %c-files%
-gcc -g -o %output% %c-files%
-goto done
-
 :unknown
 echo Unknown make. I know how to make these:
 echo.
 echo    fc - makes forth-compiler.exe
+echo    nc - makes forth-compiler.exe
 echo    forth - makes forth.exe (if arg2=1 it then runs forth.exe)
-echo    bd - makes bin-dump.exe
+echo    fd - makes forth-dis.exe
+echo    nd - makes forth-dis.exe
 
 :done
