@@ -7,8 +7,6 @@ variable tl tl !
 : forget-these tl @ (last) ! th @ dp ! ;
 
 \ ---------------------------------------------- TESTS START HERE -----------------------------------------------------
-: mith " *made-it-to-here*" CT ;
-
 here
 : test 1 1 = if 255 drop else 254 drop then ;
 here 1- .S dump cr
@@ -115,7 +113,32 @@ next-test: str.empty str.len 0 = passed? ( 30 )
 
 DROP
 
-wordsv
+\ Testing the parameter stack stuff
+: p= = passed? ;
+
+: t1 3 >>p
+    next-test: p1 77 p= \ 31
+    next-test: p2 88 p= \ 32
+    next-test: p3 99 p= \ 33
+    3 p>> ;
+
+: t2 3 >>p
+    77 88 99 t1
+    next-test: p1 44 p= \ 34
+    next-test: p2 55 p= \ 35
+    next-test: p3 66 p= \ 36
+    3 p>> ;
+
+: t3 3 >>p
+    44 55 66 t2
+    next-test: p1 11 p= \ 37
+    next-test: p2 22 p= \ 38
+    next-test: p3 33 p= \ 39
+    3 p>> ;
+
+11 22 33 t3
+
+\ wordsv
 
 : ttt 
     " counting to" ct dup . bl
@@ -133,7 +156,7 @@ wordsv
 
 1000 1000 5 * * ttt
 
-20 .lastx
+\ 20 .lastx
 CR test-results
 
 \ ---------------------------------------------- TESTS END HERE -----------------------------------------------------

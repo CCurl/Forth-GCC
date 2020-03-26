@@ -57,19 +57,21 @@
 : MEM_SZ (MEM_K) @ 1024 * ;
 256 (MEM_K) !
 
+: R@ R> DUP >R ; INLINE
+: RDROP R> DROP   ; INLINE
+
+: 2DUP  OVER OVER ; INLINE
+: 2DROP DROP DROP ; INLINE
+: TUCK  SWAP OVER ; INLINE
+: NIP   SWAP DROP ; INLINE
+: ROT   >R SWAP R> SWAP ; INLINE
+: -ROT  SWAP >R SWAP R> ; INLINE
+
 : 1+ 1 + ; INLINE
 : 1- 1 - ; INLINE
 
 : 2* 2 * ; INLINE 
 : 2/ 2 / ; INLINE
-
-: R@ R> DUP >R ; INLINE
-
-: RDROP R> DROP   ; INLINE
-: TUCK  SWAP OVER ; INLINE
-: NIP   SWAP DROP ; INLINE
-: ROT   >R SWAP R> SWAP ;
-: -ROT  SWAP >R SWAP R> ;
 
 : += OVER @ + SWAP ! ;   \ ( addr n -- )
 : -= OVER @   SWAP - SWAP ! ;   \ ( addr n -- )
@@ -92,10 +94,6 @@
 : FALSE 0 ; INLINE
 : NOT 0 = ; INLINE
 
-: 2DUP  OVER OVER ; INLINE
-: 2DROP DROP DROP ; INLINE
-
-: COUNT DUP 1+ SWAP C@ ;		\ ( addr1 --  addr2 num )
 
 : LEAVE ?COMPILING IF a.CPUSH a.RET C, THEN ; IMMEDIATE
 
@@ -104,7 +102,9 @@
 : WHILE ?COMPILING IF a.CPUSH a.JMPNZ C, , THEN ; IMMEDIATE
 : UNTIL ?COMPILING IF a.CPUSH a.JMPZ  C, , THEN ; IMMEDIATE
 
-: TYPE			\ ( addr count -- ) 
+: COUNT DUP 1+ SWAP C@ ;		\ ( addr1 --  addr2 num )
+
+: TYPE							\ ( addr count -- ) 
     BEGIN
 	    DUP 0=
 		IF
@@ -146,7 +146,7 @@
 : PAD tmp-init 200 tmp-alloc ;
 : getInput PAD 128 0 FREADLINE DROP PAD ;			\ ( -- addr )
 
-: skipWS               \ ( addr1 -- addr2 )
+: skipWS               								\ ( addr1 -- addr2 )
 	BEGIN
 		DUP C@ DUP
 		IF
@@ -158,7 +158,7 @@
 	AGAIN
 ;
 
-: getOneWord							\ ( addr1 -- word-addr addr2 )
+: getOneWord										\ ( addr1 -- word-addr addr2 )
 	\ NB: this word assumes that 
 	\ leading WS has already been skipped.
 	DUP >R >R
@@ -208,7 +208,7 @@
 : DICT.GetIMMEDIATE DICT.GetFLAGS FLAGS.ISIMMEDIATE? ;
 : DICT.GetINLINE    DICT.GetFLAGS FLAGS.ISINLINE? ;
 
-: findInDict		\ ( addr -- XT IMM bool )
+: findInDict						\ ( addr -- XT IMM bool )
 	LAST >R
 	BEGIN
 		R@ DUP
@@ -228,7 +228,7 @@
 
 : isHEX? BASE C@ 16 = ;
 
-: isNumChar?		\ ( ch -- val bool )
+: isNumChar?						\ ( ch -- val bool )
 	DUP 48 57 BETWEEN IF 48 - 1 LEAVE THEN
 	isHEX? 
 	IF
@@ -241,7 +241,7 @@
 : NEGATE 0 SWAP - ;
 : ABS DUP 0 < IF NEGATE THEN ;
 
-: isNumber?			\ ( addr -- num bool )
+: isNumber?							\ ( addr -- num bool )
 	\ find out if it is negative
 	DUP C@ 45 = DUP isNeg C! IF 1+ THEN
 	

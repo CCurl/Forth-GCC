@@ -75,20 +75,30 @@
     (stk-ptr) CELL -= ;
 
 \ --------------------------------------------------------------------------------
+\ -- Parameter stack words
+\ --------------------------------------------------------------------------------
 variable ps
-decimal 24 ps stk-init
+decimal 64 ps stk-init
 : >p ps >stk ; 
 : p> ps stk> ; 
 : p@ ps stk@ ;
 : pdepth ps stk-depth ;
 : pdrop ps stk> DROP ;
-: ppick ps @ swap cells - @ ;
 : pclear ps stk-reset ;
-: p1 1 ps stk-pick ;
-: p2 2 ps stk-pick ;
-: p3 3 ps stk-pick ;
-: p4 4 ps stk-pick ;
-: p5 5 ps stk-pick ;
+: (p) ps @ swap cells - ;
+: ppick (p) @ ;
+: (p1) 1 (p) ;
+: (p2) 2 (p) ;
+: (p3) 3 (p) ;
+: (p4) 4 (p) ;
+: (p5) 5 (p) ;
+: (p6) 6 (p) ;
+: p1 (p1) @ ;
+: p2 (p2) @ ;
+: p3 (p3) @ ;
+: p4 (p4) @ ;
+: p5 (p5) @ ;
+: p6 (p6) @ ;
 : >>p
     1 begin 
         2dup < if 2drop leave then 
