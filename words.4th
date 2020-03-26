@@ -12,10 +12,48 @@
         SWAP 
     THEN 
     BEGIN 
+        2DUP <
+        IF 2DROP LEAVE 
+        THEN 
+        DUP BL C@ HEX. 1+ 
+    AGAIN ;
+
+: dump-n ( start num -- ) 
+    OVER + 1-
+    CR 2DUP < 
+    IF 
+        SWAP 
+    THEN 
+    BEGIN 
         2DUP < 
         IF 2DROP LEAVE 
         THEN 
         DUP BL C@ HEX. 1+ 
+    AGAIN ;
+
+: dump-w ( start end -- ) 
+    CR 2DUP < 
+    IF 
+        SWAP 
+    THEN 
+    BEGIN 
+        2DUP < 
+        IF 2DROP LEAVE 
+        THEN 
+        DUP BL @ HEX. CELL + 
+    AGAIN ;
+
+: dump-nw ( start num -- ) 
+    CELLS OVER +
+    CR 2DUP < 
+    IF 
+        SWAP 
+    THEN 
+    BEGIN 
+        2DUP < 
+        IF 2DROP LEAVE 
+        THEN 
+        DUP BL @ HEX. CELL + 
     AGAIN ;
 
 : dump.num ( start num -- ) OVER + dump ;
@@ -31,8 +69,8 @@
    THEN ;
 
 \ ------------------------------------------------------------------------------------
-\ A stack is comprised of 3 parts, [stack-pointer] [stack-last] [stack-data]
-\ The stack "bottom" is the first CELL after the stack-pointer
+\ A stack is comprised of 3 parts, [stack-pointer] [stack-top-pointer] [stack-data]
+\ The stack "bottom" is the first CELL after the (stack-top) pointer
 \
 : (stk-ptr) ;                                   \ ( stk -- stk-ptr-addr )
 : (stk-top) CELL + ;		        	        \ ( stk -- last-cell-addr )
@@ -51,7 +89,7 @@
     CELL ALLOT stk-reset ;
 
 : stk-over?                                     \ ( stk -- )
-    DUP stk-top OVER stk-ptr <
+    DUP stk-top OVER stk-ptr <=
     IF
         " Stack overflow." CT
 	    DROP RESET
@@ -115,7 +153,15 @@ decimal 64 ps stk-init
     again ;
 
 \ --------------------------------------------------------------------------------
-\ very rudimentary floating point division	
-variable mb
-100000 mb !
-: m/ over mb @ * over / -rot / . mb @ mod 46 emit (.) ;
+\ POSIT numbers - aka- floating point stuff - http://www.johngustafson.net/pdfs/BeatingFloatingPoint.pdf
+\ a POSIT number looks like this:
+\ sign(1 bit)regime(k bits)exponent(n bits)fraction(f bits)
+: pow-2 ( n1 -- n2 )
+	1 swap 0 begin
+	2dup = if 2drop leave then
+	>R >R
+	2 *
+	R> R> 1+ again ;
+
+: useed ( es -- n )
+	pow-2 pow-2 ;
