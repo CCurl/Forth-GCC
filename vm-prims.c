@@ -5,6 +5,11 @@
 #include "logger.h"
 #include "forth-vm.h"
 
+static inline CELL GETTOS() { return *(DSP-1); }
+static inline CELL GET2ND() { return *(DSP-2); }
+static inline void SETTOS(CELL val) { *(DSP-1) = (val); }
+static inline void SET2ND(CELL val) { *(DSP-2) = (val); }
+
 void (*vm_prims[257])();
 
 CELL arg1, arg2, arg3;
@@ -18,6 +23,70 @@ extern CELL *dsp_init;
 extern bool isBYE;
 extern BYTE *the_memory;
 extern int __DEBUG__;
+extern int _QUIT_HIT;
+
+// The data stack starts at (MEM_SZ - STACKS_SZ) and grows upwards towards the return stack
+void push(CELL val)
+{
+	// trace(" push(%ld, DSP=0x%08lx) ", val, DSP);
+	if (RSP <= DSP)
+	{
+		printf(" stack overflow!");
+		reset_vm();
+		// _QUIT_HIT = 1;
+		// isBYE = 1;
+		return;
+	}
+	*(DSP) = (CELL)(val);
+	++DSP;
+}
+
+CELL pop() 
+{
+	if (DSP <= dsp_init)
+	{
+		printf(" stack underflow!");
+		reset_vm();
+		// _QUIT_HIT = 1;
+		// isBYE = 1;
+		return 0;
+	}
+	DSP--;
+	// trace(" pop(%ld, DSP=0x%08lx) ", *(DSP), DSP);
+	return *(DSP);
+}
+
+// The return stack starts at (MEM_SZ) and grows downwards towards the data stack
+void rpush(CELL val)
+{
+	if (RSP <= DSP)
+	{
+		printf(" return stack overflow!");
+		reset_vm();
+		// _QUIT_HIT = 1;
+		// isBYE = 1;
+		return;
+	}
+	// trace(" rpush %ld ", val);
+	--RSP;
+	*(RSP) = (CELL)(val);
+}
+
+CELL rpop()
+{
+	if (RSP >= rsp_init)
+	{
+		printf(" return stack underflow! (at PC=0x%04lx)", PC-1);
+		reset_vm();
+		// _QUIT_HIT = 1;
+		// isBYE = 1;
+		return PC;
+	}
+	CELL val = *(RSP);
+	// trace(" rpop(%ld) ", val);
+	RSP++;
+	return val;
+}
 
 // LITERAL - Doeswhat
 void prim_LITERAL()
@@ -440,6 +509,62 @@ void prim_COMPAREI()
 	}
 }
 
+// User stacks look like this:
+// [SP][last-valid-SP][data]
+void prim_USINIT()
+{
+	arg1 = pop();		// User Stack start address
+	arg2 = pop();		// size
+	trace("USTACKINIT stack [0x%04lx], size=%ld\n", arg1, arg2);
+	CELL firstOK = arg1 + (2*CELL_SZ);
+	CELL lastOK = firstOK + ((arg2-1)*CELL_SZ);
+	SETAT(arg1, firstOK);
+	SETAT(arg1 + CELL_SZ, lastOK);
+	push(lastOK + CELL_SZ);
+}
+
+void prim_USPUSH()
+{
+	arg1 = pop();		// User Stack start address
+	arg2 = pop();		// Val
+	trace("UPUSH %d to stack [0x%04lx]\n", arg2, arg1);
+	CELL sp = GETAT(arg1);
+	CELL firstOK = arg1 + (2 * CELL_SZ);
+	CELL lastOK = GETAT(arg1 + CELL_SZ);
+	if (sp <= lastOK)
+	{
+		SETAT(sp, arg2);
+		sp = sp + CELL_SZ;
+		SETAT(arg1, sp);
+	}
+	else
+	{
+		printf(" user stack [0x%04lx] overflow. (SP=0x%04lx, range=%04lx:%04lx)", arg1, sp, firstOK, lastOK);
+		reset_vm();
+	}
+}
+
+void prim_USPOP()
+{
+	arg1 = pop();		// User Stack start address
+	CELL sp = GETAT(arg1);
+	CELL firstOK = arg1 + (2 * CELL_SZ);
+	CELL lastOK = GETAT(arg1 + CELL_SZ);
+	trace("UPOP from stack [0x%04lx]\n", arg1);
+	if (firstOK < sp)
+	{
+		sp = sp - CELL_SZ;
+		arg2 = GETAT(sp);
+		SETAT(arg1, sp);
+		push(arg2);
+	}
+	else
+	{
+		printf(" user stack [0x%04lx] underflow. (SP=0x%04lx, range=%04lx:%04lx)", arg1, sp, firstOK, lastOK);
+		reset_vm();
+	}
+}
+
 // BREAK - Doeswhat
 void prim_BREAK()
 {
@@ -502,6 +627,9 @@ void init_vm_vectors()
 	vm_prims[38] = prim_DEPTH;
 	vm_prims[39] = prim_GETCH;
 	vm_prims[40] = prim_COMPAREI;
+	vm_prims[41] = prim_USINIT;
+	vm_prims[42] = prim_USPUSH;
+	vm_prims[43] = prim_USPOP;
 	// vm_prims[253] = prim_BREAK;
 	// vm_prims[254] = prim_RESET;
 	// vm_prims[255] = prim_BYE;

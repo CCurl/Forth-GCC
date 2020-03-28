@@ -9,10 +9,10 @@ variable tl tl !
 \ ------------- START OF SANDBOX -------------
 
 \ posit math ...
-\ in this implementation, posit numbers are 16-bit things
+\ in this implementation, posit numbers are 24-bit things
 \ s=sign-bit, r=regime-bit, e=exp-bit, f-fraction-bit
-\ es=3, nbits=16
-\ srrrxeeeffffffff
+\ es=4, nbits=24
+\ srrrxeeeffffffffffffffffffff
 \ e.g. - 0000110111011101 (0x0DDD)
 \ 0 0001 101 11011101
 \ s rrrr eee ffffffff
@@ -20,78 +20,153 @@ variable tl tl !
 \ = 256^(-3) * 2^5 * (1 + 221/256)
 \ = 
 
+\ s eeeeeeee fffffffffffffffffffffff
+\ 0 00000000 00000000000000000000000
+
+
 decimal 
-16 constant nbits
-3 constant es
+variable (nbits) 0 (nbits) !
+variable (es) 0 (es) !
+variable (useed) 0 (useed) !
 
-hex
-: pow-2 ( n1 -- n2 )
-    1 swap 0 begin
-    2dup = if 2drop leave then
-    >R >R
-    2 *
-    R> R> 1+ again ;
+: nbits (nbits) @ ;
+: es (es) @ ;
 
-: useed ( -- n )
-    es pow-2 pow-2 ;
+: useed (useed) @ ;
 
-: sign-bit ( n -- n s )
-    dup nbits 1- pow-2 and 0= 0= 
-    dup if 
-        swap negate swap
-    then
+: posit-init 
+    (es) !
+    (nbits) !
+    es pow-2 pow-2 (useed) !
     ;
 
-: regime ( n -- n r )
-    dup 7800 and 800 / ;
-	
-: exp ( n -- n e )
-    dup 700 and 100 / ;
-	
-: fraction ( n -- n f )
-    dup ff and ;
+16 3 posit-init
 
-: x 2/ 2dup and 0= 0= ;
-variable fb
+variable p-mask
+: p-mask? p-mask @ binary. ;
+: p-mask-reset nbits 1- pow-2 p-mask ! ;
+
+\ extracts the current bit, shifts mask bit right 1 position
+: p-sub     \ ( n -- n 0|1 )
+    p-mask @ dup 2/ p-mask !
+    over and 0= 0= ;
+
+: sign-bit ( n -- n s )
+    p-mask-reset
+    p-sub ;
+
+\ *** regime ... aka - run-length
+\ **************************************
+variable first-bit
 variable rl
-
-\ if first bit=0, rlen is negative
-\ else rlen is positive
-: run-length ( n -- rlen )
+: regime ( n -- n r )
     1 rl ! 
-    nbits 1- pow-2
-    x fb !
     begin
-        x fb @ =
+        p-sub first-bit @ =
         if 
             rl ++
         else
-            rl @ fb @ 0= if
-                negate
-            then
-            nip
+            rl @
             leave
         then
     again ;
 
+: exp \ ( n -- n e )
+    0
+    es 0
+    begin
+        2dup = if 
+            2drop
+            leave
+        then
+        >R >R
+        >R p-sub R> 2* +
+        R> R>
+        1+
+    again
+    ;
 
-: >posit sign-bit swap
-    regime swap
-    exp swap
-    fraction nip ;
+: fraction \ ( n -- n f )
+    0
+    begin
+        p-mask @ 0= if
+            leave
+        then
+        >R p-sub R> 2* +
+    again ;
 
-\ DDD
-\ 0 0001 101 10111011
-\ s rrrr eee ffffffff
+: >posit            \ ( n -- sign first-bit regime exp fraction )
+    sign-bit >R
+    p-sub first-bit !
+    first-bit @ >R
+    regime >R
+    exp >R
+    fraction >R 
+    DROP R> R> R> R> R> ;
 
-: b. base c@ swap binary . base c! ;
-hex 3867 >posit b. b. b. b. cr
-hex 0DDD >posit b. b. b. b. cr
-hex -DDD >posit b. b. b. b. cr
+: posit? dup >posit 
+    base c@ >R
+    hex .s
+    binary .s 
+    R> base c! 
+    2drop 2drop 2drop ;
+
+\ s Fr eee ff ffff ffff
+\ 0 01 110 00 0110 0111 (3867)
+\ 0 0 1  6           67
+CR hex 3867 posit?
+
+\ s Frrr eee ffffffff
+\ 0 0001 101 1101 1101 (DDD)
+\ 0 0  3   5        DD (hex)
+CR hex 0DDD posit?
+
+\ s Frr eee ffffffffff
+\ 1 10 111 0111011101 (DDDD)
+\ 1 1 1  7        1DD (hex)
+CR hex DDDD posit?
 
 \ ------------- END OF SANDBOX -------------
+: ft forget-these ;
 \ forget-these
 \ .(HERE) 44 EMIT BL .(LAST) CR
 
 \ fedcba9876543210
 \ 0000110111011101
+
+
+: f-sign dup 0 < ;                      \ ( n -- n s )
+: f-fraction dup 7fffff and ;           \ ( n -- n f )
+: f-exp dup 7fffffff and 800000 / ;     \ ( n -- n e )
+: >fp f-sign swap                       \ ( n -- s e f )
+    f-exp swap
+    f-fraction nip ;
+
+: ?z over > if 48 emit then ;
+: z10 10 ?z ;
+: z100 100 ?z ;
+: z1000 1000 ?z ;
+
+: fd. 46 emit z100 z10 (.) ;
+: fnorm 1000 /mod >R + R> ;
+: f. fnorm swap (.) fd. ;
+
+: fbase 1000 ;
+: f+ rot + -rot + swap ;
+: f* swap fbase * + -rot swap fbase * + * 5 + fbase / fbase /mod ;
+: f- rot swap - -rot - swap ;
+
+: ?fp >fp .s drop drop drop ;
+\ 3 ?fp
+\ hex ddd ?fp
+
+: fsub 10 /mod swap dup if exp ++ then ;
+
+
+\ s eeeeeeee fffffffffffffffffffffff
+\ 0 00000001 10000000000000000000111
+\ 1 00000001 10000000000000000000111
+\ 0 11111111 00000000000000000000111
+
+\ 11111111100000000000000000000111 ?fp 
+\ 01111111100000000000000000000111 ?fp

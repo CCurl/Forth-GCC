@@ -2,6 +2,7 @@
 : (const) a.CPUSH a.PUSH C, , a.CPUSH a.RET C, ;
 : CONSTANT CREATE-NAME (const) ; INLINE
 : VARIABLE CREATE-NAME HERE 2 + CELL + (const) 0 , ; INLINE
+: CVARIABLE CREATE-NAME HERE 2 + CELL + (const) 0 C, ; INLINE
 
 : ascii. DUP HEX. BL DUP DECIMAL. BL EMIT ;
 : ascii 2DUP < IF SWAP THEN BEGIN CRLF DUP ascii. 1+ 2DUP > WHILE 2DROP ;
@@ -74,43 +75,28 @@
 \
 : (stk-ptr) ;                                   \ ( stk -- stk-ptr-addr )
 : (stk-top) CELL + ;		        	        \ ( stk -- last-cell-addr )
-
-: stk-bottom CELL DUP + + ;                     \ ( stk -- bottom )
+: stk-bottom 2 CELLS + ;                        \ ( stk -- bottom )
 : stk-top (stk-top) @ ;			                \ ( stk -- last-cell-addr )
 : stk-ptr (stk-ptr) @ ;                         \ ( stk -- stk-ptr )
-: stk-reset DUP stk-bottom SWAP (stk-ptr) ! ;   \ ( stk -- )
 : stk-depth DUP stk-ptr                         \ ( stk -- depth )
     SWAP stk-bottom - CELL / ;
 : stk-pick @ swap cells - @ ;                   \ ( n1 stk -- n2 )
 
-: stk-init 								        \ ( sz stk -- )
-    SWAP 1+ CELLS ALLOT
-    HERE OVER (stk-top) !
-    CELL ALLOT stk-reset ;
+: stk-init ustackinit       \ ( sz stk -- top )
+    here over <
+    if 
+        dp !
+    else 
+        drop
+    then
+ ;
 
-: stk-over?                                     \ ( stk -- )
-    DUP stk-top OVER stk-ptr <=
-    IF
-        " Stack overflow." CT
-	    DROP RESET
-    THEN 
-    DROP ;
+: stk-sz >R R@ cell + @ R> 2 cells + - cell / 1+ ;
+: stk-reset >R R@ stk-sz R> stk-init ;   \ ( stk -- )
 
-: stk-under?                                    \ ( stk -- )
-    DUP stk-ptr OVER stk-bottom <=
-    IF
-		" Stack empty." CT
-	     stk-reset RESET
-    THEN 
-    DROP ;
-
-: >stk DUP stk-over? (stk-ptr) TUCK @ !	        \ ( val stk -- )
-    CELL += ;
-
-: stk@ DUP stk-under? stk-ptr CELL - @ ;        \ ( stk -- val )
-
-: stk> DUP stk@ SWAP                            \ ( stk -- val )
-    (stk-ptr) CELL -= ;
+: >stk >ustack ; INLINE
+: stk> ustack> ; INLINE
+: stk@ >R R@ stk> dup R> >stk ;
 
 \ --------------------------------------------------------------------------------
 \ -- Parameter stack words
@@ -153,15 +139,10 @@ decimal 64 ps stk-init
     again ;
 
 \ --------------------------------------------------------------------------------
-\ POSIT numbers - aka- floating point stuff - http://www.johngustafson.net/pdfs/BeatingFloatingPoint.pdf
-\ a POSIT number looks like this:
-\ sign(1 bit)regime(k bits)exponent(n bits)fraction(f bits)
-: pow-2 ( n1 -- n2 )
+\ returns 2 raised to the n-th power
+: pow-2   \ ( n1 -- n2 )
 	1 swap 0 begin
 	2dup = if 2drop leave then
 	>R >R
 	2 *
 	R> R> 1+ again ;
-
-: useed ( es -- n )
-	pow-2 pow-2 ;

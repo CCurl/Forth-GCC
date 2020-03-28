@@ -437,6 +437,18 @@ CELL dis_one(char *bytes, char *desc)
 		sprintf(desc, "OR");
 		return 0;
 
+	case USINIT:
+		sprintf(desc, "USTACKINIT");
+		return 0;
+
+	case USPUSH:
+		sprintf(desc, "UPUSH");
+		return 0;
+
+	case USPOP:
+		sprintf(desc, "UPOP");
+		return 0;
+
 	case BREAK:
 	// {
 	// 	arg1 = the_memory[ADDR_HERE];

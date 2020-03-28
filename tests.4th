@@ -138,6 +138,23 @@ DROP
 
 11 22 33 t3
 
+\ ***************************************************
+\ user stack tests
+
+variable ts   
+4 ts ustackinit dp ! 
+: >ts ts >ustack ;
+: ts> ts ustack> ;
+: ts@ ts> dup >ts ;
+: ts-sz ts cell + @ ts 2 cells + - cell / 1+ ;
+
+44 33 22 11 >ts >ts >ts >ts
+next-test: ts> 44 p=
+next-test: ts> 33 p=
+next-test: ts> 22 p=
+next-test: ts> 11 p=
+\ ***************************************************
+
 \ wordsv
 
 : ttt 
@@ -155,6 +172,10 @@ DROP
     again ;
 
 1000 1000 5 * * ttt
+
+
+
+
 
 \ 20 .lastx
 CR test-results
