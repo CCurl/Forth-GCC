@@ -136,11 +136,11 @@ next-test: ts> 11 p=    \ 47
 next-test: ts-sz 5 p=   \ 48
 
 \ ***************************************************
-next-test:  0 pow-2    1 p=
-next-test:  1 pow-2    2 p=
-next-test:  5 pow-2   32 p=
-next-test:  8 pow-2  256 p=
-next-test: 10 pow-2 1024 p=
+next-test:  0 pow-2    1 p= \ 50
+next-test:  1 pow-2    2 p= \ 51
+next-test:  5 pow-2   32 p= \ 52
+next-test:  8 pow-2  256 p= \ 53
+next-test: 10 pow-2 1024 p= \ 54
 
 \ ***************************************************
 
@@ -148,7 +148,7 @@ next-test: 10 pow-2 1024 p=
 
 : count-to
     " counting to" ct dup . "  ..." ct
-    0 
+    1
     begin 
         2dup < 
         if
@@ -156,7 +156,7 @@ next-test: 10 pow-2 1024 p=
             2drop leave
         then 
         >R >R 
-        R> R@ 1000000 mod 0= if 46 emit then >R
+        R> R@ 2000000 mod 0= if R@ . then >R
         R> R> 
         1+ 
     again ;
