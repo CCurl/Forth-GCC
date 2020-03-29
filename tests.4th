@@ -7,9 +7,8 @@ variable tl tl !
 : forget-these tl @ (last) ! th @ dp ! ;
 
 \ ---------------------------------------------- TESTS START HERE -----------------------------------------------------
-here
-: test 1 1 = if 255 drop else 254 drop then ;
-here 1- .S dump cr
+: test 1 2 = if 255 drop else 254 drop then ;
+cr last dict>xt @ here 1- .S dump cr
 
 variable num-tests
 variable passed
@@ -32,7 +31,7 @@ variable passed
 : next-test: num-tests ++ ;
 
 \ ---------------------------------------------- TESTS START HERE -----------------------------------------------------
-\ Stack tests ...
+\ User stack tests ...
 
 variable ms
 decimal 20 ms stk-init
@@ -41,44 +40,18 @@ decimal 20 ms stk-init
 : m@ ms stk@ ;
 : mdepth ms stk-depth ;
 : mdrop ms stk> DROP ;
-: m1 ms @ cell - @ ;
-: m2 ms @ 2 cells - @ ;
-: m3 ms @ 3 cells - @ ;
-: m4 ms @ 4 cells - @ ;
-: >>m 
-    1 begin 
-        2dup < 
-        if
-            2drop leave
-        then 
-        tuck >R >R 
-            >m
-        R> R> 1+ 
-    again ;
 
-: m>>
-    1 begin 
-        2dup < 
-        if
-            2drop leave
-        then 
-        tuck >R >R 
-            mdrop
-        R> R> 1+ 
-    again ;
-
-
-next-test: ( 1 ) 444 >m 555 >m mdepth 2 = passed?
-next-test: ( 2 ) m> 555 = passed?
-next-test: ( 3 ) m@ 444 = passed?
-next-test: ( 4 ) m> 444 = passed?
-next-test: ( 5 ) mdepth 0 = passed?
-next-test: ( 6 ) 1 >m ms stk-reset mdepth 0 = passed?
+next-test: (  1 ) 444 >m 555 >m mdepth 2 = passed?
+next-test: (  2 ) m> 555 = passed?
+next-test: (  3 ) m@ 444 = passed?
+next-test: (  4 ) m> 444 = passed?
+next-test: (  5 ) mdepth 0 = passed?
+next-test: (  6 ) 1 >m ms stk-reset mdepth 0 = passed?
 1111 >m 2222 >m 3333 >m
-next-test: ( 7 ) mdepth 3 = passed?
-next-test: ( 8 ) mdrop mdepth 2 = passed?
-next-test: ( 9 ) m@ 2222 = passed?
-
+next-test: (  7 ) mdepth 3 = passed?
+next-test: (  8 ) mdrop mdepth 2 = passed?
+next-test: (  9 ) m@ 2222 = passed? 
+next-test: ( 10 ) mdepth 2 = passed?
 \ String tests ...
 here 100 +
 str.empty
@@ -113,7 +86,8 @@ next-test: str.empty str.len 0 = passed? ( 30 )
 
 DROP
 
-\ Testing the parameter stack stuff
+\ ***************************************************
+\ Parameter stack tests
 : p= = passed? ;
 
 : t1 3 >>p
@@ -138,27 +112,42 @@ DROP
 
 11 22 33 t3
 
+33 44 55 66 77 88 6 >>p
+next-test: 123 p2! p2 123 p=  \ 40
+next-test: pdrop pdepth 5 p=  \ 41
+next-test: pclear pdepth 0 p= \ 42
+
 \ ***************************************************
 \ user stack tests
 
 variable ts   
-4 ts ustackinit dp ! 
-: >ts ts >ustack ;
-: ts> ts ustack> ;
+5 ts stk-init
+: >ts ts >stk ;
+: ts> ts stk> ;
 : ts@ ts> dup >ts ;
-: ts-sz ts cell + @ ts 2 cells + - cell / 1+ ;
+: ts-sz ts stk-sz ;
 
 44 33 22 11 >ts >ts >ts >ts
-next-test: ts> 44 p=
-next-test: ts> 33 p=
-next-test: ts> 22 p=
-next-test: ts> 11 p=
+next-test: ts stk-depth 4 p= \ 43
+next-test: ts> 44 p=    \ 44
+next-test: ts> 33 p=    \ 45
+next-test: ts> 22 p=    \ 46
+next-test: ts> 11 p=    \ 47
+next-test: ts-sz 5 p=   \ 48
+
+\ ***************************************************
+next-test:  0 pow-2    1 p=
+next-test:  1 pow-2    2 p=
+next-test:  5 pow-2   32 p=
+next-test:  8 pow-2  256 p=
+next-test: 10 pow-2 1024 p=
+
 \ ***************************************************
 
 \ wordsv
 
-: ttt 
-    " counting to" ct dup . bl
+: count-to
+    " counting to" ct dup . "  ..." ct
     0 
     begin 
         2dup < 
@@ -166,16 +155,13 @@ next-test: ts> 11 p=
             "  done." ct cr
             2drop leave
         then 
-        tuck >R >R 
-            50000 mod 0= if 46 emit then
-        R> R> 1+ 
+        >R >R 
+        R> R@ 1000000 mod 0= if 46 emit then >R
+        R> R> 
+        1+ 
     again ;
 
-1000 1000 5 * * ttt
-
-
-
-
+1024 dup * 16 * cr count-to
 
 \ 20 .lastx
 CR test-results
