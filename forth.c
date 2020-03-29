@@ -4,14 +4,11 @@
 #include <string.h>
 #include "Shared.h"
 #include "forth-vm.h"
-#include "functions.h"
 #include "string.h"
 #include "logger.h"
 
 char input_fn[256];
-char load_fn[256];
 FILE *input_fp = NULL;
-FILE *load_fp = NULL;
 
 // *********************************************************************
 bool load_vm()
@@ -24,7 +21,16 @@ bool load_vm()
 		return false;
 	}
 
-	fread(the_memory, 1, MEM_SZ, input_fp);
+    fseek(input_fp, 0L, SEEK_END);
+    long file_sz = ftell(input_fp);
+    debug("file_sz: %ld bytes, ", file_sz);
+    fseek(input_fp, 0L, SEEK_SET);
+
+    memory_size = file_sz;
+    init_vm(file_sz);
+
+	int num_read = fread(the_memory, 1, memory_size, input_fp);
+    debug("%ld bytes read\n", num_read);
 	fclose(input_fp);
 	input_fp = NULL;
 	debug(" done.\n");
@@ -47,17 +53,11 @@ void process_arg(char *arg)
     {
         trace_on();
     }
-    else if (*arg == 'l') 
-    {
-        arg = arg+2;
-        strcpy(load_fn, arg);
-    }
     else if (*arg == '?') 
     {
         printf("usage forth [args]\n");
         printf("  -i:imagefile - Forth VM image\n");
         printf("     default imagefile is 'forth.bin'\n");
-        printf("  -l:file - Load/execute a file\n");
         printf("  -d - Turn on debug logging\n");
         printf("  -t - Turn on trace logging\n");
         printf("  -? - Prints this message\n");
@@ -73,7 +73,6 @@ void process_arg(char *arg)
 int main(int argc, char **argv)
 {
     strcpy(input_fn, "forth.bin");
-    strcpy(load_fn, "");
 
     for (int i = 1; i < argc; i++)
     {
@@ -84,14 +83,8 @@ int main(int argc, char **argv)
         }
     }
 
-	init_vm();
 	if (load_vm())
-	{
-        if (strlen(load_fn) > 0)
-        {
-            printf("  LoadFile (%s) is not implemented yet.\n", load_fn);
-        }
-		PC = 0;
+    {
 		cpu_loop();
 	}
 

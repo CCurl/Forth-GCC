@@ -1,46 +1,71 @@
- ------------------------------------------------------------------------------------------
+\ -----------------------------------------------------------------------------------------------
 \ This is the source code for the VM's boot loader.
-\ This file is compiled by CFComp.exe and an image of the VM's initial state is created.
-\ CFComp.exe then disassembles that image, creating a listing file named dis.txt
-\ The resulting dis.txt is read by the VM when it boots.
-\ ------------------------------------------------------------------------------------------
+\ This file is compiled by forth-compiler.exe and an image of the VM's initial state is created.
+\ It then writes that image to a file specified by -i:<filename>. The default is forth.bin.
+\ It also disassembles that image, creating a listing file named by the -o arg, forth.asm.
+\ The image file is read by the VM when it boots.
+\
+\ The compiler does these things ...
+\ - it generates the following word: C,
+\ - it generates the opcodes as words, e.g. "a.JMPNZ"
+\ - it generates the forth primitives as INLINE words, e.g. @, C@ !, C!, SWAP, DUP, ...
+\ - it generates the forth constants as INLINE words, e.g. BASE, DP, ...
+\
+\ NB: don't inline anything with a 12 in it ... that is RET
+\ -----------------------------------------------------------------------------------------------
 
-\ .CELL 2 \ 2 => 16-bit, 4 => 32-bit
+: INLINE    (LAST) @ 2 CELL * + DUP C@ 2 OR SWAP C! ;
+: CELLS CELL * ; INLINE
 
-.ORG 32
+: FLAG_IMMEDIATE 1 ; INLINE
+: FLAG_INLINE    2 ; INLINE
 
-\ don't inline anything with a 12 in it ... that is RET
-\ The compiler/dis-assembler is hard-coded to put these values here ...
-: CELL   7 C@ ; INLINE
-: DP       16 ; INLINE
-: (LAST)   20 ; INLINE
-: BASE     24 ; INLINE
+: IMMEDIATE (LAST) @  2 CELLS + DUP C@ FLAG_IMMEDIATE OR SWAP C! ;
 
-: HERE DP @ ; INLINE
 : LAST (LAST) @ ; INLINE
+: HERE DP     @ ; INLINE
 
-: CELLS CELL * ; \ ( num1 -- num2 )
+: , HERE ! HERE CELL + DP ! ;
 
-: >IN   <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
-: STATE <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
-: isNeg <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
-: (MEM_K) <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
-16 (MEM_K) !
+: LOGLEVEL a.LOGLEVEL ; INLINE
+
+: TRACE-ON  2 LOGLEVEL ;
+: TRACE-OFF 0 LOGLEVEL ;
+: DEBUG-ON  1 LOGLEVEL ;
+: DEBUG-OFF 0 LOGLEVEL ;
+
+: HEX     16 BASE C! ;
+: DECIMAL 10 BASE C! ;
+: OCTAL    8 BASE C! ;
+: BINARY   2 BASE C! ;
+
+: ON 1 SWAP ! ;
+: OFF 0 SWAP ! ;
+
+: [ 0 STATE ! ; IMMEDIATE
+: ] 1 STATE ! ; IMMEDIATE
+
+: ?COMPILING STATE @ ;
+: THEN ?COMPILING .IF HERE SWAP ! .THEN ; IMMEDIATE
+: IF   ?COMPILING .IF a.CPUSH a.JMPZ C, HERE 0 , .THEN ; IMMEDIATE
+: ELSE ?COMPILING .IF a.CPUSH a.JMP  C, HERE SWAP 0 , HERE SWAP ! .THEN ; IMMEDIATE
+
+: >IN      [ a.PUSH HERE 1 + CELL + , ] ; 0 , a.RET
+: isNeg    [ a.PUSH HERE 1 + CELL + , ] ; 0 , a.RET
+
+: (MEM_K)  [ a.PUSH HERE 1 + CELL + , ] ; 0 , a.RET
 : MEM_SZ (MEM_K) @ 1024 * ;
+256 (MEM_K) !
 
-\ : STDIN <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
-\ : INPUT-FP <asm> .HERE 4 + .LITERAL </asm> ; 0 .COMMA
+: R@ R> DUP >R ; INLINE
+: RDROP R> DROP   ; INLINE
 
-: !  <asm> STORE  </asm> ; INLINE
-: C! <asm> CSTORE </asm> ; INLINE
-
-: @  <asm> FETCH  </asm> ; INLINE
-: C@ <asm> CFETCH </asm> ; INLINE
-
-: + <asm> ADD </asm> ; INLINE
-: - <asm> SUB </asm> ; INLINE
-: * <asm> MUL </asm> ; INLINE
-: / <asm> DIV </asm> ; INLINE
+: 2DUP  OVER OVER ; INLINE
+: 2DROP DROP DROP ; INLINE
+: TUCK  SWAP OVER ; INLINE
+: NIP   SWAP DROP ; INLINE
+: ROT   >R SWAP R> SWAP ; INLINE
+: -ROT  SWAP >R SWAP R> ; INLINE
 
 : 1+ 1 + ; INLINE
 : 1- 1 - ; INLINE
@@ -48,112 +73,80 @@
 : 2* 2 * ; INLINE 
 : 2/ 2 / ; INLINE
 
-: AND <asm> AND </asm> ; INLINE
-: OR  <asm> OR  </asm> ; INLINE
+: += OVER @ + SWAP ! ;   \ ( addr n -- )
+: -= OVER @   SWAP - SWAP ! ;   \ ( addr n -- )
 
-: >R <asm> DTOR   </asm> ; INLINE
-: R> <asm> RTOD   </asm> ; INLINE
-: R@ R> DUP >R ; INLINE
+: ++ 1 += ;   \ ( addr -- )
+: -- 1 -= ;   \ ( addr -- )
 
-: < <asm> LT </asm> ; INLINE
-: = <asm> EQ </asm> ; INLINE
-: > <asm> GT </asm> ; INLINE
-
-: DUP  <asm> DUP  </asm> ; INLINE
-: SWAP <asm> SWAP </asm> ; INLINE
-: DROP <asm> DROP </asm> ; INLINE
-: OVER <asm> OVER </asm> ; INLINE
-: PICK <asm> PICK </asm> ; INLINE
-
-: DEPTH <asm> DEPTH </asm> ; INLINE
-: RESET <asm> RESET </asm> ; INLINE
-: BREAK <asm> BREAK </asm> ; INLINE
-: BYE   <asm> BYE   </asm> ; INLINE
-
-: EMIT  <asm> EMIT  </asm> ; INLINE
-: ZTYPE <asm> ZTYPE </asm> ; INLINE
-: GETCH <asm> GETCH </asm> ; INLINE
-
-: FOPEN     <asm> FOPEN     </asm> ; INLINE
-: FREAD     <asm> FREAD     </asm> ; INLINE
-: FREADLINE <asm> FREADLINE </asm> ; INLINE
-: FWRITE    <asm> FWRITE    </asm> ; INLINE
-: FCLOSE    <asm> FCLOSE    </asm> ; INLINE
-
-: COMPARE <asm> COMPARE </asm> ; INLINE
-: COMPAREI <asm> COMPAREI </asm> ; INLINE
-
-: RDROP R> DROP   ; INLINE
-: TUCK  SWAP OVER ; INLINE
-: NIP   SWAP DROP ; INLINE
-: ROT   >R SWAP R> SWAP ;
-: -ROT  SWAP >R SWAP R> ;
-
-: ++  DUP @  1+ SWAP ! ;  \ ( addr -- )
-: C++ DUP C@ 1+ SWAP C! ; \ ( addr -- )
-
-: --  DUP @  1- SWAP ! ;  \ ( addr -- )
-: C-- DUP C@ 1- SWAP C! ; \ ( addr -- )
+: C++ DUP C@ 1+ SWAP C! ;   \ ( addr -- )
+: C-- DUP C@ 1- SWAP C! ;   \ ( addr -- )
 
 : +!  TUCK @  + SWAP !  ;
 : C+! TUCK C@ + SWAP C! ;
-
-: += OVER @ + SWAP ! ;
-: -= OVER @ SWAP - SWAP ! ;
-
-: ,  HERE !  CELL DP +! ;
-: C, HERE C!      DP ++ ;
-
-: ?COMPILING STATE @ ;
-: [ 0 STATE ! ; IMMEDIATE
-: ] 1 STATE ! ; IMMEDIATE
-
-: LEAVE ?COMPILING IF <asm> CPUSH RET </asm> C, THEN ; IMMEDIATE
-
-: IF   ?COMPILING IF <asm> CPUSH JMPZ </asm> C, HERE 0 , THEN ; IMMEDIATE
-: ELSE ?COMPILING IF <asm> CPUSH JMP  </asm> C, HERE SWAP 0 , HERE SWAP ! THEN ; IMMEDIATE
-: THEN ?COMPILING IF HERE SWAP ! THEN ; IMMEDIATE
-
-: BEGIN ?COMPILING IF HERE THEN ; IMMEDIATE
-: AGAIN ?COMPILING IF <asm> CPUSH JMP   </asm> C, , THEN ; IMMEDIATE
-: WHILE ?COMPILING IF <asm> CPUSH JMPNZ </asm> C, , THEN ; IMMEDIATE
-: UNTIL ?COMPILING IF <asm> CPUSH JMPZ  </asm> C, , THEN ; IMMEDIATE
 
 : 0= 0 =  ; INLINE
 : <> = 0= ; INLINE
 : <= > 0= ; INLINE
 : >= < 0= ; INLINE
 
-: 2DUP  OVER OVER ; INLINE
-: 2DROP DROP DROP ; INLINE
+: TRUE 1 ; INLINE
+: FALSE 0 ; INLINE
+: NOT 0 = ; INLINE
 
-: CRLF 13 EMIT 10 EMIT ;
-: CR CRLF ;
+
+: LEAVE ?COMPILING IF a.CPUSH a.RET C, THEN ; IMMEDIATE
+
+: BEGIN ?COMPILING IF HERE THEN ; IMMEDIATE
+: AGAIN ?COMPILING IF a.CPUSH a.JMP   C, , THEN ; IMMEDIATE
+: WHILE ?COMPILING IF a.CPUSH a.JMPNZ C, , THEN ; IMMEDIATE
+: UNTIL ?COMPILING IF a.CPUSH a.JMPZ  C, , THEN ; IMMEDIATE
+
+: COUNT DUP 1+ SWAP C@ ;		\ ( addr1 --  addr2 num )
+
+: TYPE							\ ( addr count -- ) 
+    BEGIN
+	    DUP 0=
+		IF
+            2DROP LEAVE
+        THEN
+        SWAP DUP C@ EMIT 1+ SWAP 1-
+    AGAIN ;
+
+: CT COUNT TYPE ;
+
+: \ 0 >IN @ C! ; IMMEDIATE
+
+: ( BEGIN 
+	>IN @ C@ 
+	DUP 0= IF 
+		S" missing closing ')'" CT RESET
+	THEN
+	>IN ++		
+	41 = IF		\ 41 = ')'
+		LEAVE 
+	THEN
+	AGAIN ; IMMEDIATE
+
 : BL 32 EMIT ; INLINE
+: CRLF 13 EMIT 10 EMIT ; INLINE
+: CR CRLF ; INLINE
 
-: ON 1 SWAP ! ; : OFF 0 SWAP ! ;
-
-: BETWEEN \ ( num min max -- bool )
+: BETWEEN											\ ( num min max -- bool )
 	2 PICK 
-	< IF 2DROP 0 LEAVE THEN
+	< IF 2DROP FALSE LEAVE THEN
 	< 0=
 ;
 
-: COUNT DUP 1+ SWAP C@ ; \ ( addr1 --  addr2 num )
-: TYPE DROP ZTYPE ; \ ( addr num -- )
-: CT COUNT TYPE ;
+: (tmp) [ a.PUSH HERE 1 + CELL + , ] ; 0 , a.RET
+: tmp-init LAST (tmp) ! ;							\ ( -- )
+: tmp-cur (tmp) @ ;
+: tmp-alloc (tmp) TUCK @ SWAP - SWAP ! tmp-cur ;	\ ( size -- addr )
 
-: PAD LAST 200 - ;
-: getInput PAD 128 0 FREADLINE DROP PAD ; \ ( -- addr )
+: PAD tmp-init 200 tmp-alloc ;
+: getInput PAD 128 0 FREADLINE DROP PAD ;			\ ( -- addr )
 
-: ?DUP DUP IF DUP THEN ;
-
-: HEX     16 BASE ! ;
-: DECIMAL 10 BASE ! ;
-: OCTAL    8 BASE ! ;
-: BINARY   2 BASE ! ;
-
-: skipWS \ ( addr1 -- addr2 )
+: skipWS               								\ ( addr1 -- addr2 )
 	BEGIN
 		DUP C@ DUP
 		IF
@@ -165,8 +158,9 @@
 	AGAIN
 ;
 
-\ NB: this word assumes that leading WS has already been skipped.
-: getOneWord \ ( addr1 -- word-addr addr2 )
+: getOneWord										\ ( addr1 -- word-addr addr2 )
+	\ NB: this word assumes that 
+	\ leading WS has already been skipped.
 	DUP >R >R
 	BEGIN
 		R@ C@ 32 > IF
@@ -193,13 +187,13 @@
 : FLAGS>DICT  2 CELLS - ;
 : NAME>DICT   1- 2 CELLS - ;
 
-: DICT.GetXT DICT>XT @ ;
+: DICT.GetXT DICT>XT @ ; 1 DROP
 : DICT.GetFLAGS DICT>FLAGS C@ ;
 
 : DICTP>NAME 1+ @ DICT>NAME ;
 
-: XT.GetDICTP \ ( XT -- dictp )
-	DUP C@ <asm> CPUSH DICTP </asm> = 
+: XT.GetDICTP 						\ ( XT -- dictp )
+	DUP C@ a.CPUSH a.DICTP = 
 	IF
 		1+ @
 	ELSE
@@ -207,8 +201,6 @@
 	THEN
 ;
 
-: FLAG_IMMEDIATE 1 ;
-: FLAG_INLINE    2 ;
 
 : FLAGS.ISIMMEDIATE? FLAG_IMMEDIATE AND ;
 : FLAGS.ISINLINE?    FLAG_INLINE    AND ;
@@ -216,7 +208,7 @@
 : DICT.GetIMMEDIATE DICT.GetFLAGS FLAGS.ISIMMEDIATE? ;
 : DICT.GetINLINE    DICT.GetFLAGS FLAGS.ISINLINE? ;
 
-: findInDict \ ( addr -- XT IMM bool )
+: findInDict						\ ( addr -- XT IMM bool )
 	LAST >R
 	BEGIN
 		R@ DUP
@@ -234,9 +226,9 @@
 	AGAIN
 ;
 
-: isHEX? BASE @ 16 = ;
+: isHEX? BASE C@ 16 = ;
 
-: isNumChar? \ ( ch -- val bool )
+: isNumChar?						\ ( ch -- val bool )
 	DUP 48 57 BETWEEN IF 48 - 1 LEAVE THEN
 	isHEX? 
 	IF
@@ -249,7 +241,7 @@
 : NEGATE 0 SWAP - ;
 : ABS DUP 0 < IF NEGATE THEN ;
 
-: isNumber? \ ( addr -- num bool )
+: isNumber?							\ ( addr -- num bool )
 	\ find out if it is negative
 	DUP C@ 45 = DUP isNeg C! IF 1+ THEN
 	
@@ -266,7 +258,7 @@
 
 		isNumChar? 
 		IF
-			R> BASE @ * + >R
+			R> BASE C@ * + >R
 			1+
 		ELSE
 			DROP R> 0 LEAVE
@@ -276,11 +268,11 @@
 
 : MOD 2DUP / * - ;
 
-: /MOD \ ( num1 num2 -- num3 mod )
+: /MOD			\ ( num1 num2 -- num3 mod )
 	2DUP / >R R@ * - R> SWAP
 ;
 
-: (.)  \ ( num -- )
+: (.)			\ ( num -- )
 	DUP 0 = 
 	IF
 		DROP 48 EMIT LEAVE
@@ -292,7 +284,7 @@
 	BEGIN
 		DUP
 		IF
-			BASE @ /MOD 
+			BASE C@ /MOD 
 			48 OVER 9 > IF 7 + THEN
 			+ SWAP
 		ELSE
@@ -307,9 +299,9 @@
 : . BL (.) ;
 
 HEX
-: HEX.     BASE @ SWAP HEX DUP 10 < IF 0 (.) THEN (.) BASE ! ; DECIMAL
-: DECIMAL. BASE @ SWAP DECIMAL (.) BASE ! ;
-: BINARY.  BASE @ SWAP BINARY  (.) BASE ! ;
+: HEX.     BASE C@ SWAP HEX DUP 10 < IF 30 EMIT THEN (.) BASE C! ; DECIMAL
+: DECIMAL. BASE C@ SWAP DECIMAL (.) BASE C! ;
+: BINARY.  BASE C@ SWAP BINARY  (.) BASE C! ;
 
 : MIN 2DUP > IF SWAP THEN DROP ; 
 : MAX 2DUP < IF SWAP THEN DROP ; 
@@ -331,35 +323,26 @@ HEX
 	AGAIN
 ;
 
-: .(MEM_SZ) S" Memory: " CT MEM_SZ DUP HEX. S"  (" CT . BL S" )" CT ;
-: .(HERE) S" HERE: " CT HERE DUP HEX. S"  (" CT . BL S" )" CT ;
-: .(LAST) LAST DUP S" LAST: " CT HEX. S"  (" CT . BL S" )" CT ;
+: .(MEM_SZ) S" Memory: " CT MEM_SZ DUP HEX. S"  (" CT (.) S" )" CT ;
+: .(HERE)   S" HERE: "   CT HERE   DUP HEX. S"  (" CT (.) S" )" CT ;
+: .(LAST)   S" LAST: "   CT LAST   DUP HEX. S"  (" CT (.) S" )" CT ;
 
 : .WORD-SHORT DUP DICT>NAME CT BL @ ;
+: WORDS LAST BEGIN DUP @ 0= IF DROP CRLF LEAVE THEN .WORD-SHORT AGAIN ;
+
 : .WORD-LONG  
-		DUP HEX. S" :" CT BL
+		DUP HEX. 58 EMIT BL
 		DUP DICT>NAME CT BL
 		DUP DICT.GetXT 40 EMIT HEX. 41 EMIT \ DEBUG
 		DUP DICT>FLAGS C@ \ DEBUG
 		DUP S" , Flags: " CT HEX. \ DEBUG
 		DUP FLAGS.ISINLINE? IF S"  (INLINE)" CT THEN \ DEBUG
 		FLAGS.ISIMMEDIATE? IF S"  (IMMEDIATE)" CT THEN \ DEBUG
-		CRLF @
-;
+		CRLF @ ;
 
-: WORDS               LAST BEGIN DUP 0 = IF DROP CRLF LEAVE THEN .WORD-SHORT AGAIN ;
-: WORDSV .(LAST) CRLF LAST BEGIN DUP 0 = IF DROP CRLF LEAVE THEN .WORD-LONG  AGAIN ;
+: WORDSV .(LAST) CRLF LAST BEGIN DUP @ 0= IF DROP CRLF LEAVE THEN .WORD-LONG  AGAIN ;
 
-: WORDS-OLD \ ( -- )
-	LAST DUP HEX. 58 EMIT BL
-	BEGIN
-		DUP 0 =
-		IF
-			DROP CRLF LEAVE
-		THEN
-		@
-	AGAIN
-;
+: NUM-WORDS 0 >R LAST BEGIN DUP @ 0= IF DROP R> CRLF LEAVE THEN R> 1+ >R @ AGAIN ;
 
 \ Prints the last <x> words
 : .lastx CR LAST SWAP 0
@@ -371,13 +354,12 @@ HEX
         THEN
     AGAIN ;
 
-: EXECUTE RDROP >R ; \ ( addr -- )
+: EXECUTE RDROP >R ;		\ ( addr -- )
 
-\ ( addr1 -- addr2 )
-: find.ret
+: find.ret			\ ( addr1 -- addr2 )
 	BEGIN
 		DUP C@ 
-		<asm> CPUSH RET </asm> =
+		a.CPUSH a.RET =
 		IF
 			LEAVE
 		THEN
@@ -385,7 +367,7 @@ HEX
 	AGAIN
 ;
 
-: (inline) \ ( from to -- )
+: (inline)		\ ( from to -- )
 	2DUP < IF SWAP THEN
 	BEGIN
 		DUP C@ C,
@@ -401,9 +383,9 @@ HEX
 	(inline)
 ;
 
-: Copy.INLINE \ ( XT -- )
+: Copy.INLINE		\ ( XT -- )
 	\ Skip over the DICTP
-	DUP C@ <asm> CPUSH DICTP </asm> =
+	DUP C@ a.CPUSH a.DICTP =
 	IF 
 		1+ CELL +
 	THEN
@@ -422,86 +404,52 @@ HEX
 	NIP
 ;
 
-: cstr, \ ( start -- )
+: cstr,			\ ( start -- )
 	DUP C@ 
 	OVER + 1+ 1+
 	(inline)
 ;
 
-: [COMPILE] \ ( XT flags -- )
-	DUP FLAGS.ISIMMEDIATE? \ Immediate?
+: [COMPILE]		\ ( XT flags -- )
+	FLAGS.ISINLINE? 
 	IF
-		DROP EXECUTE
+		Copy.INLINE
 	ELSE
-		FLAGS.ISINLINE? 
-		IF
-			Copy.INLINE
-		ELSE
-			<asm> CPUSH CALL </asm> C, ,
-		THEN
+		a.CPUSH a.CALL C, ,
 	THEN
 ;
 
-: isPostpone <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
-
-: POSTPONE.rt
-	R@ @ DICT.GetXT
-	R@ @ DICT.GetFLAGS
-	R> CELL + >R
-	[COMPILE]
-;
-
-LAST DICT.GetXT
-: POSTPONE  \ compile call to POSTPONE.rt
-	<asm> CPUSH CALL </asm> C,
-	<asm> PUSH , </asm> ,
-	isPostpone ON
-; IMMEDIATE
-
-: executeWord  \ ( addr -- )
+: executeWord		\ ( addr -- )
 	>R R@ findInDict \ ( addr -- XT FLAGS found )
 	IF
 		RDROP
 		?COMPILING
 		IF
-			isPostpone @ 
+			DUP FLAGS.ISIMMEDIATE? \ Immediate?
 			IF
-				DROP XT.GetDICTP ,
-				isPostpone OFF
+				DROP EXECUTE
 			ELSE
-				DUP FLAGS.ISIMMEDIATE? \ Immediate?
-				IF
-					DROP EXECUTE
-				ELSE
-					[COMPILE]
-				THEN
+				[COMPILE]
 			THEN
 		ELSE
 			DROP EXECUTE
 		THEN
-	ELSE \ word not found
-		2DROP \ discard IMM and XT place holders
+	ELSE             \ word not found
+		2DROP        \ discard IMM and XT place holders
 		R@ isNumber? \ ( addr -- num bool )
 		IF
 			?COMPILING
 			IF
-				isPostpone @ 
+				DUP 0 255 BETWEEN
 				IF
-					RESET	\ POSTPONE for literals not implemented yet
-					isPostpone OFF
+					a.CPUSH a.CPUSH C, C,
 				ELSE
-					DUP 0 255 BETWEEN
-					IF
-						<asm> CPUSH CPUSH </asm> C, C,
-					ELSE
-						<asm> CPUSH PUSH </asm> C, ,
-					THEN
+					a.CPUSH a.PUSH C, ,
 				THEN
 			THEN
 		ELSE
-			\ . LAST . \ debug
 			DROP
-			R@ ZTYPE S" ??" CT RESET \ TODO: error
+			S" ??" CT RESET     \ TODO: error
 		THEN
 		RDROP
 	THEN
@@ -509,10 +457,8 @@ LAST DICT.GetXT
 
 : executeInput 
 	BEGIN 
-		>IN @ skipWS
-		>IN ! 
-		\ EOL?
-		>IN @ C@ 
+		>IN @ skipWS >IN ! 
+		>IN @ C@  \ <EOL>?
 		IF
 			>IN @ getOneWord 
 			>IN ! executeWord
@@ -522,35 +468,60 @@ LAST DICT.GetXT
 	AGAIN
 ;
 
-: Pad LAST 200 - ;
-: >In <asm> .HERE 2 + .CELL + .LITERAL </asm> ; 0 .COMMA
+: Pad LAST 200 - 
+	DUP HERE < IF
+		S" Out of Memory!" RESET
+	THEN
+; 
 
-: getLine \ ( -- addr )
-	0 Pad DUP 1+ >In ! C!
+: LoadingFromFile? INPUT-FP @ ;		\ ( -- bool ) 
+
+: getLineFromFile		\ ( addr sz fp -- )
+	\ DROP 0 LEAVE
+	200 INPUT-FP @ FREADLINE 0 =
+	IF 
+		INPUT-FP OFF
+	THEN
+;
+
+: getLine			\ ( -- addr )
+	\ tmp-init 200 tmp-alloc (Pad) !
+	0 Pad DUP 1+ >IN ! C!
+
+	LoadingFromFile? IF
+		Pad getLineFromFile
+		LEAVE
+	THEN
+
 	BEGIN
-		0 >In @ C!
+		0 >IN @ C!     \ Null term
 		GETCH 
 
-		DUP 13 =
-		IF DROP Pad BL LEAVE THEN
+		DUP 13 = IF 
+			DROP Pad BL LEAVE 
+		THEN
 
-		DUP 8 = 
-		IF
-			\ .S
-			Pad C@ 0 >
-			IF 
+		DUP 9 = IF     \ Tab?
+			DROP 32    \ Change it into a BL
+		THEN
+
+		DUP 3 = IF
+			BYE
+		THEN
+		
+		DUP 8 = IF       \ Backspace?
+			Pad C@ 0 > IF 
 				Pad C--
-				>In --
+				>IN --
 				DUP EMIT BL EMIT
 			ELSE
 				DROP
 			THEN
 		ELSE
-			DUP 32 127 BETWEEN
-			IF
+			DUP 32 127 BETWEEN IF
 				DUP EMIT
-				>In @ C! 
-				>In ++
+				>IN @ C! 
+				>IN ++
 				Pad C++
 			ELSE
 				DROP
@@ -559,7 +530,7 @@ LAST DICT.GetXT
 	AGAIN
 ;
 
-: strcpy2c \ ( from to -- ) from is NOT counted, to is to get count byte
+: strcpy2c			\ ( from to -- ) from is NOT counted, to is to get count byte
 	\ 65 EMIT OVER . DUP . \ DEBUG
 	DUP >R					\ from to
 	0 OVER C!				\ from to (init count)
@@ -578,7 +549,7 @@ LAST DICT.GetXT
 	AGAIN
 ;
 
-: Define-Word \ ( addr -- )
+: Define-Word		\ ( addr -- )
 	LAST OVER strlen 2 CELLS 3 + + - 
 	DUP >R >R					\ Save new LAST
 	LAST R@  !  R> CELL + >R	\ NEXT
@@ -588,10 +559,7 @@ LAST DICT.GetXT
 	R> (LAST) !
 ;
 
-: IMMEDIATE LAST DICT>FLAGS DUP C@ FLAG_IMMEDIATE OR SWAP C! ;
-: INLINE    LAST DICT>FLAGS DUP C@ FLAG_INLINE    OR SWAP C! ;
-
-: CREATE-NAME \ ( -- )
+: CREATE-NAME		\ ( -- )
 	>IN @ skipWS >IN ! 
 	>IN @ C@ 
 	IF
@@ -599,7 +567,7 @@ LAST DICT.GetXT
 		DUP C@
 		IF
 			Define-Word
-			<asm> CPUSH DICTP </asm> C,
+			a.CPUSH a.DICTP C,
 			LAST ,
 		ELSE
 			DROP RESET
@@ -610,125 +578,128 @@ LAST DICT.GetXT
 : : CREATE-NAME STATE ON ;
 : :NONAME HERE STATE ON ;
 
-: ; \ ( -- )
-	?COMPILING 
-	IF
-		<asm> CPUSH RET </asm> C,
-		STATE OFF
-	ELSE
-		RESET
-	THEN
+: ;
+	a.CPUSH a.RET C,
+	STATE OFF
 ; IMMEDIATE
 
-: LAST? LAST DICT>NAME COUNT TYPE ;
-
-: (FL) \ Forgets the last word
+: ForgetLast \ Forgets the last word
 	LAST CELL + @ DP ! 
 	LAST @ (LAST) ! 
 ;
 
-: .fl (FL) LAST? ;
-
 : resetState ?COMPILING 
-	IF (FL) THEN 
+	IF ForgetLast THEN 
 	STATE OFF
-	isPostpone OFF
 	DECIMAL
 ;
 
 : ALLOT HERE + DP ! ;
 
-: (const) <asm> CPUSH PUSH </asm> C, , <asm> CPUSH RET </asm> C, ;
-: CONSTANT CREATE-NAME (const) ; INLINE
-: VARIABLE CREATE-NAME HERE 2 + CELL + (const) 0 , ; INLINE
-: CVARIABLE CREATE-NAME HERE 2 + 1 + (const) 0 C, ; INLINE
-
-: ? @ . ; \ ( addr -- )
-: C? C@ . ; \ ( addr -- )
+: ? @ . ;		\ ( addr -- )
+: C? C@ . ;		\ ( addr -- )
 
 : FREE LAST HERE - ;
-: FREE? FREE . S"  bytes free." CT ;
-
-: bufAppend DUP C++ DUP C@ + C! ; \ ( ch addr -- )
-: nullTerm DUP C@ + 1+ 0 SWAP C! ; \ ( addr -- )
-
-: ascii. DUP HEX. BL DUP DECIMAL. BL EMIT ;
-: ascii 2DUP < IF SWAP THEN BEGIN CRLF DUP ascii. 1+ 2DUP > WHILE 2DROP ;
-
-: t0 2DUP < IF SWAP THEN BEGIN DUP . 1+ 2DUP > WHILE 2DROP ;
-: t1 2DUP < IF SWAP THEN BEGIN 1+ DUP . 2DUP > WHILE 2DROP ;
+: FREE? FREE (.) S"  bytes free." CT ;
 
 : mainLoop 
 	resetState 
 	BEGIN 
+		tmp-init
 		?COMPILING 0= IF S"  OK" CT .S THEN
 		CRLF getLine 1+ >IN ! 
 		executeInput BL 
 	AGAIN ;
 
-99 STATE !
 : main STATE @ 99 = IF STATE OFF S" Hello." CT THEN mainLoop ;
 
-: fn S" img-4th.bin" ;
-: img-save 
-   fn 1 FOPEN IF
-       >R
-       0 MEM_SZ R@ FWRITE 
-	   . S"  bytes written." CT
-       R> FCLOSE
-   ELSE
-       S" cannot open " CT fn CT RESET
-   THEN ;
-
-: dump CR BEGIN 2DUP < IF 2DROP LEAVE THEN DUP BL C@ HEX. 1+ AGAIN ;
-
 \ ------------------------------------------------------------------------------------
-\ A stack is comprised of 3 parts, [stack-pointer] [stack-last] [stack-data]
-\ The stack "bottom" is the first CELL after the stack-pointer
-\
-: (stk-ptr) ;                                   \ ( stk -- stk-ptr-addr )
-: (stk-top) CELL + ;		        	        \ ( stk -- last-cell-addr )
+: file-getLine		\ ( fp -- addr num-read )
+	Pad SWAP 200 SWAP
+	FREADLINE \ ( addr sz fp -- num-read )
+	Pad SWAP
+	\ Pad CT CR \ DEBUG
+;
 
-: stk-bottom CELL DUP + + ;                     \ ( stk -- bottom )
-: stk-top (stk-top) @ ;			                \ ( stk -- last-cell-addr )
-: stk-ptr (stk-ptr) @ ;                         \ ( stk -- stk-ptr )
-: stk-reset DUP stk-bottom SWAP (stk-ptr) ! ;   \ ( stk -- )
-: stk-depth DUP stk-ptr                         \ ( stk -- depth )
-    SWAP stk-bottom - CELL / ;
+: load 0 0 FOPEN 		\ ( filename -- ) 
+	0= IF
+		S" Cannot open file." CT LEAVE
+	THEN
+	INPUT-FP !
+	BEGIN
+		INPUT-FP @ file-getLine
+		IF
+			1+ >IN !
+			\ >IN @ C@ .
+			executeInput
+		ELSE
+			DROP
+			INPUT-FP @ FCLOSE
+			INPUT-FP OFF
+			LEAVE
+		THEN
+	AGAIN ;
 
-: stk-init 								        \ ( sz stk -- )
-    SWAP CELLS ALLOT
-    HERE OVER (stk-top) !
-    CELL ALLOT stk-reset ;
+\ ******************************************************************************************
+: STR.EMPTY 0 OVER ! ; INLINE		\ ( addr -- addr )
 
-: stk-over?                                     \ ( stk -- )
-    DUP stk-top OVER stk-ptr <
-    IF
-        S" Stack overflow." CT
-	    DROP RESET
-    THEN 
-    DROP ;
+: STR.LEN DUP C@ ; INLINE		\ ( addr -- addr len )
 
-: stk-under?                                    \ ( stk -- )
-    DUP stk-ptr OVER stk-bottom <=
-    IF
-		S" Stack empty." CT
-	     stk-reset RESET
-    THEN 
-    DROP ;
+: STR.CATC			\ ( addr ch -- addr )
+    OVER
+    DUP C++        \ increment len
+    STR.LEN + 
+    0 OVER 1+ C!   \ null-terminate
+    C! ;
 
-: >stk DUP stk-over? (stk-ptr) TUCK @ !	        \ ( val stk -- )
-    CELL += ;
+: STR.NULLTERM DUP STR.LEN + 1+ 0 SWAP C! ;			\ ( addr -- addr )
 
-: stk@ DUP stk-under? stk-ptr CELL - @ ;        \ ( stk -- val )
+\ ******************************************************************************************
+\ String literals
+: I" 				 \ ( -- addr )
+    HERE 100 + STR.EMPTY
+	BEGIN 						
+		>IN @ C@		        \ ( 1001 ch )
+		DUP 0= IF
+			S" missing closing " CT 34 EMIT
+			RESET
+		THEN
+		>IN ++ 					\ ( 1001 ch )
+		DUP 34 = IF				\ 34 = '"'
+			DROP LEAVE 
+		THEN
+		STR.CATC
+	AGAIN ;
 
-: stk> DUP stk@ SWAP                            \ ( stk -- val )
-    (stk-ptr) CELL -= ;
+: " ?COMPILING 0= IF 
+		I" LEAVE 
+	THEN
+	
+	a.CPUSH a.SLITERAL C,
+	HERE 0 C,						\ count-byte placeholder
+	BEGIN 						
+		>IN @ C@
+		DUP 0= IF
+			DROP 1- DP !		\ reset HERE
+			S" missing closing '" CT 34 EMIT 39 EMIT
+			RESET
+		THEN
+		>IN ++
+		DUP 34 = IF				\ 34 = '"'
+			DROP HERE 0 C,		\ NT string ( 1001 1004 ) 
+			OVER - 1- SWAP C!	\ 
+			LEAVE 
+		THEN
+		C,
+	AGAIN ; IMMEDIATE
 
-\ ------------------------------------------------------------------------------------
+: ll S" loads.4th" load ;
 
-CR
-.(MEM_SZ) 44 EMIT BL
-.(HERE)   44 EMIT BL 
-.(LAST)   44 EMIT BL 
-FREE? CR
+: sys-stats
+	.(MEM_SZ) 44 EMIT BL
+	.(HERE)   44 EMIT BL 
+	.(LAST)   44 EMIT BL
+	FREE? CR ;
+
+sys-stats
+99 STATE !

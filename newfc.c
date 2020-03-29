@@ -5,31 +5,32 @@
 #include <ctype.h>
 #include "forth-vm.h"
 #include "Shared.h"
+#include "functions.h"
 #include "logger.h"
 #include "string.h"
 
 void Parse(char *);
-DICT_T *FindWord(char *word);
+CELL FindWord(char *word);
 
 char input_fn[256];
 char output_fn[256];
 FILE *input_fp = NULL;
 FILE *output_fp = NULL;
 
-CELL HERE, LAST, STATE;
-CELL BASE = 10;
+BYTE BASE = 10, STATE = 0;
+CELL ORG = 0x40;
+CELL HERE, LAST;
 
 extern int _QUIT_HIT;
 
-/*
-NB build this in somehow to enable usage of VT100 ECSAPE sequences to control the screen
-
-	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	DWORD dwMode = 0;
-	GetConsoleMode(hOut, &dwMode);
-	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-	SetConsoleMode(hOut, dwMode);
-*/
+// ------------------------------------------------------------------------------------------
+typedef struct {
+	CELL prev;
+	CELL next;
+	BYTE flags;
+	BYTE len;
+	char name[64];
+} DICT_T2;
 
 // ------------------------------------------------------------------------------------------
 OPCODE_T opcodes[] = {
@@ -47,7 +48,7 @@ OPCODE_T opcodes[] = {
 	, { _T("JMPZ"), JMPZ, _T("") }
 	, { _T("JMPNZ"), JMPNZ, _T("") }
 	, { _T("CALL"), CALL, _T("") }
-	, { _T("RET"), RET, _T("") }
+	, { _T("RET"), RET, _T("LEAVE") }
 	, { _T("COMPARE"), COMPARE, _T("COMPARE") }
 	, { _T("COMPAREI"), COMPAREI, _T("COMPAREI") }
 	, { _T("ADD"), ADD, _T("+") }
@@ -73,9 +74,6 @@ OPCODE_T opcodes[] = {
 	, { _T("AND"), AND, _T("AND") }
 	, { _T("OR"), OR, _T("OR") }
 	, { _T("GETCH"), GETCH, _T("GETCH") }
-	, { _T("USTACKINIT"), USINIT, _T("USTACKINIT") }
-	, { _T("UPUSH"), USPUSH, _T(">USTACK") }
-	, { _T("UPOP"), USPOP, _T("USTACK>") }
 	, { _T("BREAK"), BREAK, _T("BREAK") }
 	, { _T("RESET"), RESET, _T("RESET") }
 	, { _T("BYE"), BYE, _T("BYE") }
@@ -107,30 +105,16 @@ CELL CFetch(CELL loc)
 
 void Comma(CELL num)
 {
-	if ((0 <= HERE) && (HERE < LAST))
-	{
-		trace(", %04lx (%04lx)", num, HERE);
-		Store(HERE, num);
-		HERE += CELL_SZ;
-	}
-	else
-	{
-		printf("Comma(%04lx): out of memory!", num);
-	}
+    trace(", %04lx (%04lx)", num, HERE);
+    Store(HERE, num);
+    HERE += CELL_SZ;
 }
 
 void CComma(BYTE num)
 {
-	if (HERE < LAST)
-	{
-		trace("C, %02lx (%04lx)", num, HERE);
-		the_memory[HERE] = num;
-		HERE += 1;
-	}
-	else
-	{
-		printf("CComma(%02x): out of memory!", (int)num);
-	}
+    trace("C, %02lx (%04lx)", num, HERE);
+    the_memory[HERE] = num;
+    HERE += 1;
 }
 
 void SyncMem(bool isSet)
@@ -151,12 +135,18 @@ void SyncMem(bool isSet)
 	}
 }
 
+CELL GetXT(CELL addr)
+{
+	DICT_T2 *dp = (DICT_T2 *)(&the_memory[addr]);
+	return addr + 11 + strlen(dp->name);
+}
+
 void Compile(FILE *fp_in)
 {
 	int line_no = 0;
+
 	char buf[128];
 	char line[128];
-
     while (fgets(buf, sizeof(buf), fp_in) == buf)
     {
 		string_rtrim(buf);
@@ -164,23 +154,32 @@ void Compile(FILE *fp_in)
         strcpy(line, buf);
         Parse(buf);
 		if (_QUIT_HIT == 1)
-		{
-			printf("QUIT hit on line %d: %s\n", line_no, line);
 			break;
-		}
     }
     fclose(fp_in);
 
-	DICT_T *dp = FindWord("main");
-	if (dp == NULL)
+	CELL addr = FindWord("main");
+	if (addr == 0)
 	{
-		dp = (DICT_T *)&the_memory[LAST];
+		addr = LAST;
 	}
 
 	CStore(0, JMP);
-	Store(1, dp->XT);
+	Store(1, GetXT(addr));
 
 	SyncMem(true);
+}
+
+bool ExecuteOpcode(BYTE opcode)
+{
+	PC = HERE + 10;
+	the_memory[PC] = opcode;
+
+	SyncMem(true);
+	cpu_step();
+	SyncMem(false);
+
+	return (PC > 0);
 }
 
 CELL ExecuteXT(CELL XT)
@@ -195,21 +194,51 @@ CELL ExecuteXT(CELL XT)
 	return ret;
 }
 
-DICT_T *FindWord(LPCTSTR word)
+BYTE FindAsm(LPCTSTR word)
 {
-	trace(" looking for word [%s]\n", word);
-	DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
-	while (dp->next > 0)
+	for (int i = 0; opcodes[i].opcode != 0; i++)
 	{
-		if (string_equals(word, dp->name))
+		if (string_equals(opcodes[i].asm_instr, word))
 		{
-			return dp;
+			return opcodes[i].opcode;
 		}
-		dp = (DICT_T *)(&the_memory[dp->next]);
 	}
-
 	return 0;
 }
+
+BYTE FindForthPrim(LPCTSTR word)
+{
+	for (int i = 0; opcodes[i].opcode != 0; i++)
+	{
+		if (string_equals(opcodes[i].forth_prim, word))
+		{
+			return opcodes[i].opcode;
+		}
+	}
+	return 0;
+}
+
+CELL FindWord(LPCTSTR word)
+{
+	debug(" looking for word [%s] ... ", word);
+	CELL cur = LAST;
+
+	do {
+		DICT_T2 *dp = (DICT_T2 *)(&the_memory[cur]);
+		trace("cur=%04lx, %s ... ", cur, dp->name);
+		if (string_equals(word, dp->name))
+		{
+			debug("found it at %04lx\n", cur);
+			return cur;
+		}
+		cur = dp->prev;
+	}
+	while (cur != 0);
+
+	debug("not found.\n");
+	return 0;
+}
+
 
 bool MakeNumber(LPCTSTR word, CELL *the_num)
 {
@@ -250,17 +279,21 @@ bool MakeNumber(LPCTSTR word, CELL *the_num)
 
 void DefineWord(LPCTSTR word, BYTE flags)
 {
-	CELL curLAST = LAST;
-	LAST -= ((CELL_SZ*2) + 3 + string_len(word));
-	debug("Defining word [%s] at %04lx, HERE=%04lx\n", word, LAST, HERE);
+	debug("Defining word [%s] at HERE=%04lx, LAST=%04lx\n", word, HERE, LAST);
 
-	DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
-	dp->next = curLAST;
-	dp->XT = HERE;
+	DICT_T2 *dp = (DICT_T2 *)(&the_memory[LAST]);
+	dp->next = HERE;
+
+	dp = (DICT_T2 *)(&the_memory[HERE]);
+	dp->next = 0;
+	dp->prev = LAST;
 	dp->flags = flags;
-	dp->len = string_len(word);
+	dp->len = strlen(word);
 	strcpy(dp->name, word);
+    LAST = HERE;
+	HERE += (11 + dp->len);
 	SyncMem(true);
+    debug("word XT = %04lx\n", HERE);
 }
 
 // Returns a pointer to the first char after the first word in the line
@@ -295,6 +328,56 @@ char *ParseWord(char *word, char *line)
 		return line;
 	}
 
+	if (string_equals(word, ".TRACE-ON"))
+	{
+		trace_on();
+		return line;
+	}
+
+	if (string_equals(word, ".DEBUG-ON"))
+	{
+		debug_on();
+		return line;
+	}
+
+	if (string_equals(word, ".DEBUG-OFF"))
+	{
+		debug_off();
+		return line;
+	}
+
+	if (string_equals(word, ".TRACE-OFF"))
+	{
+		debug_off();
+		return line;
+	}
+
+	if (string_equals(word, ".ORG"))
+	{
+		GetWord(line, word);
+		CELL addr = 0;
+		if (MakeNumber(word, &addr))
+		{
+			ORG = addr;
+			HERE = addr;
+		}
+		return line;
+	}
+
+	if (string_equals(word, ".HEX"))
+	{
+		BASE = 16;
+		CStore(ADDR_BASE, BASE);
+		return line;
+	}
+
+	if (string_equals(word, ".DECIMAL"))
+	{
+		BASE = 10;
+		CStore(ADDR_BASE, BASE);
+		return line;
+	}
+
 	if ((STATE < 0) || (STATE > 2))
 	{
 		printf("STATE (%ld) is messed up!\n", STATE);
@@ -305,10 +388,86 @@ char *ParseWord(char *word, char *line)
 	{
 		trace("\n");
 		line = GetWord(line, word);
-		DefineWord(word, 0);
-		CComma(DICTP);
-		Comma(LAST);
 		STATE = 1;
+		DefineWord(word, 0);
+		// CComma(DICTP);
+		// Comma(LAST);
+		return line;
+	}
+
+	if (string_equals(word, "IMMEDIATE"))
+	{
+		CELL addr = LAST + 8;
+		BYTE val = CFetch(addr);
+		CStore(addr, (val|IS_IMMEDIATE));
+		return line;
+	}
+
+	if (string_equals(word, "INLINE"))
+	{
+		CELL addr = LAST + 8;
+		BYTE val = CFetch(addr);
+		CStore(addr, (val|IS_INLINE));
+		return line;
+	}
+
+	if (string_equals(word, "<asm>"))
+	{
+		STATE = 2;
+		return line;
+	}
+
+	if (string_equals(word, "</asm>"))
+	{
+		STATE = 1;
+		return line;
+	}
+
+	if (string_equals(word, ".HERE"))
+	{
+		push(HERE);
+		if (STATE == 1)
+		{
+			CComma(LITERAL);
+			Comma(pop());
+		}
+		return line;
+	}
+
+	if (string_equals(word, ".CELL"))
+	{
+		push(CELL_SZ);
+		return line;
+	}
+
+	if (string_equals(word, ".LITERAL"))
+	{
+		CComma(LITERAL);
+		Comma(pop());
+		return line;
+	}
+
+	if (string_equals(word, ".CLITERAL"))
+	{
+		CComma(CLITERAL);
+		CComma((BYTE)pop());
+		return line;
+	}
+
+	if (string_equals(word, ".COMMA"))
+	{
+		Comma(pop());
+		return line;
+	}
+
+	if (string_equals(word, "("))
+	{
+		while (true)
+		{
+			BYTE ch = *(line++);
+			if ((ch == ')') || (ch == NULL))
+				break;
+		}
 		return line;
 	}
 
@@ -322,7 +481,7 @@ char *ParseWord(char *word, char *line)
 			return line;
 		}
 
-		if (strcmp(word, ".IF") == 0)
+		if (strcmp(word, "IF") == 0)
 		{
 			CComma(JMPZ);
 			push(HERE);
@@ -330,7 +489,7 @@ char *ParseWord(char *word, char *line)
 			return line;
 		}
 
-		if (strcmp(word, ".ELSE") == 0)
+		if (strcmp(word, "ELSE") == 0)
 		{
 			CELL tmp = pop();
 			CComma(JMP);
@@ -340,10 +499,37 @@ char *ParseWord(char *word, char *line)
 			return line;
 		}
 
-		if (strcmp(word, ".THEN") == 0)
+		if (strcmp(word, "THEN") == 0)
 		{
 			CELL tmp = pop();
 			Store(tmp, HERE);
+			return line;
+		}
+
+		if (strcmp(word, "BEGIN") == 0)
+		{
+			push(HERE);
+			return line;
+		}
+
+		if (strcmp(word, "AGAIN") == 0)
+		{
+			CComma(JMP);
+			Comma(pop());
+			return line;
+		}
+
+		if (strcmp(word, "WHILE") == 0)
+		{
+			CComma(JMPNZ);
+			Comma(pop());
+			return line;
+		}
+
+		if (strcmp(word, "UNTIL") == 0)
+		{
+			CComma(JMPZ);
+			Comma(pop());
 			return line;
 		}
 
@@ -374,43 +560,87 @@ char *ParseWord(char *word, char *line)
 		}
 	}
 
-	DICT_T *dp = FindWord(word);
-	if (dp != NULL)
+	BYTE opcode = FindAsm(word);
+
+	if (0 < opcode)
 	{
-		debug("FORTH word [%s]. STATE=%ld ... ", dp->name, STATE);
+		debug("[%s] Is an ASM keyword: opcode=%d\n", word, opcode);
+		if (STATE == 0)
+		{
+			if (! ExecuteOpcode(opcode))
+			{
+				printf("\n%s: unsupported opcode %d", word, opcode);
+				_QUIT_HIT = 1;
+			}
+		}
+		else 
+		{
+			CComma(opcode);
+		}
+		return line;
+	}
+
+	opcode = FindForthPrim(word);
+	if (0 < opcode)
+	{
+		debug("[%s] Is a FORTH primitive: opcode=%d\n", word, opcode);
 		if (STATE == 1)
 		{
-			debug("compiling into current word\n", dp->name, dp->XT, STATE);
+			CComma(opcode);
+		}
+		else
+		{
+			if (!ExecuteOpcode(opcode))
+			{
+				printf("\n%s: unsupported opcode %d", word, opcode);
+			}
+		}
+		return line;
+	}
+
+	CELL word_addr = FindWord(word);
+	if (word_addr != 0)
+	{
+		debug("FORTH word [%s]. STATE=%ld, HERE=%04lx ... ", word, STATE, HERE);
+		DICT_T2 *dp = (DICT_T2 *)&(the_memory[word_addr]);
+		CELL xt = GetXT(word_addr);
+		debug("xt=%04lx ... ", xt);
+		if (STATE == 1)
+		{
 			if (dp->flags & IS_IMMEDIATE)
 			{
-				ExecuteXT(dp->XT);
+				debug("IMMEDIATE: executing it ...\n");
+				ExecuteXT(xt);
 			}
 			else if (dp->flags & IS_INLINE)
 			{
-				// Skip the DICTP instruction
-				CELL addr = dp->XT + 1 + CELL_SZ;
-
+				debug("INLINE: copying it ...\n");
 				// Copy bytes until the first RET
 				while (true)
 				{
-					BYTE b = CFetch(addr++);
-					if (b == RET)
+					BYTE b = CFetch(xt++);
+					if (b != RET)
+					{
+						CComma(b);
+					}
+					else
 					{
 						break;
+
 					}
-					CComma(b);
 				}
 			}
 			else
 			{
+				debug("compiling into current word\n", word, xt, STATE);
 				CComma(CALL);
-				Comma(dp->XT);
+				Comma(xt);
 			}
 		}
 		else
 		{
-			debug("executing it ...\n");
-			ExecuteXT(dp->XT);
+			debug("STATE = 0, executing it ...\n");
+			ExecuteXT(xt);
 		}
 		return line;
 	}
@@ -486,8 +716,6 @@ void generate_CComma()
 {
 	DefineWord("C,", 0);
 	CComma_XT = HERE;
-	CComma(DICTP);
-	Comma(LAST);
 	CComma(CLITERAL);
 	CComma(ADDR_HERE);
 	CComma(FETCH);
@@ -512,8 +740,6 @@ void generate_asm_words()
 		OPCODE_T *op = &(opcodes[i]);
 		sprintf(tmp, "a.%s", op->asm_instr);
 		DefineWord(tmp, IS_IMMEDIATE);
-		CComma(DICTP);
-		Comma(LAST);
 		CComma(CLITERAL);
 		CComma(opcodes[i].opcode);
 		CComma(CALL);
@@ -530,32 +756,10 @@ void generate_forth_prims()
 		if (strlen(op->forth_prim) > 0)
 		{
 			DefineWord(op->forth_prim, IS_INLINE);
-			CComma(DICTP);
-			Comma(LAST);
 			CComma(op->opcode);
 			CComma(RET);
 		}
 	}
-}
-
-void generate_constant(char *name, BYTE val)
-{
-	DefineWord(name, IS_INLINE);
-	CComma(DICTP);
-	Comma(LAST);
-	CComma(CLITERAL);
-	CComma(val);
-	CComma(RET);
-}
-
-void generate_constants()
-{
-	generate_constant("BASE", ADDR_BASE);
-	generate_constant("CELL", CELL_SZ);
-	generate_constant("DP", ADDR_HERE);
-	generate_constant("(LAST)", ADDR_LAST);
-	generate_constant("INPUT-FP", 0x001C);
-	generate_constant("STATE", ADDR_STATE);
 }
 
 void write_output_file()
@@ -578,16 +782,16 @@ void write_output_file()
 void CompilerInit()
 {
 	init_vm(MEM_SZ);
-	the_memory[0] = RET;
-	isEmbedded = true;
+	CStore(ADDR_CELL, CELL_SZ);
 
 	HERE = 0x0040;
-	LAST = MEM_SZ - STACKS_SZ - CELL_SZ;
+	LAST = 0;
+    BASE = 10;
 	STATE = 0;
 
-	Store(LAST, 0);
-	CStore(ADDR_CELL, CELL_SZ);
-	CStore(ADDR_BASE, BASE);
+	SyncMem(true);
+	CStore(0, RET);
+	isEmbedded = true;
 }
 
 void do_compile()
@@ -595,10 +799,10 @@ void do_compile()
     printf("compiling from %s...\n", input_fn);
 	CompilerInit();
 
-	generate_constants();
 	generate_CComma();
 	generate_asm_words();
 	generate_forth_prims();
+	// _QUIT_HIT = 1;
 
     input_fp = fopen(input_fn, "rt");
     if (!input_fp)
@@ -608,7 +812,6 @@ void do_compile()
     }
 
 	Compile(input_fp);
-	CStore(ADDR_BASE, 10);
     fclose(input_fp);
     input_fp = NULL;
 }
