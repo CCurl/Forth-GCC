@@ -105,7 +105,6 @@ variable ps
 decimal 64 ps stk-init
 : >p ps >stk ; 
 : p> ps stk> ; 
-: p@ ps stk@ ;
 : pdepth ps stk-depth ;
 : pdrop ps stk> DROP ;
 : pclear ps stk-reset ;
@@ -123,6 +122,12 @@ decimal 64 ps stk-init
 : p4 (p4) @ ;
 : p5 (p5) @ ;
 : p6 (p6) @ ;
+: p1! (p1) ! ;
+: p2! (p2) ! ;
+: p3! (p3) ! ;
+: p4! (p4) ! ;
+: p5! (p5) ! ;
+: p6! (p6) ! ;
 : >>p
     1 begin 
         2dup < if 2drop leave then 
