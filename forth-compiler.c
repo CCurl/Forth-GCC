@@ -73,6 +73,9 @@ OPCODE_T opcodes[] = {
 	, { _T("AND"), AND, _T("AND") }
 	, { _T("OR"), OR, _T("OR") }
 	, { _T("GETCH"), GETCH, _T("GETCH") }
+	, { _T("USTACKINIT"), USINIT, _T("USTACKINIT") }
+	, { _T("UPUSH"), USPUSH, _T(">USTACK") }
+	, { _T("UPOP"), USPOP, _T("USTACK>") }
 	, { _T("BREAK"), BREAK, _T("BREAK") }
 	, { _T("RESET"), RESET, _T("RESET") }
 	, { _T("BYE"), BYE, _T("BYE") }
@@ -161,7 +164,10 @@ void Compile(FILE *fp_in)
         strcpy(line, buf);
         Parse(buf);
 		if (_QUIT_HIT == 1)
+		{
+			printf("QUIT hit on line %d: %s\n", line_no, line);
 			break;
+		}
     }
     fclose(fp_in);
 

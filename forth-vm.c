@@ -18,8 +18,6 @@ CELL *DSP = NULL;	// the data stack pointer
 CELL *dsp_init = NULL;
 CELL *rsp_init = NULL;
 
-CELL arg1, arg2, arg3;
-
 bool isEmbedded = false;
 bool isBYE = false;
 
@@ -66,69 +64,6 @@ void init_vm(int vm_size)
 	init_vm_vectors();
 	create_vm();
 	reset_vm();
-}
-
-// The data stack starts at (MEM_SZ - STACKS_SZ) and grows upwards towards the return stack
-void push(CELL val)
-{
-	// trace(" push(%ld, DSP=0x%08lx) ", val, DSP);
-	if (RSP <= DSP)
-	{
-		printf(" stack overflow!");
-		reset_vm();
-		// _QUIT_HIT = 1;
-		// isBYE = 1;
-		return;
-	}
-	*(DSP) = (CELL)(val);
-	++DSP;
-}
-
-CELL pop() 
-{
-	if (DSP <= dsp_init)
-	{
-		printf(" stack underflow!");
-		reset_vm();
-		// _QUIT_HIT = 1;
-		// isBYE = 1;
-		return 0;
-	}
-	DSP--;
-	// trace(" pop(%ld, DSP=0x%08lx) ", *(DSP), DSP);
-	return *(DSP);
-}
-
-// The return stack starts at (MEM_SZ) and grows downwards towards the data stack
-void rpush(CELL val)
-{
-	if (RSP <= DSP)
-	{
-		printf(" return stack overflow!");
-		reset_vm();
-		// _QUIT_HIT = 1;
-		// isBYE = 1;
-		return;
-	}
-	// trace(" rpush %ld ", val);
-	--RSP;
-	*(RSP) = (CELL)(val);
-}
-
-CELL rpop()
-{
-	if (RSP >= rsp_init)
-	{
-		printf(" return stack underflow! (at PC=0x%04lx)", PC-1);
-		reset_vm();
-		// _QUIT_HIT = 1;
-		// isBYE = 1;
-		return PC;
-	}
-	CELL val = *(RSP);
-	// trace(" rpop(%ld) ", val);
-	RSP++;
-	return val;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -184,7 +119,7 @@ CELL cpu_loop()
 		if (isBYE)
 		{
 			debug("done. PC=%04lx\n", PC);
-			return GETTOS();
+			return 1;
 		}
 	}
 	return 0;
