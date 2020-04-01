@@ -15,6 +15,7 @@ char input_fn[256];
 char output_fn[256];
 FILE *input_fp = NULL;
 FILE *output_fp = NULL;
+int stand_alone = 1;
 
 CELL HERE, LAST, STATE;
 CELL BASE = 10;
@@ -347,6 +348,26 @@ char *ParseWord(char *word, char *line)
 			return line;
 		}
 
+		if (strcmp(word, ".LEAVE") == 0)
+		{
+			CComma(RET);
+			return line;
+		}
+
+		if (strcmp(word, ".BEGIN") == 0)
+		{
+			push(HERE);
+			return line;
+		}
+
+		if (strcmp(word, ".AGAIN") == 0)
+		{
+			CELL tmp = pop();
+			CComma(JMP);
+			Comma(tmp);
+			return line;
+		}
+
 		if (string_equals(word, "S\""))
 		{
 			CComma(SLITERAL);
@@ -504,8 +525,52 @@ void generate_CComma()
 	CComma(RET);
 }
 
+CELL Comma_XT = 0;
+void generate_Comma()
+{
+	if (stand_alone)
+	{
+		DefineWord(",", 0);
+		Comma_XT = HERE;
+		CComma(DICTP);
+		Comma(LAST);
+		CComma(LITERAL);
+		CComma(ADDR_HERE);
+		CComma(FETCH);
+		CComma(STORE);
+		CComma(CLITERAL);
+		CComma(ADDR_HERE);
+		CComma(FETCH);
+		CComma(CLITERAL);
+		CComma(CELL_SZ);
+		CComma(ADD);
+		CComma(CLITERAL);
+		CComma(ADDR_HERE);
+		CComma(STORE);
+		CComma(RET);
+	}
+}
+
+CELL CComma_HERE = 0;
+void generate_HERE()
+{
+	if (stand_alone)
+	{
+		DefineWord("HERE", 0);
+		CComma_HERE = HERE;
+		CComma(DICTP);
+		Comma(LAST);
+		CComma(CLITERAL);
+		CComma(ADDR_HERE);
+		CComma(FETCH);
+	}
+}
+
 void generate_asm_words()
 {
+	if (stand_alone)
+		return;
+
 	char tmp[64];
 	for (int i = 0; opcodes[i].opcode != 0; i++)
 	{
@@ -597,6 +662,8 @@ void do_compile()
 
 	generate_constants();
 	generate_CComma();
+	generate_Comma();
+	generate_HERE();
 	generate_asm_words();
 	generate_forth_prims();
 

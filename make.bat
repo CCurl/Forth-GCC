@@ -2,6 +2,7 @@
 
 if "--%1%--" == "--fc--" goto make-fc
 if "--%1%--" == "--fd--" goto make-fd
+if "--%1%--" == "--fa--" goto make-fa
 if "--%1%--" == "--forth--" goto make-forth
 if "--%1%--" == "--nc--" goto make-nc
 if "--%1%--" == "--nd--" goto make-nd
@@ -63,6 +64,20 @@ gcc -g -o tmp %c-files%
 strip -o %output%.exe -g -S -d -X tmp.exe
 del tmp.exe
 if "--%2%--" == "--1--" forth-dis
+goto done
+
+:make-fa
+set output=forth-dis2
+set c-files=forth-dis2.c 
+set c-files=%c-files% forth-vm.c
+set c-files=%c-files% vm-prims.c
+set c-files=%c-files% logger.c
+echo making %output% ...
+echo gcc -g -o %output% %c-files%
+gcc -g -o tmp %c-files%
+strip -o %output%.exe -g -S -d -X tmp.exe
+del tmp.exe
+if "--%2%--" NEQ "----" forth-dis2
 goto done
 
 :make-nd
