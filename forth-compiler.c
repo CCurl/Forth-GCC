@@ -15,6 +15,8 @@ char input_fn[256];
 char output_fn[256];
 FILE *input_fp = NULL;
 FILE *output_fp = NULL;
+int stand_alone = 0;
+int mem_size_KB = 64;
 
 CELL HERE, LAST, STATE;
 CELL BASE = 10;
@@ -174,7 +176,11 @@ void Compile(FILE *fp_in)
 	DICT_T *dp = FindWord("main");
 	if (dp == NULL)
 	{
-		dp = (DICT_T *)&the_memory[LAST];
+		dp = FindWord("MAIN");
+		if (dp == NULL)
+		{
+			dp = (DICT_T *)&the_memory[LAST];
+		}
 	}
 
 	CStore(0, JMP);
@@ -347,6 +353,26 @@ char *ParseWord(char *word, char *line)
 			return line;
 		}
 
+		if (strcmp(word, ".LEAVE") == 0)
+		{
+			CComma(RET);
+			return line;
+		}
+
+		if (strcmp(word, ".BEGIN") == 0)
+		{
+			push(HERE);
+			return line;
+		}
+
+		if (strcmp(word, ".AGAIN") == 0)
+		{
+			CELL tmp = pop();
+			CComma(JMP);
+			Comma(tmp);
+			return line;
+		}
+
 		if (string_equals(word, "S\""))
 		{
 			CComma(SLITERAL);
@@ -504,8 +530,52 @@ void generate_CComma()
 	CComma(RET);
 }
 
+CELL Comma_XT = 0;
+void generate_Comma()
+{
+	if (stand_alone)
+	{
+		DefineWord(",", 0);
+		Comma_XT = HERE;
+		CComma(DICTP);
+		Comma(LAST);
+		CComma(LITERAL);
+		CComma(ADDR_HERE);
+		CComma(FETCH);
+		CComma(STORE);
+		CComma(CLITERAL);
+		CComma(ADDR_HERE);
+		CComma(FETCH);
+		CComma(CLITERAL);
+		CComma(CELL_SZ);
+		CComma(ADD);
+		CComma(CLITERAL);
+		CComma(ADDR_HERE);
+		CComma(STORE);
+		CComma(RET);
+	}
+}
+
+CELL CComma_HERE = 0;
+void generate_HERE()
+{
+	if (stand_alone)
+	{
+		DefineWord("HERE", 0);
+		CComma_HERE = HERE;
+		CComma(DICTP);
+		Comma(LAST);
+		CComma(CLITERAL);
+		CComma(ADDR_HERE);
+		CComma(FETCH);
+	}
+}
+
 void generate_asm_words()
 {
+	if (stand_alone)
+		return;
+
 	char tmp[64];
 	for (int i = 0; opcodes[i].opcode != 0; i++)
 	{
@@ -597,6 +667,8 @@ void do_compile()
 
 	generate_constants();
 	generate_CComma();
+	generate_Comma();
+	generate_HERE();
 	generate_asm_words();
 	generate_forth_prims();
 
@@ -626,6 +698,16 @@ void process_arg(char *arg)
         arg = arg+2;
         strcpy(output_fn, arg);
     }
+    else if (*arg == 'a') 
+    {
+        arg = arg+2;
+        stand_alone = (strcmp(arg, "1") == 0) ? 0 : 1;
+    }
+    else if (*arg == 'm') 
+    {
+        arg = arg+2;
+        mem_size_KB = atoi(arg);
+    }
     else if (*arg == 't') 
     {
 		trace_on();
@@ -643,6 +725,10 @@ void process_arg(char *arg)
         printf("      default inputFile is forth.src\n");
         printf("  -o:outputFile (full or relative path)\n");
         printf("      default outputFile is forth.bin\n");
+        printf("  -a:(0|1) - include assembler words\n");
+        printf("      default value is 1\n");
+        printf("  -m:<KB> - Memory size in KB\n");
+        printf("      default value is 64\n");
         printf("  -t (set log level to trace)\n");
         printf("  -d (set log level to debug)\n");
         printf("  -? (prints this message)\n");
@@ -669,6 +755,7 @@ int main (int argc, char **argv)
         }
     }
 
+	MEM_SZ = mem_size_KB * 1024;
     do_compile();
 	write_output_file();
 

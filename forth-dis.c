@@ -673,6 +673,5 @@ int main (int argc, char **argv)
     load_vm();
 	do_dis();
 
-	printf("all done.");
     return 0;
 }

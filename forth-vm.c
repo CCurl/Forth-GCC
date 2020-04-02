@@ -22,6 +22,7 @@ bool isEmbedded = false;
 bool isBYE = false;
 
 int _QUIT_HIT = 0;
+int MEM_SZ = 0;
 
 void init_vm_vectors();
 extern void (*vm_prims[])();
@@ -64,6 +65,7 @@ void init_vm(int vm_size)
 	init_vm_vectors();
 	create_vm();
 	reset_vm();
+	SETAT(ADDR_MEM_SZ, memory_size);
 }
 
 // ------------------------------------------------------------------------------------------

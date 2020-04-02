@@ -53,9 +53,7 @@
 : >IN      [ a.PUSH HERE 1 + CELL + , ] ; 0 , a.RET
 : isNeg    [ a.PUSH HERE 1 + CELL + , ] ; 0 , a.RET
 
-: (MEM_K)  [ a.PUSH HERE 1 + CELL + , ] ; 0 , a.RET
-: MEM_SZ (MEM_K) @ 1024 * ;
-256 (MEM_K) !
+HEX : MEM_SZ 24 @ ; DECIMAL
 
 : R@ R> DUP >R ; INLINE
 : RDROP R> DROP   ; INLINE
@@ -102,16 +100,14 @@
 : WHILE ?COMPILING IF a.CPUSH a.JMPNZ C, , THEN ; IMMEDIATE
 : UNTIL ?COMPILING IF a.CPUSH a.JMPZ  C, , THEN ; IMMEDIATE
 
-: COUNT DUP 1+ SWAP C@ ;		\ ( addr1 --  addr2 num )
+: COUNT DUP 1 + SWAP C@ ;		\ ( addr1 --  addr2 num )
 
-: TYPE							\ ( addr count -- ) 
-    BEGIN
-	    DUP 0=
-		IF
-            2DROP LEAVE
-        THEN
-        SWAP DUP C@ EMIT 1+ SWAP 1-
-    AGAIN ;
+: TYPE     \ ( addr count -- ) 
+	OVER + SWAP
+	BEGIN
+		2DUP <= IF 2DROP LEAVE THEN
+		DUP C@ EMIT 1 +
+	AGAIN ;
 
 : CT COUNT TYPE ;
 
@@ -268,9 +264,7 @@
 
 : MOD 2DUP / * - ;
 
-: /MOD			\ ( num1 num2 -- num3 mod )
-	2DUP / >R R@ * - R> SWAP
-;
+: /MOD 2DUP / DUP >R * - R> SWAP ;     \ ( num1 num2 -- num3 mod )
 
 : (.)			\ ( num -- )
 	DUP 0 = 
@@ -284,7 +278,7 @@
 	BEGIN
 		DUP
 		IF
-			BASE C@ /MOD 
+			BASE C@ /MOD
 			48 OVER 9 > IF 7 + THEN
 			+ SWAP
 		ELSE
@@ -298,10 +292,11 @@
 
 : . BL (.) ;
 
-HEX
-: HEX.     BASE C@ SWAP HEX DUP 10 < IF 30 EMIT THEN (.) BASE C! ; DECIMAL
+HEX 
+: HEX.     BASE C@ SWAP HEX DUP 10 < IF 30 EMIT THEN (.) BASE C! ; 
 : DECIMAL. BASE C@ SWAP DECIMAL (.) BASE C! ;
 : BINARY.  BASE C@ SWAP BINARY  (.) BASE C! ;
+DECIMAL
 
 : MIN 2DUP > IF SWAP THEN DROP ; 
 : MAX 2DUP < IF SWAP THEN DROP ; 
