@@ -4,6 +4,7 @@ if "--%1%--" == "--fc--" goto make-fc
 if "--%1%--" == "--fd--" goto make-fd
 if "--%1%--" == "--fa--" goto make-fa
 if "--%1%--" == "--fb--" goto make-fb
+if "--%1%--" == "--ex--" goto make-ex
 if "--%1%--" == "--forth--" goto make-forth
 if "--%1%--" == "--nc--" goto make-nc
 if "--%1%--" == "--nd--" goto make-nd
@@ -73,6 +74,13 @@ forth-dis
 if "--%2%--" NEQ "----" forth
 goto done
 
+:make-ex
+forth-compiler.exe -i:ex.src -o:ex.bin -a:0 -m:3
+forth-dis -i:ex.bin -o:ex.lst
+if "--%2%--" == "----" goto done
+forth -i:ex.bin
+goto done
+
 :make-fa
 set output=forth-dis2
 set c-files=forth-dis2.c 
@@ -109,6 +117,9 @@ echo    nc - makes forth-compiler.exe
 echo    forth - makes forth.exe (if arg2=1 it then runs forth.exe)
 echo    fd - makes forth-dis.exe
 echo    fb - builds forth from forth.src
+echo    ex - makes and runs the stand-alone example
 echo    nd - makes forth-dis.exe
+echo.
+echo    NOTE: if arg2 is given it then runs the program
 
 :done
