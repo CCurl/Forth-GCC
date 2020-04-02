@@ -91,7 +91,6 @@ DECIMAL
 	DP @ D. S"  bytes used, " CT
 	(LAST) @ DP @ - D. S"  bytes free" CT
 	S" ." CT
-	. . . . .
 	BYE ;
 
 : catch-error S" ** ERROR occurred, exiting **" CT BYE ;
