@@ -1,39 +1,39 @@
-; memory-size: 262144 bytes, (40000 hex)
-; data-stack: 3fe00, grows up
-; return-stack: 3fffc, grows down
+; memory-size: 65536 bytes, (10000 hex)
+; data-stack: fe00, grows up
+; return-stack: fffc, grows down
 ;
-L0000:       JMP L12d2
+L0000:       JMP L12b9
 L0005:
 L0008:
 L0010:
 L0020:
 L0030:
 
-L0040:       # DICTP BASE (3fded)
+L0040:       # DICTP BASE (fded)
 L0045:       CPUSH 6 # (6)
 L0047:       RET
 
-L0048:       # DICTP CELL (3fdde)
+L0048:       # DICTP CELL (fdde)
 L004d:       CPUSH 4 # (4)
 L004f:       RET
 
-L0050:       # DICTP DP (3fdd1)
+L0050:       # DICTP DP (fdd1)
 L0055:       CPUSH 16 # (10)
 L0057:       RET
 
-L0058:       # DICTP (LAST) (3fdc0)
+L0058:       # DICTP (LAST) (fdc0)
 L005d:       CPUSH 20 # (14)
 L005f:       RET
 
-L0060:       # DICTP INPUT-FP (3fdad)
+L0060:       # DICTP INPUT-FP (fdad)
 L0065:       CPUSH 28 # (1c)
 L0067:       RET
 
-L0068:       # DICTP STATE (3fd9d)
+L0068:       # DICTP STATE (fd9d)
 L006d:       CPUSH 32 # (20)
 L006f:       RET
 
-L0070:       # DICTP C, (3fd90)
+L0070:       # DICTP C, (fd90)
 L0075:       CPUSH 16 # (10)
 L0077:       FETCH
 L0078:       CSTORE
@@ -45,381 +45,381 @@ L007f:       CPUSH 16 # (10)
 L0081:       STORE
 L0082:       RET
 
-L0083:       # DICTP a.PUSH (3fd7f)
+L0083:       # DICTP a.PUSH (fd7f)
 L0088:       CPUSH 1 # (1)
 L008a:       CALL L0070 # (C,)
 L008f:       RET
 
-L0090:       # DICTP a.CPUSH (3fd6d)
+L0090:       # DICTP a.CPUSH (fd6d)
 L0095:       CPUSH 14 # (e)
 L0097:       CALL L0070 # (C,)
 L009c:       RET
 
-L009d:       # DICTP a.FETCH (3fd5b)
+L009d:       # DICTP a.FETCH (fd5b)
 L00a2:       CPUSH 2 # (2)
 L00a4:       CALL L0070 # (C,)
 L00a9:       RET
 
-L00aa:       # DICTP a.STORE (3fd49)
+L00aa:       # DICTP a.STORE (fd49)
 L00af:       CPUSH 3 # (3)
 L00b1:       CALL L0070 # (C,)
 L00b6:       RET
 
-L00b7:       # DICTP a.CFETCH (3fd36)
+L00b7:       # DICTP a.CFETCH (fd36)
 L00bc:       CPUSH 15 # (f)
 L00be:       CALL L0070 # (C,)
 L00c3:       RET
 
-L00c4:       # DICTP a.CSTORE (3fd23)
+L00c4:       # DICTP a.CSTORE (fd23)
 L00c9:       CPUSH 16 # (10)
 L00cb:       CALL L0070 # (C,)
 L00d0:       RET
 
-L00d1:       # DICTP a.SWAP (3fd12)
+L00d1:       # DICTP a.SWAP (fd12)
 L00d6:       CPUSH 4 # (4)
 L00d8:       CALL L0070 # (C,)
 L00dd:       RET
 
-L00de:       # DICTP a.DROP (3fd01)
+L00de:       # DICTP a.DROP (fd01)
 L00e3:       CPUSH 5 # (5)
 L00e5:       CALL L0070 # (C,)
 L00ea:       RET
 
-L00eb:       # DICTP a.DUP (3fcf1)
+L00eb:       # DICTP a.DUP (fcf1)
 L00f0:       CPUSH 6 # (6)
 L00f2:       CALL L0070 # (C,)
 L00f7:       RET
 
-L00f8:       # DICTP a.OVER (3fce0)
+L00f8:       # DICTP a.OVER (fce0)
 L00fd:       CPUSH 26 # (1a)
 L00ff:       CALL L0070 # (C,)
 L0104:       RET
 
-L0105:       # DICTP a.JMP (3fcd0)
+L0105:       # DICTP a.JMP (fcd0)
 L010a:       CPUSH 8 # (8)
 L010c:       CALL L0070 # (C,)
 L0111:       RET
 
-L0112:       # DICTP a.JMPZ (3fcbf)
+L0112:       # DICTP a.JMPZ (fcbf)
 L0117:       CPUSH 9 # (9)
 L0119:       CALL L0070 # (C,)
 L011e:       RET
 
-L011f:       # DICTP a.JMPNZ (3fcad)
+L011f:       # DICTP a.JMPNZ (fcad)
 L0124:       CPUSH 10 # (a)
 L0126:       CALL L0070 # (C,)
 L012b:       RET
 
-L012c:       # DICTP a.CALL (3fc9c)
+L012c:       # DICTP a.CALL (fc9c)
 L0131:       CPUSH 11 # (b)
 L0133:       CALL L0070 # (C,)
 L0138:       RET
 
-L0139:       # DICTP a.RET (3fc8c)
+L0139:       # DICTP a.RET (fc8c)
 L013e:       CPUSH 12 # (c)
 L0140:       CALL L0070 # (C,)
 L0145:       RET
 
-L0146:       # DICTP a.COMPARE (3fc78)
+L0146:       # DICTP a.COMPARE (fc78)
 L014b:       CPUSH 27 # (1b)
 L014d:       CALL L0070 # (C,)
 L0152:       RET
 
-L0153:       # DICTP a.COMPAREI (3fc63)
+L0153:       # DICTP a.COMPAREI (fc63)
 L0158:       CPUSH 40 # (28)
 L015a:       CALL L0070 # (C,)
 L015f:       RET
 
-L0160:       # DICTP a.ADD (3fc53)
+L0160:       # DICTP a.ADD (fc53)
 L0165:       CPUSH 17 # (11)
 L0167:       CALL L0070 # (C,)
 L016c:       RET
 
-L016d:       # DICTP a.SUB (3fc43)
+L016d:       # DICTP a.SUB (fc43)
 L0172:       CPUSH 18 # (12)
 L0174:       CALL L0070 # (C,)
 L0179:       RET
 
-L017a:       # DICTP a.MUL (3fc33)
+L017a:       # DICTP a.MUL (fc33)
 L017f:       CPUSH 19 # (13)
 L0181:       CALL L0070 # (C,)
 L0186:       RET
 
-L0187:       # DICTP a.DIV (3fc23)
+L0187:       # DICTP a.DIV (fc23)
 L018c:       CPUSH 20 # (14)
 L018e:       CALL L0070 # (C,)
 L0193:       RET
 
-L0194:       # DICTP a.LT (3fc14)
+L0194:       # DICTP a.LT (fc14)
 L0199:       CPUSH 21 # (15)
 L019b:       CALL L0070 # (C,)
 L01a0:       RET
 
-L01a1:       # DICTP a.EQ (3fc05)
+L01a1:       # DICTP a.EQ (fc05)
 L01a6:       CPUSH 22 # (16)
 L01a8:       CALL L0070 # (C,)
 L01ad:       RET
 
-L01ae:       # DICTP a.GT (3fbf6)
+L01ae:       # DICTP a.GT (fbf6)
 L01b3:       CPUSH 23 # (17)
 L01b5:       CALL L0070 # (C,)
 L01ba:       RET
 
-L01bb:       # DICTP a.DICTP (3fbe4)
+L01bb:       # DICTP a.DICTP (fbe4)
 L01c0:       CPUSH 24 # (18)
 L01c2:       CALL L0070 # (C,)
 L01c7:       RET
 
-L01c8:       # DICTP a.EMIT (3fbd3)
+L01c8:       # DICTP a.EMIT (fbd3)
 L01cd:       CPUSH 25 # (19)
 L01cf:       CALL L0070 # (C,)
 L01d4:       RET
 
-L01d5:       # DICTP a.FOPEN (3fbc1)
+L01d5:       # DICTP a.FOPEN (fbc1)
 L01da:       CPUSH 28 # (1c)
 L01dc:       CALL L0070 # (C,)
 L01e1:       RET
 
-L01e2:       # DICTP a.FREAD (3fbaf)
+L01e2:       # DICTP a.FREAD (fbaf)
 L01e7:       CPUSH 29 # (1d)
 L01e9:       CALL L0070 # (C,)
 L01ee:       RET
 
-L01ef:       # DICTP a.FREADLINE (3fb99)
+L01ef:       # DICTP a.FREADLINE (fb99)
 L01f4:       CPUSH 30 # (1e)
 L01f6:       CALL L0070 # (C,)
 L01fb:       RET
 
-L01fc:       # DICTP a.FWRITE (3fb86)
+L01fc:       # DICTP a.FWRITE (fb86)
 L0201:       CPUSH 31 # (1f)
 L0203:       CALL L0070 # (C,)
 L0208:       RET
 
-L0209:       # DICTP a.FCLOSE (3fb73)
+L0209:       # DICTP a.FCLOSE (fb73)
 L020e:       CPUSH 32 # (20)
 L0210:       CALL L0070 # (C,)
 L0215:       RET
 
-L0216:       # DICTP a.SLITERAL (3fb5e)
+L0216:       # DICTP a.SLITERAL (fb5e)
 L021b:       CPUSH 7 # (7)
 L021d:       CALL L0070 # (C,)
 L0222:       RET
 
-L0223:       # DICTP a.DTOR (3fb4d)
+L0223:       # DICTP a.DTOR (fb4d)
 L0228:       CPUSH 33 # (21)
 L022a:       CALL L0070 # (C,)
 L022f:       RET
 
-L0230:       # DICTP a.RTOD (3fb3c)
+L0230:       # DICTP a.RTOD (fb3c)
 L0235:       CPUSH 34 # (22)
 L0237:       CALL L0070 # (C,)
 L023c:       RET
 
-L023d:       # DICTP a.PICK (3fb2b)
+L023d:       # DICTP a.PICK (fb2b)
 L0242:       CPUSH 37 # (25)
 L0244:       CALL L0070 # (C,)
 L0249:       RET
 
-L024a:       # DICTP a.LOGLEVEL (3fb16)
+L024a:       # DICTP a.LOGLEVEL (fb16)
 L024f:       CPUSH 35 # (23)
 L0251:       CALL L0070 # (C,)
 L0256:       RET
 
-L0257:       # DICTP a.DEPTH (3fb04)
+L0257:       # DICTP a.DEPTH (fb04)
 L025c:       CPUSH 38 # (26)
 L025e:       CALL L0070 # (C,)
 L0263:       RET
 
-L0264:       # DICTP a.AND (3faf4)
+L0264:       # DICTP a.AND (faf4)
 L0269:       CPUSH 36 # (24)
 L026b:       CALL L0070 # (C,)
 L0270:       RET
 
-L0271:       # DICTP a.OR (3fae5)
+L0271:       # DICTP a.OR (fae5)
 L0276:       CPUSH 13 # (d)
 L0278:       CALL L0070 # (C,)
 L027d:       RET
 
-L027e:       # DICTP a.GETCH (3fad3)
+L027e:       # DICTP a.GETCH (fad3)
 L0283:       CPUSH 39 # (27)
 L0285:       CALL L0070 # (C,)
 L028a:       RET
 
-L028b:       # DICTP a.USTACKINIT (3fabc)
+L028b:       # DICTP a.USTACKINIT (fabc)
 L0290:       CPUSH 41 # (29)
 L0292:       CALL L0070 # (C,)
 L0297:       RET
 
-L0298:       # DICTP a.UPUSH (3faaa)
+L0298:       # DICTP a.UPUSH (faaa)
 L029d:       CPUSH 42 # (2a)
 L029f:       CALL L0070 # (C,)
 L02a4:       RET
 
-L02a5:       # DICTP a.UPOP (3fa99)
+L02a5:       # DICTP a.UPOP (fa99)
 L02aa:       CPUSH 43 # (2b)
 L02ac:       CALL L0070 # (C,)
 L02b1:       RET
 
-L02b2:       # DICTP a.BREAK (3fa87)
+L02b2:       # DICTP a.BREAK (fa87)
 L02b7:       CPUSH 253 # (fd)
 L02b9:       CALL L0070 # (C,)
 L02be:       RET
 
-L02bf:       # DICTP a.RESET (3fa75)
+L02bf:       # DICTP a.RESET (fa75)
 L02c4:       CPUSH 254 # (fe)
 L02c6:       CALL L0070 # (C,)
 L02cb:       RET
 
-L02cc:       # DICTP a.BYE (3fa65)
+L02cc:       # DICTP a.BYE (fa65)
 L02d1:       CPUSH 255 # (ff)
 L02d3:       CALL L0070 # (C,)
 L02d8:       RET
 
-L02d9:       # DICTP @ (3fa59)
+L02d9:       # DICTP @ (fa59)
 L02de:       FETCH
 L02df:       RET
 
-L02e0:       # DICTP ! (3fa4d)
+L02e0:       # DICTP ! (fa4d)
 L02e5:       STORE
 L02e6:       RET
 
-L02e7:       # DICTP C@ (3fa40)
+L02e7:       # DICTP C@ (fa40)
 L02ec:       CFETCH
 L02ed:       RET
 
-L02ee:       # DICTP C! (3fa33)
+L02ee:       # DICTP C! (fa33)
 L02f3:       CSTORE
 L02f4:       RET
 
-L02f5:       # DICTP SWAP (3fa24)
+L02f5:       # DICTP SWAP (fa24)
 L02fa:       SWAP
 L02fb:       RET
 
-L02fc:       # DICTP DROP (3fa15)
+L02fc:       # DICTP DROP (fa15)
 L0301:       DROP
 L0302:       RET
 
-L0303:       # DICTP DUP (3fa07)
+L0303:       # DICTP DUP (fa07)
 L0308:       DUP
 L0309:       RET
 
-L030a:       # DICTP OVER (3f9f8)
+L030a:       # DICTP OVER (f9f8)
 L030f:       OVER
 L0310:       RET
 
-L0311:       # DICTP COMPARE (3f9e6)
+L0311:       # DICTP COMPARE (f9e6)
 L0316:       COMPARE
 L0317:       RET
 
-L0318:       # DICTP COMPAREI (3f9d3)
+L0318:       # DICTP COMPAREI (f9d3)
 L031d:       COMPAREI
 L031e:       RET
 
-L031f:       # DICTP + (3f9c7)
+L031f:       # DICTP + (f9c7)
 L0324:       ADD
 L0325:       RET
 
-L0326:       # DICTP - (3f9bb)
+L0326:       # DICTP - (f9bb)
 L032b:       SUB
 L032c:       RET
 
-L032d:       # DICTP * (3f9af)
+L032d:       # DICTP * (f9af)
 L0332:       MUL
 L0333:       RET
 
-L0334:       # DICTP / (3f9a3)
+L0334:       # DICTP / (f9a3)
 L0339:       DIV
 L033a:       RET
 
-L033b:       # DICTP < (3f997)
+L033b:       # DICTP < (f997)
 L0340:       LT
 L0341:       RET
 
-L0342:       # DICTP = (3f98b)
+L0342:       # DICTP = (f98b)
 L0347:       EQ
 L0348:       RET
 
-L0349:       # DICTP > (3f97f)
+L0349:       # DICTP > (f97f)
 L034e:       GT
 L034f:       RET
 
-L0350:       # DICTP EMIT (3f970)
+L0350:       # DICTP EMIT (f970)
 L0355:       EMIT
 L0356:       RET
 
-L0357:       # DICTP FOPEN (3f960)
+L0357:       # DICTP FOPEN (f960)
 L035c:       FOPEN
 L035d:       RET
 
-L035e:       # DICTP FREAD (3f950)
+L035e:       # DICTP FREAD (f950)
 L0363:       FREAD
 L0364:       RET
 
-L0365:       # DICTP FREADLINE (3f93c)
+L0365:       # DICTP FREADLINE (f93c)
 L036a:       FREADLINE
 L036b:       RET
 
-L036c:       # DICTP FWRITE (3f92b)
+L036c:       # DICTP FWRITE (f92b)
 L0371:       FWRITE
 L0372:       RET
 
-L0373:       # DICTP FCLOSE (3f91a)
+L0373:       # DICTP FCLOSE (f91a)
 L0378:       FCLOSE
 L0379:       RET
 
-L037a:       # DICTP >R (3f90d)
+L037a:       # DICTP >R (f90d)
 L037f:       DTOR
 L0380:       RET
 
-L0381:       # DICTP R> (3f900)
+L0381:       # DICTP R> (f900)
 L0386:       RTOD
 L0387:       RET
 
-L0388:       # DICTP PICK (3f8f1)
+L0388:       # DICTP PICK (f8f1)
 L038d:       PICK
 L038e:       RET
 
-L038f:       # DICTP DEPTH (3f8e1)
+L038f:       # DICTP DEPTH (f8e1)
 L0394:       DEPTH
 L0395:       RET
 
-L0396:       # DICTP AND (3f8d3)
+L0396:       # DICTP AND (f8d3)
 L039b:       AND
 L039c:       RET
 
-L039d:       # DICTP OR (3f8c6)
+L039d:       # DICTP OR (f8c6)
 L03a2:       OR
 L03a3:       RET
 
-L03a4:       # DICTP GETCH (3f8b6)
+L03a4:       # DICTP GETCH (f8b6)
 L03a9:       GETCH
 L03aa:       RET
 
-L03ab:       # DICTP USTACKINIT (3f8a1)
+L03ab:       # DICTP USTACKINIT (f8a1)
 L03b0:       USTACKINIT
 L03b1:       RET
 
-L03b2:       # DICTP >USTACK (3f88f)
+L03b2:       # DICTP >USTACK (f88f)
 L03b7:       UPUSH
 L03b8:       RET
 
-L03b9:       # DICTP USTACK> (3f87d)
+L03b9:       # DICTP USTACK> (f87d)
 L03be:       UPOP
 L03bf:       RET
 
-L03c0:       # DICTP BREAK (3f86d)
+L03c0:       # DICTP BREAK (f86d)
 L03c5:       BREAK
 L03c6:       RET
 
-L03c7:       # DICTP RESET (3f85d)
+L03c7:       # DICTP RESET (f85d)
 L03cc:       RESET
 L03cd:       RET
 
-L03ce:       # DICTP BYE (3f84f)
+L03ce:       # DICTP BYE (f84f)
 L03d3:       BYE
 L03d4:       RET
 
-L03d5:       # DICTP INLINE (3f83e)
+L03d5:       # DICTP INLINE (f83e)
 L03da:       CPUSH 20 # (14)
 L03dc:       FETCH
 L03dd:       CPUSH 2 # (2)
@@ -434,20 +434,20 @@ L03e8:       SWAP
 L03e9:       CSTORE
 L03ea:       RET
 
-L03eb:       # DICTP CELLS (3f82e)
+L03eb:       # DICTP CELLS (f82e)
 L03f0:       CPUSH 4 # (4)
 L03f2:       MUL
 L03f3:       RET
 
-L03f4:       # DICTP FLAG_IMMEDIATE (3f815)
+L03f4:       # DICTP FLAG_IMMEDIATE (f815)
 L03f9:       CPUSH 1 # (1)
 L03fb:       RET
 
-L03fc:       # DICTP FLAG_INLINE (3f7ff)
+L03fc:       # DICTP FLAG_INLINE (f7ff)
 L0401:       CPUSH 2 # (2)
 L0403:       RET
 
-L0404:       # DICTP IMMEDIATE (3f7eb)
+L0404:       # DICTP IMMEDIATE (f7eb)
 L0409:       CPUSH 20 # (14)
 L040b:       FETCH
 L040c:       CPUSH 2 # (2)
@@ -462,17 +462,17 @@ L0417:       SWAP
 L0418:       CSTORE
 L0419:       RET
 
-L041a:       # DICTP LAST (3f7dc)
+L041a:       # DICTP LAST (f7dc)
 L041f:       CPUSH 20 # (14)
 L0421:       FETCH
 L0422:       RET
 
-L0423:       # DICTP HERE (3f7cd)
+L0423:       # DICTP HERE (f7cd)
 L0428:       CPUSH 16 # (10)
 L042a:       FETCH
 L042b:       RET
 
-L042c:       # DICTP , (3f7c1)
+L042c:       # DICTP , (f7c1)
 L0431:       CPUSH 16 # (10)
 L0433:       FETCH
 L0434:       STORE
@@ -484,84 +484,84 @@ L043b:       CPUSH 16 # (10)
 L043d:       STORE
 L043e:       RET
 
-L043f:       # DICTP LOGLEVEL (3f7ae)
+L043f:       # DICTP LOGLEVEL (f7ae)
 L0444:       LOGLEVEL
 L0445:       RET
 
-L0446:       # DICTP TRACE-ON (3f79b)
+L0446:       # DICTP TRACE-ON (f79b)
 L044b:       CPUSH 2 # (2)
 L044d:       LOGLEVEL
 L044e:       RET
 
-L044f:       # DICTP TRACE-OFF (3f787)
+L044f:       # DICTP TRACE-OFF (f787)
 L0454:       CPUSH 0 # (0)
 L0456:       LOGLEVEL
 L0457:       RET
 
-L0458:       # DICTP DEBUG-ON (3f774)
+L0458:       # DICTP DEBUG-ON (f774)
 L045d:       CPUSH 1 # (1)
 L045f:       LOGLEVEL
 L0460:       RET
 
-L0461:       # DICTP DEBUG-OFF (3f760)
+L0461:       # DICTP DEBUG-OFF (f760)
 L0466:       CPUSH 0 # (0)
 L0468:       LOGLEVEL
 L0469:       RET
 
-L046a:       # DICTP HEX (3f752)
+L046a:       # DICTP HEX (f752)
 L046f:       CPUSH 16 # (10)
 L0471:       CPUSH 6 # (6)
 L0473:       CSTORE
 L0474:       RET
 
-L0475:       # DICTP DECIMAL (3f740)
+L0475:       # DICTP DECIMAL (f740)
 L047a:       CPUSH 10 # (a)
 L047c:       CPUSH 6 # (6)
 L047e:       CSTORE
 L047f:       RET
 
-L0480:       # DICTP OCTAL (3f730)
+L0480:       # DICTP OCTAL (f730)
 L0485:       CPUSH 8 # (8)
 L0487:       CPUSH 6 # (6)
 L0489:       CSTORE
 L048a:       RET
 
-L048b:       # DICTP BINARY (3f71f)
+L048b:       # DICTP BINARY (f71f)
 L0490:       CPUSH 2 # (2)
 L0492:       CPUSH 6 # (6)
 L0494:       CSTORE
 L0495:       RET
 
-L0496:       # DICTP ON (3f712)
+L0496:       # DICTP ON (f712)
 L049b:       CPUSH 1 # (1)
 L049d:       SWAP
 L049e:       STORE
 L049f:       RET
 
-L04a0:       # DICTP OFF (3f704)
+L04a0:       # DICTP OFF (f704)
 L04a5:       CPUSH 0 # (0)
 L04a7:       SWAP
 L04a8:       STORE
 L04a9:       RET
 
-L04aa:       # DICTP [ (3f6f8)
+L04aa:       # DICTP [ (f6f8)
 L04af:       CPUSH 0 # (0)
 L04b1:       CPUSH 32 # (20)
 L04b3:       STORE
 L04b4:       RET
 
-L04b5:       # DICTP ] (3f6ec)
+L04b5:       # DICTP ] (f6ec)
 L04ba:       CPUSH 1 # (1)
 L04bc:       CPUSH 32 # (20)
 L04be:       STORE
 L04bf:       RET
 
-L04c0:       # DICTP ?COMPILING (3f6d7)
+L04c0:       # DICTP ?COMPILING (f6d7)
 L04c5:       CPUSH 32 # (20)
 L04c7:       FETCH
 L04c8:       RET
 
-L04c9:       # DICTP THEN (3f6c8)
+L04c9:       # DICTP THEN (f6c8)
 L04ce:       CALL L04c0 # (?COMPILING)
 L04d3:       JMPZ L04dd
 L04d8:       CPUSH 16 # (10)
@@ -570,7 +570,7 @@ L04db:       SWAP
 L04dc:       STORE
 L04dd:       RET
 
-L04de:       # DICTP IF (3f6bb)
+L04de:       # DICTP IF (f6bb)
 L04e3:       CALL L04c0 # (?COMPILING)
 L04e8:       JMPZ L04fe
 L04ed:       CPUSH 9 # (9)
@@ -581,7 +581,7 @@ L04f7:       CPUSH 0 # (0)
 L04f9:       CALL L042c # (,)
 L04fe:       RET
 
-L04ff:       # DICTP ELSE (3f6ac)
+L04ff:       # DICTP ELSE (f6ac)
 L0504:       CALL L04c0 # (?COMPILING)
 L0509:       JMPZ L0525
 L050e:       CPUSH 8 # (8)
@@ -597,7 +597,7 @@ L0523:       SWAP
 L0524:       STORE
 L0525:       RET
 
-L0526:       # DICTP >IN (3f69e)
+L0526:       # DICTP >IN (f69e)
 L052b:       PUSH 1329 # (531)
 L0530:       RET
 .byte 0x00   
@@ -606,7 +606,7 @@ L0530:       RET
 .byte 0x00   
 L0535:       RET
 
-L0536:       # DICTP isNeg (3f68e)
+L0536:       # DICTP isNeg (f68e)
 L053b:       PUSH 1345 # (541)
 L0540:       RET
 .byte 0x00   
@@ -615,2730 +615,2717 @@ L0540:       RET
 .byte 0x00   
 L0545:       RET
 
-L0546:       # DICTP (MEM_K) (3f67c)
-L054b:       PUSH 1361 # (551)
-L0550:       RET
-.byte 0x00   
-L0552:       PUSH 403439616 # (180c0000)
-.byte 0x6b   
-.byte 0xf6   
-L0559:       STORE
-.byte 0x00   
-L055b:       CALL L0546 # ((MEM_K))
-L0560:       FETCH
-L0561:       PUSH 1024 # (400)
-L0566:       MUL
+L0546:       # DICTP MEM_SZ (f67d)
+L054b:       CPUSH 36 # (24)
+L054d:       FETCH
+L054e:       RET
+
+L054f:       # DICTP R@ (f670)
+L0554:       RTOD
+L0555:       DUP
+L0556:       DTOR
+L0557:       RET
+
+L0558:       # DICTP RDROP (f660)
+L055d:       RTOD
+L055e:       DROP
+L055f:       RET
+
+L0560:       # DICTP 2DUP (f651)
+L0565:       OVER
+L0566:       OVER
 L0567:       RET
 
-L0568:       # DICTP R@ (3f65e)
-L056d:       RTOD
-L056e:       DUP
-L056f:       DTOR
-L0570:       RET
+L0568:       # DICTP 2DROP (f641)
+L056d:       DROP
+L056e:       DROP
+L056f:       RET
 
-L0571:       # DICTP RDROP (3f64e)
-L0576:       RTOD
-L0577:       DROP
-L0578:       RET
+L0570:       # DICTP TUCK (f632)
+L0575:       SWAP
+L0576:       OVER
+L0577:       RET
 
-L0579:       # DICTP 2DUP (3f63f)
-L057e:       OVER
-L057f:       OVER
-L0580:       RET
+L0578:       # DICTP NIP (f624)
+L057d:       SWAP
+L057e:       DROP
+L057f:       RET
 
-L0581:       # DICTP 2DROP (3f62f)
-L0586:       DROP
-L0587:       DROP
-L0588:       RET
+L0580:       # DICTP ROT (f616)
+L0585:       DTOR
+L0586:       SWAP
+L0587:       RTOD
+L0588:       SWAP
+L0589:       RET
 
-L0589:       # DICTP TUCK (3f620)
-L058e:       SWAP
-L058f:       OVER
-L0590:       RET
+L058a:       # DICTP -ROT (f607)
+L058f:       SWAP
+L0590:       DTOR
+L0591:       SWAP
+L0592:       RTOD
+L0593:       RET
 
-L0591:       # DICTP NIP (3f612)
-L0596:       SWAP
-L0597:       DROP
-L0598:       RET
+L0594:       # DICTP 1+ (f5fa)
+L0599:       CPUSH 1 # (1)
+L059b:       ADD
+L059c:       RET
 
-L0599:       # DICTP ROT (3f604)
-L059e:       DTOR
-L059f:       SWAP
-L05a0:       RTOD
-L05a1:       SWAP
-L05a2:       RET
+L059d:       # DICTP 1- (f5ed)
+L05a2:       CPUSH 1 # (1)
+L05a4:       SUB
+L05a5:       RET
 
-L05a3:       # DICTP -ROT (3f5f5)
-L05a8:       SWAP
-L05a9:       DTOR
-L05aa:       SWAP
-L05ab:       RTOD
-L05ac:       RET
+L05a6:       # DICTP 2* (f5e0)
+L05ab:       CPUSH 2 # (2)
+L05ad:       MUL
+L05ae:       RET
 
-L05ad:       # DICTP 1+ (3f5e8)
-L05b2:       CPUSH 1 # (1)
-L05b4:       ADD
-L05b5:       RET
+L05af:       # DICTP 2/ (f5d3)
+L05b4:       CPUSH 2 # (2)
+L05b6:       DIV
+L05b7:       RET
 
-L05b6:       # DICTP 1- (3f5db)
-L05bb:       CPUSH 1 # (1)
-L05bd:       SUB
-L05be:       RET
+L05b8:       # DICTP += (f5c6)
+L05bd:       OVER
+L05be:       FETCH
+L05bf:       ADD
+L05c0:       SWAP
+L05c1:       STORE
+L05c2:       RET
 
-L05bf:       # DICTP 2* (3f5ce)
-L05c4:       CPUSH 2 # (2)
-L05c6:       MUL
-L05c7:       RET
+L05c3:       # DICTP -= (f5b9)
+L05c8:       OVER
+L05c9:       FETCH
+L05ca:       SWAP
+L05cb:       SUB
+L05cc:       SWAP
+L05cd:       STORE
+L05ce:       RET
 
-L05c8:       # DICTP 2/ (3f5c1)
-L05cd:       CPUSH 2 # (2)
-L05cf:       DIV
-L05d0:       RET
-
-L05d1:       # DICTP += (3f5b4)
-L05d6:       OVER
-L05d7:       FETCH
-L05d8:       ADD
-L05d9:       SWAP
-L05da:       STORE
+L05cf:       # DICTP ++ (f5ac)
+L05d4:       CPUSH 1 # (1)
+L05d6:       CALL L05b8 # (+=)
 L05db:       RET
 
-L05dc:       # DICTP -= (3f5a7)
-L05e1:       OVER
-L05e2:       FETCH
-L05e3:       SWAP
-L05e4:       SUB
-L05e5:       SWAP
-L05e6:       STORE
-L05e7:       RET
+L05dc:       # DICTP -- (f59f)
+L05e1:       CPUSH 1 # (1)
+L05e3:       CALL L05c3 # (-=)
+L05e8:       RET
 
-L05e8:       # DICTP ++ (3f59a)
-L05ed:       CPUSH 1 # (1)
-L05ef:       CALL L05d1 # (+=)
-L05f4:       RET
+L05e9:       # DICTP C++ (f591)
+L05ee:       DUP
+L05ef:       CFETCH
+L05f0:       CPUSH 1 # (1)
+L05f2:       ADD
+L05f3:       SWAP
+L05f4:       CSTORE
+L05f5:       RET
 
-L05f5:       # DICTP -- (3f58d)
-L05fa:       CPUSH 1 # (1)
-L05fc:       CALL L05dc # (-=)
-L0601:       RET
+L05f6:       # DICTP C-- (f583)
+L05fb:       DUP
+L05fc:       CFETCH
+L05fd:       CPUSH 1 # (1)
+L05ff:       SUB
+L0600:       SWAP
+L0601:       CSTORE
+L0602:       RET
 
-L0602:       # DICTP C++ (3f57f)
-L0607:       DUP
-L0608:       CFETCH
-L0609:       CPUSH 1 # (1)
+L0603:       # DICTP +! (f576)
+L0608:       SWAP
+L0609:       OVER
+L060a:       FETCH
 L060b:       ADD
 L060c:       SWAP
-L060d:       CSTORE
+L060d:       STORE
 L060e:       RET
 
-L060f:       # DICTP C-- (3f571)
-L0614:       DUP
-L0615:       CFETCH
-L0616:       CPUSH 1 # (1)
-L0618:       SUB
-L0619:       SWAP
-L061a:       CSTORE
-L061b:       RET
+L060f:       # DICTP C+! (f568)
+L0614:       SWAP
+L0615:       OVER
+L0616:       CFETCH
+L0617:       ADD
+L0618:       SWAP
+L0619:       CSTORE
+L061a:       RET
 
-L061c:       # DICTP +! (3f564)
-L0621:       SWAP
-L0622:       OVER
-L0623:       FETCH
-L0624:       ADD
-L0625:       SWAP
-L0626:       STORE
-L0627:       RET
+L061b:       # DICTP 0= (f55b)
+L0620:       CPUSH 0 # (0)
+L0622:       EQ
+L0623:       RET
 
-L0628:       # DICTP C+! (3f556)
-L062d:       SWAP
-L062e:       OVER
-L062f:       CFETCH
-L0630:       ADD
-L0631:       SWAP
-L0632:       CSTORE
-L0633:       RET
+L0624:       # DICTP <> (f54e)
+L0629:       EQ
+L062a:       CPUSH 0 # (0)
+L062c:       EQ
+L062d:       RET
 
-L0634:       # DICTP 0= (3f549)
-L0639:       CPUSH 0 # (0)
-L063b:       EQ
-L063c:       RET
+L062e:       # DICTP <= (f541)
+L0633:       GT
+L0634:       CPUSH 0 # (0)
+L0636:       EQ
+L0637:       RET
 
-L063d:       # DICTP <> (3f53c)
-L0642:       EQ
-L0643:       CPUSH 0 # (0)
-L0645:       EQ
-L0646:       RET
+L0638:       # DICTP >= (f534)
+L063d:       LT
+L063e:       CPUSH 0 # (0)
+L0640:       EQ
+L0641:       RET
 
-L0647:       # DICTP <= (3f52f)
-L064c:       GT
-L064d:       CPUSH 0 # (0)
-L064f:       EQ
-L0650:       RET
+L0642:       # DICTP TRUE (f525)
+L0647:       CPUSH 1 # (1)
+L0649:       RET
 
-L0651:       # DICTP >= (3f522)
-L0656:       LT
+L064a:       # DICTP FALSE (f515)
+L064f:       CPUSH 0 # (0)
+L0651:       RET
+
+L0652:       # DICTP NOT (f507)
 L0657:       CPUSH 0 # (0)
 L0659:       EQ
 L065a:       RET
 
-L065b:       # DICTP TRUE (3f513)
-L0660:       CPUSH 1 # (1)
-L0662:       RET
+L065b:       # DICTP LEAVE (f4f7)
+L0660:       CALL L04c0 # (?COMPILING)
+L0665:       JMPZ L0671
+L066a:       CPUSH 12 # (c)
+L066c:       CALL L0070 # (C,)
+L0671:       RET
 
-L0663:       # DICTP FALSE (3f503)
-L0668:       CPUSH 0 # (0)
-L066a:       RET
+L0672:       # DICTP BEGIN (f4e7)
+L0677:       CALL L04c0 # (?COMPILING)
+L067c:       JMPZ L0684
+L0681:       CPUSH 16 # (10)
+L0683:       FETCH
+L0684:       RET
 
-L066b:       # DICTP NOT (3f4f5)
-L0670:       CPUSH 0 # (0)
-L0672:       EQ
-L0673:       RET
+L0685:       # DICTP AGAIN (f4d7)
+L068a:       CALL L04c0 # (?COMPILING)
+L068f:       JMPZ L06a0
+L0694:       CPUSH 8 # (8)
+L0696:       CALL L0070 # (C,)
+L069b:       CALL L042c # (,)
+L06a0:       RET
 
-L0674:       # DICTP LEAVE (3f4e5)
-L0679:       CALL L04c0 # (?COMPILING)
-L067e:       JMPZ L068a
-L0683:       CPUSH 12 # (c)
-L0685:       CALL L0070 # (C,)
-L068a:       RET
+L06a1:       # DICTP WHILE (f4c7)
+L06a6:       CALL L04c0 # (?COMPILING)
+L06ab:       JMPZ L06bc
+L06b0:       CPUSH 10 # (a)
+L06b2:       CALL L0070 # (C,)
+L06b7:       CALL L042c # (,)
+L06bc:       RET
 
-L068b:       # DICTP BEGIN (3f4d5)
-L0690:       CALL L04c0 # (?COMPILING)
-L0695:       JMPZ L069d
-L069a:       CPUSH 16 # (10)
-L069c:       FETCH
-L069d:       RET
+L06bd:       # DICTP UNTIL (f4b7)
+L06c2:       CALL L04c0 # (?COMPILING)
+L06c7:       JMPZ L06d8
+L06cc:       CPUSH 9 # (9)
+L06ce:       CALL L0070 # (C,)
+L06d3:       CALL L042c # (,)
+L06d8:       RET
 
-L069e:       # DICTP AGAIN (3f4c5)
-L06a3:       CALL L04c0 # (?COMPILING)
-L06a8:       JMPZ L06b9
-L06ad:       CPUSH 8 # (8)
-L06af:       CALL L0070 # (C,)
-L06b4:       CALL L042c # (,)
-L06b9:       RET
+L06d9:       # DICTP COUNT (f4a7)
+L06de:       DUP
+L06df:       CPUSH 1 # (1)
+L06e1:       ADD
+L06e2:       SWAP
+L06e3:       CFETCH
+L06e4:       RET
 
-L06ba:       # DICTP WHILE (3f4b5)
-L06bf:       CALL L04c0 # (?COMPILING)
-L06c4:       JMPZ L06d5
-L06c9:       CPUSH 10 # (a)
-L06cb:       CALL L0070 # (C,)
-L06d0:       CALL L042c # (,)
-L06d5:       RET
-
-L06d6:       # DICTP UNTIL (3f4a5)
-L06db:       CALL L04c0 # (?COMPILING)
-L06e0:       JMPZ L06f1
-L06e5:       CPUSH 9 # (9)
-L06e7:       CALL L0070 # (C,)
-L06ec:       CALL L042c # (,)
-L06f1:       RET
-
-L06f2:       # DICTP COUNT (3f495)
-L06f7:       DUP
-L06f8:       CPUSH 1 # (1)
-L06fa:       ADD
-L06fb:       SWAP
+L06e5:       # DICTP TYPE (f498)
+L06ea:       OVER
+L06eb:       ADD
+L06ec:       SWAP
+L06ed:       OVER
+L06ee:       OVER
+L06ef:       GT
+L06f0:       CPUSH 0 # (0)
+L06f2:       EQ
+L06f3:       JMPZ L06fb
+L06f8:       DROP
+L06f9:       DROP
+L06fa:       RET
+L06fb:       DUP
 L06fc:       CFETCH
-L06fd:       RET
+L06fd:       EMIT
+L06fe:       CPUSH 1 # (1)
+L0700:       ADD
+L0701:       JMP L06ed
+L0706:       RET
 
-L06fe:       # DICTP TYPE (3f486)
-L0703:       DUP
-L0704:       CPUSH 0 # (0)
-L0706:       EQ
-L0707:       JMPZ L070f
-L070c:       DROP
-L070d:       DROP
-L070e:       RET
-L070f:       SWAP
-L0710:       DUP
-L0711:       CFETCH
-L0712:       EMIT
-L0713:       CPUSH 1 # (1)
-L0715:       ADD
-L0716:       SWAP
-L0717:       CPUSH 1 # (1)
-L0719:       SUB
-L071a:       JMP L0703
-L071f:       RET
+L0707:       # DICTP CT (f48b)
+L070c:       CALL L06d9 # (COUNT)
+L0711:       CALL L06e5 # (TYPE)
+L0716:       RET
 
-L0720:       # DICTP CT (3f479)
-L0725:       CALL L06f2 # (COUNT)
-L072a:       CALL L06fe # (TYPE)
-L072f:       RET
+L0717:       # DICTP \ (f47f)
+L071c:       CPUSH 0 # (0)
+L071e:       CALL L0526 # (>IN)
+L0723:       FETCH
+L0724:       CSTORE
+L0725:       RET
 
-L0730:       # DICTP \ (3f46d)
-L0735:       CPUSH 0 # (0)
-L0737:       CALL L0526 # (>IN)
-L073c:       FETCH
-L073d:       CSTORE
-L073e:       RET
+L0726:       # DICTP ( (f473)
+L072b:       CALL L0526 # (>IN)
+L0730:       FETCH
+L0731:       CFETCH
+L0732:       DUP
+L0733:       CPUSH 0 # (0)
+L0735:       EQ
+L0736:       JMPZ L0757
+L073b:       SLITERAL (073c) [missing closing ')']
+L0751:       CALL L0707 # (CT)
+L0756:       RESET
+L0757:       CALL L0526 # (>IN)
+L075c:       CALL L05cf # (++)
+L0761:       CPUSH 41 # (29)
+L0763:       EQ
+L0764:       JMPZ L076a
+L0769:       RET
+L076a:       JMP L072b
+L076f:       RET
 
-L073f:       # DICTP ( (3f461)
-L0744:       CALL L0526 # (>IN)
-L0749:       FETCH
-L074a:       CFETCH
-L074b:       DUP
-L074c:       CPUSH 0 # (0)
-L074e:       EQ
-L074f:       JMPZ L0770
-L0754:       SLITERAL (0755) [missing closing ')']
-L076a:       CALL L0720 # (CT)
-L076f:       RESET
-L0770:       CALL L0526 # (>IN)
-L0775:       CALL L05e8 # (++)
-L077a:       CPUSH 41 # (29)
-L077c:       EQ
-L077d:       JMPZ L0783
-L0782:       RET
-L0783:       JMP L0744
-L0788:       RET
+L0770:       # DICTP BL (f466)
+L0775:       CPUSH 32 # (20)
+L0777:       EMIT
+L0778:       RET
 
-L0789:       # DICTP BL (3f454)
-L078e:       CPUSH 32 # (20)
-L0790:       EMIT
-L0791:       RET
+L0779:       # DICTP CRLF (f457)
+L077e:       CPUSH 13 # (d)
+L0780:       EMIT
+L0781:       CPUSH 10 # (a)
+L0783:       EMIT
+L0784:       RET
 
-L0792:       # DICTP CRLF (3f445)
-L0797:       CPUSH 13 # (d)
-L0799:       EMIT
-L079a:       CPUSH 10 # (a)
-L079c:       EMIT
-L079d:       RET
+L0785:       # DICTP CR (f44a)
+L078a:       CPUSH 13 # (d)
+L078c:       EMIT
+L078d:       CPUSH 10 # (a)
+L078f:       EMIT
+L0790:       RET
 
-L079e:       # DICTP CR (3f438)
-L07a3:       CPUSH 13 # (d)
-L07a5:       EMIT
-L07a6:       CPUSH 10 # (a)
-L07a8:       EMIT
-L07a9:       RET
+L0791:       # DICTP BETWEEN (f438)
+L0796:       CPUSH 2 # (2)
+L0798:       PICK
+L0799:       LT
+L079a:       JMPZ L07a4
+L079f:       DROP
+L07a0:       DROP
+L07a1:       CPUSH 0 # (0)
+L07a3:       RET
+L07a4:       LT
+L07a5:       CPUSH 0 # (0)
+L07a7:       EQ
+L07a8:       RET
 
-L07aa:       # DICTP BETWEEN (3f426)
-L07af:       CPUSH 2 # (2)
-L07b1:       PICK
-L07b2:       LT
-L07b3:       JMPZ L07bd
-L07b8:       DROP
-L07b9:       DROP
-L07ba:       CPUSH 0 # (0)
-L07bc:       RET
-L07bd:       LT
-L07be:       CPUSH 0 # (0)
-L07c0:       EQ
-L07c1:       RET
-
-L07c2:       # DICTP (tmp) (3f416)
-L07c7:       PUSH 1997 # (7cd)
-L07cc:       RET
+L07a9:       # DICTP (tmp) (f428)
+L07ae:       PUSH 1972 # (7b4)
+L07b3:       RET
 .byte 0x00   
 .byte 0x00   
 .byte 0x00   
 .byte 0x00   
-L07d1:       RET
+L07b8:       RET
 
-L07d2:       # DICTP tmp-init (3f403)
-L07d7:       CPUSH 20 # (14)
-L07d9:       FETCH
-L07da:       CALL L07c2 # ((tmp))
-L07df:       STORE
-L07e0:       RET
+L07b9:       # DICTP tmp-init (f415)
+L07be:       CPUSH 20 # (14)
+L07c0:       FETCH
+L07c1:       CALL L07a9 # ((tmp))
+L07c6:       STORE
+L07c7:       RET
 
-L07e1:       # DICTP tmp-cur (3f3f1)
-L07e6:       CALL L07c2 # ((tmp))
-L07eb:       FETCH
-L07ec:       RET
+L07c8:       # DICTP tmp-cur (f403)
+L07cd:       CALL L07a9 # ((tmp))
+L07d2:       FETCH
+L07d3:       RET
 
-L07ed:       # DICTP tmp-alloc (3f3dd)
-L07f2:       CALL L07c2 # ((tmp))
-L07f7:       SWAP
-L07f8:       OVER
-L07f9:       FETCH
-L07fa:       SWAP
-L07fb:       SUB
-L07fc:       SWAP
-L07fd:       STORE
-L07fe:       CALL L07e1 # (tmp-cur)
-L0803:       RET
+L07d4:       # DICTP tmp-alloc (f3ef)
+L07d9:       CALL L07a9 # ((tmp))
+L07de:       SWAP
+L07df:       OVER
+L07e0:       FETCH
+L07e1:       SWAP
+L07e2:       SUB
+L07e3:       SWAP
+L07e4:       STORE
+L07e5:       CALL L07c8 # (tmp-cur)
+L07ea:       RET
 
-L0804:       # DICTP PAD (3f3cf)
-L0809:       CALL L07d2 # (tmp-init)
-L080e:       CPUSH 200 # (c8)
-L0810:       CALL L07ed # (tmp-alloc)
-L0815:       RET
+L07eb:       # DICTP PAD (f3e1)
+L07f0:       CALL L07b9 # (tmp-init)
+L07f5:       CPUSH 200 # (c8)
+L07f7:       CALL L07d4 # (tmp-alloc)
+L07fc:       RET
 
-L0816:       # DICTP getInput (3f3bc)
-L081b:       CALL L0804 # (PAD)
-L0820:       CPUSH 128 # (80)
-L0822:       CPUSH 0 # (0)
-L0824:       FREADLINE
-L0825:       DROP
-L0826:       CALL L0804 # (PAD)
-L082b:       RET
+L07fd:       # DICTP getInput (f3ce)
+L0802:       CALL L07eb # (PAD)
+L0807:       CPUSH 128 # (80)
+L0809:       CPUSH 0 # (0)
+L080b:       FREADLINE
+L080c:       DROP
+L080d:       CALL L07eb # (PAD)
+L0812:       RET
 
-L082c:       # DICTP skipWS (3f3ab)
-L0831:       DUP
-L0832:       CFETCH
-L0833:       DUP
-L0834:       JMPZ L084f
-L0839:       CPUSH 32 # (20)
-L083b:       GT
-L083c:       JMPZ L0847
-L0841:       RET
-L0842:       JMP L084a
-L0847:       CPUSH 1 # (1)
-L0849:       ADD
-L084a:       JMP L0851
-L084f:       DROP
-L0850:       RET
-L0851:       JMP L0831
-L0856:       RET
+L0813:       # DICTP skipWS (f3bd)
+L0818:       DUP
+L0819:       CFETCH
+L081a:       DUP
+L081b:       JMPZ L0836
+L0820:       CPUSH 32 # (20)
+L0822:       GT
+L0823:       JMPZ L082e
+L0828:       RET
+L0829:       JMP L0831
+L082e:       CPUSH 1 # (1)
+L0830:       ADD
+L0831:       JMP L0838
+L0836:       DROP
+L0837:       RET
+L0838:       JMP L0818
+L083d:       RET
 
-L0857:       # DICTP getOneWord (3f396)
-L085c:       DUP
-L085d:       DTOR
+L083e:       # DICTP getOneWord (f3a8)
+L0843:       DUP
+L0844:       DTOR
+L0845:       DTOR
+L0846:       RTOD
+L0847:       DUP
+L0848:       DTOR
+L0849:       CFETCH
+L084a:       CPUSH 32 # (20)
+L084c:       GT
+L084d:       JMPZ L085c
+L0852:       RTOD
+L0853:       CPUSH 1 # (1)
+L0855:       ADD
+L0856:       DTOR
+L0857:       JMP L0874
+L085c:       RTOD
+L085d:       DUP
 L085e:       DTOR
-L085f:       RTOD
-L0860:       DUP
-L0861:       DTOR
-L0862:       CFETCH
-L0863:       CPUSH 32 # (20)
-L0865:       GT
-L0866:       JMPZ L0875
+L085f:       CFETCH
+L0860:       JMPZ L0870
+L0865:       CPUSH 0 # (0)
+L0867:       RTOD
+L0868:       DUP
+L0869:       DTOR
+L086a:       CSTORE
 L086b:       RTOD
 L086c:       CPUSH 1 # (1)
 L086e:       ADD
 L086f:       DTOR
-L0870:       JMP L088d
-L0875:       RTOD
-L0876:       DUP
-L0877:       DTOR
-L0878:       CFETCH
-L0879:       JMPZ L0889
-L087e:       CPUSH 0 # (0)
-L0880:       RTOD
-L0881:       DUP
-L0882:       DTOR
-L0883:       CSTORE
-L0884:       RTOD
-L0885:       CPUSH 1 # (1)
+L0870:       RTOD
+L0871:       RTOD
+L0872:       SWAP
+L0873:       RET
+L0874:       JMP L0846
+L0879:       RET
+
+L087a:       # DICTP DICT>NEXT (f394)
+L087f:       RET
+
+L0880:       # DICTP DICT>XT (f382)
+L0885:       CPUSH 4 # (4)
 L0887:       ADD
-L0888:       DTOR
-L0889:       RTOD
-L088a:       RTOD
-L088b:       SWAP
-L088c:       RET
-L088d:       JMP L085f
-L0892:       RET
+L0888:       RET
 
-L0893:       # DICTP DICT>NEXT (3f382)
-L0898:       RET
+L0889:       # DICTP DICT>FLAGS (f36d)
+L088e:       CPUSH 2 # (2)
+L0890:       CPUSH 4 # (4)
+L0892:       MUL
+L0893:       ADD
+L0894:       RET
 
-L0899:       # DICTP DICT>XT (3f370)
-L089e:       CPUSH 4 # (4)
-L08a0:       ADD
-L08a1:       RET
+L0895:       # DICTP DICT>NAME (f359)
+L089a:       CALL L0889 # (DICT>FLAGS)
+L089f:       CPUSH 1 # (1)
+L08a1:       ADD
+L08a2:       RET
 
-L08a2:       # DICTP DICT>FLAGS (3f35b)
-L08a7:       CPUSH 2 # (2)
-L08a9:       CPUSH 4 # (4)
-L08ab:       MUL
-L08ac:       ADD
-L08ad:       RET
+L08a3:       # DICTP NEXT>DICT (f345)
+L08a8:       RET
 
-L08ae:       # DICTP DICT>NAME (3f347)
-L08b3:       CALL L08a2 # (DICT>FLAGS)
-L08b8:       CPUSH 1 # (1)
-L08ba:       ADD
-L08bb:       RET
+L08a9:       # DICTP XT>DICT (f333)
+L08ae:       CPUSH 4 # (4)
+L08b0:       SUB
+L08b1:       RET
 
-L08bc:       # DICTP NEXT>DICT (3f333)
-L08c1:       RET
+L08b2:       # DICTP FLAGS>DICT (f31e)
+L08b7:       CPUSH 2 # (2)
+L08b9:       CPUSH 4 # (4)
+L08bb:       MUL
+L08bc:       SUB
+L08bd:       RET
 
-L08c2:       # DICTP XT>DICT (3f321)
-L08c7:       CPUSH 4 # (4)
-L08c9:       SUB
-L08ca:       RET
+L08be:       # DICTP NAME>DICT (f30a)
+L08c3:       CPUSH 1 # (1)
+L08c5:       SUB
+L08c6:       CPUSH 2 # (2)
+L08c8:       CPUSH 4 # (4)
+L08ca:       MUL
+L08cb:       SUB
+L08cc:       RET
 
-L08cb:       # DICTP FLAGS>DICT (3f30c)
-L08d0:       CPUSH 2 # (2)
-L08d2:       CPUSH 4 # (4)
-L08d4:       MUL
-L08d5:       SUB
-L08d6:       RET
+L08cd:       # DICTP DICT.GetXT (f2f5)
+L08d2:       CALL L0880 # (DICT>XT)
+L08d7:       FETCH
+L08d8:       RET
 
-L08d7:       # DICTP NAME>DICT (3f2f8)
-L08dc:       CPUSH 1 # (1)
-L08de:       SUB
-L08df:       CPUSH 2 # (2)
-L08e1:       CPUSH 4 # (4)
-L08e3:       MUL
-L08e4:       SUB
-L08e5:       RET
+L08d9:       # DICTP DICT.GetFLAGS (f2dd)
+L08de:       CALL L0889 # (DICT>FLAGS)
+L08e3:       CFETCH
+L08e4:       RET
 
-L08e6:       # DICTP DICT.GetXT (3f2e3)
-L08eb:       CALL L0899 # (DICT>XT)
-L08f0:       FETCH
-L08f1:       RET
+L08e5:       # DICTP DICTP>NAME (f2c8)
+L08ea:       CPUSH 1 # (1)
+L08ec:       ADD
+L08ed:       FETCH
+L08ee:       CALL L0895 # (DICT>NAME)
+L08f3:       RET
 
-L08f2:       # DICTP DICT.GetFLAGS (3f2cb)
-L08f7:       CALL L08a2 # (DICT>FLAGS)
-L08fc:       CFETCH
-L08fd:       RET
-
-L08fe:       # DICTP DICTP>NAME (3f2b6)
+L08f4:       # DICTP XT.GetDICTP (f2b2)
+L08f9:       DUP
+L08fa:       CFETCH
+L08fb:       CPUSH 24 # (18)
+L08fd:       EQ
+L08fe:       JMPZ L090c
 L0903:       CPUSH 1 # (1)
 L0905:       ADD
 L0906:       FETCH
-L0907:       CALL L08ae # (DICT>NAME)
-L090c:       RET
+L0907:       JMP L090e
+L090c:       DROP
+L090d:       RESET
+L090e:       RET
 
-L090d:       # DICTP XT.GetDICTP (3f2a0)
-L0912:       DUP
-L0913:       CFETCH
-L0914:       CPUSH 24 # (18)
-L0916:       EQ
-L0917:       JMPZ L0925
-L091c:       CPUSH 1 # (1)
-L091e:       ADD
-L091f:       FETCH
-L0920:       JMP L0927
-L0925:       DROP
-L0926:       RESET
-L0927:       RET
+L090f:       # DICTP FLAGS.ISIMMEDIATE? (f295)
+L0914:       CPUSH 1 # (1)
+L0916:       AND
+L0917:       RET
 
-L0928:       # DICTP FLAGS.ISIMMEDIATE? (3f283)
-L092d:       CPUSH 1 # (1)
-L092f:       AND
+L0918:       # DICTP FLAGS.ISINLINE? (f27b)
+L091d:       CPUSH 2 # (2)
+L091f:       AND
+L0920:       RET
+
+L0921:       # DICTP DICT.GetIMMEDIATE (f25f)
+L0926:       CALL L08d9 # (DICT.GetFLAGS)
+L092b:       CALL L090f # (FLAGS.ISIMMEDIATE?)
 L0930:       RET
 
-L0931:       # DICTP FLAGS.ISINLINE? (3f269)
-L0936:       CPUSH 2 # (2)
-L0938:       AND
-L0939:       RET
+L0931:       # DICTP DICT.GetINLINE (f246)
+L0936:       CALL L08d9 # (DICT.GetFLAGS)
+L093b:       CALL L0918 # (FLAGS.ISINLINE?)
+L0940:       RET
 
-L093a:       # DICTP DICT.GetIMMEDIATE (3f24d)
-L093f:       CALL L08f2 # (DICT.GetFLAGS)
-L0944:       CALL L0928 # (FLAGS.ISIMMEDIATE?)
-L0949:       RET
-
-L094a:       # DICTP DICT.GetINLINE (3f234)
-L094f:       CALL L08f2 # (DICT.GetFLAGS)
-L0954:       CALL L0931 # (FLAGS.ISINLINE?)
-L0959:       RET
-
-L095a:       # DICTP findInDict (3f21f)
-L095f:       CPUSH 20 # (14)
-L0961:       FETCH
-L0962:       DTOR
+L0941:       # DICTP findInDict (f231)
+L0946:       CPUSH 20 # (14)
+L0948:       FETCH
+L0949:       DTOR
+L094a:       RTOD
+L094b:       DUP
+L094c:       DTOR
+L094d:       DUP
+L094e:       JMPZ L0979
+L0953:       CALL L0895 # (DICT>NAME)
+L0958:       CPUSH 1 # (1)
+L095a:       ADD
+L095b:       OVER
+L095c:       COMPAREI
+L095d:       JMPZ L0974
+L0962:       DROP
 L0963:       RTOD
 L0964:       DUP
 L0965:       DTOR
-L0966:       DUP
-L0967:       JMPZ L0992
-L096c:       CALL L08ae # (DICT>NAME)
+L0966:       CALL L08cd # (DICT.GetXT)
+L096b:       RTOD
+L096c:       CALL L08d9 # (DICT.GetFLAGS)
 L0971:       CPUSH 1 # (1)
-L0973:       ADD
-L0974:       OVER
-L0975:       COMPAREI
-L0976:       JMPZ L098d
-L097b:       DROP
-L097c:       RTOD
-L097d:       DUP
-L097e:       DTOR
-L097f:       CALL L08e6 # (DICT.GetXT)
-L0984:       RTOD
-L0985:       CALL L08f2 # (DICT.GetFLAGS)
-L098a:       CPUSH 1 # (1)
-L098c:       RET
-L098d:       JMP L099a
-L0992:       DROP
-L0993:       DROP
-L0994:       RTOD
-L0995:       CPUSH 0 # (0)
-L0997:       CPUSH 0 # (0)
-L0999:       RET
-L099a:       RTOD
-L099b:       FETCH
-L099c:       DTOR
-L099d:       JMP L0963
-L09a2:       RET
+L0973:       RET
+L0974:       JMP L0981
+L0979:       DROP
+L097a:       DROP
+L097b:       RTOD
+L097c:       CPUSH 0 # (0)
+L097e:       CPUSH 0 # (0)
+L0980:       RET
+L0981:       RTOD
+L0982:       FETCH
+L0983:       DTOR
+L0984:       JMP L094a
+L0989:       RET
 
-L09a3:       # DICTP isHEX? (3f20e)
-L09a8:       CPUSH 6 # (6)
-L09aa:       CFETCH
-L09ab:       CPUSH 16 # (10)
-L09ad:       EQ
-L09ae:       RET
+L098a:       # DICTP isHEX? (f220)
+L098f:       CPUSH 6 # (6)
+L0991:       CFETCH
+L0992:       CPUSH 16 # (10)
+L0994:       EQ
+L0995:       RET
 
-L09af:       # DICTP isNumChar? (3f1f9)
-L09b4:       DUP
-L09b5:       CPUSH 48 # (30)
-L09b7:       CPUSH 57 # (39)
-L09b9:       CALL L07aa # (BETWEEN)
-L09be:       JMPZ L09c9
-L09c3:       CPUSH 48 # (30)
-L09c5:       SUB
-L09c6:       CPUSH 1 # (1)
-L09c8:       RET
-L09c9:       CALL L09a3 # (isHEX?)
-L09ce:       JMPZ L09fd
-L09d3:       DUP
-L09d4:       CPUSH 65 # (41)
-L09d6:       CPUSH 70 # (46)
-L09d8:       CALL L07aa # (BETWEEN)
-L09dd:       JMPZ L09e8
-L09e2:       CPUSH 55 # (37)
-L09e4:       SUB
-L09e5:       CPUSH 1 # (1)
-L09e7:       RET
-L09e8:       DUP
-L09e9:       CPUSH 97 # (61)
-L09eb:       CPUSH 102 # (66)
-L09ed:       CALL L07aa # (BETWEEN)
-L09f2:       JMPZ L09fd
-L09f7:       CPUSH 87 # (57)
-L09f9:       SUB
-L09fa:       CPUSH 1 # (1)
-L09fc:       RET
-L09fd:       CPUSH 0 # (0)
-L09ff:       RET
+L0996:       # DICTP isNumChar? (f20b)
+L099b:       DUP
+L099c:       CPUSH 48 # (30)
+L099e:       CPUSH 57 # (39)
+L09a0:       CALL L0791 # (BETWEEN)
+L09a5:       JMPZ L09b0
+L09aa:       CPUSH 48 # (30)
+L09ac:       SUB
+L09ad:       CPUSH 1 # (1)
+L09af:       RET
+L09b0:       CALL L098a # (isHEX?)
+L09b5:       JMPZ L09e4
+L09ba:       DUP
+L09bb:       CPUSH 65 # (41)
+L09bd:       CPUSH 70 # (46)
+L09bf:       CALL L0791 # (BETWEEN)
+L09c4:       JMPZ L09cf
+L09c9:       CPUSH 55 # (37)
+L09cb:       SUB
+L09cc:       CPUSH 1 # (1)
+L09ce:       RET
+L09cf:       DUP
+L09d0:       CPUSH 97 # (61)
+L09d2:       CPUSH 102 # (66)
+L09d4:       CALL L0791 # (BETWEEN)
+L09d9:       JMPZ L09e4
+L09de:       CPUSH 87 # (57)
+L09e0:       SUB
+L09e1:       CPUSH 1 # (1)
+L09e3:       RET
+L09e4:       CPUSH 0 # (0)
+L09e6:       RET
 
-L0a00:       # DICTP NEGATE (3f1e8)
-L0a05:       CPUSH 0 # (0)
-L0a07:       SWAP
-L0a08:       SUB
-L0a09:       RET
+L09e7:       # DICTP NEGATE (f1fa)
+L09ec:       CPUSH 0 # (0)
+L09ee:       SWAP
+L09ef:       SUB
+L09f0:       RET
 
-L0a0a:       # DICTP ABS (3f1da)
+L09f1:       # DICTP ABS (f1ec)
+L09f6:       DUP
+L09f7:       CPUSH 0 # (0)
+L09f9:       LT
+L09fa:       JMPZ L0a04
+L09ff:       CALL L09e7 # (NEGATE)
+L0a04:       RET
+
+L0a05:       # DICTP isNumber? (f1d8)
+L0a0a:       DUP
+L0a0b:       CFETCH
+L0a0c:       CPUSH 45 # (2d)
+L0a0e:       EQ
 L0a0f:       DUP
-L0a10:       CPUSH 0 # (0)
-L0a12:       LT
-L0a13:       JMPZ L0a1d
-L0a18:       CALL L0a00 # (NEGATE)
-L0a1d:       RET
-
-L0a1e:       # DICTP isNumber? (3f1c6)
+L0a10:       CALL L0536 # (isNeg)
+L0a15:       CSTORE
+L0a16:       JMPZ L0a1e
+L0a1b:       CPUSH 1 # (1)
+L0a1d:       ADD
+L0a1e:       CPUSH 0 # (0)
+L0a20:       DTOR
+L0a21:       DUP
+L0a22:       CFETCH
 L0a23:       DUP
-L0a24:       CFETCH
-L0a25:       CPUSH 45 # (2d)
-L0a27:       EQ
-L0a28:       DUP
-L0a29:       CALL L0536 # (isNeg)
-L0a2e:       CSTORE
-L0a2f:       JMPZ L0a37
-L0a34:       CPUSH 1 # (1)
-L0a36:       ADD
-L0a37:       CPUSH 0 # (0)
-L0a39:       DTOR
-L0a3a:       DUP
-L0a3b:       CFETCH
-L0a3c:       DUP
-L0a3d:       CPUSH 0 # (0)
-L0a3f:       EQ
-L0a40:       JMPZ L0a5b
-L0a45:       DROP
-L0a46:       DROP
-L0a47:       RTOD
-L0a48:       CALL L0536 # (isNeg)
-L0a4d:       CFETCH
-L0a4e:       JMPZ L0a58
-L0a53:       CALL L0a00 # (NEGATE)
-L0a58:       CPUSH 1 # (1)
-L0a5a:       RET
-L0a5b:       CALL L09af # (isNumChar?)
-L0a60:       JMPZ L0a74
-L0a65:       RTOD
-L0a66:       CPUSH 6 # (6)
-L0a68:       CFETCH
-L0a69:       MUL
-L0a6a:       ADD
-L0a6b:       DTOR
-L0a6c:       CPUSH 1 # (1)
-L0a6e:       ADD
-L0a6f:       JMP L0a79
-L0a74:       DROP
-L0a75:       RTOD
-L0a76:       CPUSH 0 # (0)
-L0a78:       RET
-L0a79:       JMP L0a3a
-L0a7e:       RET
+L0a24:       CPUSH 0 # (0)
+L0a26:       EQ
+L0a27:       JMPZ L0a42
+L0a2c:       DROP
+L0a2d:       DROP
+L0a2e:       RTOD
+L0a2f:       CALL L0536 # (isNeg)
+L0a34:       CFETCH
+L0a35:       JMPZ L0a3f
+L0a3a:       CALL L09e7 # (NEGATE)
+L0a3f:       CPUSH 1 # (1)
+L0a41:       RET
+L0a42:       CALL L0996 # (isNumChar?)
+L0a47:       JMPZ L0a5b
+L0a4c:       RTOD
+L0a4d:       CPUSH 6 # (6)
+L0a4f:       CFETCH
+L0a50:       MUL
+L0a51:       ADD
+L0a52:       DTOR
+L0a53:       CPUSH 1 # (1)
+L0a55:       ADD
+L0a56:       JMP L0a60
+L0a5b:       DROP
+L0a5c:       RTOD
+L0a5d:       CPUSH 0 # (0)
+L0a5f:       RET
+L0a60:       JMP L0a21
+L0a65:       RET
 
-L0a7f:       # DICTP MOD (3f1b8)
-L0a84:       OVER
-L0a85:       OVER
-L0a86:       DIV
-L0a87:       MUL
-L0a88:       SUB
-L0a89:       RET
+L0a66:       # DICTP MOD (f1ca)
+L0a6b:       OVER
+L0a6c:       OVER
+L0a6d:       DIV
+L0a6e:       MUL
+L0a6f:       SUB
+L0a70:       RET
 
-L0a8a:       # DICTP /MOD (3f1a9)
-L0a8f:       OVER
-L0a90:       OVER
-L0a91:       DIV
-L0a92:       DTOR
-L0a93:       RTOD
-L0a94:       DUP
-L0a95:       DTOR
-L0a96:       MUL
-L0a97:       SUB
-L0a98:       RTOD
-L0a99:       SWAP
-L0a9a:       RET
+L0a71:       # DICTP /MOD (f1bb)
+L0a76:       OVER
+L0a77:       OVER
+L0a78:       DIV
+L0a79:       DTOR
+L0a7a:       RTOD
+L0a7b:       DUP
+L0a7c:       DTOR
+L0a7d:       MUL
+L0a7e:       SUB
+L0a7f:       RTOD
+L0a80:       SWAP
+L0a81:       RET
 
-L0a9b:       # DICTP (.) (3f19b)
-L0aa0:       DUP
-L0aa1:       CPUSH 0 # (0)
-L0aa3:       EQ
-L0aa4:       JMPZ L0aae
-L0aa9:       DROP
-L0aaa:       CPUSH 48 # (30)
-L0aac:       EMIT
-L0aad:       RET
-L0aae:       DUP
-L0aaf:       CPUSH 0 # (0)
-L0ab1:       LT
-L0ab2:       JMPZ L0ac3
-L0ab7:       CALL L0a00 # (NEGATE)
-L0abc:       CPUSH 1 # (1)
-L0abe:       JMP L0ac5
-L0ac3:       CPUSH 0 # (0)
-L0ac5:       DTOR
-L0ac6:       CPUSH 0 # (0)
-L0ac8:       SWAP
-L0ac9:       DUP
-L0aca:       JMPZ L0aec
-L0acf:       CPUSH 6 # (6)
-L0ad1:       CFETCH
-L0ad2:       CALL L0a8a # (/MOD)
-L0ad7:       CPUSH 48 # (30)
-L0ad9:       OVER
-L0ada:       CPUSH 9 # (9)
-L0adc:       GT
-L0add:       JMPZ L0ae5
-L0ae2:       CPUSH 7 # (7)
-L0ae4:       ADD
-L0ae5:       ADD
-L0ae6:       SWAP
-L0ae7:       JMP L0b09
-L0aec:       DROP
-L0aed:       RTOD
-L0aee:       JMPZ L0af6
-L0af3:       CPUSH 45 # (2d)
-L0af5:       EMIT
-L0af6:       DUP
-L0af7:       JMPZ L0b02
-L0afc:       EMIT
-L0afd:       JMP L0b04
-L0b02:       DROP
+L0a82:       # DICTP (.) (f1ad)
+L0a87:       DUP
+L0a88:       CPUSH 0 # (0)
+L0a8a:       EQ
+L0a8b:       JMPZ L0a95
+L0a90:       DROP
+L0a91:       CPUSH 48 # (30)
+L0a93:       EMIT
+L0a94:       RET
+L0a95:       DUP
+L0a96:       CPUSH 0 # (0)
+L0a98:       LT
+L0a99:       JMPZ L0aaa
+L0a9e:       CALL L09e7 # (NEGATE)
+L0aa3:       CPUSH 1 # (1)
+L0aa5:       JMP L0aac
+L0aaa:       CPUSH 0 # (0)
+L0aac:       DTOR
+L0aad:       CPUSH 0 # (0)
+L0aaf:       SWAP
+L0ab0:       DUP
+L0ab1:       JMPZ L0ad3
+L0ab6:       CPUSH 6 # (6)
+L0ab8:       CFETCH
+L0ab9:       CALL L0a71 # (/MOD)
+L0abe:       CPUSH 48 # (30)
+L0ac0:       OVER
+L0ac1:       CPUSH 9 # (9)
+L0ac3:       GT
+L0ac4:       JMPZ L0acc
+L0ac9:       CPUSH 7 # (7)
+L0acb:       ADD
+L0acc:       ADD
+L0acd:       SWAP
+L0ace:       JMP L0af0
+L0ad3:       DROP
+L0ad4:       RTOD
+L0ad5:       JMPZ L0add
+L0ada:       CPUSH 45 # (2d)
+L0adc:       EMIT
+L0add:       DUP
+L0ade:       JMPZ L0ae9
+L0ae3:       EMIT
+L0ae4:       JMP L0aeb
+L0ae9:       DROP
+L0aea:       RET
+L0aeb:       JMP L0add
+L0af0:       JMP L0ab0
+L0af5:       RET
+
+L0af6:       # DICTP . (f1a1)
+L0afb:       CPUSH 32 # (20)
+L0afd:       EMIT
+L0afe:       CALL L0a82 # ((.))
 L0b03:       RET
-L0b04:       JMP L0af6
-L0b09:       JMP L0ac9
-L0b0e:       RET
 
-L0b0f:       # DICTP . (3f18f)
-L0b14:       CPUSH 32 # (20)
-L0b16:       EMIT
-L0b17:       CALL L0a9b # ((.))
-L0b1c:       RET
+L0b04:       # DICTP HEX. (f192)
+L0b09:       CPUSH 6 # (6)
+L0b0b:       CFETCH
+L0b0c:       SWAP
+L0b0d:       CALL L046a # (HEX)
+L0b12:       DUP
+L0b13:       CPUSH 16 # (10)
+L0b15:       LT
+L0b16:       JMPZ L0b1e
+L0b1b:       CPUSH 48 # (30)
+L0b1d:       EMIT
+L0b1e:       CALL L0a82 # ((.))
+L0b23:       CPUSH 6 # (6)
+L0b25:       CSTORE
+L0b26:       RET
 
-L0b1d:       # DICTP HEX. (3f180)
-L0b22:       CPUSH 6 # (6)
-L0b24:       CFETCH
-L0b25:       SWAP
-L0b26:       CALL L046a # (HEX)
-L0b2b:       DUP
-L0b2c:       CPUSH 16 # (10)
-L0b2e:       LT
-L0b2f:       JMPZ L0b37
-L0b34:       CPUSH 48 # (30)
-L0b36:       EMIT
-L0b37:       CALL L0a9b # ((.))
-L0b3c:       CPUSH 6 # (6)
-L0b3e:       CSTORE
-L0b3f:       RET
+L0b27:       # DICTP DECIMAL. (f17f)
+L0b2c:       CPUSH 6 # (6)
+L0b2e:       CFETCH
+L0b2f:       SWAP
+L0b30:       CALL L0475 # (DECIMAL)
+L0b35:       CALL L0a82 # ((.))
+L0b3a:       CPUSH 6 # (6)
+L0b3c:       CSTORE
+L0b3d:       RET
 
-L0b40:       # DICTP DECIMAL. (3f16d)
-L0b45:       CPUSH 6 # (6)
-L0b47:       CFETCH
-L0b48:       SWAP
-L0b49:       CALL L0475 # (DECIMAL)
-L0b4e:       CALL L0a9b # ((.))
-L0b53:       CPUSH 6 # (6)
-L0b55:       CSTORE
-L0b56:       RET
+L0b3e:       # DICTP BINARY. (f16d)
+L0b43:       CPUSH 6 # (6)
+L0b45:       CFETCH
+L0b46:       SWAP
+L0b47:       CALL L048b # (BINARY)
+L0b4c:       CALL L0a82 # ((.))
+L0b51:       CPUSH 6 # (6)
+L0b53:       CSTORE
+L0b54:       RET
 
-L0b57:       # DICTP BINARY. (3f15b)
-L0b5c:       CPUSH 6 # (6)
-L0b5e:       CFETCH
-L0b5f:       SWAP
-L0b60:       CALL L048b # (BINARY)
-L0b65:       CALL L0a9b # ((.))
-L0b6a:       CPUSH 6 # (6)
-L0b6c:       CSTORE
-L0b6d:       RET
+L0b55:       # DICTP MIN (f15f)
+L0b5a:       OVER
+L0b5b:       OVER
+L0b5c:       GT
+L0b5d:       JMPZ L0b63
+L0b62:       SWAP
+L0b63:       DROP
+L0b64:       RET
 
-L0b6e:       # DICTP MIN (3f14d)
-L0b73:       OVER
-L0b74:       OVER
-L0b75:       GT
-L0b76:       JMPZ L0b7c
-L0b7b:       SWAP
-L0b7c:       DROP
-L0b7d:       RET
+L0b65:       # DICTP MAX (f151)
+L0b6a:       OVER
+L0b6b:       OVER
+L0b6c:       LT
+L0b6d:       JMPZ L0b73
+L0b72:       SWAP
+L0b73:       DROP
+L0b74:       RET
 
-L0b7e:       # DICTP MAX (3f13f)
-L0b83:       OVER
-L0b84:       OVER
-L0b85:       LT
-L0b86:       JMPZ L0b8c
-L0b8b:       SWAP
-L0b8c:       DROP
-L0b8d:       RET
+L0b75:       # DICTP .S (f144)
+L0b7a:       CPUSH 32 # (20)
+L0b7c:       EMIT
+L0b7d:       DEPTH
+L0b7e:       CPUSH 0 # (0)
+L0b80:       LT
+L0b81:       JMPZ L0ba4
+L0b86:       SLITERAL (0b87) [Stack underflow!]
+L0b99:       CALL L06d9 # (COUNT)
+L0b9e:       CALL L06e5 # (TYPE)
+L0ba3:       RESET
+L0ba4:       DEPTH
+L0ba5:       CPUSH 0 # (0)
+L0ba7:       EQ
+L0ba8:       JMPZ L0bb7
+L0bad:       CPUSH 40 # (28)
+L0baf:       EMIT
+L0bb0:       CPUSH 237 # (ed)
+L0bb2:       EMIT
+L0bb3:       CPUSH 41 # (29)
+L0bb5:       EMIT
+L0bb6:       RET
+L0bb7:       CPUSH 40 # (28)
+L0bb9:       EMIT
+L0bba:       DEPTH
+L0bbb:       CPUSH 1 # (1)
+L0bbd:       SUB
+L0bbe:       DTOR
+L0bbf:       RTOD
+L0bc0:       DUP
+L0bc1:       DTOR
+L0bc2:       PICK
+L0bc3:       CALL L0af6 # (.)
+L0bc8:       RTOD
+L0bc9:       DUP
+L0bca:       DTOR
+L0bcb:       JMPZ L0bda
+L0bd0:       RTOD
+L0bd1:       CPUSH 1 # (1)
+L0bd3:       SUB
+L0bd4:       DTOR
+L0bd5:       JMP L0be3
+L0bda:       RTOD
+L0bdb:       DROP
+L0bdc:       CPUSH 32 # (20)
+L0bde:       EMIT
+L0bdf:       CPUSH 41 # (29)
+L0be1:       EMIT
+L0be2:       RET
+L0be3:       JMP L0bbf
+L0be8:       RET
 
-L0b8e:       # DICTP .S (3f132)
-L0b93:       CPUSH 32 # (20)
-L0b95:       EMIT
-L0b96:       DEPTH
-L0b97:       CPUSH 0 # (0)
-L0b99:       LT
-L0b9a:       JMPZ L0bbd
-L0b9f:       SLITERAL (0ba0) [Stack underflow!]
-L0bb2:       CALL L06f2 # (COUNT)
-L0bb7:       CALL L06fe # (TYPE)
-L0bbc:       RESET
-L0bbd:       DEPTH
-L0bbe:       CPUSH 0 # (0)
-L0bc0:       EQ
-L0bc1:       JMPZ L0bd0
-L0bc6:       CPUSH 40 # (28)
-L0bc8:       EMIT
-L0bc9:       CPUSH 237 # (ed)
-L0bcb:       EMIT
-L0bcc:       CPUSH 41 # (29)
-L0bce:       EMIT
-L0bcf:       RET
-L0bd0:       CPUSH 40 # (28)
-L0bd2:       EMIT
-L0bd3:       DEPTH
-L0bd4:       CPUSH 1 # (1)
-L0bd6:       SUB
-L0bd7:       DTOR
-L0bd8:       RTOD
-L0bd9:       DUP
-L0bda:       DTOR
-L0bdb:       PICK
-L0bdc:       CALL L0b0f # (.)
-L0be1:       RTOD
-L0be2:       DUP
-L0be3:       DTOR
-L0be4:       JMPZ L0bf3
-L0be9:       RTOD
-L0bea:       CPUSH 1 # (1)
-L0bec:       SUB
-L0bed:       DTOR
-L0bee:       JMP L0bfc
-L0bf3:       RTOD
-L0bf4:       DROP
-L0bf5:       CPUSH 32 # (20)
-L0bf7:       EMIT
-L0bf8:       CPUSH 41 # (29)
-L0bfa:       EMIT
-L0bfb:       RET
-L0bfc:       JMP L0bd8
-L0c01:       RET
+L0be9:       # DICTP .(MEM_SZ) (f130)
+L0bee:       SLITERAL (0bef) [Memory: ]
+L0bf9:       CALL L0707 # (CT)
+L0bfe:       CALL L0546 # (MEM_SZ)
+L0c03:       DUP
+L0c04:       CALL L0b04 # (HEX.)
+L0c09:       SLITERAL (0c0a) [ (]
+L0c0e:       CALL L0707 # (CT)
+L0c13:       CALL L0a82 # ((.))
+L0c18:       SLITERAL (0c19) [)]
+L0c1c:       CALL L0707 # (CT)
+L0c21:       RET
 
-L0c02:       # DICTP .(MEM_SZ) (3f11e)
-L0c07:       SLITERAL (0c08) [Memory: ]
-L0c12:       CALL L0720 # (CT)
-L0c17:       CALL L0556 # (MEM_SZ)
-L0c1c:       DUP
-L0c1d:       CALL L0b1d # (HEX.)
-L0c22:       SLITERAL (0c23) [ (]
-L0c27:       CALL L0720 # (CT)
-L0c2c:       CALL L0a9b # ((.))
-L0c31:       SLITERAL (0c32) [)]
-L0c35:       CALL L0720 # (CT)
-L0c3a:       RET
+L0c22:       # DICTP .(HERE) (f11e)
+L0c27:       SLITERAL (0c28) [HERE: ]
+L0c30:       CALL L0707 # (CT)
+L0c35:       CPUSH 16 # (10)
+L0c37:       FETCH
+L0c38:       DUP
+L0c39:       CALL L0b04 # (HEX.)
+L0c3e:       SLITERAL (0c3f) [ (]
+L0c43:       CALL L0707 # (CT)
+L0c48:       CALL L0a82 # ((.))
+L0c4d:       SLITERAL (0c4e) [)]
+L0c51:       CALL L0707 # (CT)
+L0c56:       RET
 
-L0c3b:       # DICTP .(HERE) (3f10c)
-L0c40:       SLITERAL (0c41) [HERE: ]
-L0c49:       CALL L0720 # (CT)
-L0c4e:       CPUSH 16 # (10)
-L0c50:       FETCH
-L0c51:       DUP
-L0c52:       CALL L0b1d # (HEX.)
-L0c57:       SLITERAL (0c58) [ (]
-L0c5c:       CALL L0720 # (CT)
-L0c61:       CALL L0a9b # ((.))
-L0c66:       SLITERAL (0c67) [)]
-L0c6a:       CALL L0720 # (CT)
-L0c6f:       RET
+L0c57:       # DICTP .(LAST) (f10c)
+L0c5c:       SLITERAL (0c5d) [LAST: ]
+L0c65:       CALL L0707 # (CT)
+L0c6a:       CPUSH 20 # (14)
+L0c6c:       FETCH
+L0c6d:       DUP
+L0c6e:       CALL L0b04 # (HEX.)
+L0c73:       SLITERAL (0c74) [ (]
+L0c78:       CALL L0707 # (CT)
+L0c7d:       CALL L0a82 # ((.))
+L0c82:       SLITERAL (0c83) [)]
+L0c86:       CALL L0707 # (CT)
+L0c8b:       RET
 
-L0c70:       # DICTP .(LAST) (3f0fa)
-L0c75:       SLITERAL (0c76) [LAST: ]
-L0c7e:       CALL L0720 # (CT)
-L0c83:       CPUSH 20 # (14)
-L0c85:       FETCH
-L0c86:       DUP
-L0c87:       CALL L0b1d # (HEX.)
-L0c8c:       SLITERAL (0c8d) [ (]
-L0c91:       CALL L0720 # (CT)
-L0c96:       CALL L0a9b # ((.))
-L0c9b:       SLITERAL (0c9c) [)]
-L0c9f:       CALL L0720 # (CT)
-L0ca4:       RET
+L0c8c:       # DICTP .WORD-SHORT (f0f6)
+L0c91:       DUP
+L0c92:       CALL L0895 # (DICT>NAME)
+L0c97:       CALL L0707 # (CT)
+L0c9c:       CPUSH 32 # (20)
+L0c9e:       EMIT
+L0c9f:       FETCH
+L0ca0:       RET
 
-L0ca5:       # DICTP .WORD-SHORT (3f0e4)
-L0caa:       DUP
-L0cab:       CALL L08ae # (DICT>NAME)
-L0cb0:       CALL L0720 # (CT)
-L0cb5:       CPUSH 32 # (20)
-L0cb7:       EMIT
-L0cb8:       FETCH
-L0cb9:       RET
+L0ca1:       # DICTP WORDS (f0e6)
+L0ca6:       CPUSH 20 # (14)
+L0ca8:       FETCH
+L0ca9:       DUP
+L0caa:       FETCH
+L0cab:       CPUSH 0 # (0)
+L0cad:       EQ
+L0cae:       JMPZ L0cbb
+L0cb3:       DROP
+L0cb4:       CPUSH 13 # (d)
+L0cb6:       EMIT
+L0cb7:       CPUSH 10 # (a)
+L0cb9:       EMIT
+L0cba:       RET
+L0cbb:       CALL L0c8c # (.WORD-SHORT)
+L0cc0:       JMP L0ca9
+L0cc5:       RET
 
-L0cba:       # DICTP WORDS (3f0d4)
-L0cbf:       CPUSH 20 # (14)
-L0cc1:       FETCH
-L0cc2:       DUP
-L0cc3:       FETCH
-L0cc4:       CPUSH 0 # (0)
-L0cc6:       EQ
-L0cc7:       JMPZ L0cd4
-L0ccc:       DROP
-L0ccd:       CPUSH 13 # (d)
-L0ccf:       EMIT
-L0cd0:       CPUSH 10 # (a)
-L0cd2:       EMIT
-L0cd3:       RET
-L0cd4:       CALL L0ca5 # (.WORD-SHORT)
-L0cd9:       JMP L0cc2
-L0cde:       RET
+L0cc6:       # DICTP .WORD-LONG (f0d1)
+L0ccb:       DUP
+L0ccc:       CALL L0b04 # (HEX.)
+L0cd1:       CPUSH 58 # (3a)
+L0cd3:       EMIT
+L0cd4:       CPUSH 32 # (20)
+L0cd6:       EMIT
+L0cd7:       DUP
+L0cd8:       CALL L0895 # (DICT>NAME)
+L0cdd:       CALL L0707 # (CT)
+L0ce2:       CPUSH 32 # (20)
+L0ce4:       EMIT
+L0ce5:       DUP
+L0ce6:       CALL L08cd # (DICT.GetXT)
+L0ceb:       CPUSH 40 # (28)
+L0ced:       EMIT
+L0cee:       CALL L0b04 # (HEX.)
+L0cf3:       CPUSH 41 # (29)
+L0cf5:       EMIT
+L0cf6:       DUP
+L0cf7:       CALL L0889 # (DICT>FLAGS)
+L0cfc:       CFETCH
+L0cfd:       DUP
+L0cfe:       SLITERAL (0cff) [, Flags: ]
+L0d0a:       CALL L0707 # (CT)
+L0d0f:       CALL L0b04 # (HEX.)
+L0d14:       DUP
+L0d15:       CALL L0918 # (FLAGS.ISINLINE?)
+L0d1a:       JMPZ L0d30
+L0d1f:       SLITERAL (0d20) [ (INLINE)]
+L0d2b:       CALL L0707 # (CT)
+L0d30:       CALL L090f # (FLAGS.ISIMMEDIATE?)
+L0d35:       JMPZ L0d4e
+L0d3a:       SLITERAL (0d3b) [ (IMMEDIATE)]
+L0d49:       CALL L0707 # (CT)
+L0d4e:       CPUSH 13 # (d)
+L0d50:       EMIT
+L0d51:       CPUSH 10 # (a)
+L0d53:       EMIT
+L0d54:       FETCH
+L0d55:       RET
 
-L0cdf:       # DICTP .WORD-LONG (3f0bf)
-L0ce4:       DUP
-L0ce5:       CALL L0b1d # (HEX.)
-L0cea:       CPUSH 58 # (3a)
-L0cec:       EMIT
-L0ced:       CPUSH 32 # (20)
-L0cef:       EMIT
-L0cf0:       DUP
-L0cf1:       CALL L08ae # (DICT>NAME)
-L0cf6:       CALL L0720 # (CT)
-L0cfb:       CPUSH 32 # (20)
-L0cfd:       EMIT
-L0cfe:       DUP
-L0cff:       CALL L08e6 # (DICT.GetXT)
-L0d04:       CPUSH 40 # (28)
-L0d06:       EMIT
-L0d07:       CALL L0b1d # (HEX.)
-L0d0c:       CPUSH 41 # (29)
-L0d0e:       EMIT
-L0d0f:       DUP
-L0d10:       CALL L08a2 # (DICT>FLAGS)
-L0d15:       CFETCH
-L0d16:       DUP
-L0d17:       SLITERAL (0d18) [, Flags: ]
-L0d23:       CALL L0720 # (CT)
-L0d28:       CALL L0b1d # (HEX.)
-L0d2d:       DUP
-L0d2e:       CALL L0931 # (FLAGS.ISINLINE?)
-L0d33:       JMPZ L0d49
-L0d38:       SLITERAL (0d39) [ (INLINE)]
-L0d44:       CALL L0720 # (CT)
-L0d49:       CALL L0928 # (FLAGS.ISIMMEDIATE?)
-L0d4e:       JMPZ L0d67
-L0d53:       SLITERAL (0d54) [ (IMMEDIATE)]
-L0d62:       CALL L0720 # (CT)
-L0d67:       CPUSH 13 # (d)
-L0d69:       EMIT
-L0d6a:       CPUSH 10 # (a)
-L0d6c:       EMIT
-L0d6d:       FETCH
-L0d6e:       RET
+L0d56:       # DICTP WORDSV (f0c0)
+L0d5b:       CALL L0c57 # (.(LAST))
+L0d60:       CPUSH 13 # (d)
+L0d62:       EMIT
+L0d63:       CPUSH 10 # (a)
+L0d65:       EMIT
+L0d66:       CPUSH 20 # (14)
+L0d68:       FETCH
+L0d69:       DUP
+L0d6a:       FETCH
+L0d6b:       CPUSH 0 # (0)
+L0d6d:       EQ
+L0d6e:       JMPZ L0d7b
+L0d73:       DROP
+L0d74:       CPUSH 13 # (d)
+L0d76:       EMIT
+L0d77:       CPUSH 10 # (a)
+L0d79:       EMIT
+L0d7a:       RET
+L0d7b:       CALL L0cc6 # (.WORD-LONG)
+L0d80:       JMP L0d69
+L0d85:       RET
 
-L0d6f:       # DICTP WORDSV (3f0ae)
-L0d74:       CALL L0c70 # (.(LAST))
-L0d79:       CPUSH 13 # (d)
-L0d7b:       EMIT
-L0d7c:       CPUSH 10 # (a)
-L0d7e:       EMIT
-L0d7f:       CPUSH 20 # (14)
-L0d81:       FETCH
-L0d82:       DUP
-L0d83:       FETCH
-L0d84:       CPUSH 0 # (0)
-L0d86:       EQ
-L0d87:       JMPZ L0d94
-L0d8c:       DROP
-L0d8d:       CPUSH 13 # (d)
-L0d8f:       EMIT
-L0d90:       CPUSH 10 # (a)
-L0d92:       EMIT
-L0d93:       RET
-L0d94:       CALL L0cdf # (.WORD-LONG)
-L0d99:       JMP L0d82
-L0d9e:       RET
-
-L0d9f:       # DICTP NUM-WORDS (3f09a)
-L0da4:       CPUSH 0 # (0)
-L0da6:       DTOR
-L0da7:       CPUSH 20 # (14)
+L0d86:       # DICTP NUM-WORDS (f0ac)
+L0d8b:       CPUSH 0 # (0)
+L0d8d:       DTOR
+L0d8e:       CPUSH 20 # (14)
+L0d90:       FETCH
+L0d91:       DUP
+L0d92:       FETCH
+L0d93:       CPUSH 0 # (0)
+L0d95:       EQ
+L0d96:       JMPZ L0da4
+L0d9b:       DROP
+L0d9c:       RTOD
+L0d9d:       CPUSH 13 # (d)
+L0d9f:       EMIT
+L0da0:       CPUSH 10 # (a)
+L0da2:       EMIT
+L0da3:       RET
+L0da4:       RTOD
+L0da5:       CPUSH 1 # (1)
+L0da7:       ADD
+L0da8:       DTOR
 L0da9:       FETCH
-L0daa:       DUP
-L0dab:       FETCH
-L0dac:       CPUSH 0 # (0)
-L0dae:       EQ
-L0daf:       JMPZ L0dbd
-L0db4:       DROP
-L0db5:       RTOD
-L0db6:       CPUSH 13 # (d)
-L0db8:       EMIT
-L0db9:       CPUSH 10 # (a)
-L0dbb:       EMIT
-L0dbc:       RET
-L0dbd:       RTOD
-L0dbe:       CPUSH 1 # (1)
-L0dc0:       ADD
-L0dc1:       DTOR
-L0dc2:       FETCH
-L0dc3:       JMP L0daa
-L0dc8:       RET
+L0daa:       JMP L0d91
+L0daf:       RET
 
-L0dc9:       # DICTP .lastx (3f089)
-L0dce:       CPUSH 13 # (d)
-L0dd0:       EMIT
-L0dd1:       CPUSH 10 # (a)
-L0dd3:       EMIT
-L0dd4:       CPUSH 20 # (14)
-L0dd6:       FETCH
-L0dd7:       SWAP
-L0dd8:       CPUSH 0 # (0)
-L0dda:       OVER
-L0ddb:       OVER
-L0ddc:       GT
-L0ddd:       JMPZ L0df7
-L0de2:       DTOR
-L0de3:       SWAP
-L0de4:       RTOD
-L0de5:       SWAP
-L0de6:       CALL L0cdf # (.WORD-LONG)
-L0deb:       SWAP
-L0dec:       DTOR
-L0ded:       SWAP
-L0dee:       RTOD
-L0def:       CPUSH 1 # (1)
-L0df1:       ADD
-L0df2:       JMP L0dfb
-L0df7:       DROP
-L0df8:       DROP
-L0df9:       DROP
-L0dfa:       RET
-L0dfb:       JMP L0dda
+L0db0:       # DICTP .lastx (f09b)
+L0db5:       CPUSH 13 # (d)
+L0db7:       EMIT
+L0db8:       CPUSH 10 # (a)
+L0dba:       EMIT
+L0dbb:       CPUSH 20 # (14)
+L0dbd:       FETCH
+L0dbe:       SWAP
+L0dbf:       CPUSH 0 # (0)
+L0dc1:       OVER
+L0dc2:       OVER
+L0dc3:       GT
+L0dc4:       JMPZ L0dde
+L0dc9:       DTOR
+L0dca:       SWAP
+L0dcb:       RTOD
+L0dcc:       SWAP
+L0dcd:       CALL L0cc6 # (.WORD-LONG)
+L0dd2:       SWAP
+L0dd3:       DTOR
+L0dd4:       SWAP
+L0dd5:       RTOD
+L0dd6:       CPUSH 1 # (1)
+L0dd8:       ADD
+L0dd9:       JMP L0de2
+L0dde:       DROP
+L0ddf:       DROP
+L0de0:       DROP
+L0de1:       RET
+L0de2:       JMP L0dc1
+L0de7:       RET
+
+L0de8:       # DICTP EXECUTE (f089)
+L0ded:       RTOD
+L0dee:       DROP
+L0def:       DTOR
+L0df0:       RET
+
+L0df1:       # DICTP find.ret (f076)
+L0df6:       DUP
+L0df7:       CFETCH
+L0df8:       CPUSH 12 # (c)
+L0dfa:       EQ
+L0dfb:       JMPZ L0e01
 L0e00:       RET
-
-L0e01:       # DICTP EXECUTE (3f077)
-L0e06:       RTOD
-L0e07:       DROP
-L0e08:       DTOR
+L0e01:       CPUSH 1 # (1)
+L0e03:       ADD
+L0e04:       JMP L0df6
 L0e09:       RET
 
-L0e0a:       # DICTP find.ret (3f064)
-L0e0f:       DUP
-L0e10:       CFETCH
-L0e11:       CPUSH 12 # (c)
-L0e13:       EQ
-L0e14:       JMPZ L0e1a
-L0e19:       RET
-L0e1a:       CPUSH 1 # (1)
-L0e1c:       ADD
-L0e1d:       JMP L0e0f
-L0e22:       RET
+L0e0a:       # DICTP (inline) (f063)
+L0e0f:       OVER
+L0e10:       OVER
+L0e11:       LT
+L0e12:       JMPZ L0e18
+L0e17:       SWAP
+L0e18:       DUP
+L0e19:       CFETCH
+L0e1a:       CALL L0070 # (C,)
+L0e1f:       CPUSH 1 # (1)
+L0e21:       ADD
+L0e22:       OVER
+L0e23:       OVER
+L0e24:       GT
+L0e25:       JMPNZ L0e18
+L0e2a:       DROP
+L0e2b:       DROP
+L0e2c:       RET
 
-L0e23:       # DICTP (inline) (3f051)
-L0e28:       OVER
-L0e29:       OVER
-L0e2a:       LT
-L0e2b:       JMPZ L0e31
-L0e30:       SWAP
-L0e31:       DUP
-L0e32:       CFETCH
-L0e33:       CALL L0070 # (C,)
-L0e38:       CPUSH 1 # (1)
-L0e3a:       ADD
-L0e3b:       OVER
-L0e3c:       OVER
-L0e3d:       GT
-L0e3e:       JMPNZ L0e31
-L0e43:       DROP
-L0e44:       DROP
-L0e45:       RET
+L0e2d:       # DICTP DOES> (f053)
+L0e32:       RTOD
+L0e33:       DUP
+L0e34:       CALL L0df1 # (find.ret)
+L0e39:       DUP
+L0e3a:       DTOR
+L0e3b:       CPUSH 1 # (1)
+L0e3d:       ADD
+L0e3e:       CALL L0e0a # ((inline))
+L0e43:       RET
 
-L0e46:       # DICTP DOES> (3f041)
-L0e4b:       RTOD
-L0e4c:       DUP
-L0e4d:       CALL L0e0a # (find.ret)
-L0e52:       DUP
-L0e53:       DTOR
-L0e54:       CPUSH 1 # (1)
-L0e56:       ADD
-L0e57:       CALL L0e23 # ((inline))
-L0e5c:       RET
+L0e44:       # DICTP Copy.INLINE (f03d)
+L0e49:       DUP
+L0e4a:       CFETCH
+L0e4b:       CPUSH 24 # (18)
+L0e4d:       EQ
+L0e4e:       JMPZ L0e59
+L0e53:       CPUSH 1 # (1)
+L0e55:       ADD
+L0e56:       CPUSH 4 # (4)
+L0e58:       ADD
+L0e59:       DUP
+L0e5a:       CALL L0df1 # (find.ret)
+L0e5f:       CALL L0e0a # ((inline))
+L0e64:       RET
 
-L0e5d:       # DICTP Copy.INLINE (3f02b)
-L0e62:       DUP
-L0e63:       CFETCH
-L0e64:       CPUSH 24 # (18)
-L0e66:       EQ
-L0e67:       JMPZ L0e72
-L0e6c:       CPUSH 1 # (1)
-L0e6e:       ADD
-L0e6f:       CPUSH 4 # (4)
-L0e71:       ADD
-L0e72:       DUP
-L0e73:       CALL L0e0a # (find.ret)
-L0e78:       CALL L0e23 # ((inline))
-L0e7d:       RET
-
-L0e7e:       # DICTP strlen (3f01a)
-L0e83:       CPUSH 0 # (0)
+L0e65:       # DICTP strlen (f02c)
+L0e6a:       CPUSH 0 # (0)
+L0e6c:       SWAP
+L0e6d:       SWAP
+L0e6e:       OVER
+L0e6f:       CFETCH
+L0e70:       DUP
+L0e71:       JMPZ L0e80
+L0e76:       DROP
+L0e77:       CPUSH 1 # (1)
+L0e79:       ADD
+L0e7a:       SWAP
+L0e7b:       CPUSH 1 # (1)
+L0e7d:       ADD
+L0e7e:       CPUSH 1 # (1)
+L0e80:       JMPNZ L0e6d
 L0e85:       SWAP
-L0e86:       SWAP
-L0e87:       OVER
-L0e88:       CFETCH
-L0e89:       DUP
-L0e8a:       JMPZ L0e99
-L0e8f:       DROP
-L0e90:       CPUSH 1 # (1)
-L0e92:       ADD
-L0e93:       SWAP
+L0e86:       DROP
+L0e87:       RET
+
+L0e88:       # DICTP cstr, (f01c)
+L0e8d:       DUP
+L0e8e:       CFETCH
+L0e8f:       OVER
+L0e90:       ADD
+L0e91:       CPUSH 1 # (1)
+L0e93:       ADD
 L0e94:       CPUSH 1 # (1)
 L0e96:       ADD
-L0e97:       CPUSH 1 # (1)
-L0e99:       JMPNZ L0e86
-L0e9e:       SWAP
-L0e9f:       DROP
-L0ea0:       RET
+L0e97:       CALL L0e0a # ((inline))
+L0e9c:       RET
 
-L0ea1:       # DICTP cstr, (3f00a)
-L0ea6:       DUP
-L0ea7:       CFETCH
-L0ea8:       OVER
-L0ea9:       ADD
-L0eaa:       CPUSH 1 # (1)
-L0eac:       ADD
-L0ead:       CPUSH 1 # (1)
-L0eaf:       ADD
-L0eb0:       CALL L0e23 # ((inline))
-L0eb5:       RET
+L0e9d:       # DICTP [COMPILE] (f008)
+L0ea2:       CALL L0918 # (FLAGS.ISINLINE?)
+L0ea7:       JMPZ L0eb6
+L0eac:       CALL L0e44 # (Copy.INLINE)
+L0eb1:       JMP L0ec2
+L0eb6:       CPUSH 11 # (b)
+L0eb8:       CALL L0070 # (C,)
+L0ebd:       CALL L042c # (,)
+L0ec2:       RET
 
-L0eb6:       # DICTP [COMPILE] (3eff6)
-L0ebb:       CALL L0931 # (FLAGS.ISINLINE?)
-L0ec0:       JMPZ L0ecf
-L0ec5:       CALL L0e5d # (Copy.INLINE)
-L0eca:       JMP L0edb
-L0ecf:       CPUSH 11 # (b)
-L0ed1:       CALL L0070 # (C,)
-L0ed6:       CALL L042c # (,)
-L0edb:       RET
+L0ec3:       # DICTP executeWord (eff2)
+L0ec8:       DTOR
+L0ec9:       RTOD
+L0eca:       DUP
+L0ecb:       DTOR
+L0ecc:       CALL L0941 # (findInDict)
+L0ed1:       JMPZ L0f0d
+L0ed6:       RTOD
+L0ed7:       DROP
+L0ed8:       CALL L04c0 # (?COMPILING)
+L0edd:       JMPZ L0f02
+L0ee2:       DUP
+L0ee3:       CALL L090f # (FLAGS.ISIMMEDIATE?)
+L0ee8:       JMPZ L0ef8
+L0eed:       DROP
+L0eee:       CALL L0de8 # (EXECUTE)
+L0ef3:       JMP L0efd
+L0ef8:       CALL L0e9d # ([COMPILE])
+L0efd:       JMP L0f08
+L0f02:       DROP
+L0f03:       CALL L0de8 # (EXECUTE)
+L0f08:       JMP L0f65
+L0f0d:       DROP
+L0f0e:       DROP
+L0f0f:       RTOD
+L0f10:       DUP
+L0f11:       DTOR
+L0f12:       CALL L0a05 # (isNumber?)
+L0f17:       JMPZ L0f57
+L0f1c:       CALL L04c0 # (?COMPILING)
+L0f21:       JMPZ L0f52
+L0f26:       DUP
+L0f27:       CPUSH 0 # (0)
+L0f29:       CPUSH 255 # (ff)
+L0f2b:       CALL L0791 # (BETWEEN)
+L0f30:       JMPZ L0f46
+L0f35:       CPUSH 14 # (e)
+L0f37:       CALL L0070 # (C,)
+L0f3c:       CALL L0070 # (C,)
+L0f41:       JMP L0f52
+L0f46:       CPUSH 1 # (1)
+L0f48:       CALL L0070 # (C,)
+L0f4d:       CALL L042c # (,)
+L0f52:       JMP L0f63
+L0f57:       DROP
+L0f58:       SLITERAL (0f59) [??]
+L0f5d:       CALL L0707 # (CT)
+L0f62:       RESET
+L0f63:       RTOD
+L0f64:       DROP
+L0f65:       RET
 
-L0edc:       # DICTP executeWord (3efe0)
-L0ee1:       DTOR
-L0ee2:       RTOD
-L0ee3:       DUP
-L0ee4:       DTOR
-L0ee5:       CALL L095a # (findInDict)
-L0eea:       JMPZ L0f26
-L0eef:       RTOD
-L0ef0:       DROP
-L0ef1:       CALL L04c0 # (?COMPILING)
-L0ef6:       JMPZ L0f1b
-L0efb:       DUP
-L0efc:       CALL L0928 # (FLAGS.ISIMMEDIATE?)
-L0f01:       JMPZ L0f11
-L0f06:       DROP
-L0f07:       CALL L0e01 # (EXECUTE)
-L0f0c:       JMP L0f16
-L0f11:       CALL L0eb6 # ([COMPILE])
-L0f16:       JMP L0f21
-L0f1b:       DROP
-L0f1c:       CALL L0e01 # (EXECUTE)
-L0f21:       JMP L0f7e
-L0f26:       DROP
-L0f27:       DROP
-L0f28:       RTOD
-L0f29:       DUP
-L0f2a:       DTOR
-L0f2b:       CALL L0a1e # (isNumber?)
-L0f30:       JMPZ L0f70
-L0f35:       CALL L04c0 # (?COMPILING)
-L0f3a:       JMPZ L0f6b
-L0f3f:       DUP
-L0f40:       CPUSH 0 # (0)
-L0f42:       CPUSH 255 # (ff)
-L0f44:       CALL L07aa # (BETWEEN)
-L0f49:       JMPZ L0f5f
-L0f4e:       CPUSH 14 # (e)
-L0f50:       CALL L0070 # (C,)
-L0f55:       CALL L0070 # (C,)
-L0f5a:       JMP L0f6b
-L0f5f:       CPUSH 1 # (1)
-L0f61:       CALL L0070 # (C,)
-L0f66:       CALL L042c # (,)
-L0f6b:       JMP L0f7c
-L0f70:       DROP
-L0f71:       SLITERAL (0f72) [??]
-L0f76:       CALL L0720 # (CT)
-L0f7b:       RESET
-L0f7c:       RTOD
-L0f7d:       DROP
-L0f7e:       RET
+L0f66:       # DICTP executeInput (efdb)
+L0f6b:       CALL L0526 # (>IN)
+L0f70:       FETCH
+L0f71:       CALL L0813 # (skipWS)
+L0f76:       CALL L0526 # (>IN)
+L0f7b:       STORE
+L0f7c:       CALL L0526 # (>IN)
+L0f81:       FETCH
+L0f82:       CFETCH
+L0f83:       JMPZ L0fa3
+L0f88:       CALL L0526 # (>IN)
+L0f8d:       FETCH
+L0f8e:       CALL L083e # (getOneWord)
+L0f93:       CALL L0526 # (>IN)
+L0f98:       STORE
+L0f99:       CALL L0ec3 # (executeWord)
+L0f9e:       JMP L0fa4
+L0fa3:       RET
+L0fa4:       JMP L0f6b
+L0fa9:       RET
 
-L0f7f:       # DICTP executeInput (3efc9)
-L0f84:       CALL L0526 # (>IN)
-L0f89:       FETCH
-L0f8a:       CALL L082c # (skipWS)
-L0f8f:       CALL L0526 # (>IN)
-L0f94:       STORE
-L0f95:       CALL L0526 # (>IN)
-L0f9a:       FETCH
-L0f9b:       CFETCH
-L0f9c:       JMPZ L0fbc
-L0fa1:       CALL L0526 # (>IN)
-L0fa6:       FETCH
-L0fa7:       CALL L0857 # (getOneWord)
-L0fac:       CALL L0526 # (>IN)
-L0fb1:       STORE
-L0fb2:       CALL L0edc # (executeWord)
-L0fb7:       JMP L0fbd
-L0fbc:       RET
-L0fbd:       JMP L0f84
-L0fc2:       RET
+L0faa:       # DICTP Pad (efcd)
+L0faf:       CPUSH 20 # (14)
+L0fb1:       FETCH
+L0fb2:       CPUSH 200 # (c8)
+L0fb4:       SUB
+L0fb5:       DUP
+L0fb6:       CPUSH 16 # (10)
+L0fb8:       FETCH
+L0fb9:       LT
+L0fba:       JMPZ L0fd1
+L0fbf:       SLITERAL (0fc0) [Out of Memory!]
+L0fd0:       RESET
+L0fd1:       RET
 
-L0fc3:       # DICTP Pad (3efbb)
-L0fc8:       CPUSH 20 # (14)
-L0fca:       FETCH
-L0fcb:       CPUSH 200 # (c8)
-L0fcd:       SUB
-L0fce:       DUP
-L0fcf:       CPUSH 16 # (10)
-L0fd1:       FETCH
-L0fd2:       LT
-L0fd3:       JMPZ L0fea
-L0fd8:       SLITERAL (0fd9) [Out of Memory!]
-L0fe9:       RESET
-L0fea:       RET
+L0fd2:       # DICTP LoadingFromFile? (efb2)
+L0fd7:       CPUSH 28 # (1c)
+L0fd9:       FETCH
+L0fda:       RET
 
-L0feb:       # DICTP LoadingFromFile? (3efa0)
-L0ff0:       CPUSH 28 # (1c)
-L0ff2:       FETCH
-L0ff3:       RET
+L0fdb:       # DICTP getLineFromFile (ef98)
+L0fe0:       CPUSH 200 # (c8)
+L0fe2:       CPUSH 28 # (1c)
+L0fe4:       FETCH
+L0fe5:       FREADLINE
+L0fe6:       CPUSH 0 # (0)
+L0fe8:       EQ
+L0fe9:       JMPZ L0ff5
+L0fee:       CPUSH 28 # (1c)
+L0ff0:       CALL L04a0 # (OFF)
+L0ff5:       RET
 
-L0ff4:       # DICTP getLineFromFile (3ef86)
-L0ff9:       CPUSH 200 # (c8)
-L0ffb:       CPUSH 28 # (1c)
-L0ffd:       FETCH
-L0ffe:       FREADLINE
-L0fff:       CPUSH 0 # (0)
-L1001:       EQ
-L1002:       JMPZ L100e
-L1007:       CPUSH 28 # (1c)
-L1009:       CALL L04a0 # (OFF)
-L100e:       RET
+L0ff6:       # DICTP getLine (ef86)
+L0ffb:       CPUSH 0 # (0)
+L0ffd:       CALL L0faa # (Pad)
+L1002:       DUP
+L1003:       CPUSH 1 # (1)
+L1005:       ADD
+L1006:       CALL L0526 # (>IN)
+L100b:       STORE
+L100c:       CSTORE
+L100d:       CALL L0fd2 # (LoadingFromFile?)
+L1012:       JMPZ L1022
+L1017:       CALL L0faa # (Pad)
+L101c:       CALL L0fdb # (getLineFromFile)
+L1021:       RET
+L1022:       CPUSH 0 # (0)
+L1024:       CALL L0526 # (>IN)
+L1029:       FETCH
+L102a:       CSTORE
+L102b:       GETCH
+L102c:       DUP
+L102d:       CPUSH 13 # (d)
+L102f:       EQ
+L1030:       JMPZ L103f
+L1035:       DROP
+L1036:       CALL L0faa # (Pad)
+L103b:       CPUSH 32 # (20)
+L103d:       EMIT
+L103e:       RET
+L103f:       DUP
+L1040:       CPUSH 9 # (9)
+L1042:       EQ
+L1043:       JMPZ L104b
+L1048:       DROP
+L1049:       CPUSH 32 # (20)
+L104b:       DUP
+L104c:       CPUSH 3 # (3)
+L104e:       EQ
+L104f:       JMPZ L1055
+L1054:       BYE
+L1055:       DUP
+L1056:       CPUSH 8 # (8)
+L1058:       EQ
+L1059:       JMPZ L1091
+L105e:       CALL L0faa # (Pad)
+L1063:       CFETCH
+L1064:       CPUSH 0 # (0)
+L1066:       GT
+L1067:       JMPZ L108b
+L106c:       CALL L0faa # (Pad)
+L1071:       CALL L05f6 # (C--)
+L1076:       CALL L0526 # (>IN)
+L107b:       CALL L05dc # (--)
+L1080:       DUP
+L1081:       EMIT
+L1082:       CPUSH 32 # (20)
+L1084:       EMIT
+L1085:       EMIT
+L1086:       JMP L108c
+L108b:       DROP
+L108c:       JMP L10c3
+L1091:       DUP
+L1092:       CPUSH 32 # (20)
+L1094:       CPUSH 127 # (7f)
+L1096:       CALL L0791 # (BETWEEN)
+L109b:       JMPZ L10c2
+L10a0:       DUP
+L10a1:       EMIT
+L10a2:       CALL L0526 # (>IN)
+L10a7:       FETCH
+L10a8:       CSTORE
+L10a9:       CALL L0526 # (>IN)
+L10ae:       CALL L05cf # (++)
+L10b3:       CALL L0faa # (Pad)
+L10b8:       CALL L05e9 # (C++)
+L10bd:       JMP L10c3
+L10c2:       DROP
+L10c3:       JMP L1022
+L10c8:       RET
 
-L100f:       # DICTP getLine (3ef74)
-L1014:       CPUSH 0 # (0)
-L1016:       CALL L0fc3 # (Pad)
-L101b:       DUP
-L101c:       CPUSH 1 # (1)
-L101e:       ADD
-L101f:       CALL L0526 # (>IN)
-L1024:       STORE
-L1025:       CSTORE
-L1026:       CALL L0feb # (LoadingFromFile?)
-L102b:       JMPZ L103b
-L1030:       CALL L0fc3 # (Pad)
-L1035:       CALL L0ff4 # (getLineFromFile)
-L103a:       RET
-L103b:       CPUSH 0 # (0)
-L103d:       CALL L0526 # (>IN)
-L1042:       FETCH
-L1043:       CSTORE
-L1044:       GETCH
-L1045:       DUP
-L1046:       CPUSH 13 # (d)
-L1048:       EQ
-L1049:       JMPZ L1058
-L104e:       DROP
-L104f:       CALL L0fc3 # (Pad)
-L1054:       CPUSH 32 # (20)
-L1056:       EMIT
-L1057:       RET
-L1058:       DUP
-L1059:       CPUSH 9 # (9)
-L105b:       EQ
-L105c:       JMPZ L1064
-L1061:       DROP
-L1062:       CPUSH 32 # (20)
-L1064:       DUP
-L1065:       CPUSH 3 # (3)
-L1067:       EQ
-L1068:       JMPZ L106e
-L106d:       BYE
-L106e:       DUP
-L106f:       CPUSH 8 # (8)
-L1071:       EQ
-L1072:       JMPZ L10aa
-L1077:       CALL L0fc3 # (Pad)
-L107c:       CFETCH
-L107d:       CPUSH 0 # (0)
-L107f:       GT
-L1080:       JMPZ L10a4
-L1085:       CALL L0fc3 # (Pad)
-L108a:       CALL L060f # (C--)
-L108f:       CALL L0526 # (>IN)
-L1094:       CALL L05f5 # (--)
-L1099:       DUP
-L109a:       EMIT
-L109b:       CPUSH 32 # (20)
-L109d:       EMIT
-L109e:       EMIT
-L109f:       JMP L10a5
-L10a4:       DROP
-L10a5:       JMP L10dc
-L10aa:       DUP
-L10ab:       CPUSH 32 # (20)
-L10ad:       CPUSH 127 # (7f)
-L10af:       CALL L07aa # (BETWEEN)
-L10b4:       JMPZ L10db
-L10b9:       DUP
-L10ba:       EMIT
-L10bb:       CALL L0526 # (>IN)
-L10c0:       FETCH
-L10c1:       CSTORE
-L10c2:       CALL L0526 # (>IN)
-L10c7:       CALL L05e8 # (++)
-L10cc:       CALL L0fc3 # (Pad)
-L10d1:       CALL L0602 # (C++)
-L10d6:       JMP L10dc
-L10db:       DROP
-L10dc:       JMP L103b
-L10e1:       RET
+L10c9:       # DICTP strcpy2c (ef73)
+L10ce:       DUP
+L10cf:       DTOR
+L10d0:       CPUSH 0 # (0)
+L10d2:       OVER
+L10d3:       CSTORE
+L10d4:       CPUSH 1 # (1)
+L10d6:       ADD
+L10d7:       SWAP
+L10d8:       DUP
+L10d9:       CFETCH
+L10da:       DUP
+L10db:       JMPZ L10f9
+L10e0:       CPUSH 2 # (2)
+L10e2:       PICK
+L10e3:       CSTORE
+L10e4:       SWAP
+L10e5:       CPUSH 1 # (1)
+L10e7:       ADD
+L10e8:       SWAP
+L10e9:       CPUSH 1 # (1)
+L10eb:       ADD
+L10ec:       RTOD
+L10ed:       DUP
+L10ee:       DTOR
+L10ef:       CALL L05e9 # (C++)
+L10f4:       JMP L1102
+L10f9:       DTOR
+L10fa:       SWAP
+L10fb:       RTOD
+L10fc:       SWAP
+L10fd:       CSTORE
+L10fe:       DROP
+L10ff:       RTOD
+L1100:       DROP
+L1101:       RET
+L1102:       JMP L10d8
+L1107:       RET
 
-L10e2:       # DICTP strcpy2c (3ef61)
-L10e7:       DUP
-L10e8:       DTOR
-L10e9:       CPUSH 0 # (0)
-L10eb:       OVER
-L10ec:       CSTORE
-L10ed:       CPUSH 1 # (1)
-L10ef:       ADD
-L10f0:       SWAP
-L10f1:       DUP
-L10f2:       CFETCH
-L10f3:       DUP
-L10f4:       JMPZ L1112
-L10f9:       CPUSH 2 # (2)
-L10fb:       PICK
-L10fc:       CSTORE
-L10fd:       SWAP
-L10fe:       CPUSH 1 # (1)
-L1100:       ADD
-L1101:       SWAP
-L1102:       CPUSH 1 # (1)
-L1104:       ADD
-L1105:       RTOD
-L1106:       DUP
-L1107:       DTOR
-L1108:       CALL L0602 # (C++)
-L110d:       JMP L111b
-L1112:       DTOR
-L1113:       SWAP
-L1114:       RTOD
-L1115:       SWAP
-L1116:       CSTORE
-L1117:       DROP
-L1118:       RTOD
-L1119:       DROP
-L111a:       RET
-L111b:       JMP L10f1
-L1120:       RET
-
-L1121:       # DICTP Define-Word (3ef4b)
-L1126:       CPUSH 20 # (14)
-L1128:       FETCH
-L1129:       OVER
-L112a:       CALL L0e7e # (strlen)
-L112f:       CPUSH 2 # (2)
-L1131:       CPUSH 4 # (4)
-L1133:       MUL
-L1134:       CPUSH 3 # (3)
-L1136:       ADD
-L1137:       ADD
-L1138:       SUB
-L1139:       DUP
+L1108:       # DICTP Define-Word (ef5d)
+L110d:       CPUSH 20 # (14)
+L110f:       FETCH
+L1110:       OVER
+L1111:       CALL L0e65 # (strlen)
+L1116:       CPUSH 2 # (2)
+L1118:       CPUSH 4 # (4)
+L111a:       MUL
+L111b:       CPUSH 3 # (3)
+L111d:       ADD
+L111e:       ADD
+L111f:       SUB
+L1120:       DUP
+L1121:       DTOR
+L1122:       DTOR
+L1123:       CPUSH 20 # (14)
+L1125:       FETCH
+L1126:       RTOD
+L1127:       DUP
+L1128:       DTOR
+L1129:       STORE
+L112a:       RTOD
+L112b:       CPUSH 4 # (4)
+L112d:       ADD
+L112e:       DTOR
+L112f:       CPUSH 16 # (10)
+L1131:       FETCH
+L1132:       RTOD
+L1133:       DUP
+L1134:       DTOR
+L1135:       STORE
+L1136:       RTOD
+L1137:       CPUSH 4 # (4)
+L1139:       ADD
 L113a:       DTOR
-L113b:       DTOR
-L113c:       CPUSH 20 # (14)
-L113e:       FETCH
-L113f:       RTOD
-L1140:       DUP
-L1141:       DTOR
-L1142:       STORE
-L1143:       RTOD
-L1144:       CPUSH 4 # (4)
-L1146:       ADD
-L1147:       DTOR
-L1148:       CPUSH 16 # (10)
-L114a:       FETCH
-L114b:       RTOD
-L114c:       DUP
-L114d:       DTOR
-L114e:       STORE
-L114f:       RTOD
-L1150:       CPUSH 4 # (4)
-L1152:       ADD
-L1153:       DTOR
-L1154:       CPUSH 0 # (0)
-L1156:       RTOD
-L1157:       DUP
-L1158:       DTOR
-L1159:       CSTORE
-L115a:       RTOD
-L115b:       CPUSH 1 # (1)
-L115d:       ADD
-L115e:       DTOR
-L115f:       RTOD
-L1160:       CALL L10e2 # (strcpy2c)
-L1165:       RTOD
-L1166:       CPUSH 20 # (14)
-L1168:       STORE
-L1169:       RET
+L113b:       CPUSH 0 # (0)
+L113d:       RTOD
+L113e:       DUP
+L113f:       DTOR
+L1140:       CSTORE
+L1141:       RTOD
+L1142:       CPUSH 1 # (1)
+L1144:       ADD
+L1145:       DTOR
+L1146:       RTOD
+L1147:       CALL L10c9 # (strcpy2c)
+L114c:       RTOD
+L114d:       CPUSH 20 # (14)
+L114f:       STORE
+L1150:       RET
 
-L116a:       # DICTP CREATE-NAME (3ef35)
-L116f:       CALL L0526 # (>IN)
-L1174:       FETCH
-L1175:       CALL L082c # (skipWS)
-L117a:       CALL L0526 # (>IN)
-L117f:       STORE
-L1180:       CALL L0526 # (>IN)
-L1185:       FETCH
-L1186:       CFETCH
-L1187:       JMPZ L11bf
-L118c:       CALL L0526 # (>IN)
-L1191:       FETCH
-L1192:       CALL L0857 # (getOneWord)
-L1197:       CALL L0526 # (>IN)
-L119c:       STORE
-L119d:       DUP
-L119e:       CFETCH
-L119f:       JMPZ L11bd
-L11a4:       CALL L1121 # (Define-Word)
-L11a9:       CPUSH 24 # (18)
-L11ab:       CALL L0070 # (C,)
-L11b0:       CPUSH 20 # (14)
-L11b2:       FETCH
-L11b3:       CALL L042c # (,)
-L11b8:       JMP L11bf
-L11bd:       DROP
-L11be:       RESET
-L11bf:       RET
+L1151:       # DICTP CREATE-NAME (ef47)
+L1156:       CALL L0526 # (>IN)
+L115b:       FETCH
+L115c:       CALL L0813 # (skipWS)
+L1161:       CALL L0526 # (>IN)
+L1166:       STORE
+L1167:       CALL L0526 # (>IN)
+L116c:       FETCH
+L116d:       CFETCH
+L116e:       JMPZ L11a6
+L1173:       CALL L0526 # (>IN)
+L1178:       FETCH
+L1179:       CALL L083e # (getOneWord)
+L117e:       CALL L0526 # (>IN)
+L1183:       STORE
+L1184:       DUP
+L1185:       CFETCH
+L1186:       JMPZ L11a4
+L118b:       CALL L1108 # (Define-Word)
+L1190:       CPUSH 24 # (18)
+L1192:       CALL L0070 # (C,)
+L1197:       CPUSH 20 # (14)
+L1199:       FETCH
+L119a:       CALL L042c # (,)
+L119f:       JMP L11a6
+L11a4:       DROP
+L11a5:       RESET
+L11a6:       RET
 
-L11c0:       # DICTP : (3ef29)
-L11c5:       CALL L116a # (CREATE-NAME)
-L11ca:       CPUSH 32 # (20)
-L11cc:       CALL L0496 # (ON)
-L11d1:       RET
+L11a7:       # DICTP : (ef3b)
+L11ac:       CALL L1151 # (CREATE-NAME)
+L11b1:       CPUSH 32 # (20)
+L11b3:       CALL L0496 # (ON)
+L11b8:       RET
 
-L11d2:       # DICTP :NONAME (3ef17)
-L11d7:       CPUSH 16 # (10)
-L11d9:       FETCH
-L11da:       CPUSH 32 # (20)
-L11dc:       CALL L0496 # (ON)
-L11e1:       RET
+L11b9:       # DICTP :NONAME (ef29)
+L11be:       CPUSH 16 # (10)
+L11c0:       FETCH
+L11c1:       CPUSH 32 # (20)
+L11c3:       CALL L0496 # (ON)
+L11c8:       RET
 
-L11e2:       # DICTP ; (3ef0b)
-L11e7:       CPUSH 12 # (c)
-L11e9:       CALL L0070 # (C,)
-L11ee:       CPUSH 32 # (20)
-L11f0:       CALL L04a0 # (OFF)
-L11f5:       RET
+L11c9:       # DICTP ; (ef1d)
+L11ce:       CPUSH 12 # (c)
+L11d0:       CALL L0070 # (C,)
+L11d5:       CPUSH 32 # (20)
+L11d7:       CALL L04a0 # (OFF)
+L11dc:       RET
 
-L11f6:       # DICTP ForgetLast (3eef6)
-L11fb:       CPUSH 20 # (14)
-L11fd:       FETCH
-L11fe:       CPUSH 4 # (4)
-L1200:       ADD
-L1201:       FETCH
-L1202:       CPUSH 16 # (10)
-L1204:       STORE
-L1205:       CPUSH 20 # (14)
-L1207:       FETCH
-L1208:       FETCH
-L1209:       CPUSH 20 # (14)
-L120b:       STORE
-L120c:       RET
+L11dd:       # DICTP ForgetLast (ef08)
+L11e2:       CPUSH 20 # (14)
+L11e4:       FETCH
+L11e5:       CPUSH 4 # (4)
+L11e7:       ADD
+L11e8:       FETCH
+L11e9:       CPUSH 16 # (10)
+L11eb:       STORE
+L11ec:       CPUSH 20 # (14)
+L11ee:       FETCH
+L11ef:       FETCH
+L11f0:       CPUSH 20 # (14)
+L11f2:       STORE
+L11f3:       RET
 
-L120d:       # DICTP resetState (3eee1)
-L1212:       CALL L04c0 # (?COMPILING)
-L1217:       JMPZ L1221
-L121c:       CALL L11f6 # (ForgetLast)
-L1221:       CPUSH 32 # (20)
-L1223:       CALL L04a0 # (OFF)
-L1228:       CALL L0475 # (DECIMAL)
+L11f4:       # DICTP resetState (eef3)
+L11f9:       CALL L04c0 # (?COMPILING)
+L11fe:       JMPZ L1208
+L1203:       CALL L11dd # (ForgetLast)
+L1208:       CPUSH 32 # (20)
+L120a:       CALL L04a0 # (OFF)
+L120f:       CALL L0475 # (DECIMAL)
+L1214:       RET
+
+L1215:       # DICTP ALLOT (eee3)
+L121a:       CPUSH 16 # (10)
+L121c:       FETCH
+L121d:       ADD
+L121e:       CPUSH 16 # (10)
+L1220:       STORE
+L1221:       RET
+
+L1222:       # DICTP ? (eed7)
+L1227:       FETCH
+L1228:       CALL L0af6 # (.)
 L122d:       RET
 
-L122e:       # DICTP ALLOT (3eed1)
-L1233:       CPUSH 16 # (10)
-L1235:       FETCH
-L1236:       ADD
-L1237:       CPUSH 16 # (10)
-L1239:       STORE
-L123a:       RET
+L122e:       # DICTP C? (eeca)
+L1233:       CFETCH
+L1234:       CALL L0af6 # (.)
+L1239:       RET
 
-L123b:       # DICTP ? (3eec5)
-L1240:       FETCH
-L1241:       CALL L0b0f # (.)
+L123a:       # DICTP FREE (eebb)
+L123f:       CPUSH 20 # (14)
+L1241:       FETCH
+L1242:       CPUSH 16 # (10)
+L1244:       FETCH
+L1245:       SUB
 L1246:       RET
 
-L1247:       # DICTP C? (3eeb8)
-L124c:       CFETCH
-L124d:       CALL L0b0f # (.)
-L1252:       RET
+L1247:       # DICTP FREE? (eeab)
+L124c:       CALL L123a # (FREE)
+L1251:       CALL L0a82 # ((.))
+L1256:       SLITERAL (1257) [ bytes free.]
+L1265:       CALL L0707 # (CT)
+L126a:       RET
 
-L1253:       # DICTP FREE (3eea9)
-L1258:       CPUSH 20 # (14)
-L125a:       FETCH
-L125b:       CPUSH 16 # (10)
-L125d:       FETCH
-L125e:       SUB
-L125f:       RET
-
-L1260:       # DICTP FREE? (3ee99)
-L1265:       CALL L1253 # (FREE)
-L126a:       CALL L0a9b # ((.))
-L126f:       SLITERAL (1270) [ bytes free.]
-L127e:       CALL L0720 # (CT)
-L1283:       RET
-
-L1284:       # DICTP mainLoop (3ee86)
-L1289:       CALL L120d # (resetState)
-L128e:       CALL L07d2 # (tmp-init)
-L1293:       CALL L04c0 # (?COMPILING)
-L1298:       CPUSH 0 # (0)
-L129a:       EQ
-L129b:       JMPZ L12b0
-L12a0:       SLITERAL (12a1) [ OK]
-L12a6:       CALL L0720 # (CT)
-L12ab:       CALL L0b8e # (.S)
-L12b0:       CPUSH 13 # (d)
+L126b:       # DICTP mainLoop (ee98)
+L1270:       CALL L11f4 # (resetState)
+L1275:       CALL L07b9 # (tmp-init)
+L127a:       CALL L04c0 # (?COMPILING)
+L127f:       CPUSH 0 # (0)
+L1281:       EQ
+L1282:       JMPZ L1297
+L1287:       SLITERAL (1288) [ OK]
+L128d:       CALL L0707 # (CT)
+L1292:       CALL L0b75 # (.S)
+L1297:       CPUSH 13 # (d)
+L1299:       EMIT
+L129a:       CPUSH 10 # (a)
+L129c:       EMIT
+L129d:       CALL L0ff6 # (getLine)
+L12a2:       CPUSH 1 # (1)
+L12a4:       ADD
+L12a5:       CALL L0526 # (>IN)
+L12aa:       STORE
+L12ab:       CALL L0f66 # (executeInput)
+L12b0:       CPUSH 32 # (20)
 L12b2:       EMIT
-L12b3:       CPUSH 10 # (a)
-L12b5:       EMIT
-L12b6:       CALL L100f # (getLine)
-L12bb:       CPUSH 1 # (1)
-L12bd:       ADD
-L12be:       CALL L0526 # (>IN)
-L12c3:       STORE
-L12c4:       CALL L0f7f # (executeInput)
+L12b3:       JMP L1275
+L12b8:       RET
+
+L12b9:       # DICTP main (ee89)
+L12be:       CPUSH 32 # (20)
+L12c0:       FETCH
+L12c1:       CPUSH 99 # (63)
+L12c3:       EQ
+L12c4:       JMPZ L12de
 L12c9:       CPUSH 32 # (20)
-L12cb:       EMIT
-L12cc:       JMP L128e
-L12d1:       RET
+L12cb:       CALL L04a0 # (OFF)
+L12d0:       SLITERAL (12d1) [Hello.]
+L12d9:       CALL L0707 # (CT)
+L12de:       CALL L126b # (mainLoop)
+L12e3:       RET
 
-L12d2:       # DICTP main (3ee77)
-L12d7:       CPUSH 32 # (20)
-L12d9:       FETCH
-L12da:       CPUSH 99 # (63)
-L12dc:       EQ
-L12dd:       JMPZ L12f7
-L12e2:       CPUSH 32 # (20)
-L12e4:       CALL L04a0 # (OFF)
-L12e9:       SLITERAL (12ea) [Hello.]
-L12f2:       CALL L0720 # (CT)
-L12f7:       CALL L1284 # (mainLoop)
-L12fc:       RET
+L12e4:       # DICTP file-getLine (ee72)
+L12e9:       CALL L0faa # (Pad)
+L12ee:       SWAP
+L12ef:       CPUSH 200 # (c8)
+L12f1:       SWAP
+L12f2:       FREADLINE
+L12f3:       CALL L0faa # (Pad)
+L12f8:       SWAP
+L12f9:       RET
 
-L12fd:       # DICTP file-getLine (3ee60)
-L1302:       CALL L0fc3 # (Pad)
-L1307:       SWAP
-L1308:       CPUSH 200 # (c8)
-L130a:       SWAP
-L130b:       FREADLINE
-L130c:       CALL L0fc3 # (Pad)
-L1311:       SWAP
-L1312:       RET
+L12fa:       # DICTP load (ee63)
+L12ff:       CPUSH 0 # (0)
+L1301:       CPUSH 0 # (0)
+L1303:       FOPEN
+L1304:       CPUSH 0 # (0)
+L1306:       EQ
+L1307:       JMPZ L1326
+L130c:       SLITERAL (130d) [Cannot open file.]
+L1320:       CALL L0707 # (CT)
+L1325:       RET
+L1326:       CPUSH 28 # (1c)
+L1328:       STORE
+L1329:       CPUSH 28 # (1c)
+L132b:       FETCH
+L132c:       CALL L12e4 # (file-getLine)
+L1331:       JMPZ L1349
+L1336:       CPUSH 1 # (1)
+L1338:       ADD
+L1339:       CALL L0526 # (>IN)
+L133e:       STORE
+L133f:       CALL L0f66 # (executeInput)
+L1344:       JMP L1356
+L1349:       DROP
+L134a:       CPUSH 28 # (1c)
+L134c:       FETCH
+L134d:       FCLOSE
+L134e:       CPUSH 28 # (1c)
+L1350:       CALL L04a0 # (OFF)
+L1355:       RET
+L1356:       JMP L1329
+L135b:       RET
 
-L1313:       # DICTP load (3ee51)
-L1318:       CPUSH 0 # (0)
-L131a:       CPUSH 0 # (0)
-L131c:       FOPEN
-L131d:       CPUSH 0 # (0)
-L131f:       EQ
-L1320:       JMPZ L133f
-L1325:       SLITERAL (1326) [Cannot open file.]
-L1339:       CALL L0720 # (CT)
-L133e:       RET
-L133f:       CPUSH 28 # (1c)
-L1341:       STORE
-L1342:       CPUSH 28 # (1c)
-L1344:       FETCH
-L1345:       CALL L12fd # (file-getLine)
-L134a:       JMPZ L1362
-L134f:       CPUSH 1 # (1)
-L1351:       ADD
-L1352:       CALL L0526 # (>IN)
-L1357:       STORE
-L1358:       CALL L0f7f # (executeInput)
-L135d:       JMP L136f
-L1362:       DROP
-L1363:       CPUSH 28 # (1c)
-L1365:       FETCH
-L1366:       FCLOSE
-L1367:       CPUSH 28 # (1c)
-L1369:       CALL L04a0 # (OFF)
-L136e:       RET
-L136f:       JMP L1342
-L1374:       RET
+L135c:       # DICTP STR.EMPTY (ee4f)
+L1361:       CPUSH 0 # (0)
+L1363:       OVER
+L1364:       STORE
+L1365:       RET
 
-L1375:       # DICTP STR.EMPTY (3ee3d)
-L137a:       CPUSH 0 # (0)
-L137c:       OVER
-L137d:       STORE
-L137e:       RET
+L1366:       # DICTP STR.LEN (ee3d)
+L136b:       DUP
+L136c:       CFETCH
+L136d:       RET
 
-L137f:       # DICTP STR.LEN (3ee2b)
-L1384:       DUP
-L1385:       CFETCH
-L1386:       RET
+L136e:       # DICTP STR.CATC (ee2a)
+L1373:       OVER
+L1374:       DUP
+L1375:       CALL L05e9 # (C++)
+L137a:       DUP
+L137b:       CFETCH
+L137c:       ADD
+L137d:       CPUSH 0 # (0)
+L137f:       OVER
+L1380:       CPUSH 1 # (1)
+L1382:       ADD
+L1383:       CSTORE
+L1384:       CSTORE
+L1385:       RET
 
-L1387:       # DICTP STR.CATC (3ee18)
-L138c:       OVER
-L138d:       DUP
-L138e:       CALL L0602 # (C++)
-L1393:       DUP
-L1394:       CFETCH
-L1395:       ADD
-L1396:       CPUSH 0 # (0)
-L1398:       OVER
-L1399:       CPUSH 1 # (1)
-L139b:       ADD
-L139c:       CSTORE
-L139d:       CSTORE
-L139e:       RET
+L1386:       # DICTP STR.NULLTERM (ee13)
+L138b:       DUP
+L138c:       DUP
+L138d:       CFETCH
+L138e:       ADD
+L138f:       CPUSH 1 # (1)
+L1391:       ADD
+L1392:       CPUSH 0 # (0)
+L1394:       SWAP
+L1395:       CSTORE
+L1396:       RET
 
-L139f:       # DICTP STR.NULLTERM (3ee01)
-L13a4:       DUP
-L13a5:       DUP
-L13a6:       CFETCH
-L13a7:       ADD
-L13a8:       CPUSH 1 # (1)
-L13aa:       ADD
-L13ab:       CPUSH 0 # (0)
-L13ad:       SWAP
-L13ae:       CSTORE
-L13af:       RET
+L1397:       # DICTP I" (ee06)
+L139c:       CPUSH 16 # (10)
+L139e:       FETCH
+L139f:       CPUSH 100 # (64)
+L13a1:       ADD
+L13a2:       CPUSH 0 # (0)
+L13a4:       OVER
+L13a5:       STORE
+L13a6:       CALL L0526 # (>IN)
+L13ab:       FETCH
+L13ac:       CFETCH
+L13ad:       DUP
+L13ae:       CPUSH 0 # (0)
+L13b0:       EQ
+L13b1:       JMPZ L13d2
+L13b6:       SLITERAL (13b7) [missing closing ]
+L13c9:       CALL L0707 # (CT)
+L13ce:       CPUSH 34 # (22)
+L13d0:       EMIT
+L13d1:       RESET
+L13d2:       CALL L0526 # (>IN)
+L13d7:       CALL L05cf # (++)
+L13dc:       DUP
+L13dd:       CPUSH 34 # (22)
+L13df:       EQ
+L13e0:       JMPZ L13e7
+L13e5:       DROP
+L13e6:       RET
+L13e7:       CALL L136e # (STR.CATC)
+L13ec:       JMP L13a6
+L13f1:       RET
 
-L13b0:       # DICTP I" (3edf4)
-L13b5:       CPUSH 16 # (10)
-L13b7:       FETCH
-L13b8:       CPUSH 100 # (64)
-L13ba:       ADD
-L13bb:       CPUSH 0 # (0)
-L13bd:       OVER
-L13be:       STORE
-L13bf:       CALL L0526 # (>IN)
-L13c4:       FETCH
-L13c5:       CFETCH
-L13c6:       DUP
-L13c7:       CPUSH 0 # (0)
-L13c9:       EQ
-L13ca:       JMPZ L13eb
-L13cf:       SLITERAL (13d0) [missing closing ]
-L13e2:       CALL L0720 # (CT)
-L13e7:       CPUSH 34 # (22)
-L13e9:       EMIT
-L13ea:       RESET
-L13eb:       CALL L0526 # (>IN)
-L13f0:       CALL L05e8 # (++)
-L13f5:       DUP
-L13f6:       CPUSH 34 # (22)
-L13f8:       EQ
-L13f9:       JMPZ L1400
-L13fe:       DROP
-L13ff:       RET
-L1400:       CALL L1387 # (STR.CATC)
-L1405:       JMP L13bf
-L140a:       RET
+L13f2:       # DICTP " (edfa)
+L13f7:       CALL L04c0 # (?COMPILING)
+L13fc:       CPUSH 0 # (0)
+L13fe:       EQ
+L13ff:       JMPZ L140a
+L1404:       CALL L1397 # (I")
+L1409:       RET
+L140a:       CPUSH 7 # (7)
+L140c:       CALL L0070 # (C,)
+L1411:       CPUSH 16 # (10)
+L1413:       FETCH
+L1414:       CPUSH 0 # (0)
+L1416:       CALL L0070 # (C,)
+L141b:       CALL L0526 # (>IN)
+L1420:       FETCH
+L1421:       CFETCH
+L1422:       DUP
+L1423:       CPUSH 0 # (0)
+L1425:       EQ
+L1426:       JMPZ L1452
+L142b:       DROP
+L142c:       CPUSH 1 # (1)
+L142e:       SUB
+L142f:       CPUSH 16 # (10)
+L1431:       STORE
+L1432:       SLITERAL (1433) [missing closing ']
+L1446:       CALL L0707 # (CT)
+L144b:       CPUSH 34 # (22)
+L144d:       EMIT
+L144e:       CPUSH 39 # (27)
+L1450:       EMIT
+L1451:       RESET
+L1452:       CALL L0526 # (>IN)
+L1457:       CALL L05cf # (++)
+L145c:       DUP
+L145d:       CPUSH 34 # (22)
+L145f:       EQ
+L1460:       JMPZ L1478
+L1465:       DROP
+L1466:       CPUSH 16 # (10)
+L1468:       FETCH
+L1469:       CPUSH 0 # (0)
+L146b:       CALL L0070 # (C,)
+L1470:       OVER
+L1471:       SUB
+L1472:       CPUSH 1 # (1)
+L1474:       SUB
+L1475:       SWAP
+L1476:       CSTORE
+L1477:       RET
+L1478:       CALL L0070 # (C,)
+L147d:       JMP L141b
+L1482:       RET
 
-L140b:       # DICTP " (3ede8)
-L1410:       CALL L04c0 # (?COMPILING)
-L1415:       CPUSH 0 # (0)
-L1417:       EQ
-L1418:       JMPZ L1423
-L141d:       CALL L13b0 # (I")
-L1422:       RET
-L1423:       CPUSH 7 # (7)
-L1425:       CALL L0070 # (C,)
-L142a:       CPUSH 16 # (10)
-L142c:       FETCH
-L142d:       CPUSH 0 # (0)
-L142f:       CALL L0070 # (C,)
-L1434:       CALL L0526 # (>IN)
-L1439:       FETCH
-L143a:       CFETCH
-L143b:       DUP
-L143c:       CPUSH 0 # (0)
-L143e:       EQ
-L143f:       JMPZ L146b
-L1444:       DROP
-L1445:       CPUSH 1 # (1)
-L1447:       SUB
-L1448:       CPUSH 16 # (10)
-L144a:       STORE
-L144b:       SLITERAL (144c) [missing closing ']
-L145f:       CALL L0720 # (CT)
-L1464:       CPUSH 34 # (22)
-L1466:       EMIT
-L1467:       CPUSH 39 # (27)
-L1469:       EMIT
-L146a:       RESET
-L146b:       CALL L0526 # (>IN)
-L1470:       CALL L05e8 # (++)
-L1475:       DUP
-L1476:       CPUSH 34 # (22)
-L1478:       EQ
-L1479:       JMPZ L1491
-L147e:       DROP
-L147f:       CPUSH 16 # (10)
-L1481:       FETCH
-L1482:       CPUSH 0 # (0)
-L1484:       CALL L0070 # (C,)
-L1489:       OVER
-L148a:       SUB
-L148b:       CPUSH 1 # (1)
-L148d:       SUB
-L148e:       SWAP
-L148f:       CSTORE
-L1490:       RET
-L1491:       CALL L0070 # (C,)
-L1496:       JMP L1434
-L149b:       RET
+L1483:       # DICTP ll (eded)
+L1488:       SLITERAL (1489) [loads.4th]
+L1494:       CALL L12fa # (load)
+L1499:       RET
 
-L149c:       # DICTP ll (3eddb)
-L14a1:       SLITERAL (14a2) [loads.4th]
-L14ad:       CALL L1313 # (load)
-L14b2:       RET
-
-L14b3:       # DICTP sys-stats (3edc7)
-L14b8:       CALL L0c02 # (.(MEM_SZ))
-L14bd:       CPUSH 44 # (2c)
+L149a:       # DICTP sys-stats (edd9)
+L149f:       CALL L0be9 # (.(MEM_SZ))
+L14a4:       CPUSH 44 # (2c)
+L14a6:       EMIT
+L14a7:       CPUSH 32 # (20)
+L14a9:       EMIT
+L14aa:       CALL L0c22 # (.(HERE))
+L14af:       CPUSH 44 # (2c)
+L14b1:       EMIT
+L14b2:       CPUSH 32 # (20)
+L14b4:       EMIT
+L14b5:       CALL L0c57 # (.(LAST))
+L14ba:       CPUSH 44 # (2c)
+L14bc:       EMIT
+L14bd:       CPUSH 32 # (20)
 L14bf:       EMIT
-L14c0:       CPUSH 32 # (20)
-L14c2:       EMIT
-L14c3:       CALL L0c3b # (.(HERE))
-L14c8:       CPUSH 44 # (2c)
+L14c0:       CALL L1247 # (FREE?)
+L14c5:       CPUSH 13 # (d)
+L14c7:       EMIT
+L14c8:       CPUSH 10 # (a)
 L14ca:       EMIT
-L14cb:       CPUSH 32 # (20)
-L14cd:       EMIT
-L14ce:       CALL L0c70 # (.(LAST))
-L14d3:       CPUSH 44 # (2c)
-L14d5:       EMIT
-L14d6:       CPUSH 32 # (20)
-L14d8:       EMIT
-L14d9:       CALL L1260 # (FREE?)
-L14de:       CPUSH 13 # (d)
-L14e0:       EMIT
-L14e1:       CPUSH 10 # (a)
-L14e3:       EMIT
-L14e4:       RET
+L14cb:       RET
 ;
 ; End of code, Dictionary:
 ;
-3edc7:                           ; sys-stats - (next: 3eddb ll)
-3edcb:                           ; XT=14b3, flags=00
-3edd0: 09                        ; 9, sys-stats
-;
-3eddb:                           ; ll - (next: 3ede8 ")
-3eddf:                           ; XT=149c, flags=00
-3ede4: 02                        ; 2, ll
-;
-3ede8:                           ; " - (next: 3edf4 I")
-3edec:                           ; XT=140b, flags=01
-3edf1: 01                        ; 1, "
-;
-3edf4:                           ; I" - (next: 3ee01 STR.NULLTERM)
-3edf8:                           ; XT=13b0, flags=00
-3edfd: 02                        ; 2, I"
-;
-3ee01:                           ; STR.NULLTERM - (next: 3ee18 STR.CATC)
-3ee05:                           ; XT=139f, flags=00
-3ee0a: 0c                        ; 12, STR.NULLTERM
-;
-3ee18:                           ; STR.CATC - (next: 3ee2b STR.LEN)
-3ee1c:                           ; XT=1387, flags=00
-3ee21: 08                        ; 8, STR.CATC
-;
-3ee2b:                           ; STR.LEN - (next: 3ee3d STR.EMPTY)
-3ee2f:                           ; XT=137f, flags=02
-3ee34: 07                        ; 7, STR.LEN
-;
-3ee3d:                           ; STR.EMPTY - (next: 3ee51 load)
-3ee41:                           ; XT=1375, flags=02
-3ee46: 09                        ; 9, STR.EMPTY
-;
-3ee51:                           ; load - (next: 3ee60 file-getLine)
-3ee55:                           ; XT=1313, flags=00
-3ee5a: 04                        ; 4, load
-;
-3ee60:                           ; file-getLine - (next: 3ee77 main)
-3ee64:                           ; XT=12fd, flags=00
-3ee69: 0c                        ; 12, file-getLine
-;
-3ee77:                           ; main - (next: 3ee86 mainLoop)
-3ee7b:                           ; XT=12d2, flags=00
-3ee80: 04                        ; 4, main
-;
-3ee86:                           ; mainLoop - (next: 3ee99 FREE?)
-3ee8a:                           ; XT=1284, flags=00
-3ee8f: 08                        ; 8, mainLoop
-;
-3ee99:                           ; FREE? - (next: 3eea9 FREE)
-3ee9d:                           ; XT=1260, flags=00
-3eea2: 05                        ; 5, FREE?
-;
-3eea9:                           ; FREE - (next: 3eeb8 C?)
-3eead:                           ; XT=1253, flags=00
-3eeb2: 04                        ; 4, FREE
-;
-3eeb8:                           ; C? - (next: 3eec5 ?)
-3eebc:                           ; XT=1247, flags=00
-3eec1: 02                        ; 2, C?
-;
-3eec5:                           ; ? - (next: 3eed1 ALLOT)
-3eec9:                           ; XT=123b, flags=00
-3eece: 01                        ; 1, ?
-;
-3eed1:                           ; ALLOT - (next: 3eee1 resetState)
-3eed5:                           ; XT=122e, flags=00
-3eeda: 05                        ; 5, ALLOT
-;
-3eee1:                           ; resetState - (next: 3eef6 ForgetLast)
-3eee5:                           ; XT=120d, flags=00
-3eeea: 0a                        ; 10, resetState
-;
-3eef6:                           ; ForgetLast - (next: 3ef0b ;)
-3eefa:                           ; XT=11f6, flags=00
-3eeff: 0a                        ; 10, ForgetLast
-;
-3ef0b:                           ; ; - (next: 3ef17 :NONAME)
-3ef0f:                           ; XT=11e2, flags=01
-3ef14: 01                        ; 1, ;
-;
-3ef17:                           ; :NONAME - (next: 3ef29 :)
-3ef1b:                           ; XT=11d2, flags=00
-3ef20: 07                        ; 7, :NONAME
-;
-3ef29:                           ; : - (next: 3ef35 CREATE-NAME)
-3ef2d:                           ; XT=11c0, flags=00
-3ef32: 01                        ; 1, :
-;
-3ef35:                           ; CREATE-NAME - (next: 3ef4b Define-Word)
-3ef39:                           ; XT=116a, flags=00
-3ef3e: 0b                        ; 11, CREATE-NAME
-;
-3ef4b:                           ; Define-Word - (next: 3ef61 strcpy2c)
-3ef4f:                           ; XT=1121, flags=00
-3ef54: 0b                        ; 11, Define-Word
-;
-3ef61:                           ; strcpy2c - (next: 3ef74 getLine)
-3ef65:                           ; XT=10e2, flags=00
-3ef6a: 08                        ; 8, strcpy2c
-;
-3ef74:                           ; getLine - (next: 3ef86 getLineFromFile)
-3ef78:                           ; XT=100f, flags=00
-3ef7d: 07                        ; 7, getLine
-;
-3ef86:                           ; getLineFromFile - (next: 3efa0 LoadingFromFile?)
-3ef8a:                           ; XT=0ff4, flags=00
-3ef8f: 0f                        ; 15, getLineFromFile
-;
-3efa0:                           ; LoadingFromFile? - (next: 3efbb Pad)
-3efa4:                           ; XT=0feb, flags=00
-3efa9: 10                        ; 16, LoadingFromFile?
-;
-3efbb:                           ; Pad - (next: 3efc9 executeInput)
-3efbf:                           ; XT=0fc3, flags=00
-3efc4: 03                        ; 3, Pad
-;
-3efc9:                           ; executeInput - (next: 3efe0 executeWord)
-3efcd:                           ; XT=0f7f, flags=00
-3efd2: 0c                        ; 12, executeInput
-;
-3efe0:                           ; executeWord - (next: 3eff6 [COMPILE])
-3efe4:                           ; XT=0edc, flags=00
-3efe9: 0b                        ; 11, executeWord
-;
-3eff6:                           ; [COMPILE] - (next: 3f00a cstr,)
-3effa:                           ; XT=0eb6, flags=00
-3efff: 09                        ; 9, [COMPILE]
-;
-3f00a:                           ; cstr, - (next: 3f01a strlen)
-3f00e:                           ; XT=0ea1, flags=00
-3f013: 05                        ; 5, cstr,
-;
-3f01a:                           ; strlen - (next: 3f02b Copy.INLINE)
-3f01e:                           ; XT=0e7e, flags=00
-3f023: 06                        ; 6, strlen
-;
-3f02b:                           ; Copy.INLINE - (next: 3f041 DOES>)
-3f02f:                           ; XT=0e5d, flags=00
-3f034: 0b                        ; 11, Copy.INLINE
-;
-3f041:                           ; DOES> - (next: 3f051 (inline))
-3f045:                           ; XT=0e46, flags=00
-3f04a: 05                        ; 5, DOES>
-;
-3f051:                           ; (inline) - (next: 3f064 find.ret)
-3f055:                           ; XT=0e23, flags=00
-3f05a: 08                        ; 8, (inline)
-;
-3f064:                           ; find.ret - (next: 3f077 EXECUTE)
-3f068:                           ; XT=0e0a, flags=00
-3f06d: 08                        ; 8, find.ret
-;
-3f077:                           ; EXECUTE - (next: 3f089 .lastx)
-3f07b:                           ; XT=0e01, flags=00
-3f080: 07                        ; 7, EXECUTE
-;
-3f089:                           ; .lastx - (next: 3f09a NUM-WORDS)
-3f08d:                           ; XT=0dc9, flags=00
-3f092: 06                        ; 6, .lastx
-;
-3f09a:                           ; NUM-WORDS - (next: 3f0ae WORDSV)
-3f09e:                           ; XT=0d9f, flags=00
-3f0a3: 09                        ; 9, NUM-WORDS
-;
-3f0ae:                           ; WORDSV - (next: 3f0bf .WORD-LONG)
-3f0b2:                           ; XT=0d6f, flags=00
-3f0b7: 06                        ; 6, WORDSV
-;
-3f0bf:                           ; .WORD-LONG - (next: 3f0d4 WORDS)
-3f0c3:                           ; XT=0cdf, flags=00
-3f0c8: 0a                        ; 10, .WORD-LONG
-;
-3f0d4:                           ; WORDS - (next: 3f0e4 .WORD-SHORT)
-3f0d8:                           ; XT=0cba, flags=00
-3f0dd: 05                        ; 5, WORDS
-;
-3f0e4:                           ; .WORD-SHORT - (next: 3f0fa .(LAST))
-3f0e8:                           ; XT=0ca5, flags=00
-3f0ed: 0b                        ; 11, .WORD-SHORT
-;
-3f0fa:                           ; .(LAST) - (next: 3f10c .(HERE))
-3f0fe:                           ; XT=0c70, flags=00
-3f103: 07                        ; 7, .(LAST)
-;
-3f10c:                           ; .(HERE) - (next: 3f11e .(MEM_SZ))
-3f110:                           ; XT=0c3b, flags=00
-3f115: 07                        ; 7, .(HERE)
-;
-3f11e:                           ; .(MEM_SZ) - (next: 3f132 .S)
-3f122:                           ; XT=0c02, flags=00
-3f127: 09                        ; 9, .(MEM_SZ)
-;
-3f132:                           ; .S - (next: 3f13f MAX)
-3f136:                           ; XT=0b8e, flags=00
-3f13b: 02                        ; 2, .S
-;
-3f13f:                           ; MAX - (next: 3f14d MIN)
-3f143:                           ; XT=0b7e, flags=00
-3f148: 03                        ; 3, MAX
-;
-3f14d:                           ; MIN - (next: 3f15b BINARY.)
-3f151:                           ; XT=0b6e, flags=00
-3f156: 03                        ; 3, MIN
-;
-3f15b:                           ; BINARY. - (next: 3f16d DECIMAL.)
-3f15f:                           ; XT=0b57, flags=00
-3f164: 07                        ; 7, BINARY.
-;
-3f16d:                           ; DECIMAL. - (next: 3f180 HEX.)
-3f171:                           ; XT=0b40, flags=00
-3f176: 08                        ; 8, DECIMAL.
-;
-3f180:                           ; HEX. - (next: 3f18f .)
-3f184:                           ; XT=0b1d, flags=00
-3f189: 04                        ; 4, HEX.
-;
-3f18f:                           ; . - (next: 3f19b (.))
-3f193:                           ; XT=0b0f, flags=00
-3f198: 01                        ; 1, .
-;
-3f19b:                           ; (.) - (next: 3f1a9 /MOD)
-3f19f:                           ; XT=0a9b, flags=00
-3f1a4: 03                        ; 3, (.)
-;
-3f1a9:                           ; /MOD - (next: 3f1b8 MOD)
-3f1ad:                           ; XT=0a8a, flags=00
-3f1b2: 04                        ; 4, /MOD
-;
-3f1b8:                           ; MOD - (next: 3f1c6 isNumber?)
-3f1bc:                           ; XT=0a7f, flags=00
-3f1c1: 03                        ; 3, MOD
-;
-3f1c6:                           ; isNumber? - (next: 3f1da ABS)
-3f1ca:                           ; XT=0a1e, flags=00
-3f1cf: 09                        ; 9, isNumber?
-;
-3f1da:                           ; ABS - (next: 3f1e8 NEGATE)
-3f1de:                           ; XT=0a0a, flags=00
-3f1e3: 03                        ; 3, ABS
-;
-3f1e8:                           ; NEGATE - (next: 3f1f9 isNumChar?)
-3f1ec:                           ; XT=0a00, flags=00
-3f1f1: 06                        ; 6, NEGATE
-;
-3f1f9:                           ; isNumChar? - (next: 3f20e isHEX?)
-3f1fd:                           ; XT=09af, flags=00
-3f202: 0a                        ; 10, isNumChar?
-;
-3f20e:                           ; isHEX? - (next: 3f21f findInDict)
-3f212:                           ; XT=09a3, flags=00
-3f217: 06                        ; 6, isHEX?
-;
-3f21f:                           ; findInDict - (next: 3f234 DICT.GetINLINE)
-3f223:                           ; XT=095a, flags=00
-3f228: 0a                        ; 10, findInDict
-;
-3f234:                           ; DICT.GetINLINE - (next: 3f24d DICT.GetIMMEDIATE)
-3f238:                           ; XT=094a, flags=00
-3f23d: 0e                        ; 14, DICT.GetINLINE
-;
-3f24d:                           ; DICT.GetIMMEDIATE - (next: 3f269 FLAGS.ISINLINE?)
-3f251:                           ; XT=093a, flags=00
-3f256: 11                        ; 17, DICT.GetIMMEDIATE
-;
-3f269:                           ; FLAGS.ISINLINE? - (next: 3f283 FLAGS.ISIMMEDIATE?)
-3f26d:                           ; XT=0931, flags=00
-3f272: 0f                        ; 15, FLAGS.ISINLINE?
-;
-3f283:                           ; FLAGS.ISIMMEDIATE? - (next: 3f2a0 XT.GetDICTP)
-3f287:                           ; XT=0928, flags=00
-3f28c: 12                        ; 18, FLAGS.ISIMMEDIATE?
-;
-3f2a0:                           ; XT.GetDICTP - (next: 3f2b6 DICTP>NAME)
-3f2a4:                           ; XT=090d, flags=00
-3f2a9: 0b                        ; 11, XT.GetDICTP
-;
-3f2b6:                           ; DICTP>NAME - (next: 3f2cb DICT.GetFLAGS)
-3f2ba:                           ; XT=08fe, flags=00
-3f2bf: 0a                        ; 10, DICTP>NAME
-;
-3f2cb:                           ; DICT.GetFLAGS - (next: 3f2e3 DICT.GetXT)
-3f2cf:                           ; XT=08f2, flags=00
-3f2d4: 0d                        ; 13, DICT.GetFLAGS
-;
-3f2e3:                           ; DICT.GetXT - (next: 3f2f8 NAME>DICT)
-3f2e7:                           ; XT=08e6, flags=00
-3f2ec: 0a                        ; 10, DICT.GetXT
-;
-3f2f8:                           ; NAME>DICT - (next: 3f30c FLAGS>DICT)
-3f2fc:                           ; XT=08d7, flags=00
-3f301: 09                        ; 9, NAME>DICT
-;
-3f30c:                           ; FLAGS>DICT - (next: 3f321 XT>DICT)
-3f310:                           ; XT=08cb, flags=00
-3f315: 0a                        ; 10, FLAGS>DICT
-;
-3f321:                           ; XT>DICT - (next: 3f333 NEXT>DICT)
-3f325:                           ; XT=08c2, flags=00
-3f32a: 07                        ; 7, XT>DICT
-;
-3f333:                           ; NEXT>DICT - (next: 3f347 DICT>NAME)
-3f337:                           ; XT=08bc, flags=00
-3f33c: 09                        ; 9, NEXT>DICT
-;
-3f347:                           ; DICT>NAME - (next: 3f35b DICT>FLAGS)
-3f34b:                           ; XT=08ae, flags=00
-3f350: 09                        ; 9, DICT>NAME
-;
-3f35b:                           ; DICT>FLAGS - (next: 3f370 DICT>XT)
-3f35f:                           ; XT=08a2, flags=00
-3f364: 0a                        ; 10, DICT>FLAGS
-;
-3f370:                           ; DICT>XT - (next: 3f382 DICT>NEXT)
-3f374:                           ; XT=0899, flags=00
-3f379: 07                        ; 7, DICT>XT
-;
-3f382:                           ; DICT>NEXT - (next: 3f396 getOneWord)
-3f386:                           ; XT=0893, flags=00
-3f38b: 09                        ; 9, DICT>NEXT
-;
-3f396:                           ; getOneWord - (next: 3f3ab skipWS)
-3f39a:                           ; XT=0857, flags=00
-3f39f: 0a                        ; 10, getOneWord
-;
-3f3ab:                           ; skipWS - (next: 3f3bc getInput)
-3f3af:                           ; XT=082c, flags=00
-3f3b4: 06                        ; 6, skipWS
-;
-3f3bc:                           ; getInput - (next: 3f3cf PAD)
-3f3c0:                           ; XT=0816, flags=00
-3f3c5: 08                        ; 8, getInput
-;
-3f3cf:                           ; PAD - (next: 3f3dd tmp-alloc)
-3f3d3:                           ; XT=0804, flags=00
-3f3d8: 03                        ; 3, PAD
-;
-3f3dd:                           ; tmp-alloc - (next: 3f3f1 tmp-cur)
-3f3e1:                           ; XT=07ed, flags=00
-3f3e6: 09                        ; 9, tmp-alloc
-;
-3f3f1:                           ; tmp-cur - (next: 3f403 tmp-init)
-3f3f5:                           ; XT=07e1, flags=00
-3f3fa: 07                        ; 7, tmp-cur
-;
-3f403:                           ; tmp-init - (next: 3f416 (tmp))
-3f407:                           ; XT=07d2, flags=00
-3f40c: 08                        ; 8, tmp-init
-;
-3f416:                           ; (tmp) - (next: 3f426 BETWEEN)
-3f41a:                           ; XT=07c2, flags=00
-3f41f: 05                        ; 5, (tmp)
-;
-3f426:                           ; BETWEEN - (next: 3f438 CR)
-3f42a:                           ; XT=07aa, flags=00
-3f42f: 07                        ; 7, BETWEEN
-;
-3f438:                           ; CR - (next: 3f445 CRLF)
-3f43c:                           ; XT=079e, flags=02
-3f441: 02                        ; 2, CR
-;
-3f445:                           ; CRLF - (next: 3f454 BL)
-3f449:                           ; XT=0792, flags=02
-3f44e: 04                        ; 4, CRLF
-;
-3f454:                           ; BL - (next: 3f461 ()
-3f458:                           ; XT=0789, flags=02
-3f45d: 02                        ; 2, BL
-;
-3f461:                           ; ( - (next: 3f46d \)
-3f465:                           ; XT=073f, flags=01
-3f46a: 01                        ; 1, (
-;
-3f46d:                           ; \ - (next: 3f479 CT)
-3f471:                           ; XT=0730, flags=01
-3f476: 01                        ; 1, \
-;
-3f479:                           ; CT - (next: 3f486 TYPE)
-3f47d:                           ; XT=0720, flags=00
-3f482: 02                        ; 2, CT
-;
-3f486:                           ; TYPE - (next: 3f495 COUNT)
-3f48a:                           ; XT=06fe, flags=00
-3f48f: 04                        ; 4, TYPE
-;
-3f495:                           ; COUNT - (next: 3f4a5 UNTIL)
-3f499:                           ; XT=06f2, flags=00
-3f49e: 05                        ; 5, COUNT
-;
-3f4a5:                           ; UNTIL - (next: 3f4b5 WHILE)
-3f4a9:                           ; XT=06d6, flags=01
-3f4ae: 05                        ; 5, UNTIL
-;
-3f4b5:                           ; WHILE - (next: 3f4c5 AGAIN)
-3f4b9:                           ; XT=06ba, flags=01
-3f4be: 05                        ; 5, WHILE
-;
-3f4c5:                           ; AGAIN - (next: 3f4d5 BEGIN)
-3f4c9:                           ; XT=069e, flags=01
-3f4ce: 05                        ; 5, AGAIN
-;
-3f4d5:                           ; BEGIN - (next: 3f4e5 LEAVE)
-3f4d9:                           ; XT=068b, flags=01
-3f4de: 05                        ; 5, BEGIN
-;
-3f4e5:                           ; LEAVE - (next: 3f4f5 NOT)
-3f4e9:                           ; XT=0674, flags=01
-3f4ee: 05                        ; 5, LEAVE
-;
-3f4f5:                           ; NOT - (next: 3f503 FALSE)
-3f4f9:                           ; XT=066b, flags=02
-3f4fe: 03                        ; 3, NOT
-;
-3f503:                           ; FALSE - (next: 3f513 TRUE)
-3f507:                           ; XT=0663, flags=02
-3f50c: 05                        ; 5, FALSE
-;
-3f513:                           ; TRUE - (next: 3f522 >=)
-3f517:                           ; XT=065b, flags=02
-3f51c: 04                        ; 4, TRUE
-;
-3f522:                           ; >= - (next: 3f52f <=)
-3f526:                           ; XT=0651, flags=02
-3f52b: 02                        ; 2, >=
-;
-3f52f:                           ; <= - (next: 3f53c <>)
-3f533:                           ; XT=0647, flags=02
-3f538: 02                        ; 2, <=
-;
-3f53c:                           ; <> - (next: 3f549 0=)
-3f540:                           ; XT=063d, flags=02
-3f545: 02                        ; 2, <>
-;
-3f549:                           ; 0= - (next: 3f556 C+!)
-3f54d:                           ; XT=0634, flags=02
-3f552: 02                        ; 2, 0=
-;
-3f556:                           ; C+! - (next: 3f564 +!)
-3f55a:                           ; XT=0628, flags=00
-3f55f: 03                        ; 3, C+!
-;
-3f564:                           ; +! - (next: 3f571 C--)
-3f568:                           ; XT=061c, flags=00
-3f56d: 02                        ; 2, +!
-;
-3f571:                           ; C-- - (next: 3f57f C++)
-3f575:                           ; XT=060f, flags=00
-3f57a: 03                        ; 3, C--
-;
-3f57f:                           ; C++ - (next: 3f58d --)
-3f583:                           ; XT=0602, flags=00
-3f588: 03                        ; 3, C++
-;
-3f58d:                           ; -- - (next: 3f59a ++)
-3f591:                           ; XT=05f5, flags=00
-3f596: 02                        ; 2, --
-;
-3f59a:                           ; ++ - (next: 3f5a7 -=)
-3f59e:                           ; XT=05e8, flags=00
-3f5a3: 02                        ; 2, ++
-;
-3f5a7:                           ; -= - (next: 3f5b4 +=)
-3f5ab:                           ; XT=05dc, flags=00
-3f5b0: 02                        ; 2, -=
-;
-3f5b4:                           ; += - (next: 3f5c1 2/)
-3f5b8:                           ; XT=05d1, flags=00
-3f5bd: 02                        ; 2, +=
-;
-3f5c1:                           ; 2/ - (next: 3f5ce 2*)
-3f5c5:                           ; XT=05c8, flags=02
-3f5ca: 02                        ; 2, 2/
-;
-3f5ce:                           ; 2* - (next: 3f5db 1-)
-3f5d2:                           ; XT=05bf, flags=02
-3f5d7: 02                        ; 2, 2*
-;
-3f5db:                           ; 1- - (next: 3f5e8 1+)
-3f5df:                           ; XT=05b6, flags=02
-3f5e4: 02                        ; 2, 1-
-;
-3f5e8:                           ; 1+ - (next: 3f5f5 -ROT)
-3f5ec:                           ; XT=05ad, flags=02
-3f5f1: 02                        ; 2, 1+
-;
-3f5f5:                           ; -ROT - (next: 3f604 ROT)
-3f5f9:                           ; XT=05a3, flags=02
-3f5fe: 04                        ; 4, -ROT
-;
-3f604:                           ; ROT - (next: 3f612 NIP)
-3f608:                           ; XT=0599, flags=02
-3f60d: 03                        ; 3, ROT
-;
-3f612:                           ; NIP - (next: 3f620 TUCK)
-3f616:                           ; XT=0591, flags=02
-3f61b: 03                        ; 3, NIP
-;
-3f620:                           ; TUCK - (next: 3f62f 2DROP)
-3f624:                           ; XT=0589, flags=02
-3f629: 04                        ; 4, TUCK
-;
-3f62f:                           ; 2DROP - (next: 3f63f 2DUP)
-3f633:                           ; XT=0581, flags=02
-3f638: 05                        ; 5, 2DROP
-;
-3f63f:                           ; 2DUP - (next: 3f64e RDROP)
-3f643:                           ; XT=0579, flags=02
-3f648: 04                        ; 4, 2DUP
-;
-3f64e:                           ; RDROP - (next: 3f65e R@)
-3f652:                           ; XT=0571, flags=02
-3f657: 05                        ; 5, RDROP
-;
-3f65e:                           ; R@ - (next: 3f66b MEM_SZ)
-3f662:                           ; XT=0568, flags=02
-3f667: 02                        ; 2, R@
-;
-3f66b:                           ; MEM_SZ - (next: 3f67c (MEM_K))
-3f66f:                           ; XT=0556, flags=00
-3f674: 06                        ; 6, MEM_SZ
-;
-3f67c:                           ; (MEM_K) - (next: 3f68e isNeg)
-3f680:                           ; XT=0546, flags=00
-3f685: 07                        ; 7, (MEM_K)
-;
-3f68e:                           ; isNeg - (next: 3f69e >IN)
-3f692:                           ; XT=0536, flags=00
-3f697: 05                        ; 5, isNeg
-;
-3f69e:                           ; >IN - (next: 3f6ac ELSE)
-3f6a2:                           ; XT=0526, flags=00
-3f6a7: 03                        ; 3, >IN
-;
-3f6ac:                           ; ELSE - (next: 3f6bb IF)
-3f6b0:                           ; XT=04ff, flags=01
-3f6b5: 04                        ; 4, ELSE
-;
-3f6bb:                           ; IF - (next: 3f6c8 THEN)
-3f6bf:                           ; XT=04de, flags=01
-3f6c4: 02                        ; 2, IF
-;
-3f6c8:                           ; THEN - (next: 3f6d7 ?COMPILING)
-3f6cc:                           ; XT=04c9, flags=01
-3f6d1: 04                        ; 4, THEN
-;
-3f6d7:                           ; ?COMPILING - (next: 3f6ec ])
-3f6db:                           ; XT=04c0, flags=00
-3f6e0: 0a                        ; 10, ?COMPILING
-;
-3f6ec:                           ; ] - (next: 3f6f8 [)
-3f6f0:                           ; XT=04b5, flags=01
-3f6f5: 01                        ; 1, ]
-;
-3f6f8:                           ; [ - (next: 3f704 OFF)
-3f6fc:                           ; XT=04aa, flags=01
-3f701: 01                        ; 1, [
-;
-3f704:                           ; OFF - (next: 3f712 ON)
-3f708:                           ; XT=04a0, flags=00
-3f70d: 03                        ; 3, OFF
-;
-3f712:                           ; ON - (next: 3f71f BINARY)
-3f716:                           ; XT=0496, flags=00
-3f71b: 02                        ; 2, ON
-;
-3f71f:                           ; BINARY - (next: 3f730 OCTAL)
-3f723:                           ; XT=048b, flags=00
-3f728: 06                        ; 6, BINARY
-;
-3f730:                           ; OCTAL - (next: 3f740 DECIMAL)
-3f734:                           ; XT=0480, flags=00
-3f739: 05                        ; 5, OCTAL
-;
-3f740:                           ; DECIMAL - (next: 3f752 HEX)
-3f744:                           ; XT=0475, flags=00
-3f749: 07                        ; 7, DECIMAL
-;
-3f752:                           ; HEX - (next: 3f760 DEBUG-OFF)
-3f756:                           ; XT=046a, flags=00
-3f75b: 03                        ; 3, HEX
-;
-3f760:                           ; DEBUG-OFF - (next: 3f774 DEBUG-ON)
-3f764:                           ; XT=0461, flags=00
-3f769: 09                        ; 9, DEBUG-OFF
-;
-3f774:                           ; DEBUG-ON - (next: 3f787 TRACE-OFF)
-3f778:                           ; XT=0458, flags=00
-3f77d: 08                        ; 8, DEBUG-ON
-;
-3f787:                           ; TRACE-OFF - (next: 3f79b TRACE-ON)
-3f78b:                           ; XT=044f, flags=00
-3f790: 09                        ; 9, TRACE-OFF
-;
-3f79b:                           ; TRACE-ON - (next: 3f7ae LOGLEVEL)
-3f79f:                           ; XT=0446, flags=00
-3f7a4: 08                        ; 8, TRACE-ON
-;
-3f7ae:                           ; LOGLEVEL - (next: 3f7c1 ,)
-3f7b2:                           ; XT=043f, flags=02
-3f7b7: 08                        ; 8, LOGLEVEL
-;
-3f7c1:                           ; , - (next: 3f7cd HERE)
-3f7c5:                           ; XT=042c, flags=00
-3f7ca: 01                        ; 1, ,
-;
-3f7cd:                           ; HERE - (next: 3f7dc LAST)
-3f7d1:                           ; XT=0423, flags=02
-3f7d6: 04                        ; 4, HERE
-;
-3f7dc:                           ; LAST - (next: 3f7eb IMMEDIATE)
-3f7e0:                           ; XT=041a, flags=02
-3f7e5: 04                        ; 4, LAST
-;
-3f7eb:                           ; IMMEDIATE - (next: 3f7ff FLAG_INLINE)
-3f7ef:                           ; XT=0404, flags=00
-3f7f4: 09                        ; 9, IMMEDIATE
-;
-3f7ff:                           ; FLAG_INLINE - (next: 3f815 FLAG_IMMEDIATE)
-3f803:                           ; XT=03fc, flags=02
-3f808: 0b                        ; 11, FLAG_INLINE
-;
-3f815:                           ; FLAG_IMMEDIATE - (next: 3f82e CELLS)
-3f819:                           ; XT=03f4, flags=02
-3f81e: 0e                        ; 14, FLAG_IMMEDIATE
-;
-3f82e:                           ; CELLS - (next: 3f83e INLINE)
-3f832:                           ; XT=03eb, flags=02
-3f837: 05                        ; 5, CELLS
-;
-3f83e:                           ; INLINE - (next: 3f84f BYE)
-3f842:                           ; XT=03d5, flags=00
-3f847: 06                        ; 6, INLINE
-;
-3f84f:                           ; BYE - (next: 3f85d RESET)
-3f853:                           ; XT=03ce, flags=02
-3f858: 03                        ; 3, BYE
-;
-3f85d:                           ; RESET - (next: 3f86d BREAK)
-3f861:                           ; XT=03c7, flags=02
-3f866: 05                        ; 5, RESET
-;
-3f86d:                           ; BREAK - (next: 3f87d USTACK>)
-3f871:                           ; XT=03c0, flags=02
-3f876: 05                        ; 5, BREAK
-;
-3f87d:                           ; USTACK> - (next: 3f88f >USTACK)
-3f881:                           ; XT=03b9, flags=02
-3f886: 07                        ; 7, USTACK>
-;
-3f88f:                           ; >USTACK - (next: 3f8a1 USTACKINIT)
-3f893:                           ; XT=03b2, flags=02
-3f898: 07                        ; 7, >USTACK
-;
-3f8a1:                           ; USTACKINIT - (next: 3f8b6 GETCH)
-3f8a5:                           ; XT=03ab, flags=02
-3f8aa: 0a                        ; 10, USTACKINIT
-;
-3f8b6:                           ; GETCH - (next: 3f8c6 OR)
-3f8ba:                           ; XT=03a4, flags=02
-3f8bf: 05                        ; 5, GETCH
-;
-3f8c6:                           ; OR - (next: 3f8d3 AND)
-3f8ca:                           ; XT=039d, flags=02
-3f8cf: 02                        ; 2, OR
-;
-3f8d3:                           ; AND - (next: 3f8e1 DEPTH)
-3f8d7:                           ; XT=0396, flags=02
-3f8dc: 03                        ; 3, AND
-;
-3f8e1:                           ; DEPTH - (next: 3f8f1 PICK)
-3f8e5:                           ; XT=038f, flags=02
-3f8ea: 05                        ; 5, DEPTH
-;
-3f8f1:                           ; PICK - (next: 3f900 R>)
-3f8f5:                           ; XT=0388, flags=02
-3f8fa: 04                        ; 4, PICK
-;
-3f900:                           ; R> - (next: 3f90d >R)
-3f904:                           ; XT=0381, flags=02
-3f909: 02                        ; 2, R>
-;
-3f90d:                           ; >R - (next: 3f91a FCLOSE)
-3f911:                           ; XT=037a, flags=02
-3f916: 02                        ; 2, >R
-;
-3f91a:                           ; FCLOSE - (next: 3f92b FWRITE)
-3f91e:                           ; XT=0373, flags=02
-3f923: 06                        ; 6, FCLOSE
-;
-3f92b:                           ; FWRITE - (next: 3f93c FREADLINE)
-3f92f:                           ; XT=036c, flags=02
-3f934: 06                        ; 6, FWRITE
-;
-3f93c:                           ; FREADLINE - (next: 3f950 FREAD)
-3f940:                           ; XT=0365, flags=02
-3f945: 09                        ; 9, FREADLINE
-;
-3f950:                           ; FREAD - (next: 3f960 FOPEN)
-3f954:                           ; XT=035e, flags=02
-3f959: 05                        ; 5, FREAD
-;
-3f960:                           ; FOPEN - (next: 3f970 EMIT)
-3f964:                           ; XT=0357, flags=02
-3f969: 05                        ; 5, FOPEN
-;
-3f970:                           ; EMIT - (next: 3f97f >)
-3f974:                           ; XT=0350, flags=02
-3f979: 04                        ; 4, EMIT
-;
-3f97f:                           ; > - (next: 3f98b =)
-3f983:                           ; XT=0349, flags=02
-3f988: 01                        ; 1, >
-;
-3f98b:                           ; = - (next: 3f997 <)
-3f98f:                           ; XT=0342, flags=02
-3f994: 01                        ; 1, =
-;
-3f997:                           ; < - (next: 3f9a3 /)
-3f99b:                           ; XT=033b, flags=02
-3f9a0: 01                        ; 1, <
-;
-3f9a3:                           ; / - (next: 3f9af *)
-3f9a7:                           ; XT=0334, flags=02
-3f9ac: 01                        ; 1, /
-;
-3f9af:                           ; * - (next: 3f9bb -)
-3f9b3:                           ; XT=032d, flags=02
-3f9b8: 01                        ; 1, *
-;
-3f9bb:                           ; - - (next: 3f9c7 +)
-3f9bf:                           ; XT=0326, flags=02
-3f9c4: 01                        ; 1, -
-;
-3f9c7:                           ; + - (next: 3f9d3 COMPAREI)
-3f9cb:                           ; XT=031f, flags=02
-3f9d0: 01                        ; 1, +
-;
-3f9d3:                           ; COMPAREI - (next: 3f9e6 COMPARE)
-3f9d7:                           ; XT=0318, flags=02
-3f9dc: 08                        ; 8, COMPAREI
-;
-3f9e6:                           ; COMPARE - (next: 3f9f8 OVER)
-3f9ea:                           ; XT=0311, flags=02
-3f9ef: 07                        ; 7, COMPARE
-;
-3f9f8:                           ; OVER - (next: 3fa07 DUP)
-3f9fc:                           ; XT=030a, flags=02
-3fa01: 04                        ; 4, OVER
-;
-3fa07:                           ; DUP - (next: 3fa15 DROP)
-3fa0b:                           ; XT=0303, flags=02
-3fa10: 03                        ; 3, DUP
-;
-3fa15:                           ; DROP - (next: 3fa24 SWAP)
-3fa19:                           ; XT=02fc, flags=02
-3fa1e: 04                        ; 4, DROP
-;
-3fa24:                           ; SWAP - (next: 3fa33 C!)
-3fa28:                           ; XT=02f5, flags=02
-3fa2d: 04                        ; 4, SWAP
-;
-3fa33:                           ; C! - (next: 3fa40 C@)
-3fa37:                           ; XT=02ee, flags=02
-3fa3c: 02                        ; 2, C!
-;
-3fa40:                           ; C@ - (next: 3fa4d !)
-3fa44:                           ; XT=02e7, flags=02
-3fa49: 02                        ; 2, C@
-;
-3fa4d:                           ; ! - (next: 3fa59 @)
-3fa51:                           ; XT=02e0, flags=02
-3fa56: 01                        ; 1, !
-;
-3fa59:                           ; @ - (next: 3fa65 a.BYE)
-3fa5d:                           ; XT=02d9, flags=02
-3fa62: 01                        ; 1, @
-;
-3fa65:                           ; a.BYE - (next: 3fa75 a.RESET)
-3fa69:                           ; XT=02cc, flags=01
-3fa6e: 05                        ; 5, a.BYE
-;
-3fa75:                           ; a.RESET - (next: 3fa87 a.BREAK)
-3fa79:                           ; XT=02bf, flags=01
-3fa7e: 07                        ; 7, a.RESET
-;
-3fa87:                           ; a.BREAK - (next: 3fa99 a.UPOP)
-3fa8b:                           ; XT=02b2, flags=01
-3fa90: 07                        ; 7, a.BREAK
-;
-3fa99:                           ; a.UPOP - (next: 3faaa a.UPUSH)
-3fa9d:                           ; XT=02a5, flags=01
-3faa2: 06                        ; 6, a.UPOP
-;
-3faaa:                           ; a.UPUSH - (next: 3fabc a.USTACKINIT)
-3faae:                           ; XT=0298, flags=01
-3fab3: 07                        ; 7, a.UPUSH
-;
-3fabc:                           ; a.USTACKINIT - (next: 3fad3 a.GETCH)
-3fac0:                           ; XT=028b, flags=01
-3fac5: 0c                        ; 12, a.USTACKINIT
-;
-3fad3:                           ; a.GETCH - (next: 3fae5 a.OR)
-3fad7:                           ; XT=027e, flags=01
-3fadc: 07                        ; 7, a.GETCH
-;
-3fae5:                           ; a.OR - (next: 3faf4 a.AND)
-3fae9:                           ; XT=0271, flags=01
-3faee: 04                        ; 4, a.OR
-;
-3faf4:                           ; a.AND - (next: 3fb04 a.DEPTH)
-3faf8:                           ; XT=0264, flags=01
-3fafd: 05                        ; 5, a.AND
-;
-3fb04:                           ; a.DEPTH - (next: 3fb16 a.LOGLEVEL)
-3fb08:                           ; XT=0257, flags=01
-3fb0d: 07                        ; 7, a.DEPTH
-;
-3fb16:                           ; a.LOGLEVEL - (next: 3fb2b a.PICK)
-3fb1a:                           ; XT=024a, flags=01
-3fb1f: 0a                        ; 10, a.LOGLEVEL
-;
-3fb2b:                           ; a.PICK - (next: 3fb3c a.RTOD)
-3fb2f:                           ; XT=023d, flags=01
-3fb34: 06                        ; 6, a.PICK
-;
-3fb3c:                           ; a.RTOD - (next: 3fb4d a.DTOR)
-3fb40:                           ; XT=0230, flags=01
-3fb45: 06                        ; 6, a.RTOD
-;
-3fb4d:                           ; a.DTOR - (next: 3fb5e a.SLITERAL)
-3fb51:                           ; XT=0223, flags=01
-3fb56: 06                        ; 6, a.DTOR
-;
-3fb5e:                           ; a.SLITERAL - (next: 3fb73 a.FCLOSE)
-3fb62:                           ; XT=0216, flags=01
-3fb67: 0a                        ; 10, a.SLITERAL
-;
-3fb73:                           ; a.FCLOSE - (next: 3fb86 a.FWRITE)
-3fb77:                           ; XT=0209, flags=01
-3fb7c: 08                        ; 8, a.FCLOSE
-;
-3fb86:                           ; a.FWRITE - (next: 3fb99 a.FREADLINE)
-3fb8a:                           ; XT=01fc, flags=01
-3fb8f: 08                        ; 8, a.FWRITE
-;
-3fb99:                           ; a.FREADLINE - (next: 3fbaf a.FREAD)
-3fb9d:                           ; XT=01ef, flags=01
-3fba2: 0b                        ; 11, a.FREADLINE
-;
-3fbaf:                           ; a.FREAD - (next: 3fbc1 a.FOPEN)
-3fbb3:                           ; XT=01e2, flags=01
-3fbb8: 07                        ; 7, a.FREAD
-;
-3fbc1:                           ; a.FOPEN - (next: 3fbd3 a.EMIT)
-3fbc5:                           ; XT=01d5, flags=01
-3fbca: 07                        ; 7, a.FOPEN
-;
-3fbd3:                           ; a.EMIT - (next: 3fbe4 a.DICTP)
-3fbd7:                           ; XT=01c8, flags=01
-3fbdc: 06                        ; 6, a.EMIT
-;
-3fbe4:                           ; a.DICTP - (next: 3fbf6 a.GT)
-3fbe8:                           ; XT=01bb, flags=01
-3fbed: 07                        ; 7, a.DICTP
-;
-3fbf6:                           ; a.GT - (next: 3fc05 a.EQ)
-3fbfa:                           ; XT=01ae, flags=01
-3fbff: 04                        ; 4, a.GT
-;
-3fc05:                           ; a.EQ - (next: 3fc14 a.LT)
-3fc09:                           ; XT=01a1, flags=01
-3fc0e: 04                        ; 4, a.EQ
-;
-3fc14:                           ; a.LT - (next: 3fc23 a.DIV)
-3fc18:                           ; XT=0194, flags=01
-3fc1d: 04                        ; 4, a.LT
-;
-3fc23:                           ; a.DIV - (next: 3fc33 a.MUL)
-3fc27:                           ; XT=0187, flags=01
-3fc2c: 05                        ; 5, a.DIV
-;
-3fc33:                           ; a.MUL - (next: 3fc43 a.SUB)
-3fc37:                           ; XT=017a, flags=01
-3fc3c: 05                        ; 5, a.MUL
-;
-3fc43:                           ; a.SUB - (next: 3fc53 a.ADD)
-3fc47:                           ; XT=016d, flags=01
-3fc4c: 05                        ; 5, a.SUB
-;
-3fc53:                           ; a.ADD - (next: 3fc63 a.COMPAREI)
-3fc57:                           ; XT=0160, flags=01
-3fc5c: 05                        ; 5, a.ADD
-;
-3fc63:                           ; a.COMPAREI - (next: 3fc78 a.COMPARE)
-3fc67:                           ; XT=0153, flags=01
-3fc6c: 0a                        ; 10, a.COMPAREI
-;
-3fc78:                           ; a.COMPARE - (next: 3fc8c a.RET)
-3fc7c:                           ; XT=0146, flags=01
-3fc81: 09                        ; 9, a.COMPARE
-;
-3fc8c:                           ; a.RET - (next: 3fc9c a.CALL)
-3fc90:                           ; XT=0139, flags=01
-3fc95: 05                        ; 5, a.RET
-;
-3fc9c:                           ; a.CALL - (next: 3fcad a.JMPNZ)
-3fca0:                           ; XT=012c, flags=01
-3fca5: 06                        ; 6, a.CALL
-;
-3fcad:                           ; a.JMPNZ - (next: 3fcbf a.JMPZ)
-3fcb1:                           ; XT=011f, flags=01
-3fcb6: 07                        ; 7, a.JMPNZ
-;
-3fcbf:                           ; a.JMPZ - (next: 3fcd0 a.JMP)
-3fcc3:                           ; XT=0112, flags=01
-3fcc8: 06                        ; 6, a.JMPZ
-;
-3fcd0:                           ; a.JMP - (next: 3fce0 a.OVER)
-3fcd4:                           ; XT=0105, flags=01
-3fcd9: 05                        ; 5, a.JMP
-;
-3fce0:                           ; a.OVER - (next: 3fcf1 a.DUP)
-3fce4:                           ; XT=00f8, flags=01
-3fce9: 06                        ; 6, a.OVER
-;
-3fcf1:                           ; a.DUP - (next: 3fd01 a.DROP)
-3fcf5:                           ; XT=00eb, flags=01
-3fcfa: 05                        ; 5, a.DUP
-;
-3fd01:                           ; a.DROP - (next: 3fd12 a.SWAP)
-3fd05:                           ; XT=00de, flags=01
-3fd0a: 06                        ; 6, a.DROP
-;
-3fd12:                           ; a.SWAP - (next: 3fd23 a.CSTORE)
-3fd16:                           ; XT=00d1, flags=01
-3fd1b: 06                        ; 6, a.SWAP
-;
-3fd23:                           ; a.CSTORE - (next: 3fd36 a.CFETCH)
-3fd27:                           ; XT=00c4, flags=01
-3fd2c: 08                        ; 8, a.CSTORE
-;
-3fd36:                           ; a.CFETCH - (next: 3fd49 a.STORE)
-3fd3a:                           ; XT=00b7, flags=01
-3fd3f: 08                        ; 8, a.CFETCH
-;
-3fd49:                           ; a.STORE - (next: 3fd5b a.FETCH)
-3fd4d:                           ; XT=00aa, flags=01
-3fd52: 07                        ; 7, a.STORE
-;
-3fd5b:                           ; a.FETCH - (next: 3fd6d a.CPUSH)
-3fd5f:                           ; XT=009d, flags=01
-3fd64: 07                        ; 7, a.FETCH
-;
-3fd6d:                           ; a.CPUSH - (next: 3fd7f a.PUSH)
-3fd71:                           ; XT=0090, flags=01
-3fd76: 07                        ; 7, a.CPUSH
-;
-3fd7f:                           ; a.PUSH - (next: 3fd90 C,)
-3fd83:                           ; XT=0083, flags=01
-3fd88: 06                        ; 6, a.PUSH
-;
-3fd90:                           ; C, - (next: 3fd9d STATE)
-3fd94:                           ; XT=0070, flags=00
-3fd99: 02                        ; 2, C,
-;
-3fd9d:                           ; STATE - (next: 3fdad INPUT-FP)
-3fda1:                           ; XT=0068, flags=02
-3fda6: 05                        ; 5, STATE
-;
-3fdad:                           ; INPUT-FP - (next: 3fdc0 (LAST))
-3fdb1:                           ; XT=0060, flags=02
-3fdb6: 08                        ; 8, INPUT-FP
-;
-3fdc0:                           ; (LAST) - (next: 3fdd1 DP)
-3fdc4:                           ; XT=0058, flags=02
-3fdc9: 06                        ; 6, (LAST)
-;
-3fdd1:                           ; DP - (next: 3fdde CELL)
-3fdd5:                           ; XT=0050, flags=02
-3fdda: 02                        ; 2, DP
-;
-3fdde:                           ; CELL - (next: 3fded BASE)
-3fde2:                           ; XT=0048, flags=02
-3fde7: 04                        ; 4, CELL
-;
-3fded:                           ; BASE - (next: 3fdfc <end>)
-3fdf1:                           ; XT=0040, flags=02
-3fdf6: 04                        ; 4, BASE
-;
-3fdfc:                           ; End.
+edd9:                            ; sys-stats - (next: eded ll)
+eddd:                            ; XT=149a, flags=00
+ede2: 09                         ; 9, sys-stats
+;
+eded:                            ; ll - (next: edfa ")
+edf1:                            ; XT=1483, flags=00
+edf6: 02                         ; 2, ll
+;
+edfa:                            ; " - (next: ee06 I")
+edfe:                            ; XT=13f2, flags=01
+ee03: 01                         ; 1, "
+;
+ee06:                            ; I" - (next: ee13 STR.NULLTERM)
+ee0a:                            ; XT=1397, flags=00
+ee0f: 02                         ; 2, I"
+;
+ee13:                            ; STR.NULLTERM - (next: ee2a STR.CATC)
+ee17:                            ; XT=1386, flags=00
+ee1c: 0c                         ; 12, STR.NULLTERM
+;
+ee2a:                            ; STR.CATC - (next: ee3d STR.LEN)
+ee2e:                            ; XT=136e, flags=00
+ee33: 08                         ; 8, STR.CATC
+;
+ee3d:                            ; STR.LEN - (next: ee4f STR.EMPTY)
+ee41:                            ; XT=1366, flags=02
+ee46: 07                         ; 7, STR.LEN
+;
+ee4f:                            ; STR.EMPTY - (next: ee63 load)
+ee53:                            ; XT=135c, flags=02
+ee58: 09                         ; 9, STR.EMPTY
+;
+ee63:                            ; load - (next: ee72 file-getLine)
+ee67:                            ; XT=12fa, flags=00
+ee6c: 04                         ; 4, load
+;
+ee72:                            ; file-getLine - (next: ee89 main)
+ee76:                            ; XT=12e4, flags=00
+ee7b: 0c                         ; 12, file-getLine
+;
+ee89:                            ; main - (next: ee98 mainLoop)
+ee8d:                            ; XT=12b9, flags=00
+ee92: 04                         ; 4, main
+;
+ee98:                            ; mainLoop - (next: eeab FREE?)
+ee9c:                            ; XT=126b, flags=00
+eea1: 08                         ; 8, mainLoop
+;
+eeab:                            ; FREE? - (next: eebb FREE)
+eeaf:                            ; XT=1247, flags=00
+eeb4: 05                         ; 5, FREE?
+;
+eebb:                            ; FREE - (next: eeca C?)
+eebf:                            ; XT=123a, flags=00
+eec4: 04                         ; 4, FREE
+;
+eeca:                            ; C? - (next: eed7 ?)
+eece:                            ; XT=122e, flags=00
+eed3: 02                         ; 2, C?
+;
+eed7:                            ; ? - (next: eee3 ALLOT)
+eedb:                            ; XT=1222, flags=00
+eee0: 01                         ; 1, ?
+;
+eee3:                            ; ALLOT - (next: eef3 resetState)
+eee7:                            ; XT=1215, flags=00
+eeec: 05                         ; 5, ALLOT
+;
+eef3:                            ; resetState - (next: ef08 ForgetLast)
+eef7:                            ; XT=11f4, flags=00
+eefc: 0a                         ; 10, resetState
+;
+ef08:                            ; ForgetLast - (next: ef1d ;)
+ef0c:                            ; XT=11dd, flags=00
+ef11: 0a                         ; 10, ForgetLast
+;
+ef1d:                            ; ; - (next: ef29 :NONAME)
+ef21:                            ; XT=11c9, flags=01
+ef26: 01                         ; 1, ;
+;
+ef29:                            ; :NONAME - (next: ef3b :)
+ef2d:                            ; XT=11b9, flags=00
+ef32: 07                         ; 7, :NONAME
+;
+ef3b:                            ; : - (next: ef47 CREATE-NAME)
+ef3f:                            ; XT=11a7, flags=00
+ef44: 01                         ; 1, :
+;
+ef47:                            ; CREATE-NAME - (next: ef5d Define-Word)
+ef4b:                            ; XT=1151, flags=00
+ef50: 0b                         ; 11, CREATE-NAME
+;
+ef5d:                            ; Define-Word - (next: ef73 strcpy2c)
+ef61:                            ; XT=1108, flags=00
+ef66: 0b                         ; 11, Define-Word
+;
+ef73:                            ; strcpy2c - (next: ef86 getLine)
+ef77:                            ; XT=10c9, flags=00
+ef7c: 08                         ; 8, strcpy2c
+;
+ef86:                            ; getLine - (next: ef98 getLineFromFile)
+ef8a:                            ; XT=0ff6, flags=00
+ef8f: 07                         ; 7, getLine
+;
+ef98:                            ; getLineFromFile - (next: efb2 LoadingFromFile?)
+ef9c:                            ; XT=0fdb, flags=00
+efa1: 0f                         ; 15, getLineFromFile
+;
+efb2:                            ; LoadingFromFile? - (next: efcd Pad)
+efb6:                            ; XT=0fd2, flags=00
+efbb: 10                         ; 16, LoadingFromFile?
+;
+efcd:                            ; Pad - (next: efdb executeInput)
+efd1:                            ; XT=0faa, flags=00
+efd6: 03                         ; 3, Pad
+;
+efdb:                            ; executeInput - (next: eff2 executeWord)
+efdf:                            ; XT=0f66, flags=00
+efe4: 0c                         ; 12, executeInput
+;
+eff2:                            ; executeWord - (next: f008 [COMPILE])
+eff6:                            ; XT=0ec3, flags=00
+effb: 0b                         ; 11, executeWord
+;
+f008:                            ; [COMPILE] - (next: f01c cstr,)
+f00c:                            ; XT=0e9d, flags=00
+f011: 09                         ; 9, [COMPILE]
+;
+f01c:                            ; cstr, - (next: f02c strlen)
+f020:                            ; XT=0e88, flags=00
+f025: 05                         ; 5, cstr,
+;
+f02c:                            ; strlen - (next: f03d Copy.INLINE)
+f030:                            ; XT=0e65, flags=00
+f035: 06                         ; 6, strlen
+;
+f03d:                            ; Copy.INLINE - (next: f053 DOES>)
+f041:                            ; XT=0e44, flags=00
+f046: 0b                         ; 11, Copy.INLINE
+;
+f053:                            ; DOES> - (next: f063 (inline))
+f057:                            ; XT=0e2d, flags=00
+f05c: 05                         ; 5, DOES>
+;
+f063:                            ; (inline) - (next: f076 find.ret)
+f067:                            ; XT=0e0a, flags=00
+f06c: 08                         ; 8, (inline)
+;
+f076:                            ; find.ret - (next: f089 EXECUTE)
+f07a:                            ; XT=0df1, flags=00
+f07f: 08                         ; 8, find.ret
+;
+f089:                            ; EXECUTE - (next: f09b .lastx)
+f08d:                            ; XT=0de8, flags=00
+f092: 07                         ; 7, EXECUTE
+;
+f09b:                            ; .lastx - (next: f0ac NUM-WORDS)
+f09f:                            ; XT=0db0, flags=00
+f0a4: 06                         ; 6, .lastx
+;
+f0ac:                            ; NUM-WORDS - (next: f0c0 WORDSV)
+f0b0:                            ; XT=0d86, flags=00
+f0b5: 09                         ; 9, NUM-WORDS
+;
+f0c0:                            ; WORDSV - (next: f0d1 .WORD-LONG)
+f0c4:                            ; XT=0d56, flags=00
+f0c9: 06                         ; 6, WORDSV
+;
+f0d1:                            ; .WORD-LONG - (next: f0e6 WORDS)
+f0d5:                            ; XT=0cc6, flags=00
+f0da: 0a                         ; 10, .WORD-LONG
+;
+f0e6:                            ; WORDS - (next: f0f6 .WORD-SHORT)
+f0ea:                            ; XT=0ca1, flags=00
+f0ef: 05                         ; 5, WORDS
+;
+f0f6:                            ; .WORD-SHORT - (next: f10c .(LAST))
+f0fa:                            ; XT=0c8c, flags=00
+f0ff: 0b                         ; 11, .WORD-SHORT
+;
+f10c:                            ; .(LAST) - (next: f11e .(HERE))
+f110:                            ; XT=0c57, flags=00
+f115: 07                         ; 7, .(LAST)
+;
+f11e:                            ; .(HERE) - (next: f130 .(MEM_SZ))
+f122:                            ; XT=0c22, flags=00
+f127: 07                         ; 7, .(HERE)
+;
+f130:                            ; .(MEM_SZ) - (next: f144 .S)
+f134:                            ; XT=0be9, flags=00
+f139: 09                         ; 9, .(MEM_SZ)
+;
+f144:                            ; .S - (next: f151 MAX)
+f148:                            ; XT=0b75, flags=00
+f14d: 02                         ; 2, .S
+;
+f151:                            ; MAX - (next: f15f MIN)
+f155:                            ; XT=0b65, flags=00
+f15a: 03                         ; 3, MAX
+;
+f15f:                            ; MIN - (next: f16d BINARY.)
+f163:                            ; XT=0b55, flags=00
+f168: 03                         ; 3, MIN
+;
+f16d:                            ; BINARY. - (next: f17f DECIMAL.)
+f171:                            ; XT=0b3e, flags=00
+f176: 07                         ; 7, BINARY.
+;
+f17f:                            ; DECIMAL. - (next: f192 HEX.)
+f183:                            ; XT=0b27, flags=00
+f188: 08                         ; 8, DECIMAL.
+;
+f192:                            ; HEX. - (next: f1a1 .)
+f196:                            ; XT=0b04, flags=00
+f19b: 04                         ; 4, HEX.
+;
+f1a1:                            ; . - (next: f1ad (.))
+f1a5:                            ; XT=0af6, flags=00
+f1aa: 01                         ; 1, .
+;
+f1ad:                            ; (.) - (next: f1bb /MOD)
+f1b1:                            ; XT=0a82, flags=00
+f1b6: 03                         ; 3, (.)
+;
+f1bb:                            ; /MOD - (next: f1ca MOD)
+f1bf:                            ; XT=0a71, flags=00
+f1c4: 04                         ; 4, /MOD
+;
+f1ca:                            ; MOD - (next: f1d8 isNumber?)
+f1ce:                            ; XT=0a66, flags=00
+f1d3: 03                         ; 3, MOD
+;
+f1d8:                            ; isNumber? - (next: f1ec ABS)
+f1dc:                            ; XT=0a05, flags=00
+f1e1: 09                         ; 9, isNumber?
+;
+f1ec:                            ; ABS - (next: f1fa NEGATE)
+f1f0:                            ; XT=09f1, flags=00
+f1f5: 03                         ; 3, ABS
+;
+f1fa:                            ; NEGATE - (next: f20b isNumChar?)
+f1fe:                            ; XT=09e7, flags=00
+f203: 06                         ; 6, NEGATE
+;
+f20b:                            ; isNumChar? - (next: f220 isHEX?)
+f20f:                            ; XT=0996, flags=00
+f214: 0a                         ; 10, isNumChar?
+;
+f220:                            ; isHEX? - (next: f231 findInDict)
+f224:                            ; XT=098a, flags=00
+f229: 06                         ; 6, isHEX?
+;
+f231:                            ; findInDict - (next: f246 DICT.GetINLINE)
+f235:                            ; XT=0941, flags=00
+f23a: 0a                         ; 10, findInDict
+;
+f246:                            ; DICT.GetINLINE - (next: f25f DICT.GetIMMEDIATE)
+f24a:                            ; XT=0931, flags=00
+f24f: 0e                         ; 14, DICT.GetINLINE
+;
+f25f:                            ; DICT.GetIMMEDIATE - (next: f27b FLAGS.ISINLINE?)
+f263:                            ; XT=0921, flags=00
+f268: 11                         ; 17, DICT.GetIMMEDIATE
+;
+f27b:                            ; FLAGS.ISINLINE? - (next: f295 FLAGS.ISIMMEDIATE?)
+f27f:                            ; XT=0918, flags=00
+f284: 0f                         ; 15, FLAGS.ISINLINE?
+;
+f295:                            ; FLAGS.ISIMMEDIATE? - (next: f2b2 XT.GetDICTP)
+f299:                            ; XT=090f, flags=00
+f29e: 12                         ; 18, FLAGS.ISIMMEDIATE?
+;
+f2b2:                            ; XT.GetDICTP - (next: f2c8 DICTP>NAME)
+f2b6:                            ; XT=08f4, flags=00
+f2bb: 0b                         ; 11, XT.GetDICTP
+;
+f2c8:                            ; DICTP>NAME - (next: f2dd DICT.GetFLAGS)
+f2cc:                            ; XT=08e5, flags=00
+f2d1: 0a                         ; 10, DICTP>NAME
+;
+f2dd:                            ; DICT.GetFLAGS - (next: f2f5 DICT.GetXT)
+f2e1:                            ; XT=08d9, flags=00
+f2e6: 0d                         ; 13, DICT.GetFLAGS
+;
+f2f5:                            ; DICT.GetXT - (next: f30a NAME>DICT)
+f2f9:                            ; XT=08cd, flags=00
+f2fe: 0a                         ; 10, DICT.GetXT
+;
+f30a:                            ; NAME>DICT - (next: f31e FLAGS>DICT)
+f30e:                            ; XT=08be, flags=00
+f313: 09                         ; 9, NAME>DICT
+;
+f31e:                            ; FLAGS>DICT - (next: f333 XT>DICT)
+f322:                            ; XT=08b2, flags=00
+f327: 0a                         ; 10, FLAGS>DICT
+;
+f333:                            ; XT>DICT - (next: f345 NEXT>DICT)
+f337:                            ; XT=08a9, flags=00
+f33c: 07                         ; 7, XT>DICT
+;
+f345:                            ; NEXT>DICT - (next: f359 DICT>NAME)
+f349:                            ; XT=08a3, flags=00
+f34e: 09                         ; 9, NEXT>DICT
+;
+f359:                            ; DICT>NAME - (next: f36d DICT>FLAGS)
+f35d:                            ; XT=0895, flags=00
+f362: 09                         ; 9, DICT>NAME
+;
+f36d:                            ; DICT>FLAGS - (next: f382 DICT>XT)
+f371:                            ; XT=0889, flags=00
+f376: 0a                         ; 10, DICT>FLAGS
+;
+f382:                            ; DICT>XT - (next: f394 DICT>NEXT)
+f386:                            ; XT=0880, flags=00
+f38b: 07                         ; 7, DICT>XT
+;
+f394:                            ; DICT>NEXT - (next: f3a8 getOneWord)
+f398:                            ; XT=087a, flags=00
+f39d: 09                         ; 9, DICT>NEXT
+;
+f3a8:                            ; getOneWord - (next: f3bd skipWS)
+f3ac:                            ; XT=083e, flags=00
+f3b1: 0a                         ; 10, getOneWord
+;
+f3bd:                            ; skipWS - (next: f3ce getInput)
+f3c1:                            ; XT=0813, flags=00
+f3c6: 06                         ; 6, skipWS
+;
+f3ce:                            ; getInput - (next: f3e1 PAD)
+f3d2:                            ; XT=07fd, flags=00
+f3d7: 08                         ; 8, getInput
+;
+f3e1:                            ; PAD - (next: f3ef tmp-alloc)
+f3e5:                            ; XT=07eb, flags=00
+f3ea: 03                         ; 3, PAD
+;
+f3ef:                            ; tmp-alloc - (next: f403 tmp-cur)
+f3f3:                            ; XT=07d4, flags=00
+f3f8: 09                         ; 9, tmp-alloc
+;
+f403:                            ; tmp-cur - (next: f415 tmp-init)
+f407:                            ; XT=07c8, flags=00
+f40c: 07                         ; 7, tmp-cur
+;
+f415:                            ; tmp-init - (next: f428 (tmp))
+f419:                            ; XT=07b9, flags=00
+f41e: 08                         ; 8, tmp-init
+;
+f428:                            ; (tmp) - (next: f438 BETWEEN)
+f42c:                            ; XT=07a9, flags=00
+f431: 05                         ; 5, (tmp)
+;
+f438:                            ; BETWEEN - (next: f44a CR)
+f43c:                            ; XT=0791, flags=00
+f441: 07                         ; 7, BETWEEN
+;
+f44a:                            ; CR - (next: f457 CRLF)
+f44e:                            ; XT=0785, flags=02
+f453: 02                         ; 2, CR
+;
+f457:                            ; CRLF - (next: f466 BL)
+f45b:                            ; XT=0779, flags=02
+f460: 04                         ; 4, CRLF
+;
+f466:                            ; BL - (next: f473 ()
+f46a:                            ; XT=0770, flags=02
+f46f: 02                         ; 2, BL
+;
+f473:                            ; ( - (next: f47f \)
+f477:                            ; XT=0726, flags=01
+f47c: 01                         ; 1, (
+;
+f47f:                            ; \ - (next: f48b CT)
+f483:                            ; XT=0717, flags=01
+f488: 01                         ; 1, \
+;
+f48b:                            ; CT - (next: f498 TYPE)
+f48f:                            ; XT=0707, flags=00
+f494: 02                         ; 2, CT
+;
+f498:                            ; TYPE - (next: f4a7 COUNT)
+f49c:                            ; XT=06e5, flags=00
+f4a1: 04                         ; 4, TYPE
+;
+f4a7:                            ; COUNT - (next: f4b7 UNTIL)
+f4ab:                            ; XT=06d9, flags=00
+f4b0: 05                         ; 5, COUNT
+;
+f4b7:                            ; UNTIL - (next: f4c7 WHILE)
+f4bb:                            ; XT=06bd, flags=01
+f4c0: 05                         ; 5, UNTIL
+;
+f4c7:                            ; WHILE - (next: f4d7 AGAIN)
+f4cb:                            ; XT=06a1, flags=01
+f4d0: 05                         ; 5, WHILE
+;
+f4d7:                            ; AGAIN - (next: f4e7 BEGIN)
+f4db:                            ; XT=0685, flags=01
+f4e0: 05                         ; 5, AGAIN
+;
+f4e7:                            ; BEGIN - (next: f4f7 LEAVE)
+f4eb:                            ; XT=0672, flags=01
+f4f0: 05                         ; 5, BEGIN
+;
+f4f7:                            ; LEAVE - (next: f507 NOT)
+f4fb:                            ; XT=065b, flags=01
+f500: 05                         ; 5, LEAVE
+;
+f507:                            ; NOT - (next: f515 FALSE)
+f50b:                            ; XT=0652, flags=02
+f510: 03                         ; 3, NOT
+;
+f515:                            ; FALSE - (next: f525 TRUE)
+f519:                            ; XT=064a, flags=02
+f51e: 05                         ; 5, FALSE
+;
+f525:                            ; TRUE - (next: f534 >=)
+f529:                            ; XT=0642, flags=02
+f52e: 04                         ; 4, TRUE
+;
+f534:                            ; >= - (next: f541 <=)
+f538:                            ; XT=0638, flags=02
+f53d: 02                         ; 2, >=
+;
+f541:                            ; <= - (next: f54e <>)
+f545:                            ; XT=062e, flags=02
+f54a: 02                         ; 2, <=
+;
+f54e:                            ; <> - (next: f55b 0=)
+f552:                            ; XT=0624, flags=02
+f557: 02                         ; 2, <>
+;
+f55b:                            ; 0= - (next: f568 C+!)
+f55f:                            ; XT=061b, flags=02
+f564: 02                         ; 2, 0=
+;
+f568:                            ; C+! - (next: f576 +!)
+f56c:                            ; XT=060f, flags=00
+f571: 03                         ; 3, C+!
+;
+f576:                            ; +! - (next: f583 C--)
+f57a:                            ; XT=0603, flags=00
+f57f: 02                         ; 2, +!
+;
+f583:                            ; C-- - (next: f591 C++)
+f587:                            ; XT=05f6, flags=00
+f58c: 03                         ; 3, C--
+;
+f591:                            ; C++ - (next: f59f --)
+f595:                            ; XT=05e9, flags=00
+f59a: 03                         ; 3, C++
+;
+f59f:                            ; -- - (next: f5ac ++)
+f5a3:                            ; XT=05dc, flags=00
+f5a8: 02                         ; 2, --
+;
+f5ac:                            ; ++ - (next: f5b9 -=)
+f5b0:                            ; XT=05cf, flags=00
+f5b5: 02                         ; 2, ++
+;
+f5b9:                            ; -= - (next: f5c6 +=)
+f5bd:                            ; XT=05c3, flags=00
+f5c2: 02                         ; 2, -=
+;
+f5c6:                            ; += - (next: f5d3 2/)
+f5ca:                            ; XT=05b8, flags=00
+f5cf: 02                         ; 2, +=
+;
+f5d3:                            ; 2/ - (next: f5e0 2*)
+f5d7:                            ; XT=05af, flags=02
+f5dc: 02                         ; 2, 2/
+;
+f5e0:                            ; 2* - (next: f5ed 1-)
+f5e4:                            ; XT=05a6, flags=02
+f5e9: 02                         ; 2, 2*
+;
+f5ed:                            ; 1- - (next: f5fa 1+)
+f5f1:                            ; XT=059d, flags=02
+f5f6: 02                         ; 2, 1-
+;
+f5fa:                            ; 1+ - (next: f607 -ROT)
+f5fe:                            ; XT=0594, flags=02
+f603: 02                         ; 2, 1+
+;
+f607:                            ; -ROT - (next: f616 ROT)
+f60b:                            ; XT=058a, flags=02
+f610: 04                         ; 4, -ROT
+;
+f616:                            ; ROT - (next: f624 NIP)
+f61a:                            ; XT=0580, flags=02
+f61f: 03                         ; 3, ROT
+;
+f624:                            ; NIP - (next: f632 TUCK)
+f628:                            ; XT=0578, flags=02
+f62d: 03                         ; 3, NIP
+;
+f632:                            ; TUCK - (next: f641 2DROP)
+f636:                            ; XT=0570, flags=02
+f63b: 04                         ; 4, TUCK
+;
+f641:                            ; 2DROP - (next: f651 2DUP)
+f645:                            ; XT=0568, flags=02
+f64a: 05                         ; 5, 2DROP
+;
+f651:                            ; 2DUP - (next: f660 RDROP)
+f655:                            ; XT=0560, flags=02
+f65a: 04                         ; 4, 2DUP
+;
+f660:                            ; RDROP - (next: f670 R@)
+f664:                            ; XT=0558, flags=02
+f669: 05                         ; 5, RDROP
+;
+f670:                            ; R@ - (next: f67d MEM_SZ)
+f674:                            ; XT=054f, flags=02
+f679: 02                         ; 2, R@
+;
+f67d:                            ; MEM_SZ - (next: f68e isNeg)
+f681:                            ; XT=0546, flags=00
+f686: 06                         ; 6, MEM_SZ
+;
+f68e:                            ; isNeg - (next: f69e >IN)
+f692:                            ; XT=0536, flags=00
+f697: 05                         ; 5, isNeg
+;
+f69e:                            ; >IN - (next: f6ac ELSE)
+f6a2:                            ; XT=0526, flags=00
+f6a7: 03                         ; 3, >IN
+;
+f6ac:                            ; ELSE - (next: f6bb IF)
+f6b0:                            ; XT=04ff, flags=01
+f6b5: 04                         ; 4, ELSE
+;
+f6bb:                            ; IF - (next: f6c8 THEN)
+f6bf:                            ; XT=04de, flags=01
+f6c4: 02                         ; 2, IF
+;
+f6c8:                            ; THEN - (next: f6d7 ?COMPILING)
+f6cc:                            ; XT=04c9, flags=01
+f6d1: 04                         ; 4, THEN
+;
+f6d7:                            ; ?COMPILING - (next: f6ec ])
+f6db:                            ; XT=04c0, flags=00
+f6e0: 0a                         ; 10, ?COMPILING
+;
+f6ec:                            ; ] - (next: f6f8 [)
+f6f0:                            ; XT=04b5, flags=01
+f6f5: 01                         ; 1, ]
+;
+f6f8:                            ; [ - (next: f704 OFF)
+f6fc:                            ; XT=04aa, flags=01
+f701: 01                         ; 1, [
+;
+f704:                            ; OFF - (next: f712 ON)
+f708:                            ; XT=04a0, flags=00
+f70d: 03                         ; 3, OFF
+;
+f712:                            ; ON - (next: f71f BINARY)
+f716:                            ; XT=0496, flags=00
+f71b: 02                         ; 2, ON
+;
+f71f:                            ; BINARY - (next: f730 OCTAL)
+f723:                            ; XT=048b, flags=00
+f728: 06                         ; 6, BINARY
+;
+f730:                            ; OCTAL - (next: f740 DECIMAL)
+f734:                            ; XT=0480, flags=00
+f739: 05                         ; 5, OCTAL
+;
+f740:                            ; DECIMAL - (next: f752 HEX)
+f744:                            ; XT=0475, flags=00
+f749: 07                         ; 7, DECIMAL
+;
+f752:                            ; HEX - (next: f760 DEBUG-OFF)
+f756:                            ; XT=046a, flags=00
+f75b: 03                         ; 3, HEX
+;
+f760:                            ; DEBUG-OFF - (next: f774 DEBUG-ON)
+f764:                            ; XT=0461, flags=00
+f769: 09                         ; 9, DEBUG-OFF
+;
+f774:                            ; DEBUG-ON - (next: f787 TRACE-OFF)
+f778:                            ; XT=0458, flags=00
+f77d: 08                         ; 8, DEBUG-ON
+;
+f787:                            ; TRACE-OFF - (next: f79b TRACE-ON)
+f78b:                            ; XT=044f, flags=00
+f790: 09                         ; 9, TRACE-OFF
+;
+f79b:                            ; TRACE-ON - (next: f7ae LOGLEVEL)
+f79f:                            ; XT=0446, flags=00
+f7a4: 08                         ; 8, TRACE-ON
+;
+f7ae:                            ; LOGLEVEL - (next: f7c1 ,)
+f7b2:                            ; XT=043f, flags=02
+f7b7: 08                         ; 8, LOGLEVEL
+;
+f7c1:                            ; , - (next: f7cd HERE)
+f7c5:                            ; XT=042c, flags=00
+f7ca: 01                         ; 1, ,
+;
+f7cd:                            ; HERE - (next: f7dc LAST)
+f7d1:                            ; XT=0423, flags=02
+f7d6: 04                         ; 4, HERE
+;
+f7dc:                            ; LAST - (next: f7eb IMMEDIATE)
+f7e0:                            ; XT=041a, flags=02
+f7e5: 04                         ; 4, LAST
+;
+f7eb:                            ; IMMEDIATE - (next: f7ff FLAG_INLINE)
+f7ef:                            ; XT=0404, flags=00
+f7f4: 09                         ; 9, IMMEDIATE
+;
+f7ff:                            ; FLAG_INLINE - (next: f815 FLAG_IMMEDIATE)
+f803:                            ; XT=03fc, flags=02
+f808: 0b                         ; 11, FLAG_INLINE
+;
+f815:                            ; FLAG_IMMEDIATE - (next: f82e CELLS)
+f819:                            ; XT=03f4, flags=02
+f81e: 0e                         ; 14, FLAG_IMMEDIATE
+;
+f82e:                            ; CELLS - (next: f83e INLINE)
+f832:                            ; XT=03eb, flags=02
+f837: 05                         ; 5, CELLS
+;
+f83e:                            ; INLINE - (next: f84f BYE)
+f842:                            ; XT=03d5, flags=00
+f847: 06                         ; 6, INLINE
+;
+f84f:                            ; BYE - (next: f85d RESET)
+f853:                            ; XT=03ce, flags=02
+f858: 03                         ; 3, BYE
+;
+f85d:                            ; RESET - (next: f86d BREAK)
+f861:                            ; XT=03c7, flags=02
+f866: 05                         ; 5, RESET
+;
+f86d:                            ; BREAK - (next: f87d USTACK>)
+f871:                            ; XT=03c0, flags=02
+f876: 05                         ; 5, BREAK
+;
+f87d:                            ; USTACK> - (next: f88f >USTACK)
+f881:                            ; XT=03b9, flags=02
+f886: 07                         ; 7, USTACK>
+;
+f88f:                            ; >USTACK - (next: f8a1 USTACKINIT)
+f893:                            ; XT=03b2, flags=02
+f898: 07                         ; 7, >USTACK
+;
+f8a1:                            ; USTACKINIT - (next: f8b6 GETCH)
+f8a5:                            ; XT=03ab, flags=02
+f8aa: 0a                         ; 10, USTACKINIT
+;
+f8b6:                            ; GETCH - (next: f8c6 OR)
+f8ba:                            ; XT=03a4, flags=02
+f8bf: 05                         ; 5, GETCH
+;
+f8c6:                            ; OR - (next: f8d3 AND)
+f8ca:                            ; XT=039d, flags=02
+f8cf: 02                         ; 2, OR
+;
+f8d3:                            ; AND - (next: f8e1 DEPTH)
+f8d7:                            ; XT=0396, flags=02
+f8dc: 03                         ; 3, AND
+;
+f8e1:                            ; DEPTH - (next: f8f1 PICK)
+f8e5:                            ; XT=038f, flags=02
+f8ea: 05                         ; 5, DEPTH
+;
+f8f1:                            ; PICK - (next: f900 R>)
+f8f5:                            ; XT=0388, flags=02
+f8fa: 04                         ; 4, PICK
+;
+f900:                            ; R> - (next: f90d >R)
+f904:                            ; XT=0381, flags=02
+f909: 02                         ; 2, R>
+;
+f90d:                            ; >R - (next: f91a FCLOSE)
+f911:                            ; XT=037a, flags=02
+f916: 02                         ; 2, >R
+;
+f91a:                            ; FCLOSE - (next: f92b FWRITE)
+f91e:                            ; XT=0373, flags=02
+f923: 06                         ; 6, FCLOSE
+;
+f92b:                            ; FWRITE - (next: f93c FREADLINE)
+f92f:                            ; XT=036c, flags=02
+f934: 06                         ; 6, FWRITE
+;
+f93c:                            ; FREADLINE - (next: f950 FREAD)
+f940:                            ; XT=0365, flags=02
+f945: 09                         ; 9, FREADLINE
+;
+f950:                            ; FREAD - (next: f960 FOPEN)
+f954:                            ; XT=035e, flags=02
+f959: 05                         ; 5, FREAD
+;
+f960:                            ; FOPEN - (next: f970 EMIT)
+f964:                            ; XT=0357, flags=02
+f969: 05                         ; 5, FOPEN
+;
+f970:                            ; EMIT - (next: f97f >)
+f974:                            ; XT=0350, flags=02
+f979: 04                         ; 4, EMIT
+;
+f97f:                            ; > - (next: f98b =)
+f983:                            ; XT=0349, flags=02
+f988: 01                         ; 1, >
+;
+f98b:                            ; = - (next: f997 <)
+f98f:                            ; XT=0342, flags=02
+f994: 01                         ; 1, =
+;
+f997:                            ; < - (next: f9a3 /)
+f99b:                            ; XT=033b, flags=02
+f9a0: 01                         ; 1, <
+;
+f9a3:                            ; / - (next: f9af *)
+f9a7:                            ; XT=0334, flags=02
+f9ac: 01                         ; 1, /
+;
+f9af:                            ; * - (next: f9bb -)
+f9b3:                            ; XT=032d, flags=02
+f9b8: 01                         ; 1, *
+;
+f9bb:                            ; - - (next: f9c7 +)
+f9bf:                            ; XT=0326, flags=02
+f9c4: 01                         ; 1, -
+;
+f9c7:                            ; + - (next: f9d3 COMPAREI)
+f9cb:                            ; XT=031f, flags=02
+f9d0: 01                         ; 1, +
+;
+f9d3:                            ; COMPAREI - (next: f9e6 COMPARE)
+f9d7:                            ; XT=0318, flags=02
+f9dc: 08                         ; 8, COMPAREI
+;
+f9e6:                            ; COMPARE - (next: f9f8 OVER)
+f9ea:                            ; XT=0311, flags=02
+f9ef: 07                         ; 7, COMPARE
+;
+f9f8:                            ; OVER - (next: fa07 DUP)
+f9fc:                            ; XT=030a, flags=02
+fa01: 04                         ; 4, OVER
+;
+fa07:                            ; DUP - (next: fa15 DROP)
+fa0b:                            ; XT=0303, flags=02
+fa10: 03                         ; 3, DUP
+;
+fa15:                            ; DROP - (next: fa24 SWAP)
+fa19:                            ; XT=02fc, flags=02
+fa1e: 04                         ; 4, DROP
+;
+fa24:                            ; SWAP - (next: fa33 C!)
+fa28:                            ; XT=02f5, flags=02
+fa2d: 04                         ; 4, SWAP
+;
+fa33:                            ; C! - (next: fa40 C@)
+fa37:                            ; XT=02ee, flags=02
+fa3c: 02                         ; 2, C!
+;
+fa40:                            ; C@ - (next: fa4d !)
+fa44:                            ; XT=02e7, flags=02
+fa49: 02                         ; 2, C@
+;
+fa4d:                            ; ! - (next: fa59 @)
+fa51:                            ; XT=02e0, flags=02
+fa56: 01                         ; 1, !
+;
+fa59:                            ; @ - (next: fa65 a.BYE)
+fa5d:                            ; XT=02d9, flags=02
+fa62: 01                         ; 1, @
+;
+fa65:                            ; a.BYE - (next: fa75 a.RESET)
+fa69:                            ; XT=02cc, flags=01
+fa6e: 05                         ; 5, a.BYE
+;
+fa75:                            ; a.RESET - (next: fa87 a.BREAK)
+fa79:                            ; XT=02bf, flags=01
+fa7e: 07                         ; 7, a.RESET
+;
+fa87:                            ; a.BREAK - (next: fa99 a.UPOP)
+fa8b:                            ; XT=02b2, flags=01
+fa90: 07                         ; 7, a.BREAK
+;
+fa99:                            ; a.UPOP - (next: faaa a.UPUSH)
+fa9d:                            ; XT=02a5, flags=01
+faa2: 06                         ; 6, a.UPOP
+;
+faaa:                            ; a.UPUSH - (next: fabc a.USTACKINIT)
+faae:                            ; XT=0298, flags=01
+fab3: 07                         ; 7, a.UPUSH
+;
+fabc:                            ; a.USTACKINIT - (next: fad3 a.GETCH)
+fac0:                            ; XT=028b, flags=01
+fac5: 0c                         ; 12, a.USTACKINIT
+;
+fad3:                            ; a.GETCH - (next: fae5 a.OR)
+fad7:                            ; XT=027e, flags=01
+fadc: 07                         ; 7, a.GETCH
+;
+fae5:                            ; a.OR - (next: faf4 a.AND)
+fae9:                            ; XT=0271, flags=01
+faee: 04                         ; 4, a.OR
+;
+faf4:                            ; a.AND - (next: fb04 a.DEPTH)
+faf8:                            ; XT=0264, flags=01
+fafd: 05                         ; 5, a.AND
+;
+fb04:                            ; a.DEPTH - (next: fb16 a.LOGLEVEL)
+fb08:                            ; XT=0257, flags=01
+fb0d: 07                         ; 7, a.DEPTH
+;
+fb16:                            ; a.LOGLEVEL - (next: fb2b a.PICK)
+fb1a:                            ; XT=024a, flags=01
+fb1f: 0a                         ; 10, a.LOGLEVEL
+;
+fb2b:                            ; a.PICK - (next: fb3c a.RTOD)
+fb2f:                            ; XT=023d, flags=01
+fb34: 06                         ; 6, a.PICK
+;
+fb3c:                            ; a.RTOD - (next: fb4d a.DTOR)
+fb40:                            ; XT=0230, flags=01
+fb45: 06                         ; 6, a.RTOD
+;
+fb4d:                            ; a.DTOR - (next: fb5e a.SLITERAL)
+fb51:                            ; XT=0223, flags=01
+fb56: 06                         ; 6, a.DTOR
+;
+fb5e:                            ; a.SLITERAL - (next: fb73 a.FCLOSE)
+fb62:                            ; XT=0216, flags=01
+fb67: 0a                         ; 10, a.SLITERAL
+;
+fb73:                            ; a.FCLOSE - (next: fb86 a.FWRITE)
+fb77:                            ; XT=0209, flags=01
+fb7c: 08                         ; 8, a.FCLOSE
+;
+fb86:                            ; a.FWRITE - (next: fb99 a.FREADLINE)
+fb8a:                            ; XT=01fc, flags=01
+fb8f: 08                         ; 8, a.FWRITE
+;
+fb99:                            ; a.FREADLINE - (next: fbaf a.FREAD)
+fb9d:                            ; XT=01ef, flags=01
+fba2: 0b                         ; 11, a.FREADLINE
+;
+fbaf:                            ; a.FREAD - (next: fbc1 a.FOPEN)
+fbb3:                            ; XT=01e2, flags=01
+fbb8: 07                         ; 7, a.FREAD
+;
+fbc1:                            ; a.FOPEN - (next: fbd3 a.EMIT)
+fbc5:                            ; XT=01d5, flags=01
+fbca: 07                         ; 7, a.FOPEN
+;
+fbd3:                            ; a.EMIT - (next: fbe4 a.DICTP)
+fbd7:                            ; XT=01c8, flags=01
+fbdc: 06                         ; 6, a.EMIT
+;
+fbe4:                            ; a.DICTP - (next: fbf6 a.GT)
+fbe8:                            ; XT=01bb, flags=01
+fbed: 07                         ; 7, a.DICTP
+;
+fbf6:                            ; a.GT - (next: fc05 a.EQ)
+fbfa:                            ; XT=01ae, flags=01
+fbff: 04                         ; 4, a.GT
+;
+fc05:                            ; a.EQ - (next: fc14 a.LT)
+fc09:                            ; XT=01a1, flags=01
+fc0e: 04                         ; 4, a.EQ
+;
+fc14:                            ; a.LT - (next: fc23 a.DIV)
+fc18:                            ; XT=0194, flags=01
+fc1d: 04                         ; 4, a.LT
+;
+fc23:                            ; a.DIV - (next: fc33 a.MUL)
+fc27:                            ; XT=0187, flags=01
+fc2c: 05                         ; 5, a.DIV
+;
+fc33:                            ; a.MUL - (next: fc43 a.SUB)
+fc37:                            ; XT=017a, flags=01
+fc3c: 05                         ; 5, a.MUL
+;
+fc43:                            ; a.SUB - (next: fc53 a.ADD)
+fc47:                            ; XT=016d, flags=01
+fc4c: 05                         ; 5, a.SUB
+;
+fc53:                            ; a.ADD - (next: fc63 a.COMPAREI)
+fc57:                            ; XT=0160, flags=01
+fc5c: 05                         ; 5, a.ADD
+;
+fc63:                            ; a.COMPAREI - (next: fc78 a.COMPARE)
+fc67:                            ; XT=0153, flags=01
+fc6c: 0a                         ; 10, a.COMPAREI
+;
+fc78:                            ; a.COMPARE - (next: fc8c a.RET)
+fc7c:                            ; XT=0146, flags=01
+fc81: 09                         ; 9, a.COMPARE
+;
+fc8c:                            ; a.RET - (next: fc9c a.CALL)
+fc90:                            ; XT=0139, flags=01
+fc95: 05                         ; 5, a.RET
+;
+fc9c:                            ; a.CALL - (next: fcad a.JMPNZ)
+fca0:                            ; XT=012c, flags=01
+fca5: 06                         ; 6, a.CALL
+;
+fcad:                            ; a.JMPNZ - (next: fcbf a.JMPZ)
+fcb1:                            ; XT=011f, flags=01
+fcb6: 07                         ; 7, a.JMPNZ
+;
+fcbf:                            ; a.JMPZ - (next: fcd0 a.JMP)
+fcc3:                            ; XT=0112, flags=01
+fcc8: 06                         ; 6, a.JMPZ
+;
+fcd0:                            ; a.JMP - (next: fce0 a.OVER)
+fcd4:                            ; XT=0105, flags=01
+fcd9: 05                         ; 5, a.JMP
+;
+fce0:                            ; a.OVER - (next: fcf1 a.DUP)
+fce4:                            ; XT=00f8, flags=01
+fce9: 06                         ; 6, a.OVER
+;
+fcf1:                            ; a.DUP - (next: fd01 a.DROP)
+fcf5:                            ; XT=00eb, flags=01
+fcfa: 05                         ; 5, a.DUP
+;
+fd01:                            ; a.DROP - (next: fd12 a.SWAP)
+fd05:                            ; XT=00de, flags=01
+fd0a: 06                         ; 6, a.DROP
+;
+fd12:                            ; a.SWAP - (next: fd23 a.CSTORE)
+fd16:                            ; XT=00d1, flags=01
+fd1b: 06                         ; 6, a.SWAP
+;
+fd23:                            ; a.CSTORE - (next: fd36 a.CFETCH)
+fd27:                            ; XT=00c4, flags=01
+fd2c: 08                         ; 8, a.CSTORE
+;
+fd36:                            ; a.CFETCH - (next: fd49 a.STORE)
+fd3a:                            ; XT=00b7, flags=01
+fd3f: 08                         ; 8, a.CFETCH
+;
+fd49:                            ; a.STORE - (next: fd5b a.FETCH)
+fd4d:                            ; XT=00aa, flags=01
+fd52: 07                         ; 7, a.STORE
+;
+fd5b:                            ; a.FETCH - (next: fd6d a.CPUSH)
+fd5f:                            ; XT=009d, flags=01
+fd64: 07                         ; 7, a.FETCH
+;
+fd6d:                            ; a.CPUSH - (next: fd7f a.PUSH)
+fd71:                            ; XT=0090, flags=01
+fd76: 07                         ; 7, a.CPUSH
+;
+fd7f:                            ; a.PUSH - (next: fd90 C,)
+fd83:                            ; XT=0083, flags=01
+fd88: 06                         ; 6, a.PUSH
+;
+fd90:                            ; C, - (next: fd9d STATE)
+fd94:                            ; XT=0070, flags=00
+fd99: 02                         ; 2, C,
+;
+fd9d:                            ; STATE - (next: fdad INPUT-FP)
+fda1:                            ; XT=0068, flags=02
+fda6: 05                         ; 5, STATE
+;
+fdad:                            ; INPUT-FP - (next: fdc0 (LAST))
+fdb1:                            ; XT=0060, flags=02
+fdb6: 08                         ; 8, INPUT-FP
+;
+fdc0:                            ; (LAST) - (next: fdd1 DP)
+fdc4:                            ; XT=0058, flags=02
+fdc9: 06                         ; 6, (LAST)
+;
+fdd1:                            ; DP - (next: fdde CELL)
+fdd5:                            ; XT=0050, flags=02
+fdda: 02                         ; 2, DP
+;
+fdde:                            ; CELL - (next: fded BASE)
+fde2:                            ; XT=0048, flags=02
+fde7: 04                         ; 4, CELL
+;
+fded:                            ; BASE - (next: fdfc <end>)
+fdf1:                            ; XT=0040, flags=02
+fdf6: 04                         ; 4, BASE
+;
+fdfc:                            ; End.
