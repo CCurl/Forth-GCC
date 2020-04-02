@@ -2,11 +2,11 @@
 ; data-stack: 0a00, grows up
 ; return-stack: 0bfc, grows down
 ;
-0000: 08 c3 03 00 00             ; JMP go (03c3)
+0000: 08 c3 03 00 00             ; JMP main (03c3)
 ;
 0005: 00 0a 04
 0008: 00000000 00000000
-0010: 00000489 0000065a 00000000 00000000
+0010: 000004d8 00000642 00000000 00000000
 0020: 00000000 00000c00 00000000 00000000
 0030: 00000000 00000000 00000000 00000000
 ;
@@ -444,54 +444,76 @@
 03bd: 08 9e 03 00 00             ; JMP 039e
 03c2: 0c                         ; RET
 ;
-03c3: 18 5a 06 00 00             ; DICTP go (065a)
+03c3: 18 58 06 00 00             ; DICTP main (0658)
 03c8: 07 0d 48 65 6c 6c 6f 2c 20 77 6f 72 6c 64 21 00 ; SLITERAL (03c9) [Hello, world!]
 03d8: 0b b7 01 00 00             ; CALL COUNT (01b7)
 03dd: 0b c3 01 00 00             ; CALL TYPE (01c3)
-03e2: 0b a2 01 00 00             ; CALL CR (01a2)
-03e7: 0e 21                      ; CLITERAL 33
-03e9: 0e 37                      ; CLITERAL 55
-03eb: 0b dd 02 00 00             ; CALL ascii (02dd)
-03f0: 0b a2 01 00 00             ; CALL CR (01a2)
-03f5: 0b 52 03 00 00             ; CALL WORDS (0352)
+03e2: 0e 14                      ; CLITERAL 20
+03e4: 02                         ; FETCH
+03e5: 0e 04                      ; CLITERAL 4
+03e7: 11                         ; ADD
+03e8: 02                         ; FETCH
+03e9: 0e 01                      ; CLITERAL 1
+03eb: 03                         ; STORE
+03ec: 0b a2 01 00 00             ; CALL CR (01a2)
+03f1: 0e 21                      ; CLITERAL 33
+03f3: 0e 37                      ; CLITERAL 55
+03f5: 0b dd 02 00 00             ; CALL ascii (02dd)
 03fa: 0b a2 01 00 00             ; CALL CR (01a2)
-03ff: 01 e8 03 00 00             ; LITERAL 1000 (3e8)
-0404: 01 e8 03 00 00             ; LITERAL 1000 (3e8)
-0409: 13                         ; MUL
-040a: 0e 19                      ; CLITERAL 25
-040c: 13                         ; MUL
-040d: 0b 71 03 00 00             ; CALL count-to (0371)
-0412: 0b a2 01 00 00             ; CALL CR (01a2)
-0417: 0e 24                      ; CLITERAL 36
-0419: 02                         ; FETCH
-041a: 07 0b 56 4d 20 73 69 7a 65 20 69 73 20 00 ; SLITERAL (041b) [VM size is ]
-0428: 0b e8 01 00 00             ; CALL CT (01e8)
-042d: 0b b6 02 00 00             ; CALL D. (02b6)
-0432: 07 08 20 62 79 74 65 73 2c 20 00 ; SLITERAL (0433) [ bytes, ]
-043d: 0b e8 01 00 00             ; CALL CT (01e8)
-0442: 0e 10                      ; CLITERAL 16
-0444: 02                         ; FETCH
-0445: 0b b6 02 00 00             ; CALL D. (02b6)
-044a: 07 0d 20 62 79 74 65 73 20 75 73 65 64 2c 20 00 ; SLITERAL (044b) [ bytes used, ]
-045a: 0b e8 01 00 00             ; CALL CT (01e8)
-045f: 0e 14                      ; CLITERAL 20
-0461: 02                         ; FETCH
-0462: 0e 10                      ; CLITERAL 16
-0464: 02                         ; FETCH
-0465: 12                         ; SUB
-0466: 0b b6 02 00 00             ; CALL D. (02b6)
-046b: 07 0b 20 62 79 74 65 73 20 66 72 65 65 00 ; SLITERAL (046c) [ bytes free]
-0479: 0b e8 01 00 00             ; CALL CT (01e8)
-047e: 07 01 2e 00                ; SLITERAL (047f) [.]
-0482: 0b e8 01 00 00             ; CALL CT (01e8)
-0487: ff                         ; BYE
-0488: 0c                         ; RET
+03ff: 0b 52 03 00 00             ; CALL WORDS (0352)
+0404: 0b a2 01 00 00             ; CALL CR (01a2)
+0409: 01 e8 03 00 00             ; LITERAL 1000 (3e8)
+040e: 01 e8 03 00 00             ; LITERAL 1000 (3e8)
+0413: 13                         ; MUL
+0414: 0e 19                      ; CLITERAL 25
+0416: 13                         ; MUL
+0417: 0b 71 03 00 00             ; CALL count-to (0371)
+041c: 0b a2 01 00 00             ; CALL CR (01a2)
+0421: 0e 24                      ; CLITERAL 36
+0423: 02                         ; FETCH
+0424: 07 0b 56 4d 20 73 69 7a 65 20 69 73 20 00 ; SLITERAL (0425) [VM size is ]
+0432: 0b e8 01 00 00             ; CALL CT (01e8)
+0437: 0b b6 02 00 00             ; CALL D. (02b6)
+043c: 07 08 20 62 79 74 65 73 2c 20 00 ; SLITERAL (043d) [ bytes, ]
+0447: 0b e8 01 00 00             ; CALL CT (01e8)
+044c: 0e 10                      ; CLITERAL 16
+044e: 02                         ; FETCH
+044f: 0b b6 02 00 00             ; CALL D. (02b6)
+0454: 07 0d 20 62 79 74 65 73 20 75 73 65 64 2c 20 00 ; SLITERAL (0455) [ bytes used, ]
+0464: 0b e8 01 00 00             ; CALL CT (01e8)
+0469: 0e 14                      ; CLITERAL 20
+046b: 02                         ; FETCH
+046c: 0e 10                      ; CLITERAL 16
+046e: 02                         ; FETCH
+046f: 12                         ; SUB
+0470: 0b b6 02 00 00             ; CALL D. (02b6)
+0475: 07 0b 20 62 79 74 65 73 20 66 72 65 65 00 ; SLITERAL (0476) [ bytes free]
+0483: 0b e8 01 00 00             ; CALL CT (01e8)
+0488: 07 01 2e 00                ; SLITERAL (0489) [.]
+048c: 0b e8 01 00 00             ; CALL CT (01e8)
+0491: 0b cd 02 00 00             ; CALL . (02cd)
+0496: 0b cd 02 00 00             ; CALL . (02cd)
+049b: 0b cd 02 00 00             ; CALL . (02cd)
+04a0: 0b cd 02 00 00             ; CALL . (02cd)
+04a5: 0b cd 02 00 00             ; CALL . (02cd)
+04aa: ff                         ; BYE
+04ab: 0c                         ; RET
+;
+04ac: 18 42 06 00 00             ; DICTP catch-error (0642)
+04b1: 07 1d 2a 2a 20 45 52 52 4f 52 20 6f 63 63 75 72 72 65 64 2c 20 65 78 69 74 69 6e 67 20 2a 2a 00 ; SLITERAL (04b2) [** ERROR occurred, exiting **]
+04d1: 0b e8 01 00 00             ; CALL CT (01e8)
+04d6: ff                         ; BYE
+04d7: 0c                         ; RET
 ;
 ; End of code, Dictionary:
 ;
-065a: 67 06 00 00                ; go - (next: 0667 count-to)
-065e: c3 03 00 00 00             ; XT=03c3, flags=00
-0663: 02 67 6f 00                ; 2, go
+0642: 58 06 00 00                ; catch-error - (next: 0658 main)
+0646: ac 04 00 00 00             ; XT=04ac, flags=00
+064b: 0b 63 61 74 63 68 2d 65 72 72 6f 72 00 ; 11, catch-error
+;
+0658: 67 06 00 00                ; main - (next: 0667 count-to)
+065c: c3 03 00 00 00             ; XT=03c3, flags=00
+0661: 04 6d 61 69 6e 00          ; 4, main
 ;
 0667: 7a 06 00 00                ; count-to - (next: 067a WORDS)
 066b: 71 03 00 00 00             ; XT=0371, flags=00

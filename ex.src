@@ -82,7 +82,8 @@ DECIMAL
         1 + 
     .AGAIN ;
 
-: go S" Hello, world!" COUNT TYPE 
+: main S" Hello, world!" COUNT TYPE 
+	(LAST) @ CELL + @ 1 !
 	CR 33 55 ascii CR
 	WORDS
 	CR 1000 1000 * 25 * count-to CR
@@ -90,4 +91,7 @@ DECIMAL
 	DP @ D. S"  bytes used, " CT
 	(LAST) @ DP @ - D. S"  bytes free" CT
 	S" ." CT
+	. . . . .
 	BYE ;
+
+: catch-error S" ** ERROR occurred, exiting **" CT BYE ;
