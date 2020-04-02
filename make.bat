@@ -3,6 +3,7 @@
 if "--%1%--" == "--fc--" goto make-fc
 if "--%1%--" == "--fd--" goto make-fd
 if "--%1%--" == "--fa--" goto make-fa
+if "--%1%--" == "--fb--" goto make-fb
 if "--%1%--" == "--forth--" goto make-forth
 if "--%1%--" == "--nc--" goto make-nc
 if "--%1%--" == "--nd--" goto make-nd
@@ -66,6 +67,12 @@ del tmp.exe
 if "--%2%--" == "--1--" forth-dis
 goto done
 
+:make-fb
+forth-compiler
+forth-dis
+if "--%2%--" NEQ "----" forth
+goto done
+
 :make-fa
 set output=forth-dis2
 set c-files=forth-dis2.c 
@@ -101,6 +108,7 @@ echo    fc - makes forth-compiler.exe
 echo    nc - makes forth-compiler.exe
 echo    forth - makes forth.exe (if arg2=1 it then runs forth.exe)
 echo    fd - makes forth-dis.exe
+echo    fb - builds forth from forth.src
 echo    nd - makes forth-dis.exe
 
 :done
