@@ -90,15 +90,16 @@ typedef struct {
 #define STACK_BUF_CELLS 2
 #define STACK_BUF_SZ (STACK_BUF_CELLS * CELL_SZ)
 
-#define ADDR_BASE  0x06
-#define ADDR_CELL  0x07
-#define ADDR_HERE  0x10
-#define ADDR_LAST  0x14
-#define ADDR_STATE 0x20
+#define ADDR_BASE   0x06
+#define ADDR_CELL   0x07
+#define ADDR_HERE   0x10
+#define ADDR_LAST   0x14
+#define ADDR_STATE  0x20
+#define ADDR_MEM_SZ 0x24
 
 #define ONE_KB (1024)
 #define ONE_MB (ONE_KB * ONE_KB)
-#define MEM_SZ (256*ONE_KB)
+extern int MEM_SZ;
 
 #define GETAT(loc) *(CELL *)(&the_memory[loc])
 #define SETAT(loc, val) *(CELL *)(&the_memory[loc]) = val

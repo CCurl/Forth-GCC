@@ -15,7 +15,8 @@ char input_fn[256];
 char output_fn[256];
 FILE *input_fp = NULL;
 FILE *output_fp = NULL;
-int stand_alone = 1;
+int stand_alone = 0;
+int mem_size_KB = 64;
 
 CELL HERE, LAST, STATE;
 CELL BASE = 10;
@@ -175,7 +176,11 @@ void Compile(FILE *fp_in)
 	DICT_T *dp = FindWord("main");
 	if (dp == NULL)
 	{
-		dp = (DICT_T *)&the_memory[LAST];
+		dp = FindWord("MAIN");
+		if (dp == NULL)
+		{
+			dp = (DICT_T *)&the_memory[LAST];
+		}
 	}
 
 	CStore(0, JMP);
@@ -693,6 +698,16 @@ void process_arg(char *arg)
         arg = arg+2;
         strcpy(output_fn, arg);
     }
+    else if (*arg == 'a') 
+    {
+        arg = arg+2;
+        stand_alone = (strcmp(arg, "1") == 0) ? 0 : 1;
+    }
+    else if (*arg == 'm') 
+    {
+        arg = arg+2;
+        mem_size_KB = atoi(arg);
+    }
     else if (*arg == 't') 
     {
 		trace_on();
@@ -710,6 +725,10 @@ void process_arg(char *arg)
         printf("      default inputFile is forth.src\n");
         printf("  -o:outputFile (full or relative path)\n");
         printf("      default outputFile is forth.bin\n");
+        printf("  -a:(0|1) - include assembler words\n");
+        printf("      default value is 1\n");
+        printf("  -m:<KB> - Memory size in KB\n");
+        printf("      default value is 64\n");
         printf("  -t (set log level to trace)\n");
         printf("  -d (set log level to debug)\n");
         printf("  -? (prints this message)\n");
@@ -736,6 +755,7 @@ int main (int argc, char **argv)
         }
     }
 
+	MEM_SZ = mem_size_KB * 1024;
     do_compile();
 	write_output_file();
 
