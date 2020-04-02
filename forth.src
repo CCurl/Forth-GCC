@@ -264,9 +264,7 @@ HEX : MEM_SZ 24 @ ; DECIMAL
 
 : MOD 2DUP / * - ;
 
-: /MOD			\ ( num1 num2 -- num3 mod )
-	2DUP / >R R@ * - R> SWAP
-;
+: /MOD 2DUP / DUP >R * - R> SWAP ;     \ ( num1 num2 -- num3 mod )
 
 : (.)			\ ( num -- )
 	DUP 0 = 
@@ -280,7 +278,7 @@ HEX : MEM_SZ 24 @ ; DECIMAL
 	BEGIN
 		DUP
 		IF
-			BASE C@ /MOD 
+			BASE C@ /MOD
 			48 OVER 9 > IF 7 + THEN
 			+ SWAP
 		ELSE
