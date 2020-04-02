@@ -113,12 +113,12 @@ goto done
 echo Unknown make. I know how to make these:
 echo.
 echo    fc - makes forth-compiler.exe
-echo    nc - makes forth-compiler.exe
-echo    forth - makes forth.exe (if arg2=1 it then runs forth.exe)
 echo    fd - makes forth-dis.exe
-echo    fb - builds forth from forth.src
-echo    ex - makes and runs the stand-alone example
-echo    nd - makes forth-dis.exe
+echo    forth - makes forth.exe
+echo    fb - builds the forth VM image from forth.src
+echo    ex - makes ex.exe (the stand-alone example)
+echo    nc - makes new-forth-compiler.exe
+echo    nd - makes new-forth-dis.exe
 echo.
 echo    NOTE: if arg2 is given it then runs the program
 

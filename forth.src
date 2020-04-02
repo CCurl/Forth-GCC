@@ -595,7 +595,7 @@ DECIMAL
 : C? C@ . ;		\ ( addr -- )
 
 : FREE LAST HERE - ;
-: FREE? FREE (.) S"  bytes free." CT ;
+: .FREE FREE (.) S"  bytes free." CT ;
 
 : mainLoop 
 	resetState 
@@ -690,11 +690,11 @@ DECIMAL
 
 : ll S" loads.4th" load ;
 
-: sys-stats
+: sys-info
 	.(MEM_SZ) 44 EMIT BL
 	.(HERE)   44 EMIT BL 
 	.(LAST)   44 EMIT BL
-	FREE? CR ;
+	.FREE CR ;
 
-sys-stats
+sys-info
 99 STATE !

@@ -1,6 +1,6 @@
 \ UNIT tests
 
-CR sys-stats
+CR sys-info
 last here
 variable th th !
 variable tl tl !
@@ -168,4 +168,4 @@ CR test-results
 
 \ ---------------------------------------------- TESTS END HERE -----------------------------------------------------
 forget-these
-CR sys-stats
+CR sys-info
