@@ -1,8 +1,8 @@
 : ?DUP DUP IF DUP THEN ;
-: (const) a.CPUSH a.PUSH C, , a.CPUSH a.RET C, ;
-: CONSTANT CREATE-NAME (const) ; INLINE
-: VARIABLE CREATE-NAME HERE 2 + CELL + (const) 0 , ; INLINE
-: CVARIABLE CREATE-NAME HERE 2 + CELL + (const) 0 C, ; INLINE
+: (const) LITERAL , RET ;
+: CONSTANT  CREATE-NAME (const) ;
+: VARIABLE  CREATE-NAME HERE 2 + CELL + (const) 0 , ;
+: CVARIABLE CREATE-NAME HERE 2 + CELL + (const) 0 C, ;
 
 : ascii. DUP HEX. BL DUP DECIMAL. BL EMIT ;
 : ascii 2DUP < IF SWAP THEN BEGIN CRLF DUP ascii. 1+ 2DUP > WHILE 2DROP ;
@@ -66,7 +66,7 @@
 	   . "  bytes written." CT
        R> FCLOSE
    ELSE
-       " cannot open file!" CT RESET
+       " cannot open file!" CT [ RESET ]
    THEN ;
 
 \ ------------------------------------------------------------------------------------
@@ -82,10 +82,10 @@
     SWAP stk-bottom - CELL / ;
 : stk-pick @ swap cells - @ ;                   \ ( n1 stk -- n2 )
 
-: stk-init ustackinit       \ ( sz stk -- top )
+: stk-init [ USINIT ]                           \ ( sz stk -- top )
     here over <
     if 
-        dp !
+        (here) !
     else 
         drop
     then

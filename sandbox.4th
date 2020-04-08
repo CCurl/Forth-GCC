@@ -4,7 +4,7 @@ last here
 variable th th !
 variable tl tl !
 
-: forget-these tl @ (last) ! th @ dp ! ;
+: forget-these tl @ (last) ! th @ (here) ! ;
 
 \ ------------- START OF SANDBOX -------------
 

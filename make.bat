@@ -75,7 +75,7 @@ if "--%2%--" NEQ "----" forth
 goto done
 
 :make-ex
-forth-compiler.exe -i:ex.src -o:ex.bin -a:0 -m:3
+forth-compiler.exe -i:ex.src -o:ex.bin -m:4
 forth-dis -i:ex.bin -o:ex.lst
 if "--%2%--" == "----" goto done
 forth -i:ex.bin

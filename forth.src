@@ -6,54 +6,100 @@
 \ The image file is read by the VM when it boots.
 \
 \ The compiler does these things ...
-\ - it generates the following word: C,
-\ - it generates the opcodes as words, e.g. "a.JMPNZ"
-\ - it generates the forth primitives as INLINE words, e.g. @, C@ !, C!, SWAP, DUP, ...
-\ - it generates the forth constants as INLINE words, e.g. BASE, DP, ...
+\ - it generates the following word: C, , [ ] (LAST) (HERE) STATE BASE CELL INPUT-FP
 \
 \ NB: don't inline anything with a 12 in it ... that is RET
 \ -----------------------------------------------------------------------------------------------
 
+: LITERAL	   1 C,   ;
+: @			[  2 C, ] ; .INLINE
+: !			[  3 C, ] ; .INLINE
+: SWAP		[  4 C, ] ; .INLINE
+: DROP		[  5 C, ] ; .INLINE
+: DUP		[  6 C, ] ; .INLINE
+: SLITERAL	   7 C,   ;
+: JMP		   8 C,   ;
+: JMPZ		   9 C,   ;
+: JMPNZ		  10 C,   ;
+: CALL		  11 C,   ;
+: RET		  12 C,   ;
+: OR		[ 13 C, ] ; .INLINE
+: CLITERAL	  14 C,   ; .INLINE
+: C@		[ 15 C, ] ; .INLINE
+: C!		[ 16 C, ] ; .INLINE
+: +			[ 17 C, ] ; .INLINE
+: -			[ 18 C, ] ; .INLINE
+: *			[ 19 C, ] ; .INLINE
+: /			[ 20 C, ] ; .INLINE
+: <			[ 21 C, ] ; .INLINE
+: =			[ 22 C, ] ; .INLINE
+: >			[ 23 C, ] ; .INLINE
+: DICTP		  24 C,   ; .INLINE
+: EMIT		[ 25 C, ] ; .INLINE
+: OVER		[ 26 C, ] ; .INLINE
+: COMPARE	[ 27 C, ] ; .INLINE
+: FOPEN		[ 28 C, ] ; .INLINE
+: FREAD		[ 29 C, ] ; .INLINE
+: FREADLINE	[ 30 C, ] ; .INLINE
+: FWRITE	[ 31 C, ] ; .INLINE
+: FCLOSE	[ 32 C, ] ; .INLINE
+: >R		[ 33 C, ] ; .INLINE
+: R>		[ 34 C, ] ; .INLINE
+: LOGLEVEL	[ 35 C, ]  ; .INLINE
+: AND		[ 36 C, ] ; .INLINE
+: PICK		[ 37 C, ] ; .INLINE
+: DEPTH		[ 38 C, ] ; .INLINE
+: GETCH		[ 39 C, ] ; .INLINE
+: COMPAREI	[ 40 C, ] ; .INLINE
+: USINIT	[ 41 C, ] ; .INLINE
+: USPUSH	[ 42 C, ] ; .INLINE
+: USPOP		[ 43 C, ] ; .INLINE
+: BREAK		[ 253 C, ] ; .INLINE
+: RESET		[ 254 C, ] ; .INLINE
+: BYE		[ 255 C, ] ; .INLINE
+
 : INLINE    (LAST) @ 2 CELL * + DUP C@ 2 OR SWAP C! ;
+: IMMEDIATE (LAST) @ 2 CELL * + DUP C@ 1 OR SWAP C! ;
 : CELLS CELL * ; INLINE
 
 : FLAG_IMMEDIATE 1 ; INLINE
 : FLAG_INLINE    2 ; INLINE
 
-: IMMEDIATE (LAST) @  2 CELLS + DUP C@ FLAG_IMMEDIATE OR SWAP C! ;
-
 : LAST (LAST) @ ; INLINE
-: HERE DP     @ ; INLINE
+: HERE (HERE) @ ; INLINE
 
-: , HERE ! HERE CELL + DP ! ;
-
-: LOGLEVEL a.LOGLEVEL ; INLINE
-
-: TRACE-ON  2 LOGLEVEL ;
-: TRACE-OFF 0 LOGLEVEL ;
-: DEBUG-ON  1 LOGLEVEL ;
-: DEBUG-OFF 0 LOGLEVEL ;
+: , HERE   ! HERE CELL + (HERE) ! ;
+: C, HERE C! HERE 1    + (HERE) ! ;
 
 : HEX     16 BASE C! ;
 : DECIMAL 10 BASE C! ;
 : OCTAL    8 BASE C! ;
 : BINARY   2 BASE C! ;
 
-: ON 1 SWAP ! ;
+: ON  1 SWAP ! ;
 : OFF 0 SWAP ! ;
 
-: [ 0 STATE ! ; IMMEDIATE
-: ] 1 STATE ! ; IMMEDIATE
 
 : ?COMPILING STATE @ ;
-: THEN ?COMPILING .IF HERE SWAP ! .THEN ; IMMEDIATE
-: IF   ?COMPILING .IF a.CPUSH a.JMPZ C, HERE 0 , .THEN ; IMMEDIATE
-: ELSE ?COMPILING .IF a.CPUSH a.JMP  C, HERE SWAP 0 , HERE SWAP ! .THEN ; IMMEDIATE
+: IF   ?COMPILING .IF JMPZ HERE 0 ,                  .THEN ; IMMEDIATE
+: ELSE ?COMPILING .IF JMP  HERE SWAP 0 , HERE SWAP ! .THEN ; IMMEDIATE
+: THEN ?COMPILING .IF HERE SWAP !                    .THEN ; IMMEDIATE
 
-: >IN      [ a.PUSH HERE 1 + CELL + , ] ; 0 , a.RET
-: isNeg    [ a.PUSH HERE 1 + CELL + , ] ; 0 , a.RET
+: BEGIN ?COMPILING IF HERE    THEN ;    IMMEDIATE 
+: AGAIN ?COMPILING IF JMP   , THEN ;    IMMEDIATE
+: WHILE ?COMPILING IF JMPNZ , THEN ;    IMMEDIATE
+: UNTIL ?COMPILING IF JMPZ  , THEN ;    IMMEDIATE
+: LEAVE ?COMPILING IF RET     THEN ;    IMMEDIATE
+
+: >IN      [ LITERAL HERE CELL + 1 + , ] ; 0 , RET
+: isNeg    [ LITERAL HERE CELL + 1 + , ] ; 0 , RET
 
 HEX : MEM_SZ 24 @ ; DECIMAL
+
+: TRACE-ON  2 LOGLEVEL ; INLINE
+: TRACE-OFF 0 LOGLEVEL ; INLINE
+: DEBUG-ON  1 LOGLEVEL ; INLINE
+: DEBUG-OFF 0 LOGLEVEL ; INLINE
 
 : R@ R> DUP >R ; INLINE
 : RDROP R> DROP   ; INLINE
@@ -92,14 +138,6 @@ HEX : MEM_SZ 24 @ ; DECIMAL
 : FALSE 0 ; INLINE
 : NOT 0 = ; INLINE
 
-
-: LEAVE ?COMPILING IF a.CPUSH a.RET C, THEN ; IMMEDIATE
-
-: BEGIN ?COMPILING IF HERE THEN ; IMMEDIATE
-: AGAIN ?COMPILING IF a.CPUSH a.JMP   C, , THEN ; IMMEDIATE
-: WHILE ?COMPILING IF a.CPUSH a.JMPNZ C, , THEN ; IMMEDIATE
-: UNTIL ?COMPILING IF a.CPUSH a.JMPZ  C, , THEN ; IMMEDIATE
-
 : COUNT DUP 1 + SWAP C@ ;		\ ( addr1 --  addr2 num )
 
 : TYPE     \ ( addr count -- ) 
@@ -134,7 +172,7 @@ HEX : MEM_SZ 24 @ ; DECIMAL
 	< 0=
 ;
 
-: (tmp) [ a.PUSH HERE 1 + CELL + , ] ; 0 , a.RET
+: (tmp) [ LITERAL HERE CELL + 1 + , ] ; 0 , RET
 : tmp-init LAST (tmp) ! ;							\ ( -- )
 : tmp-cur (tmp) @ ;
 : tmp-alloc (tmp) TUCK @ SWAP - SWAP ! tmp-cur ;	\ ( size -- addr )
@@ -189,14 +227,13 @@ HEX : MEM_SZ 24 @ ; DECIMAL
 : DICTP>NAME 1+ @ DICT>NAME ;
 
 : XT.GetDICTP 						\ ( XT -- dictp )
-	DUP C@ a.CPUSH a.DICTP = 
+	DUP C@ [ CLITERAL DICTP ] = 
 	IF
 		1+ @
 	ELSE
 		DROP RESET
 	THEN
 ;
-
 
 : FLAGS.ISIMMEDIATE? FLAG_IMMEDIATE AND ;
 : FLAGS.ISINLINE?    FLAG_INLINE    AND ;
@@ -354,7 +391,7 @@ DECIMAL
 : find.ret			\ ( addr1 -- addr2 )
 	BEGIN
 		DUP C@ 
-		a.CPUSH a.RET =
+		[ CLITERAL RET ] =
 		IF
 			LEAVE
 		THEN
@@ -380,7 +417,7 @@ DECIMAL
 
 : Copy.INLINE		\ ( XT -- )
 	\ Skip over the DICTP
-	DUP C@ a.CPUSH a.DICTP =
+	DUP C@ [ CLITERAL DICTP ] =
 	IF 
 		1+ CELL +
 	THEN
@@ -410,7 +447,7 @@ DECIMAL
 	IF
 		Copy.INLINE
 	ELSE
-		a.CPUSH a.CALL C, ,
+		CALL ,
 	THEN
 ;
 
@@ -437,9 +474,9 @@ DECIMAL
 			IF
 				DUP 0 255 BETWEEN
 				IF
-					a.CPUSH a.CPUSH C, C,
+					CLITERAL C,
 				ELSE
-					a.CPUSH a.PUSH C, ,
+					LITERAL   ,
 				THEN
 			THEN
 		ELSE
@@ -562,7 +599,7 @@ DECIMAL
 		DUP C@
 		IF
 			Define-Word
-			a.CPUSH a.DICTP C,
+			DICTP
 			LAST ,
 		ELSE
 			DROP RESET
@@ -574,12 +611,12 @@ DECIMAL
 : :NONAME HERE STATE ON ;
 
 : ;
-	a.CPUSH a.RET C,
+	RET
 	STATE OFF
 ; IMMEDIATE
 
 : ForgetLast \ Forgets the last word
-	LAST CELL + @ DP ! 
+	LAST CELL + @ (HERE) ! 
 	LAST @ (LAST) ! 
 ;
 
@@ -589,7 +626,7 @@ DECIMAL
 	DECIMAL
 ;
 
-: ALLOT HERE + DP ! ;
+: ALLOT HERE + (HERE) ! ;
 
 : ? @ . ;		\ ( addr -- )
 : C? C@ . ;		\ ( addr -- )
@@ -670,12 +707,12 @@ DECIMAL
 		I" LEAVE 
 	THEN
 	
-	a.CPUSH a.SLITERAL C,
+	SLITERAL
 	HERE 0 C,						\ count-byte placeholder
 	BEGIN 						
 		>IN @ C@
 		DUP 0= IF
-			DROP 1- DP !		\ reset HERE
+			DROP 1- (HERE) !		\ reset HERE
 			S" missing closing '" CT 34 EMIT 39 EMIT
 			RESET
 		THEN

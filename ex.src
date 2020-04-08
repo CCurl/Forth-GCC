@@ -4,43 +4,67 @@
 \ If "main" is not found, it starts with the last word defined.
 \ -----------------------------------------------------------------------------------------------
 
-: 2DUP OVER OVER ;
-: CR 13 EMIT 10 EMIT ; : BL 32 EMIT ;
+: INLINE    (LAST) @ 2 CELL * + DUP C@ 2 OR SWAP C! ;
+: IMMEDIATE (LAST) @ 2 CELL * + DUP C@ 1 OR SWAP C! ;
+
+: LAST (LAST) @ ;        INLINE
+: HERE (HERE) @ ;        INLINE
+: ?COMPILING STATE @ ;   INLINE
+
+: JMP    8 C, ;
+: JMPZ   9 C, ;
+: JMPNZ 10 C, ;
+: RET   12 C, ;
+
+: IF   ?COMPILING .IF JMPZ HERE 0 ,                  .THEN ; IMMEDIATE
+: ELSE ?COMPILING .IF JMP  HERE SWAP 0 , HERE SWAP ! .THEN ; IMMEDIATE
+: THEN ?COMPILING .IF HERE SWAP !                    .THEN ; IMMEDIATE
+
+: BEGIN ?COMPILING IF HERE THEN ;       IMMEDIATE 
+: AGAIN ?COMPILING IF JMP   , THEN ;    IMMEDIATE
+: WHILE ?COMPILING IF JMPNZ , THEN ;    IMMEDIATE
+: UNTIL ?COMPILING IF JMPZ  , THEN ;    IMMEDIATE
+: LEAVE ?COMPILING IF RET     THEN ;    IMMEDIATE
+
 : COUNT DUP 1 + SWAP C@ ;
 : TYPE 
 	OVER + SWAP
-	.BEGIN
-		2DUP > 0 = .IF DROP DROP .LEAVE .THEN
+	BEGIN
+		OVER OVER > 0 = IF DROP DROP LEAVE THEN
 		DUP C@ EMIT 1 +
-	.AGAIN ;
+	AGAIN ;
 
 : CT COUNT TYPE ;
+: CR 13 EMIT 10 EMIT ;   INLINE
+: BL 32 EMIT ;           INLINE
 
+: 2DUP OVER OVER ;       INLINE
 : /MOD 2DUP / DUP >R * - R> SWAP ; 		\ ( num1 num2 -- num3 mod )
 
 : (.)			\ ( num -- )
-	DUP 0 = .IF DROP 48 EMIT .LEAVE .THEN
-	DUP 0 < .IF 0 SWAP - 1 .ELSE 0 .THEN >R
+	DUP 0 = IF DROP 48 EMIT LEAVE THEN
+	DUP 0 < IF 0 SWAP - 1 ELSE 0 THEN >R
 
 	0 SWAP
-	.BEGIN
-		DUP .IF
+	BEGIN
+		DUP IF
 			BASE C@ /MOD 
-			\ DUP 48 + EMIT
-			48 OVER 9 > .IF 7 + .THEN
+			48 OVER 9 > IF 7 + THEN
 			+ SWAP
-		.ELSE
+		ELSE
 			\ spit out the string
 			DROP
-			R> .IF 45 EMIT .THEN
-			.BEGIN DUP .IF EMIT .ELSE DROP .LEAVE .THEN .AGAIN
-		.THEN
-	.AGAIN ;
+			R> IF 45 EMIT THEN
+			BEGIN DUP IF EMIT ELSE DROP .LEAVE THEN AGAIN
+		THEN
+	AGAIN ;
 
-: DECIMAL 10 BASE C! ; : HEX 16 BASE C! ;
+: DECIMAL 10 BASE C! ; 
+: HEX     16 BASE C! ;
 
 HEX
-: H. BASE C@ SWAP HEX DUP 10 < .IF 30 EMIT .THEN (.) BASE C! ; 
+: MEM_SZ 24 @ ;
+: H. BASE C@ SWAP HEX DUP 10 < IF 30 EMIT THEN (.) BASE C! ; 
 : D. BASE C@ SWAP DECIMAL (.) BASE C! ;
 DECIMAL
 
@@ -48,48 +72,48 @@ DECIMAL
 
 \ **********************************************************************************
 : ascii
-	2DUP < .IF
+	2DUP < IF
 		SWAP
-	.THEN
+	THEN
 	SWAP OVER
-	.BEGIN
-	2DUP < .IF
-		DROP DROP DROP .LEAVE
-	.THEN
+	BEGIN
+	2DUP < IF
+		DROP DROP DROP LEAVE
+	THEN
 	>R >R
 	DUP H. BL DUP D. BL DUP EMIT CR 1 +
 	R> R>
 	1 +
-	.AGAIN ;
+	AGAIN ;
 
 : .w DUP D. BL DUP 2 CELL * + 1 + CT BL @ ;
 
-: WORDS (LAST) @ 
-	.BEGIN
-		DUP @ 0 = .IF DROP .LEAVE .THEN
+: WORDS LAST
+	BEGIN
+		DUP @ 0 = IF DROP LEAVE THEN
 		.w
-	.AGAIN ;
+	AGAIN ;
 
 : count-to
     S" counting to " CT DUP D. S"  ..." CT
     1
-    .BEGIN 
+    BEGIN 
         2DUP < 
-        .IF
+        IF
             S"  DONE." CT
-            DROP DROP .LEAVE
-        .THEN 
+            DROP DROP LEAVE
+        THEN 
         1 + 
-    .AGAIN ;
+    AGAIN ;
 
 : main S" Hello, world!" COUNT TYPE 
-	(LAST) @ CELL + @ 1 !
+	LAST CELL + @ 1 !
 	CR 33 55 ascii CR
 	WORDS
 	CR 1000 1000 * 25 * count-to CR
-	36 @ S" VM size is " CT D. S"  bytes, " CT
-	DP @ D. S"  bytes used, " CT
-	(LAST) @ DP @ - D. S"  bytes free" CT
+	S" VM size is " CT MEM_SZ D. S"  bytes, " CT
+	HERE D. S"  bytes used, " CT
+	LAST HERE - D. S"  bytes free" CT
 	S" ." CT
 	BYE ;
 

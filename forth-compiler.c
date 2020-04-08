@@ -15,7 +15,6 @@ char input_fn[256];
 char output_fn[256];
 FILE *input_fp = NULL;
 FILE *output_fp = NULL;
-int stand_alone = 0;
 int mem_size_KB = 64;
 
 CELL HERE, LAST, STATE;
@@ -318,6 +317,13 @@ char *ParseWord(char *word, char *line)
 		return line;
 	}
 
+	if (strcmp(word, ".INLINE") == 0)
+	{
+		DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
+		dp->flags |= IS_INLINE;
+		return line;
+	}
+
 	// These words are only for : definitions
 	if (STATE == 1)
 	{
@@ -533,48 +539,55 @@ void generate_CComma()
 CELL Comma_XT = 0;
 void generate_Comma()
 {
-	if (stand_alone)
-	{
-		DefineWord(",", 0);
-		Comma_XT = HERE;
-		CComma(DICTP);
-		Comma(LAST);
-		CComma(LITERAL);
-		CComma(ADDR_HERE);
-		CComma(FETCH);
-		CComma(STORE);
-		CComma(CLITERAL);
-		CComma(ADDR_HERE);
-		CComma(FETCH);
-		CComma(CLITERAL);
-		CComma(CELL_SZ);
-		CComma(ADD);
-		CComma(CLITERAL);
-		CComma(ADDR_HERE);
-		CComma(STORE);
-		CComma(RET);
-	}
+	DefineWord(",", 0);
+	Comma_XT = HERE;
+	CComma(DICTP);
+	Comma(LAST);
+	CComma(CLITERAL);
+	CComma(ADDR_HERE);
+	CComma(FETCH);
+	CComma(STORE);
+	CComma(CLITERAL);
+	CComma(ADDR_HERE);
+	CComma(FETCH);
+	CComma(CLITERAL);
+	CComma(CELL_SZ);
+	CComma(ADD);
+	CComma(CLITERAL);
+	CComma(ADDR_HERE);
+	CComma(STORE);
+	CComma(RET);
 }
 
-CELL CComma_HERE = 0;
-void generate_HERE()
+void generate_LeftBracket()
 {
-	if (stand_alone)
-	{
-		DefineWord("HERE", 0);
-		CComma_HERE = HERE;
-		CComma(DICTP);
-		Comma(LAST);
-		CComma(CLITERAL);
-		CComma(ADDR_HERE);
-		CComma(FETCH);
-	}
+	DefineWord("[", IS_IMMEDIATE);
+	CComma(DICTP);
+	Comma(LAST);
+	CComma(CLITERAL);
+	CComma(0);
+	CComma(CLITERAL);
+	CComma(ADDR_STATE);
+	CComma(STORE);
+	CComma(RET);
+}
+
+void generate_RightBracket()
+{
+	DefineWord("]", IS_IMMEDIATE);
+	CComma(DICTP);
+	Comma(LAST);
+	CComma(CLITERAL);
+	CComma(1);
+	CComma(CLITERAL);
+	CComma(ADDR_STATE);
+	CComma(STORE);
+	CComma(RET);
 }
 
 void generate_asm_words()
 {
-	if (stand_alone)
-		return;
+	return;
 
 	char tmp[64];
 	for (int i = 0; opcodes[i].opcode != 0; i++)
@@ -622,27 +635,10 @@ void generate_constants()
 {
 	generate_constant("BASE", ADDR_BASE);
 	generate_constant("CELL", CELL_SZ);
-	generate_constant("DP", ADDR_HERE);
+	generate_constant("(HERE)", ADDR_HERE);
 	generate_constant("(LAST)", ADDR_LAST);
 	generate_constant("INPUT-FP", 0x001C);
 	generate_constant("STATE", ADDR_STATE);
-}
-
-void write_output_file()
-{
-    printf("writing output file %s ... ", output_fn);
-
-    output_fp = fopen(output_fn, "wb");
-    if (!output_fp)
-    {
-        printf("ERROR: Can't open output file!");
-        exit(1);
-    }
-
-	fwrite(the_memory, 1, MEM_SZ, output_fp);
-    fclose(output_fp);
-    output_fp = NULL;
-    printf("done.");
 }
 
 void CompilerInit()
@@ -668,9 +664,10 @@ void do_compile()
 	generate_constants();
 	generate_CComma();
 	generate_Comma();
-	generate_HERE();
-	generate_asm_words();
-	generate_forth_prims();
+	generate_LeftBracket();
+	generate_RightBracket();
+	// generate_asm_words();
+	// generate_forth_prims();
 
     input_fp = fopen(input_fn, "rt");
     if (!input_fp)
@@ -686,6 +683,24 @@ void do_compile()
 }
 
 // *********************************************************************
+void write_output_file()
+{
+    printf("writing output file %s ... ", output_fn);
+
+    output_fp = fopen(output_fn, "wb");
+    if (!output_fp)
+    {
+        printf("ERROR: Can't open output file!");
+        exit(1);
+    }
+
+	fwrite(the_memory, 1, MEM_SZ, output_fp);
+    fclose(output_fp);
+    output_fp = NULL;
+    printf("done.\n");
+}
+
+// *********************************************************************
 void process_arg(char *arg)
 {
     if (*arg == 'i') 
@@ -697,11 +712,6 @@ void process_arg(char *arg)
     {
         arg = arg+2;
         strcpy(output_fn, arg);
-    }
-    else if (*arg == 'a') 
-    {
-        arg = arg+2;
-        stand_alone = (strcmp(arg, "1") == 0) ? 0 : 1;
     }
     else if (*arg == 'm') 
     {
