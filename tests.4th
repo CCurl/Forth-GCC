@@ -4,7 +4,7 @@ CR sys-info
 last here
 variable th th !
 variable tl tl !
-: forget-these tl @ (last) ! th @ (here)) ! ;
+: forget-these tl @ (last) ! th @ (here) ! ;
 
 \ ---------------------------------------------- TESTS START HERE -----------------------------------------------------
 : test 1 2 = if 255 drop else 254 drop then ;

@@ -66,7 +66,7 @@
 	   . "  bytes written." CT
        R> FCLOSE
    ELSE
-       " cannot open file!" CT [ RESET ]
+       " cannot open file!" CT RESET
    THEN ;
 
 \ ------------------------------------------------------------------------------------
@@ -82,7 +82,7 @@
     SWAP stk-bottom - CELL / ;
 : stk-pick @ swap cells - @ ;                   \ ( n1 stk -- n2 )
 
-: stk-init [ USINIT ]                           \ ( sz stk -- top )
+: stk-init   USINIT                             \ ( sz stk -- top )
     here over <
     if 
         (here) !
@@ -94,9 +94,9 @@
 : stk-sz >R R@ cell + @ R> 2 cells + - cell / 1+ ;
 : stk-reset >R R@ stk-sz R> stk-init ;   \ ( stk -- )
 
-: >stk >ustack ; INLINE
-: stk> ustack> ; INLINE
-: stk@ >R R@ stk> dup R> >stk ;
+: >stk USPUSH ; INLINE
+: stk> USPOP  ; INLINE
+: stk@ dup >R stk> dup R> >stk ;
 
 \ --------------------------------------------------------------------------------
 \ -- Parameter stack words
