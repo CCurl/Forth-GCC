@@ -8,7 +8,7 @@
 #include "logger.h"
 #include "string.h"
 
-void Parse(char *);
+void ParseLine(char *);
 DICT_T *FindWord(char *word);
 
 char input_fn[256];
@@ -31,57 +31,6 @@ NB build this in somehow to enable usage of VT100 ECSAPE sequences to control th
 	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 	SetConsoleMode(hOut, dwMode);
 */
-
-// ------------------------------------------------------------------------------------------
-OPCODE_T opcodes[] = {
-	{ _T("PUSH"), LITERAL, _T("") }
-	, { _T("CPUSH"), CLITERAL, _T("") }
-	, { _T("FETCH"), FETCH, _T("@") }
-	, { _T("STORE"), STORE, _T("!") }
-	, { _T("CFETCH"), CFETCH, _T("C@") }
-	, { _T("CSTORE"), CSTORE, _T("C!") }
-	, { _T("SWAP"), SWAP, _T("SWAP") }
-	, { _T("DROP"), DROP, _T("DROP") }
-	, { _T("DUP"), DUP, _T("DUP") }
-	, { _T("OVER"), OVER, _T("OVER") }
-	, { _T("JMP"), JMP, _T("") }
-	, { _T("JMPZ"), JMPZ, _T("") }
-	, { _T("JMPNZ"), JMPNZ, _T("") }
-	, { _T("CALL"), CALL, _T("") }
-	, { _T("RET"), RET, _T("") }
-	, { _T("COMPARE"), COMPARE, _T("COMPARE") }
-	, { _T("COMPAREI"), COMPAREI, _T("COMPAREI") }
-	, { _T("ADD"), ADD, _T("+") }
-	, { _T("SUB"), SUB, _T("-") }
-	, { _T("MUL"), MUL, _T("*") }
-	, { _T("DIV"), DIV, _T("/") }
-	, { _T("LT"), LT, _T("<") }
-	, { _T("EQ"), EQ, _T("=") }
-	, { _T("GT"), GT, _T(">") }
-	, { _T("DICTP"), DICTP, _T("") }
-	, { _T("EMIT"), EMIT, _T("EMIT") }
-	, { _T("FOPEN"), FOPEN, _T("FOPEN") }
-	, { _T("FREAD"), FREAD, _T("FREAD") }
-	, { _T("FREADLINE"), FREADLINE, _T("FREADLINE") }
-	, { _T("FWRITE"), FWRITE, _T("FWRITE") }
-	, { _T("FCLOSE"), FCLOSE, _T("FCLOSE") }
-	, { _T("SLITERAL"), SLITERAL, _T("") }
-	, { _T("DTOR"), DTOR, _T(">R") }
-	, { _T("RTOD"), RTOD, _T("R>") }
-	, { _T("PICK"), PICK, _T("PICK") }
-	, { _T("LOGLEVEL"), LOGLEVEL, _T("") }
-	, { _T("DEPTH"), DEPTH, _T("DEPTH") }
-	, { _T("AND"), AND, _T("AND") }
-	, { _T("OR"), OR, _T("OR") }
-	, { _T("GETCH"), GETCH, _T("GETCH") }
-	, { _T("USTACKINIT"), USINIT, _T("USTACKINIT") }
-	, { _T("UPUSH"), USPUSH, _T(">USTACK") }
-	, { _T("UPOP"), USPOP, _T("USTACK>") }
-	, { _T("BREAK"), BREAK, _T("BREAK") }
-	, { _T("RESET"), RESET, _T("RESET") }
-	, { _T("BYE"), BYE, _T("BYE") }
-	, { _T(""), 0, _T("") }
-};
 
 // ------------------------------------------------------------------------------------------
 void Store(CELL loc, CELL num)
@@ -163,7 +112,7 @@ void Compile(FILE *fp_in)
 		string_rtrim(buf);
         ++line_no;
         strcpy(line, buf);
-        Parse(buf);
+        ParseLine(buf);
 		if (_QUIT_HIT == 1)
 		{
 			printf("QUIT hit on line %d: %s\n", line_no, line);
@@ -447,7 +396,7 @@ char *ParseWord(char *word, char *line)
 	return line;
 }
 
-void Parse(char *line)
+void ParseLine(char *line)
 {
 	char *source = line;
 	char word[128];
