@@ -342,40 +342,10 @@ char *ParseWord(char *word, char *line)
 			return line;
 		}
 
-		if (strcmp(word, ".ELSE") == 0)
-		{
-			CELL tmp = pop();
-			CComma(JMP);
-			push(HERE);
-			Comma(0);
-			Store(tmp, HERE);
-			return line;
-		}
-
 		if (strcmp(word, ".THEN") == 0)
 		{
 			CELL tmp = pop();
 			Store(tmp, HERE);
-			return line;
-		}
-
-		if (strcmp(word, ".LEAVE") == 0)
-		{
-			CComma(RET);
-			return line;
-		}
-
-		if (strcmp(word, ".BEGIN") == 0)
-		{
-			push(HERE);
-			return line;
-		}
-
-		if (strcmp(word, ".AGAIN") == 0)
-		{
-			CELL tmp = pop();
-			CComma(JMP);
-			Comma(tmp);
 			return line;
 		}
 
@@ -585,42 +555,6 @@ void generate_RightBracket()
 	CComma(RET);
 }
 
-void generate_asm_words()
-{
-	return;
-
-	char tmp[64];
-	for (int i = 0; opcodes[i].opcode != 0; i++)
-	{
-		OPCODE_T *op = &(opcodes[i]);
-		sprintf(tmp, "a.%s", op->asm_instr);
-		DefineWord(tmp, IS_IMMEDIATE);
-		CComma(DICTP);
-		Comma(LAST);
-		CComma(CLITERAL);
-		CComma(opcodes[i].opcode);
-		CComma(CALL);
-		Comma(CComma_XT);
-		CComma(RET);
-	}
-}
-
-void generate_forth_prims()
-{
-	for (int i = 0; opcodes[i].opcode != 0; i++)
-	{
-		OPCODE_T *op = &(opcodes[i]);
-		if (strlen(op->forth_prim) > 0)
-		{
-			DefineWord(op->forth_prim, IS_INLINE);
-			CComma(DICTP);
-			Comma(LAST);
-			CComma(op->opcode);
-			CComma(RET);
-		}
-	}
-}
-
 void generate_constant(char *name, BYTE val)
 {
 	DefineWord(name, IS_INLINE);
@@ -666,8 +600,6 @@ void do_compile()
 	generate_Comma();
 	generate_LeftBracket();
 	generate_RightBracket();
-	// generate_asm_words();
-	// generate_forth_prims();
 
     input_fp = fopen(input_fn, "rt");
     if (!input_fp)
