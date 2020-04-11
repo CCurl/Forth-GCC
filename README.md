@@ -12,30 +12,42 @@ To create the initial image for the VM, I created a simple, Forth-like compiler/
 
 The compiler creates a VM with the dictionary and code separated. That way, it would be possible to distribute just the code without the dictionary, if desired.
 
-When the VM boots, its start up code reads and parses the -i: file (forth.bin) to load the initial image of itself, and then starts executing at address 0, which is just a JUMP to the "main" word. If there is no "main", then it jumps to the last word defined.
+When the VM boots, its start up code loads the -i: file (forth.bin) to create the initial image of the VM, and then starts executing at address 0, which is just a JUMP to the "main" word. If there is no "main", then it jumps to the last word defined.
 
 There are 3 programs here, and a make.bat to facilitate building them:
 
 forth-compiler.exe - compiles the image for a basic forth vm ...
 
-    forth-compiler [args]
-        -i:inputFile (full or relative path)
-            default inputFile is forth.src
-        -a:assemblyFile (full or relative path)
-            default assemblyFile is forth.asm
-        -o:outputFile (full or relative path)
-            default outputFile is forth.bin
-        -t (set log level to trace)
-        -d (set log level to debug)
-        -? (prints this message)
+	usage: forth-compiler [args]
+		-i:inputFile (full or relative path)
+			default inputFile is forth.src
+		-o:outputFile (full or relative path)
+			default outputFile is forth.bin
+		-a:(0|1) - include assembler words
+			default value is 1
+		-m:<KB> - Memory size in KB
+			default value is 64
+		-t (set log level to trace)
+		-d (set log level to debug)
+		-? (prints this message)
 
+
+forth-dis.exe - dis-assembles a given forth vm ...
+
+    usage: forth-compiler [args]
+            -i:inputFile (full or relative path)
+                default inputFile is forth.bin
+            -o:outputFile (full or relative path)
+                default outputFile is forth.lst
+            -t (set log level to trace)
+            -d (set log level to debug)
 
 forth.exe - runs a given forth vm ...
 
-    forth [args]
-        -i:imagefile (default imageFile is 'forth.bin')
-        -l:loglevel (0=off, 1=debug, 2=trace - default is 0)
-        -? (prints this message)
+    usage: forth [args]
+            -i:imagefile (default imageFile is 'forth.bin')
+            -l:loglevel (0=off, 1=debug, 2=trace - default is 0)
+            -? (prints this message)
 
 
 To build them, execute:
