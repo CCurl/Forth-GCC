@@ -616,8 +616,6 @@ void process_arg(char *arg)
         printf("      default inputFile is forth.src\n");
         printf("  -o:outputFile (full or relative path)\n");
         printf("      default outputFile is forth.bin\n");
-        printf("  -a:(0|1) - include assembler words\n");
-        printf("      default value is 1\n");
         printf("  -m:<KB> - Memory size in KB\n");
         printf("      default value is 64\n");
         printf("  -t (set log level to trace)\n");
