@@ -8,9 +8,6 @@
 #include "logger.h"
 #include "string.h"
 
-void ParseLine(char *);
-DICT_T *FindWord(char *word);
-
 char input_fn[256];
 char output_fn[256];
 FILE *input_fp = NULL;
@@ -99,42 +96,6 @@ void SyncMem(bool isSet)
 		BASE = CFetch(ADDR_BASE);
 		STATE = Fetch(ADDR_STATE);
 	}
-}
-
-void Compile(FILE *fp_in)
-{
-	int line_no = 0;
-	char buf[128];
-	char line[128];
-
-    while (fgets(buf, sizeof(buf), fp_in) == buf)
-    {
-		string_rtrim(buf);
-        ++line_no;
-        strcpy(line, buf);
-        ParseLine(buf);
-		if (_QUIT_HIT == 1)
-		{
-			printf("QUIT hit on line %d: %s\n", line_no, line);
-			break;
-		}
-    }
-    fclose(fp_in);
-
-	DICT_T *dp = FindWord("main");
-	if (dp == NULL)
-	{
-		dp = FindWord("MAIN");
-		if (dp == NULL)
-		{
-			dp = (DICT_T *)&the_memory[LAST];
-		}
-	}
-
-	CStore(0, JMP);
-	Store(1, dp->XT);
-
-	SyncMem(true);
 }
 
 CELL ExecuteXT(CELL XT)
@@ -537,6 +498,42 @@ void CompilerInit()
 	Store(LAST, 0);
 	CStore(ADDR_CELL, CELL_SZ);
 	CStore(ADDR_BASE, BASE);
+}
+
+void Compile(FILE *fp_in)
+{
+	int line_no = 0;
+	char buf[128];
+	char line[128];
+
+    while (fgets(buf, sizeof(buf), fp_in) == buf)
+    {
+		string_rtrim(buf);
+        ++line_no;
+        strcpy(line, buf);
+        ParseLine(buf);
+		if (_QUIT_HIT == 1)
+		{
+			printf("QUIT hit on line %d: %s\n", line_no, line);
+			break;
+		}
+    }
+    fclose(fp_in);
+
+	DICT_T *dp = FindWord("main");
+	if (dp == NULL)
+	{
+		dp = FindWord("MAIN");
+		if (dp == NULL)
+		{
+			dp = (DICT_T *)&the_memory[LAST];
+		}
+	}
+
+	CStore(0, JMP);
+	Store(1, dp->XT);
+
+	SyncMem(true);
 }
 
 void do_compile()
