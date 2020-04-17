@@ -25,6 +25,41 @@ extern BYTE *the_memory;
 extern int __DEBUG__;
 extern int _QUIT_HIT;
 
+// A stack looks like this: [sp][top-addr][data]
+void stk_push(CELL stack, CELL val)
+{
+	CELL sp = GETAT(stack);
+	CELL top = GETAT(stack+CELL_SZ);
+	if ( sp > top )
+	{
+		printf("Stack full.");
+		reset_vm();
+		return;
+	}
+
+	SETAT(sp, val);
+	sp += CELL_SZ;
+	SETAT(stack, sp);
+}
+
+// A stack looks like this: [sp][top-addr][data]
+CELL stk_pop(CELL stack)
+{
+	CELL sp = GETAT(stack);
+	CELL bottom = stack+(CELL_SZ*2);
+	sp -= CELL_SZ;
+	if ( sp < bottom )
+	{
+		SETAT(stack, bottom);
+		printf("Stack empty.");
+		reset_vm();
+		return 0;
+	}
+
+	SETAT(stack, sp);
+	return GETAT(sp);
+}
+
 // The data stack starts at (MEM_SZ - STACKS_SZ) and grows upwards towards the return stack
 void push(CELL val)
 {
@@ -527,21 +562,8 @@ void prim_USPUSH()
 {
 	arg1 = pop();		// User Stack start address
 	arg2 = pop();		// Val
-	trace("UPUSH %d to stack [0x%04lx]\n", arg2, arg1);
-	CELL sp = GETAT(arg1);
-	CELL firstOK = arg1 + (2 * CELL_SZ);
-	CELL lastOK = GETAT(arg1 + CELL_SZ);
-	if (sp <= lastOK)
-	{
-		SETAT(sp, arg2);
-		sp = sp + CELL_SZ;
-		SETAT(arg1, sp);
-	}
-	else
-	{
-		printf(" user stack [0x%04lx] overflow. (SP=0x%04lx, range=%04lx:%04lx)", arg1, sp, firstOK, lastOK);
-		reset_vm();
-	}
+	trace("USPUSH %d to stack [0x%04lx]\n", arg2, arg1);
+	stk_push(arg1, arg2);
 }
 
 void prim_USPOP()
@@ -550,19 +572,9 @@ void prim_USPOP()
 	CELL sp = GETAT(arg1);
 	CELL firstOK = arg1 + (2 * CELL_SZ);
 	CELL lastOK = GETAT(arg1 + CELL_SZ);
-	trace("UPOP from stack [0x%04lx]\n", arg1);
-	if (firstOK < sp)
-	{
-		sp = sp - CELL_SZ;
-		arg2 = GETAT(sp);
-		SETAT(arg1, sp);
-		push(arg2);
-	}
-	else
-	{
-		printf(" user stack [0x%04lx] underflow. (SP=0x%04lx, range=%04lx:%04lx)", arg1, sp, firstOK, lastOK);
-		reset_vm();
-	}
+	trace("USPOP from stack [0x%04lx]\n", arg1);
+	arg2 = stk_pop(arg1);
+	push(arg2);
 }
 
 // BREAK - Doeswhat
