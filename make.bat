@@ -69,8 +69,8 @@ if "--%2%--" == "--1--" forth-dis
 goto done
 
 :make-fb
-forth-compiler
-forth-dis
+call forth-compiler
+call forth-dis
 if "--%2%--" NEQ "----" forth
 goto done
 

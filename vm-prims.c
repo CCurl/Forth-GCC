@@ -33,7 +33,7 @@ void stk_push(CELL stack, CELL val)
 	if ( sp > top )
 	{
 		printf("Stack full.");
-		reset_vm();
+		PC = GETAT(5);
 		return;
 	}
 
@@ -51,8 +51,7 @@ CELL stk_pop(CELL stack)
 	if ( sp < bottom )
 	{
 		SETAT(stack, bottom);
-		printf("Stack empty.");
-		reset_vm();
+		PC = GETAT(5);
 		return 0;
 	}
 
@@ -67,9 +66,7 @@ void push(CELL val)
 	if (RSP <= DSP)
 	{
 		printf(" stack overflow!");
-		reset_vm();
-		// _QUIT_HIT = 1;
-		// isBYE = 1;
+		PC = GETAT(5);
 		return;
 	}
 	*(DSP) = (CELL)(val);
@@ -81,9 +78,7 @@ CELL pop()
 	if (DSP <= dsp_init)
 	{
 		printf(" stack underflow!");
-		reset_vm();
-		// _QUIT_HIT = 1;
-		// isBYE = 1;
+		PC = GETAT(5);
 		return 0;
 	}
 	DSP--;
@@ -97,9 +92,7 @@ void rpush(CELL val)
 	if (RSP <= DSP)
 	{
 		printf(" return stack overflow!");
-		reset_vm();
-		// _QUIT_HIT = 1;
-		// isBYE = 1;
+		PC = GETAT(5);
 		return;
 	}
 	// trace(" rpush %ld ", val);
@@ -112,9 +105,7 @@ CELL rpop()
 	if (RSP >= rsp_init)
 	{
 		printf(" return stack underflow! (at PC=0x%04lx)", PC-1);
-		reset_vm();
-		// _QUIT_HIT = 1;
-		// isBYE = 1;
+		PC = GETAT(5);
 		return PC;
 	}
 	CELL val = *(RSP);
