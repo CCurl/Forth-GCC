@@ -62,9 +62,6 @@
 : IMMEDIATE (LAST) @ 2 CELL * + DUP C@ 1 OR SWAP C! ;
 : CELLS CELL * ; INLINE
 
-: FLAG_IMMEDIATE 1 ; INLINE
-: FLAG_INLINE    2 ; INLINE
-
 : LAST (LAST) @ ; INLINE
 : HERE (HERE) @ ; INLINE
 
@@ -109,13 +106,29 @@
 : PAD LAST 256 - ;
 
 \ ------------------------------------------------------------------------------------
+: string-nullterm               \ ( counted-str -- )
+    0 SWAP DUP C@ + 1 + C! ;
+
+\ ------------------------------------------------------------------------------------
 : string-catc          			\ ( ch addr -- )
     TUCK DUP C@ + 1 + C!
     DUP C@ 1 + SWAP C! ;
 
 \ ------------------------------------------------------------------------------------
-: string-nullterm               \ ( counted-str -- )
-    0 SWAP DUP C@ + 1 + C! ;
+: string-popc          			\ ( addr -- ch )
+    DUP C@ IF
+        DUP C@ 1 - OVER C!
+        DUP C@ + 1 + C@
+    ELSE
+        DROP 0
+    THEN ;
+
+\ ------------------------------------------------------------------------------------
+: BETWEEN						\ ( num min max -- bool )
+	2 PICK < IF
+        DROP DROP 0 LEAVE 
+    THEN
+	< 0 = ;
 
 \ ------------------------------------------------------------------------------------
 : file-getLine		            \ ( fp -- counted-str )
@@ -132,14 +145,31 @@
     BEGIN
 		GETCH 
 
+        \ <CTRL>-C?
+		DUP 3 = IF 
+            S" <CTRL>-C" COUNT TYPE
+            BYE
+        THEN
+
+        \ <CARRIAGE-RETURN>?
 		DUP 13 = IF 
 			DROP R>
             32 EMIT
             LEAVE
 		THEN
 
-        DUP EMIT
-        R@ string-catc
+        \ <BACKSPACE>?
+        DUP 8 = IF
+            R@ string-popc DROP
+            DUP EMIT 32 EMIT EMIT
+        ELSE
+            DUP 32 127 BETWEEN IF
+                DUP EMIT
+                R@ string-catc
+            ELSE
+                DROP
+            THEN
+        THEN
     AGAIN ;
 
 \ ------------------------------------------------------------------------------------
@@ -149,13 +179,6 @@
     ELSE
         DROP stdin-getline
     THEN ;
-
-\ ------------------------------------------------------------------------------------
-: BETWEEN						\ ( num min max -- bool )
-	2 PICK < IF
-        DROP DROP 0 LEAVE 
-    THEN
-	< 0 = ;
 
 \ ------------------------------------------------------------------------------------
 : skip-ws                       \ ( addr1 -- addr2 )
@@ -193,8 +216,12 @@
 : DICT>XT     CELL +         ;  INLINE
 : DICT>FLAGS  2 CELLS +      ;  INLINE
 : DICT>NAME   DICT>FLAGS 1 + ;  INLINE
+: FLAG_IMMEDIATE 1 ; INLINE
+: FLAG_INLINE    2 ; INLINE
 
+\ ------------------------------------------------------------------------------------
 : find-word						\ ( counted-str -- (addr 1) | 0 )
+    \ S" Looking for " COUNT TYPE DUP COUNT TYPE
     DUP string-nullterm
 	LAST >R
 	BEGIN
@@ -293,8 +320,7 @@
     THEN
 
     \ If we get here, it is neither a word nor a number ... ERROR!
-    COUNT TYPE 63 DUP EMIT EMIT
-    ;
+    COUNT TYPE 63 DUP EMIT EMIT ;
 
 \ ------------------------------------------------------------------------------------
 : >IN [ LITERAL HERE CELL + 1 + , ] ; 0 , RET
@@ -303,14 +329,15 @@
 : execute-line                  \ ( -- )
     BEGIN 
         >IN @ skip-ws >IN !
+
         \ >IN now points to the start of the first word, or NULL if <EOL>
-        >IN @ C@ IF
-            >IN @ get-word >IN !
-            \ <TOS> is now the word to execute
-            execute-word
-        ELSE
+        >IN @ C@ 0 = IF
             LEAVE
         THEN
+
+        >IN @ get-word >IN !
+        \ <TOS> is now the word to execute
+        execute-word
     AGAIN ;
 
 \ ------------------------------------------------------------------------------------
