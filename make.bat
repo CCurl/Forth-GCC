@@ -81,6 +81,9 @@ if "--%2%--" == "----" goto done
 forth -i:ex.bin
 goto done
 
+:make-aa
+goto done
+
 :make-fa
 set output=forth-dis2
 set c-files=forth-dis2.c 

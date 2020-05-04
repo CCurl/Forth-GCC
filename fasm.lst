@@ -1,0 +1,3292 @@
+GAS LISTING forth.s 			page 1
+
+
+   1              	# memory-size: 65536 bytes, (10000 hex)
+   2              	# data-stack: fe00, grows up
+   3              	# return-stack: fffc, grows down
+   4              	               .global main
+   5              	
+   6              	               .data
+   7              	               .align 2
+   8              	
+   9 0000 0000     	DSP:           .word 0
+  10              	data_stack:
+  11 0002 00000000 	.skip 256
+  11      00000000 
+  11      00000000 
+  11      00000000 
+  11      00000000 
+  12              	
+  13 0102 0000     	RSP:           .word 0
+  14              	return_stack:
+  15 0104 00000000 	.skip 256
+  15      00000000 
+  15      00000000 
+  15      00000000 
+  15      00000000 
+  16              	
+  17 0204 4F4B     	OK:            .ascii "OK"
+  18 0206 00000000 	stdin:         .int 0
+  19              	buf:
+  20 020a 00000000 	.skip 256
+  20      00000000 
+  20      00000000 
+  20      00000000 
+  20      00000000 
+  21              	
+  22 030a 0000     	               .text
+  23              	
+  24              	main:
+  25 0000 C7050000 	               movl $data_stack, DSP
+  25      00000200 
+  25      0000
+  26 000a C7050201 	               movl $return_stack, RSP
+  26      00000401 
+  26      0000
+  27 0014 8B2D0000 	               movl DSP, %ebp
+  27      0000
+  28              	
+  29              	               /* handle = GetStdHandle(-11) */
+  30 001a 6AF5     	               pushl   $-11
+  31 001c E8000000 	               call    _GetStdHandle@4
+  31      00
+  32 0021 A3060200 	               mov     %eax, stdin
+  32      00
+  33              	               
+  34              	               /* WriteConsole(handle, &msg[0], num_chars, &written, 0) */
+  35 0026 6A00     	               pushl   $0
+  36 0028 6A00     	               pushl   $0
+  37 002a 6A02     	               pushl   $2
+  38 002c 68040200 	               pushl   $OK
+GAS LISTING forth.s 			page 2
+
+
+  38      00
+  39 0031 FF350602 	               pushl   stdin
+  39      0000
+  40 0037 E8000000 	               call    _WriteConsoleA@20
+  40      00
+  41              	
+  42 003c 83C504   	               addl $4, %ebp
+  43 003f C7450041 	               movl $65, (%ebp)
+  43      000000
+  44 0046 83C504   	               addl $4, %ebp
+  45 0049 C7450042 	               movl $66, (%ebp)
+  45      000000
+  46 0050 83C504   	               addl $4, %ebp
+  47 0053 C7450043 	               movl $67, (%ebp)
+  47      000000
+  48 005a E8DD0000 	               call func_EMIT
+  48      00
+  49 005f E8D80000 	               call func_EMIT
+  49      00
+  50 0064 E8D30000 	               call func_EMIT
+  50      00
+  51              	
+  52 0069 6A00     	               pushl $0
+  53 006b E8000000 	               call _ExitProcess@4
+  53      00
+  54              	
+  55              	# -------------------------------------------------------------------------------------
+  56              	func_EQ:                                        # Implementation of EQ
+  57 0070 8B4500   	               movl (%ebp), %eax                # POP to %eax
+  58 0073 83ED04   	               subl $4, %ebp
+  59 0076 8B5D00   	               movl (%ebp), %ebx                # get TOS to %ebx
+  60 0079 39D8     	               cmpl %ebx, %eax
+  61 007b 7407     	               jz EQ_true
+  62 007d B8000000 	               movl $0, %eax
+  62      00
+  63 0082 EB05     	               jmp EQ_done
+  64 0084 B8010000 	EQ_true:       movl $1, %eax
+  64      00
+  65 0089 894500   	EQ_done:       movl %eax, (%ebp)                # set TOS from %eax
+  66 008c C3       	               ret
+  67              	               
+  68              	# -------------------------------------------------------------------------------------
+  69              	func_NEQ:                                       # Implementation of NEQ
+  70 008d 8B4500   	               movl (%ebp), %eax                # POP to %eax
+  71 0090 83ED04   	               subl $4, %ebp
+  72 0093 8B5D00   	               movl (%ebp), %ebx                # POP to %ebx
+  73 0096 83ED04   	               subl $4, %ebp
+  74 0099 39D8     	               cmpl %ebx, %eax
+  75 009b 7507     	               jnz NEQ_true
+  76 009d B8000000 	               movl $0, %eax
+  76      00
+  77 00a2 EB05     	               jmp NEQ_done
+  78 00a4 B8010000 	NEQ_true:      movl $1, %eax
+  78      00
+  79 00a9 83C504   	NEQ_done:      addl $4, %ebp                    # PUSH %eax
+  80 00ac 894500   	               movl %eax, (%ebp)
+  81 00af C3       	               ret
+GAS LISTING forth.s 			page 3
+
+
+  82              	               
+  83              	# -------------------------------------------------------------------------------------
+  84              	func_LT:                                        # Implementation of LT
+  85 00b0 8B4500   	               movl (%ebp), %eax                # POP to %eax
+  86 00b3 83ED04   	               subl $4, %ebp
+  87 00b6 8B5D00   	               movl (%ebp), %ebx                # POP to %ebx
+  88 00b9 83ED04   	               subl $4, %ebp
+  89 00bc 39D8     	               cmpl %ebx, %eax
+  90 00be 7C07     	               jl LT_true
+  91 00c0 B8000000 	               movl $0, %eax
+  91      00
+  92 00c5 EB05     	               jmp LT_done
+  93 00c7 B8010000 	LT_true:       movl $1, %eax
+  93      00
+  94 00cc 83C504   	LT_done:       addl $4, %ebp                    # PUSH %eax
+  95 00cf 894500   	               movl %eax, (%ebp)
+  96 00d2 C3       	               ret
+  97              	               
+  98              	# -------------------------------------------------------------------------------------
+  99              	func_GT:                                        # Implementation of GT
+ 100 00d3 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 101 00d6 83ED04   	               subl $4, %ebp
+ 102 00d9 8B5D00   	               movl (%ebp), %ebx                # POP to %ebx
+ 103 00dc 83ED04   	               subl $4, %ebp
+ 104 00df 39D8     	               cmpl %ebx, %eax
+ 105 00e1 7F07     	               jg GT_true
+ 106 00e3 B8000000 	               movl $0, %eax
+ 106      00
+ 107 00e8 EB05     	               jmp GT_done
+ 108 00ea B8010000 	GT_true:       movl $1, %eax
+ 108      00
+ 109 00ef 83C504   	GT_done:       addl $4, %ebp                    # PUSH %eax
+ 110 00f2 894500   	               movl %eax, (%ebp)
+ 111 00f5 C3       	               ret
+ 112              	               
+ 113              	# -------------------------------------------------------------------------------------
+ 114              	func_LTE:                                       # Implementation of LTE
+ 115 00f6 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 116 00f9 83ED04   	               subl $4, %ebp
+ 117 00fc 8B5D00   	               movl (%ebp), %ebx                # POP to %ebx
+ 118 00ff 83ED04   	               subl $4, %ebp
+ 119 0102 39D8     	               cmpl %ebx, %eax
+ 120 0104 7E07     	               jle LTE_true
+ 121 0106 B8000000 	               movl $0, %eax
+ 121      00
+ 122 010b EB05     	               jmp LTE_done
+ 123 010d B8010000 	LTE_true:      movl $1, %eax
+ 123      00
+ 124 0112 83C504   	LTE_done:      addl $4, %ebp                    # PUSH %eax
+ 125 0115 894500   	               movl %eax, (%ebp)
+ 126 0118 C3       	               ret
+ 127              	               
+ 128              	# -------------------------------------------------------------------------------------
+ 129              	func_GTE:                                       # Implementation of GTE
+ 130 0119 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 131 011c 83ED04   	               subl $4, %ebp
+ 132 011f 8B5D00   	               movl (%ebp), %ebx                # POP to %ebx
+GAS LISTING forth.s 			page 4
+
+
+ 133 0122 83ED04   	               subl $4, %ebp
+ 134 0125 39D8     	               cmpl %ebx, %eax
+ 135 0127 7D07     	               jge GTE_true
+ 136 0129 B8000000 	               movl $0, %eax
+ 136      00
+ 137 012e EB05     	               jmp GTE_done
+ 138 0130 B8010000 	GTE_true:      movl $1, %eax
+ 138      00
+ 139 0135 83C504   	GTE_done:      addl $4, %ebp                    # PUSH %eax
+ 140 0138 894500   	               movl %eax, (%ebp)
+ 141 013b C3       	               ret
+ 142              	               
+ 143              	# -------------------------------------------------------------------------------------
+ 144              	func_EMIT:                                      # Implementation of EMIT
+ 145 013c 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 146 013f 83ED04   	               subl $4, %ebp
+ 147 0142 A20A0200 	               mov %al, buf
+ 147      00
+ 148              	
+ 149              	               /* WriteConsole(handle, &msg[0], num_chars, &written, 0) */
+ 150 0147 6A00     	               pushl   $0
+ 151 0149 6A00     	               pushl   $0
+ 152 014b 6A01     	               pushl   $1
+ 153 014d 680A0200 	               pushl   $buf
+ 153      00
+ 154 0152 FF350602 	               pushl   stdin
+ 154      0000
+ 155 0158 E8000000 	               call    _WriteConsoleA@20
+ 155      00
+ 156              	
+ 157 015d C3       	               ret
+ 158              	               
+ 159              	# -------------------------------------------------------------------------------------
+ 160              	func_FETCH:                                     # Implementation of FETCH
+ 161 015e 8B5500   	               movl (%ebp), %edx
+ 162 0161 8B02     	               movl (%edx), %eax
+ 163 0163 894500   	               movl %eax, (%ebp)
+ 164 0166 C3       	               ret
+ 165              	               
+ 166              	# -------------------------------------------------------------------------------------
+ 167              	func_CFETCH:                                    # Implementation of CFETCH
+ 168 0167 8B5500   	               movl (%ebp), %edx
+ 169 016a 31C0     	               xor %eax, %eax
+ 170 016c 8A02     	               movb (%edx), %al
+ 171 016e 894500   	               movl %eax, (%ebp)
+ 172 0171 C3       	               ret
+ 173              	               
+ 174              	func_STORE:                                     # Implementation of STORE
+ 175 0172 8B5500   	               movl (%ebp), %edx                # POP to %edx
+ 176 0175 83ED04   	               subl $4, %ebp
+ 177 0178 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 178 017b 83ED04   	               subl $4, %ebp
+ 179 017e 8902     	               movl %eax, (%edx)
+ 180 0180 C3       	               ret
+ 181              	               
+ 182              	# -------------------------------------------------------------------------------------
+ 183              	func_CSTORE:                                    # Implementation of CSTORE
+GAS LISTING forth.s 			page 5
+
+
+ 184 0181 8B5500   	               movl (%ebp), %edx                # POP to %edx
+ 185 0184 83ED04   	               subl $4, %ebp
+ 186 0187 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 187 018a 83ED04   	               subl $4, %ebp
+ 188 018d 8802     	               movb %al, (%edx)
+ 189 018f C3       	               ret
+ 190              	               
+ 191              	# -------------------------------------------------------------------------------------
+ 192              	func_DUP:                                       # Implementation of DUP
+ 193 0190 8B4500   	               movl (%ebp), %eax
+ 194 0193 83C504   	               addl $4, %ebp                    # PUSH %eax
+ 195 0196 894500   	               movl %eax, (%ebp)
+ 196 0199 C3       	               ret
+ 197              	               
+ 198              	# -------------------------------------------------------------------------------------
+ 199              	func_SWAP:                                      # Implementation of SWAP
+ 200 019a 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 201 019d 83ED04   	               subl $4, %ebp
+ 202 01a0 8B5D00   	               movl (%ebp), %ebx
+ 203 01a3 894500   	               movl %eax, (%ebp)
+ 204 01a6 83C504   	               addl $4, %ebp                    # PUSH %ebx
+ 205 01a9 895D00   	               movl %ebx, (%ebp)
+ 206 01ac C3       	               ret
+ 207              	               
+ 208              	# -------------------------------------------------------------------------------------
+ 209              	func_OVER:                                      # Implementation of OVER
+ 210 01ad 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 211 01b0 83ED04   	               subl $4, %ebp
+ 212 01b3 8B5500   	               movl (%ebp), %edx
+ 213 01b6 83C504   	               addl $4, %ebp                    # PUSH %eax
+ 214 01b9 894500   	               movl %eax, (%ebp)
+ 215 01bc 83C504   	               addl $4, %ebp                    # PUSH %edx
+ 216 01bf 895500   	               movl %edx, (%ebp)
+ 217 01c2 C3       	               ret
+ 218              	               
+ 219              	# -------------------------------------------------------------------------------------
+ 220              	func_ADD:                                       # Implementation of ADD
+ 221 01c3 8B5D00   	               movl (%ebp), %ebx                # POP to %ebx
+ 222 01c6 83ED04   	               subl $4, %ebp
+ 223 01c9 8B4500   	               movl (%ebp), %eax
+ 224 01cc 01D8     	               addl %ebx, %eax
+ 225 01ce 894500   	               movl %eax, (%ebp)
+ 226 01d1 C3       	               ret
+ 227              	               
+ 228              	# -------------------------------------------------------------------------------------
+ 229              	func_SUB:                                       # Implementation of SUB
+ 230 01d2 8B5D00   	               movl (%ebp), %ebx                # POP to %ebx
+ 231 01d5 83ED04   	               subl $4, %ebp
+ 232 01d8 8B4500   	               movl (%ebp), %eax
+ 233 01db 29D8     	               subl %ebx, %eax
+ 234 01dd 894500   	               movl %eax, (%ebp)
+ 235 01e0 C3       	               ret
+ 236              	               
+ 237              	# -------------------------------------------------------------------------------------
+ 238              	func_MUL:                                       # Implementation of MUL
+ 239 01e1 8B5D00   	               movl (%ebp), %ebx                # POP to %ebx
+ 240 01e4 83ED04   	               subl $4, %ebp
+GAS LISTING forth.s 			page 6
+
+
+ 241 01e7 8B4500   	               movl (%ebp), %eax
+ 242 01ea F7E3     	               mull %ebx
+ 243 01ec 894500   	               movl %eax, (%ebp)
+ 244 01ef C3       	               ret
+ 245              	               
+ 246              	# -------------------------------------------------------------------------------------
+ 247              	func_DTOR:                                      # Implementation of DTOR
+ 248 01f0 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 249 01f3 83ED04   	               subl $4, %ebp
+ 250 01f6 892D0000 	               mov %ebp, DSP
+ 250      0000
+ 251 01fc 8B2D0201 	               mov RSP, %ebp
+ 251      0000
+ 252 0202 83C504   	               addl $4, %ebp                    # PUSH %eax
+ 253 0205 894500   	               movl %eax, (%ebp)
+ 254 0208 892D0201 	               mov %ebp, RSP
+ 254      0000
+ 255 020e 8B2D0000 	               mov DSP, %ebp
+ 255      0000
+ 256 0214 C3       	               ret
+ 257              	               
+ 258              	# -------------------------------------------------------------------------------------
+ 259              	func_RTOD:                                      # Implementation of RTOD
+ 260 0215 892D0000 	               mov %ebp, DSP
+ 260      0000
+ 261 021b 8B2D0201 	               mov RSP, %ebp
+ 261      0000
+ 262 0221 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 263 0224 83ED04   	               subl $4, %ebp
+ 264 0227 892D0201 	               mov %ebp, RSP
+ 264      0000
+ 265 022d 8B2D0000 	               mov DSP, %ebp
+ 265      0000
+ 266 0233 83C504   	               addl $4, %ebp                    # PUSH %eax
+ 267 0236 894500   	               movl %eax, (%ebp)
+ 268 0239 C3       	               ret
+ 269              	               
+ 270              	# -------------------------------------------------------------------------------------
+ 271              	
+ 272              	L00000040:                                      # WORD (HERE) (FDEB)
+ 273 023a 83C504   	               addl $4, %ebp                    # PUSH $16, CLITERAL 16
+ 274 023d C7450010 	               movl $16, (%ebp)
+ 274      000000
+ 275 0244 C3       	               ret
+ 276              	L00000048:                                      # WORD (LAST) (FDDA)
+ 277 0245 83C504   	               addl $4, %ebp                    # PUSH $20, CLITERAL 20
+ 278 0248 C7450014 	               movl $20, (%ebp)
+ 278      000000
+ 279 024f C3       	               ret
+ 280              	L00000050:                                      # WORD CELL (FDCB)
+ 281 0250 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 282 0253 C7450004 	               movl $4, (%ebp)
+ 282      000000
+ 283 025a C3       	               ret
+ 284              	L00000058:                                      # WORD BASE (FDBC)
+ 285 025b 83C504   	               addl $4, %ebp                    # PUSH $6, CLITERAL 6
+ 286 025e C7450006 	               movl $6, (%ebp)
+GAS LISTING forth.s 			page 7
+
+
+ 286      000000
+ 287 0265 C3       	               ret
+ 288              	L00000060:                                      # WORD STATE (FDAC)
+ 289 0266 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 290 0269 C7450020 	               movl $32, (%ebp)
+ 290      000000
+ 291 0270 C3       	               ret
+ 292              	L00000068:                                      # WORD C, (FD9F)
+ 293 0271 83C504   	               addl $4, %ebp                    # PUSH $16, CLITERAL 16
+ 294 0274 C7450010 	               movl $16, (%ebp)
+ 294      000000
+ 295 027b E8DEFEFF 	               call func_FETCH
+ 295      FF
+ 296 0280 E8FCFEFF 	               call func_CSTORE
+ 296      FF
+ 297 0285 83C504   	               addl $4, %ebp                    # PUSH $16, CLITERAL 16
+ 298 0288 C7450010 	               movl $16, (%ebp)
+ 298      000000
+ 299 028f E8CAFEFF 	               call func_FETCH
+ 299      FF
+ 300 0294 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 301 0297 C7450001 	               movl $1, (%ebp)
+ 301      000000
+ 302 029e E820FFFF 	               call func_ADD
+ 302      FF
+ 303 02a3 83C504   	               addl $4, %ebp                    # PUSH $16, CLITERAL 16
+ 304 02a6 C7450010 	               movl $16, (%ebp)
+ 304      000000
+ 305 02ad E8C0FEFF 	               call func_STORE
+ 305      FF
+ 306 02b2 C3       	               ret
+ 307              	L0000007B:                                      # WORD , (FD93)
+ 308 02b3 83C504   	               addl $4, %ebp                    # PUSH $16, CLITERAL 16
+ 309 02b6 C7450010 	               movl $16, (%ebp)
+ 309      000000
+ 310 02bd E89CFEFF 	               call func_FETCH
+ 310      FF
+ 311 02c2 E8ABFEFF 	               call func_STORE
+ 311      FF
+ 312 02c7 83C504   	               addl $4, %ebp                    # PUSH $16, CLITERAL 16
+ 313 02ca C7450010 	               movl $16, (%ebp)
+ 313      000000
+ 314 02d1 E888FEFF 	               call func_FETCH
+ 314      FF
+ 315 02d6 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 316 02d9 C7450004 	               movl $4, (%ebp)
+ 316      000000
+ 317 02e0 E8DEFEFF 	               call func_ADD
+ 317      FF
+ 318 02e5 83C504   	               addl $4, %ebp                    # PUSH $16, CLITERAL 16
+ 319 02e8 C7450010 	               movl $16, (%ebp)
+ 319      000000
+ 320 02ef E87EFEFF 	               call func_STORE
+ 320      FF
+ 321 02f4 C3       	               ret
+ 322              	L0000008E:                                      # WORD [ (FD87)
+ 323 02f5 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+GAS LISTING forth.s 			page 8
+
+
+ 324 02f8 C7450000 	               movl $0, (%ebp)
+ 324      000000
+ 325 02ff 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 326 0302 C7450020 	               movl $32, (%ebp)
+ 326      000000
+ 327 0309 E864FEFF 	               call func_STORE
+ 327      FF
+ 328 030e C3       	               ret
+ 329              	L00000099:                                      # WORD ] (FD7B)
+ 330 030f 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 331 0312 C7450001 	               movl $1, (%ebp)
+ 331      000000
+ 332 0319 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 333 031c C7450020 	               movl $32, (%ebp)
+ 333      000000
+ 334 0323 E84AFEFF 	               call func_STORE
+ 334      FF
+ 335 0328 C3       	               ret
+ 336              	L000000A4:                                      # WORD LITERAL (FD69)
+ 337 0329 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 338 032c C7450001 	               movl $1, (%ebp)
+ 338      000000
+ 339 0333 E839FFFF 	               call L00000068
+ 339      FF
+ 340 0338 C3       	               ret
+ 341              	L000000B1:                                      # WORD @ (FD5D)
+ 342 0339 E820FEFF 	               call func_FETCH
+ 342      FF
+ 343 033e C3       	               ret
+ 344              	L000000B8:                                      # WORD ! (FD51)
+ 345 033f E82EFEFF 	               call func_STORE
+ 345      FF
+ 346 0344 C3       	               ret
+ 347              	L000000BF:                                      # WORD SWAP (FD42)
+ 348 0345 E850FEFF 	               call func_SWAP
+ 348      FF
+ 349 034a C3       	               ret
+ 350              	L000000C6:                                      # WORD DROP (FD33)
+ 351 034b 83ED04   	               subl $4, %ebp                    # DROP
+ 352 034e C3       	               ret
+ 353              	L000000CD:                                      # WORD DUP (FD25)
+ 354 034f E83CFEFF 	               call func_DUP
+ 354      FF
+ 355 0354 C3       	               ret
+ 356              	L000000D4:                                      # WORD SLITERAL (FD12)
+ 357 0355 83C504   	               addl $4, %ebp                    # PUSH $7, CLITERAL 7
+ 358 0358 C7450007 	               movl $7, (%ebp)
+ 358      000000
+ 359 035f E80DFFFF 	               call L00000068
+ 359      FF
+ 360 0364 C3       	               ret
+ 361              	L000000E1:                                      # WORD JMP (FD04)
+ 362 0365 83C504   	               addl $4, %ebp                    # PUSH $8, CLITERAL 8
+ 363 0368 C7450008 	               movl $8, (%ebp)
+ 363      000000
+ 364 036f E8FDFEFF 	               call L00000068
+ 364      FF
+GAS LISTING forth.s 			page 9
+
+
+ 365 0374 C3       	               ret
+ 366              	L000000EE:                                      # WORD JMPZ (FCF5)
+ 367 0375 83C504   	               addl $4, %ebp                    # PUSH $9, CLITERAL 9
+ 368 0378 C7450009 	               movl $9, (%ebp)
+ 368      000000
+ 369 037f E8EDFEFF 	               call L00000068
+ 369      FF
+ 370 0384 C3       	               ret
+ 371              	L000000FB:                                      # WORD JMPNZ (FCE5)
+ 372 0385 83C504   	               addl $4, %ebp                    # PUSH $10, CLITERAL 10
+ 373 0388 C745000A 	               movl $10, (%ebp)
+ 373      000000
+ 374 038f E8DDFEFF 	               call L00000068
+ 374      FF
+ 375 0394 C3       	               ret
+ 376              	L00000108:                                      # WORD CALL (FCD6)
+ 377 0395 83C504   	               addl $4, %ebp                    # PUSH $11, CLITERAL 11
+ 378 0398 C745000B 	               movl $11, (%ebp)
+ 378      000000
+ 379 039f E8CDFEFF 	               call L00000068
+ 379      FF
+ 380 03a4 C3       	               ret
+ 381              	L00000115:                                      # WORD RET (FCC8)
+ 382 03a5 83C504   	               addl $4, %ebp                    # PUSH $12, CLITERAL 12
+ 383 03a8 C745000C 	               movl $12, (%ebp)
+ 383      000000
+ 384 03af E8BDFEFF 	               call L00000068
+ 384      FF
+ 385 03b4 C3       	               ret
+ 386              	L00000122:                                      # WORD OR (FCBB)
+ 387              	                                                # OR (TODO)
+ 388 03b5 C3       	               ret
+ 389              	L00000129:                                      # WORD CLITERAL (FCA8)
+ 390 03b6 83C504   	               addl $4, %ebp                    # PUSH $14, CLITERAL 14
+ 391 03b9 C745000E 	               movl $14, (%ebp)
+ 391      000000
+ 392 03c0 E8ACFEFF 	               call L00000068
+ 392      FF
+ 393 03c5 C3       	               ret
+ 394              	L00000136:                                      # WORD C@ (FC9B)
+ 395 03c6 E89CFDFF 	               call func_CFETCH
+ 395      FF
+ 396 03cb C3       	               ret
+ 397              	L0000013D:                                      # WORD C! (FC8E)
+ 398 03cc E8B0FDFF 	               call func_CSTORE
+ 398      FF
+ 399 03d1 C3       	               ret
+ 400              	L00000144:                                      # WORD + (FC82)
+ 401 03d2 E8ECFDFF 	               call func_ADD
+ 401      FF
+ 402 03d7 C3       	               ret
+ 403              	L0000014B:                                      # WORD - (FC76)
+ 404 03d8 E8F5FDFF 	               call func_SUB
+ 404      FF
+ 405 03dd C3       	               ret
+ 406              	L00000152:                                      # WORD * (FC6A)
+ 407 03de E8FEFDFF 	               call func_MUL
+GAS LISTING forth.s 			page 10
+
+
+ 407      FF
+ 408 03e3 C3       	               ret
+ 409              	L00000159:                                      # WORD / (FC5E)
+ 410 03e4 8B5D00   	               movl (%ebp), %ebx                # POP to %ebx, ADD
+ 411 03e7 83ED04   	               subl $4, %ebp
+ 412 03ea 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 413 03ed 83ED04   	               subl $4, %ebp
+ 414 03f0 F7F3     	               divl %ebx
+ 415 03f2 83C504   	               addl $4, %ebp                    # PUSH %eax
+ 416 03f5 894500   	               movl %eax, (%ebp)
+ 417 03f8 C3       	               ret
+ 418              	L00000160:                                      # WORD < (FC52)
+ 419 03f9 E8B2FCFF 	               call func_LT                     # LT
+ 419      FF
+ 420 03fe C3       	               ret
+ 421              	L00000167:                                      # WORD = (FC46)
+ 422 03ff E86CFCFF 	               call func_EQ                     # EQ
+ 422      FF
+ 423 0404 C3       	               ret
+ 424              	L0000016E:                                      # WORD > (FC3A)
+ 425 0405 E8C9FCFF 	               call func_GT                     # GT
+ 425      FF
+ 426 040a C3       	               ret
+ 427              	L00000175:                                      # WORD DICTP (FC2A)
+ 428 040b 83C504   	               addl $4, %ebp                    # PUSH $24, CLITERAL 24
+ 429 040e C7450018 	               movl $24, (%ebp)
+ 429      000000
+ 430 0415 E857FEFF 	               call L00000068
+ 430      FF
+ 431 041a C3       	               ret
+ 432              	L00000182:                                      # WORD EMIT (FC1B)
+ 433 041b E81CFDFF 	               call func_EMIT                   # EMIT
+ 433      FF
+ 434 0420 C3       	               ret
+ 435              	L00000189:                                      # WORD OVER (FC0C)
+ 436 0421 E887FDFF 	               call func_OVER
+ 436      FF
+ 437 0426 C3       	               ret
+ 438              	L00000190:                                      # WORD COMPARE (FBFA)
+ 439 0427 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 440 042a 83ED04   	               subl $4, %ebp
+ 441 042d 8B5D00   	               movl (%ebp), %ebx                # POP to %ebx
+ 442 0430 83ED04   	               subl $4, %ebp
+ 443              	               # COMPARE %eax, %ebx
+ 444 0433 83C504   	               addl $4, %ebp                    # PUSH %ebx
+ 445 0436 895D00   	               movl %ebx, (%ebp)
+ 446 0439 C3       	               ret
+ 447              	L00000197:                                      # WORD FOPEN (FBEA)
+ 448              	                                                # FOPEN (TODO)
+ 449 043a C3       	               ret
+ 450              	L0000019E:                                      # WORD FREAD (FBDA)
+ 451              	                                                # FREAD (TODO)
+ 452 043b C3       	               ret
+ 453              	L000001A5:                                      # WORD FREADLINE (FBC6)
+ 454              	                                                # FREADLINE (TODO)
+ 455 043c C3       	               ret
+ 456              	L000001AC:                                      # WORD FWRITE (FBB5)
+GAS LISTING forth.s 			page 11
+
+
+ 457              	                                                # FWRITE (TODO)
+ 458 043d C3       	               ret
+ 459              	L000001B3:                                      # WORD FCLOSE (FBA4)
+ 460              	                                                # FCLOSE (TODO)
+ 461 043e C3       	               ret
+ 462              	L000001BA:                                      # WORD >R (FB97)
+ 463 043f E8ACFDFF 	               call func_DTOR                   # DTOR
+ 463      FF
+ 464 0444 C3       	               ret
+ 465              	L000001C1:                                      # WORD R> (FB8A)
+ 466 0445 E8CBFDFF 	               call func_RTOD                   # RTOD
+ 466      FF
+ 467 044a C3       	               ret
+ 468              	L000001C8:                                      # WORD LOGLEVEL (FB77)
+ 469              	               # LOGLEVEL
+ 470 044b C3       	               ret
+ 471              	L000001CF:                                      # WORD AND (FB69)
+ 472              	                                                # AND (TODO)
+ 473 044c C3       	               ret
+ 474              	L000001D6:                                      # WORD PICK (FB5A)
+ 475              	               # PICK
+ 476 044d C3       	               ret
+ 477              	L000001DD:                                      # WORD DEPTH (FB4A)
+ 478              	                                                # DEPTH (TODO)
+ 479 044e C3       	               ret
+ 480              	L000001E4:                                      # WORD GETCH (FB3A)
+ 481              	                                                # GETCH (TODO)
+ 482 044f C3       	               ret
+ 483              	L000001EB:                                      # WORD COMPAREI (FB27)
+ 484 0450 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 485 0453 83ED04   	               subl $4, %ebp
+ 486 0456 8B5D00   	               movl (%ebp), %ebx                # POP to %ebx
+ 487 0459 83ED04   	               subl $4, %ebp
+ 488              	               # COMPAREI %eax, %ebx
+ 489 045c 83C504   	               addl $4, %ebp                    # PUSH %ebx
+ 490 045f 895D00   	               movl %ebx, (%ebp)
+ 491 0462 C3       	               ret
+ 492              	L000001F2:                                      # WORD USINIT (FB16)
+ 493              	                                                # USINIT (TODO)
+ 494 0463 C3       	               ret
+ 495              	L000001F9:                                      # WORD USPUSH (FB05)
+ 496              	                                                # USPUSH (TODO)
+ 497 0464 C3       	               ret
+ 498              	L00000200:                                      # WORD USPOP (FAF5)
+ 499              	                                                # USPOP (TODO)
+ 500 0465 C3       	               ret
+ 501              	L00000207:                                      # WORD BREAK (FAE5)
+ 502              	                                                # BREAK (TODO)
+ 503 0466 C3       	               ret
+ 504              	L0000020E:                                      # WORD RESET (FAD5)
+ 505              	                                                # RESET (TODO)
+ 506 0467 C3       	               ret
+ 507              	L00000215:                                      # WORD BYE (FAC7)
+ 508              	                                                # BYE (TODO)
+ 509 0468 C3       	               ret
+ 510              	L0000021C:                                      # WORD R@ (FABA)
+ 511 0469 E8A7FDFF 	               call func_RTOD                   # RTOD
+GAS LISTING forth.s 			page 12
+
+
+ 511      FF
+ 512 046e E81DFDFF 	               call func_DUP
+ 512      FF
+ 513 0473 E878FDFF 	               call func_DTOR                   # DTOR
+ 513      FF
+ 514 0478 C3       	               ret
+ 515              	L00000225:                                      # WORD INLINE (FAA9)
+ 516 0479 83C504   	               addl $4, %ebp                    # PUSH $20, CLITERAL 20
+ 517 047c C7450014 	               movl $20, (%ebp)
+ 517      000000
+ 518 0483 E8D6FCFF 	               call func_FETCH
+ 518      FF
+ 519 0488 83C504   	               addl $4, %ebp                    # PUSH $2, CLITERAL 2
+ 520 048b C7450002 	               movl $2, (%ebp)
+ 520      000000
+ 521 0492 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 522 0495 C7450004 	               movl $4, (%ebp)
+ 522      000000
+ 523 049c E840FDFF 	               call func_MUL
+ 523      FF
+ 524 04a1 E81DFDFF 	               call func_ADD
+ 524      FF
+ 525 04a6 E8E5FCFF 	               call func_DUP
+ 525      FF
+ 526 04ab E8B7FCFF 	               call func_CFETCH
+ 526      FF
+ 527 04b0 83C504   	               addl $4, %ebp                    # PUSH $2, CLITERAL 2
+ 528 04b3 C7450002 	               movl $2, (%ebp)
+ 528      000000
+ 529              	                                                # OR (TODO)
+ 530 04ba E8DBFCFF 	               call func_SWAP
+ 530      FF
+ 531 04bf E8BDFCFF 	               call func_CSTORE
+ 531      FF
+ 532 04c4 C3       	               ret
+ 533              	L0000023B:                                      # WORD IMMEDIATE (FA95)
+ 534 04c5 83C504   	               addl $4, %ebp                    # PUSH $20, CLITERAL 20
+ 535 04c8 C7450014 	               movl $20, (%ebp)
+ 535      000000
+ 536 04cf E88AFCFF 	               call func_FETCH
+ 536      FF
+ 537 04d4 83C504   	               addl $4, %ebp                    # PUSH $2, CLITERAL 2
+ 538 04d7 C7450002 	               movl $2, (%ebp)
+ 538      000000
+ 539 04de 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 540 04e1 C7450004 	               movl $4, (%ebp)
+ 540      000000
+ 541 04e8 E8F4FCFF 	               call func_MUL
+ 541      FF
+ 542 04ed E8D1FCFF 	               call func_ADD
+ 542      FF
+ 543 04f2 E899FCFF 	               call func_DUP
+ 543      FF
+ 544 04f7 E86BFCFF 	               call func_CFETCH
+ 544      FF
+ 545 04fc 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 546 04ff C7450001 	               movl $1, (%ebp)
+GAS LISTING forth.s 			page 13
+
+
+ 546      000000
+ 547              	                                                # OR (TODO)
+ 548 0506 E88FFCFF 	               call func_SWAP
+ 548      FF
+ 549 050b E871FCFF 	               call func_CSTORE
+ 549      FF
+ 550 0510 C3       	               ret
+ 551              	L00000251:                                      # WORD CELLS (FA85)
+ 552 0511 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 553 0514 C7450004 	               movl $4, (%ebp)
+ 553      000000
+ 554 051b E8C1FCFF 	               call func_MUL
+ 554      FF
+ 555 0520 C3       	               ret
+ 556              	L0000025A:                                      # WORD LAST (FA76)
+ 557 0521 83C504   	               addl $4, %ebp                    # PUSH $20, CLITERAL 20
+ 558 0524 C7450014 	               movl $20, (%ebp)
+ 558      000000
+ 559 052b E82EFCFF 	               call func_FETCH
+ 559      FF
+ 560 0530 C3       	               ret
+ 561              	L00000263:                                      # WORD HERE (FA67)
+ 562 0531 83C504   	               addl $4, %ebp                    # PUSH $16, CLITERAL 16
+ 563 0534 C7450010 	               movl $16, (%ebp)
+ 563      000000
+ 564 053b E81EFCFF 	               call func_FETCH
+ 564      FF
+ 565 0540 C3       	               ret
+ 566              	L0000026C:                                      # WORD ?COMPILING (FA52)
+ 567 0541 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 568 0544 C7450020 	               movl $32, (%ebp)
+ 568      000000
+ 569 054b E80EFCFF 	               call func_FETCH
+ 569      FF
+ 570 0550 C3       	               ret
+ 571              	L00000275:                                      # WORD IF (FA45)
+ 572 0551 E8EBFFFF 	               call L0000026C
+ 572      FF
+ 573 0556 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 574 0559 83ED04   	               subl $4, %ebp
+ 575 055c 39050000 	               cmp %eax, 0
+ 575      0000
+ 576 0562 7423     	               jz L00000293
+ 577 0564 E80CFEFF 	               call L000000EE
+ 577      FF
+ 578 0569 83C504   	               addl $4, %ebp                    # PUSH $16, CLITERAL 16
+ 579 056c C7450010 	               movl $16, (%ebp)
+ 579      000000
+ 580 0573 E8E6FBFF 	               call func_FETCH
+ 580      FF
+ 581 0578 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 582 057b C7450000 	               movl $0, (%ebp)
+ 582      000000
+ 583 0582 E82CFDFF 	               call L0000007B
+ 583      FF
+ 584 0587 C3       	L00000293:     ret
+ 585              	L00000294:                                      # WORD ELSE (FA36)
+GAS LISTING forth.s 			page 14
+
+
+ 586 0588 E8B4FFFF 	               call L0000026C
+ 586      FF
+ 587 058d 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 588 0590 83ED04   	               subl $4, %ebp
+ 589 0593 39050000 	               cmp %eax, 0
+ 589      0000
+ 590 0599 7441     	               jz L000002B8
+ 591 059b E8C5FDFF 	               call L000000E1
+ 591      FF
+ 592 05a0 83C504   	               addl $4, %ebp                    # PUSH $16, CLITERAL 16
+ 593 05a3 C7450010 	               movl $16, (%ebp)
+ 593      000000
+ 594 05aa E8AFFBFF 	               call func_FETCH
+ 594      FF
+ 595 05af E8E6FBFF 	               call func_SWAP
+ 595      FF
+ 596 05b4 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 597 05b7 C7450000 	               movl $0, (%ebp)
+ 597      000000
+ 598 05be E8F0FCFF 	               call L0000007B
+ 598      FF
+ 599 05c3 83C504   	               addl $4, %ebp                    # PUSH $16, CLITERAL 16
+ 600 05c6 C7450010 	               movl $16, (%ebp)
+ 600      000000
+ 601 05cd E88CFBFF 	               call func_FETCH
+ 601      FF
+ 602 05d2 E8C3FBFF 	               call func_SWAP
+ 602      FF
+ 603 05d7 E896FBFF 	               call func_STORE
+ 603      FF
+ 604 05dc C3       	L000002B8:     ret
+ 605              	L000002B9:                                      # WORD THEN (FA27)
+ 606 05dd E85FFFFF 	               call L0000026C
+ 606      FF
+ 607 05e2 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 608 05e5 83ED04   	               subl $4, %ebp
+ 609 05e8 39050000 	               cmp %eax, 0
+ 609      0000
+ 610 05ee 7419     	               jz L000002CD
+ 611 05f0 83C504   	               addl $4, %ebp                    # PUSH $16, CLITERAL 16
+ 612 05f3 C7450010 	               movl $16, (%ebp)
+ 612      000000
+ 613 05fa E85FFBFF 	               call func_FETCH
+ 613      FF
+ 614 05ff E896FBFF 	               call func_SWAP
+ 614      FF
+ 615 0604 E869FBFF 	               call func_STORE
+ 615      FF
+ 616 0609 C3       	L000002CD:     ret
+ 617              	L000002CE:                                      # WORD BEGIN (FA17)
+ 618 060a E832FFFF 	               call L0000026C
+ 618      FF
+ 619 060f 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 620 0612 83ED04   	               subl $4, %ebp
+ 621 0615 39050000 	               cmp %eax, 0
+ 621      0000
+ 622 061b 740F     	               jz L000002E0
+GAS LISTING forth.s 			page 15
+
+
+ 623 061d 83C504   	               addl $4, %ebp                    # PUSH $16, CLITERAL 16
+ 624 0620 C7450010 	               movl $16, (%ebp)
+ 624      000000
+ 625 0627 E832FBFF 	               call func_FETCH
+ 625      FF
+ 626 062c C3       	L000002E0:     ret
+ 627              	L000002E1:                                      # WORD AGAIN (FA07)
+ 628 062d E80FFFFF 	               call L0000026C
+ 628      FF
+ 629 0632 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 630 0635 83ED04   	               subl $4, %ebp
+ 631 0638 39050000 	               cmp %eax, 0
+ 631      0000
+ 632 063e 740A     	               jz L000002FA
+ 633 0640 E820FDFF 	               call L000000E1
+ 633      FF
+ 634 0645 E869FCFF 	               call L0000007B
+ 634      FF
+ 635 064a C3       	L000002FA:     ret
+ 636              	L000002FB:                                      # WORD WHILE (F9F7)
+ 637 064b E8F1FEFF 	               call L0000026C
+ 637      FF
+ 638 0650 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 639 0653 83ED04   	               subl $4, %ebp
+ 640 0656 39050000 	               cmp %eax, 0
+ 640      0000
+ 641 065c 740A     	               jz L00000314
+ 642 065e E822FDFF 	               call L000000FB
+ 642      FF
+ 643 0663 E84BFCFF 	               call L0000007B
+ 643      FF
+ 644 0668 C3       	L00000314:     ret
+ 645              	L00000315:                                      # WORD UNTIL (F9E7)
+ 646 0669 E8D3FEFF 	               call L0000026C
+ 646      FF
+ 647 066e 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 648 0671 83ED04   	               subl $4, %ebp
+ 649 0674 39050000 	               cmp %eax, 0
+ 649      0000
+ 650 067a 740A     	               jz L0000032E
+ 651 067c E8F4FCFF 	               call L000000EE
+ 651      FF
+ 652 0681 E82DFCFF 	               call L0000007B
+ 652      FF
+ 653 0686 C3       	L0000032E:     ret
+ 654              	L0000032F:                                      # WORD LEAVE (F9D7)
+ 655 0687 E8B5FEFF 	               call L0000026C
+ 655      FF
+ 656 068c 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 657 068f 83ED04   	               subl $4, %ebp
+ 658 0692 39050000 	               cmp %eax, 0
+ 658      0000
+ 659 0698 7405     	               jz L00000343
+ 660 069a E806FDFF 	               call L00000115
+ 660      FF
+ 661 069f C3       	L00000343:     ret
+ 662              	L00000344:                                      # WORD COUNT (F9C7)
+GAS LISTING forth.s 			page 16
+
+
+ 663 06a0 E8EBFAFF 	               call func_DUP
+ 663      FF
+ 664 06a5 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 665 06a8 C7450001 	               movl $1, (%ebp)
+ 665      000000
+ 666 06af E80FFBFF 	               call func_ADD
+ 666      FF
+ 667 06b4 E8E1FAFF 	               call func_SWAP
+ 667      FF
+ 668 06b9 E8A9FAFF 	               call func_CFETCH
+ 668      FF
+ 669 06be C3       	               ret
+ 670              	L00000350:                                      # WORD TYPE (F9B8)
+ 671 06bf E8E9FAFF 	               call func_OVER
+ 671      FF
+ 672 06c4 E8FAFAFF 	               call func_ADD
+ 672      FF
+ 673 06c9 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 674 06cc C7450001 	               movl $1, (%ebp)
+ 674      000000
+ 675 06d3 E8FAFAFF 	               call func_SUB
+ 675      FF
+ 676 06d8 E8BDFAFF 	               call func_SWAP
+ 676      FF
+ 677 06dd E8CBFAFF 	L0000035B:     call func_OVER
+ 677      FF
+ 678 06e2 E8C6FAFF 	               call func_OVER
+ 678      FF
+ 679 06e7 E8C4F9FF 	               call func_LT                     # LT
+ 679      FF
+ 680 06ec 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 681 06ef 83ED04   	               subl $4, %ebp
+ 682 06f2 39050000 	               cmp %eax, 0
+ 682      0000
+ 683 06f8 7407     	               jz L00000366
+ 684 06fa 83ED04   	               subl $4, %ebp                    # DROP
+ 685 06fd 83ED04   	               subl $4, %ebp                    # DROP
+ 686 0700 C3       	               ret
+ 687 0701 E88AFAFF 	L00000366:     call func_DUP
+ 687      FF
+ 688 0706 E85CFAFF 	               call func_CFETCH
+ 688      FF
+ 689 070b E82CFAFF 	               call func_EMIT                   # EMIT
+ 689      FF
+ 690 0710 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 691 0713 C7450001 	               movl $1, (%ebp)
+ 691      000000
+ 692 071a E8A4FAFF 	               call func_ADD
+ 692      FF
+ 693 071f EBBC     	               jmp L0000035B                    # JMP
+ 694 0721 C3       	               ret
+ 695              	L00000372:                                      # WORD CR (F9AB)
+ 696 0722 83C504   	               addl $4, %ebp                    # PUSH $13, CLITERAL 13
+ 697 0725 C745000D 	               movl $13, (%ebp)
+ 697      000000
+ 698 072c E80BFAFF 	               call func_EMIT                   # EMIT
+ 698      FF
+GAS LISTING forth.s 			page 17
+
+
+ 699 0731 83C504   	               addl $4, %ebp                    # PUSH $10, CLITERAL 10
+ 700 0734 C745000A 	               movl $10, (%ebp)
+ 700      000000
+ 701 073b E8FCF9FF 	               call func_EMIT                   # EMIT
+ 701      FF
+ 702 0740 C3       	               ret
+ 703              	L0000037E:                                      # WORD INPUT-FP (F998)
+ 704 0741 83C504   	               addl $4, %ebp                    # PUSH $905, LITERAL 905
+ 705 0744 C7450089 	               movl $905, (%ebp)
+ 705      030000
+ 706 074b C3       	               ret
+ 707 074c 00       	               .byte 0x00
+ 708 074d 00       	               .byte 0x00
+ 709 074e 00       	               .byte 0x00
+ 710 074f 00       	               .byte 0x00
+ 711 0750 C3       	               ret
+ 712              	L0000038E:                                      # WORD PAD (F98A)
+ 713 0751 83C504   	               addl $4, %ebp                    # PUSH $20, CLITERAL 20
+ 714 0754 C7450014 	               movl $20, (%ebp)
+ 714      000000
+ 715 075b E8FEF9FF 	               call func_FETCH
+ 715      FF
+ 716 0760 83C504   	               addl $4, %ebp                    # PUSH $256, LITERAL 256
+ 717 0763 C7450000 	               movl $256, (%ebp)
+ 717      010000
+ 718 076a E863FAFF 	               call func_SUB
+ 718      FF
+ 719 076f C3       	               ret
+ 720              	L0000039D:                                      # WORD string-nullterm (F970)
+ 721 0770 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 722 0773 C7450000 	               movl $0, (%ebp)
+ 722      000000
+ 723 077a E81BFAFF 	               call func_SWAP
+ 723      FF
+ 724 077f E80CFAFF 	               call func_DUP
+ 724      FF
+ 725 0784 E8DEF9FF 	               call func_CFETCH
+ 725      FF
+ 726 0789 E835FAFF 	               call func_ADD
+ 726      FF
+ 727 078e 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 728 0791 C7450001 	               movl $1, (%ebp)
+ 728      000000
+ 729 0798 E826FAFF 	               call func_ADD
+ 729      FF
+ 730 079d E8DFF9FF 	               call func_CSTORE
+ 730      FF
+ 731 07a2 C3       	               ret
+ 732              	L000003AD:                                      # WORD string-catc (F95A)
+ 733 07a3 E8F2F9FF 	               call func_SWAP
+ 733      FF
+ 734 07a8 E800FAFF 	               call func_OVER
+ 734      FF
+ 735 07ad E8DEF9FF 	               call func_DUP
+ 735      FF
+ 736 07b2 E8B0F9FF 	               call func_CFETCH
+ 736      FF
+GAS LISTING forth.s 			page 18
+
+
+ 737 07b7 E807FAFF 	               call func_ADD
+ 737      FF
+ 738 07bc 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 739 07bf C7450001 	               movl $1, (%ebp)
+ 739      000000
+ 740 07c6 E8F8F9FF 	               call func_ADD
+ 740      FF
+ 741 07cb E8B1F9FF 	               call func_CSTORE
+ 741      FF
+ 742 07d0 E8BBF9FF 	               call func_DUP
+ 742      FF
+ 743 07d5 E88DF9FF 	               call func_CFETCH
+ 743      FF
+ 744 07da 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 745 07dd C7450001 	               movl $1, (%ebp)
+ 745      000000
+ 746 07e4 E8DAF9FF 	               call func_ADD
+ 746      FF
+ 747 07e9 E8ACF9FF 	               call func_SWAP
+ 747      FF
+ 748 07ee E88EF9FF 	               call func_CSTORE
+ 748      FF
+ 749 07f3 C3       	               ret
+ 750              	L000003C3:                                      # WORD string-copy (F944)
+ 751 07f4 E8F7F9FF 	               call func_DTOR                   # DTOR
+ 751      FF
+ 752 07f9 E892F9FF 	               call func_DUP
+ 752      FF
+ 753 07fe E864F9FF 	               call func_CFETCH
+ 753      FF
+ 754 0803 E8A5F9FF 	               call func_OVER
+ 754      FF
+ 755 0808 E8B6F9FF 	               call func_ADD
+ 755      FF
+ 756 080d 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 757 0810 C7450001 	               movl $1, (%ebp)
+ 757      000000
+ 758 0817 E8A7F9FF 	               call func_ADD
+ 758      FF
+ 759 081c E879F9FF 	               call func_SWAP
+ 759      FF
+ 760 0821 E887F9FF 	L000003D1:     call func_OVER
+ 760      FF
+ 761 0826 E882F9FF 	               call func_OVER
+ 761      FF
+ 762 082b E840F8FF 	               call func_EQ                     # EQ
+ 762      FF
+ 763 0830 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 764 0833 83ED04   	               subl $4, %ebp
+ 765 0836 39050000 	               cmp %eax, 0
+ 765      0000
+ 766 083c 7411     	               jz L000003E3
+ 767 083e 83ED04   	               subl $4, %ebp                    # DROP
+ 768 0841 83ED04   	               subl $4, %ebp                    # DROP
+ 769 0844 E8CCF9FF 	               call func_RTOD                   # RTOD
+ 769      FF
+ 770 0849 83ED04   	               subl $4, %ebp                    # DROP
+GAS LISTING forth.s 			page 19
+
+
+ 771 084c C3       	               ret
+ 772 084d EB46     	               jmp L000003F1                    # JMP
+ 773 084f E83CF9FF 	L000003E3:     call func_DUP
+ 773      FF
+ 774 0854 E80EF9FF 	               call func_CFETCH
+ 774      FF
+ 775 0859 E8B7F9FF 	               call func_RTOD                   # RTOD
+ 775      FF
+ 776 085e E82DF9FF 	               call func_DUP
+ 776      FF
+ 777 0863 E888F9FF 	               call func_DTOR                   # DTOR
+ 777      FF
+ 778 0868 E814F9FF 	               call func_CSTORE
+ 778      FF
+ 779 086d E8A3F9FF 	               call func_RTOD                   # RTOD
+ 779      FF
+ 780 0872 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 781 0875 C7450001 	               movl $1, (%ebp)
+ 781      000000
+ 782 087c E842F9FF 	               call func_ADD
+ 782      FF
+ 783 0881 E86AF9FF 	               call func_DTOR                   # DTOR
+ 783      FF
+ 784 0886 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 785 0889 C7450001 	               movl $1, (%ebp)
+ 785      000000
+ 786 0890 E82EF9FF 	               call func_ADD
+ 786      FF
+ 787 0895 EB8A     	L000003F1:     jmp L000003D1                    # JMP
+ 788 0897 C3       	               ret
+ 789              	L000003F7:                                      # WORD string-popc (F92E)
+ 790 0898 E8F3F8FF 	               call func_DUP
+ 790      FF
+ 791 089d E8C5F8FF 	               call func_CFETCH
+ 791      FF
+ 792 08a2 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 793 08a5 83ED04   	               subl $4, %ebp
+ 794 08a8 39050000 	               cmp %eax, 0
+ 794      0000
+ 795 08ae 7448     	               jz L00000416
+ 796 08b0 E8DBF8FF 	               call func_DUP
+ 796      FF
+ 797 08b5 E8ADF8FF 	               call func_CFETCH
+ 797      FF
+ 798 08ba 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 799 08bd C7450001 	               movl $1, (%ebp)
+ 799      000000
+ 800 08c4 E809F9FF 	               call func_SUB
+ 800      FF
+ 801 08c9 E8DFF8FF 	               call func_OVER
+ 801      FF
+ 802 08ce E8AEF8FF 	               call func_CSTORE
+ 802      FF
+ 803 08d3 E8B8F8FF 	               call func_DUP
+ 803      FF
+ 804 08d8 E88AF8FF 	               call func_CFETCH
+ 804      FF
+GAS LISTING forth.s 			page 20
+
+
+ 805 08dd E8E1F8FF 	               call func_ADD
+ 805      FF
+ 806 08e2 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 807 08e5 C7450001 	               movl $1, (%ebp)
+ 807      000000
+ 808 08ec E8D2F8FF 	               call func_ADD
+ 808      FF
+ 809 08f1 E871F8FF 	               call func_CFETCH
+ 809      FF
+ 810 08f6 EB0D     	               jmp L00000419                    # JMP
+ 811 08f8 83ED04   	L00000416:     subl $4, %ebp                    # DROP
+ 812 08fb 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 813 08fe C7450000 	               movl $0, (%ebp)
+ 813      000000
+ 814 0905 C3       	L00000419:     ret
+ 815              	L0000041A:                                      # WORD BETWEEN (F91C)
+ 816 0906 83C504   	               addl $4, %ebp                    # PUSH $2, CLITERAL 2
+ 817 0909 C7450002 	               movl $2, (%ebp)
+ 817      000000
+ 818              	               # PICK
+ 819 0910 E89BF7FF 	               call func_LT                     # LT
+ 819      FF
+ 820 0915 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 821 0918 83ED04   	               subl $4, %ebp
+ 822 091b 39050000 	               cmp %eax, 0
+ 822      0000
+ 823 0921 7411     	               jz L0000042D
+ 824 0923 83ED04   	               subl $4, %ebp                    # DROP
+ 825 0926 83ED04   	               subl $4, %ebp                    # DROP
+ 826 0929 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 827 092c C7450000 	               movl $0, (%ebp)
+ 827      000000
+ 828 0933 C3       	               ret
+ 829 0934 E877F7FF 	L0000042D:     call func_LT                     # LT
+ 829      FF
+ 830 0939 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 831 093c C7450000 	               movl $0, (%ebp)
+ 831      000000
+ 832 0943 E828F7FF 	               call func_EQ                     # EQ
+ 832      FF
+ 833 0948 C3       	               ret
+ 834              	L00000432:                                      # WORD stdin-getline (F904)
+ 835 0949 E803FEFF 	               call L0000038E
+ 835      FF
+ 836 094e 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 837 0951 C7450000 	               movl $0, (%ebp)
+ 837      000000
+ 838 0958 E850F8FF 	               call func_OVER
+ 838      FF
+ 839 095d E810F8FF 	               call func_STORE
+ 839      FF
+ 840 0962 E889F8FF 	               call func_DTOR                   # DTOR
+ 840      FF
+ 841              	L00000441:                                      # GETCH (TODO)
+ 842 0967 E824F8FF 	               call func_DUP
+ 842      FF
+ 843 096c 83C504   	               addl $4, %ebp                    # PUSH $3, CLITERAL 3
+GAS LISTING forth.s 			page 21
+
+
+ 844 096f C7450003 	               movl $3, (%ebp)
+ 844      000000
+ 845 0976 E8F5F6FF 	               call func_EQ                     # EQ
+ 845      FF
+ 846 097b 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 847 097e 83ED04   	               subl $4, %ebp
+ 848 0981 39050000 	               cmp %eax, 0
+ 848      0000
+ 849 0987 740A     	               jz L00000461
+ 850              	                                                # SLITERAL (044c) [<CTRL>-C]
+ 851              	               #jmp L5254433C                    # JMP
+ 852              	               #.byte 0x4c
+ 853              	               #.byte 0x3e
+ 854              	               #.byte 0x2d
+ 855              	               #.byte 0x43
+ 856              	               #.byte 0x00
+ 857 0989 E812FDFF 	               call L00000344
+ 857      FF
+ 858 098e E82CFDFF 	               call L00000350
+ 858      FF
+ 859              	                                                # BYE (TODO)
+ 860 0993 E8F8F7FF 	L00000461:     call func_DUP
+ 860      FF
+ 861 0998 83C504   	               addl $4, %ebp                    # PUSH $13, CLITERAL 13
+ 862 099b C745000D 	               movl $13, (%ebp)
+ 862      000000
+ 863 09a2 E8C9F6FF 	               call func_EQ                     # EQ
+ 863      FF
+ 864 09a7 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 865 09aa 83ED04   	               subl $4, %ebp
+ 866 09ad 39050000 	               cmp %eax, 0
+ 866      0000
+ 867 09b3 7418     	               jz L00000470
+ 868 09b5 83ED04   	               subl $4, %ebp                    # DROP
+ 869 09b8 E858F8FF 	               call func_RTOD                   # RTOD
+ 869      FF
+ 870 09bd 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 871 09c0 C7450020 	               movl $32, (%ebp)
+ 871      000000
+ 872 09c7 E870F7FF 	               call func_EMIT                   # EMIT
+ 872      FF
+ 873 09cc C3       	               ret
+ 874 09cd E8BEF7FF 	L00000470:     call func_DUP
+ 874      FF
+ 875 09d2 83C504   	               addl $4, %ebp                    # PUSH $9, CLITERAL 9
+ 876 09d5 C7450009 	               movl $9, (%ebp)
+ 876      000000
+ 877 09dc E88FF6FF 	               call func_EQ                     # EQ
+ 877      FF
+ 878 09e1 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 879 09e4 83ED04   	               subl $4, %ebp
+ 880 09e7 39050000 	               cmp %eax, 0
+ 880      0000
+ 881 09ed 740D     	               jz L0000047C
+ 882 09ef 83ED04   	               subl $4, %ebp                    # DROP
+ 883 09f2 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 884 09f5 C7450020 	               movl $32, (%ebp)
+GAS LISTING forth.s 			page 22
+
+
+ 884      000000
+ 885 09fc E88FF7FF 	L0000047C:     call func_DUP
+ 885      FF
+ 886 0a01 83C504   	               addl $4, %ebp                    # PUSH $8, CLITERAL 8
+ 887 0a04 C7450008 	               movl $8, (%ebp)
+ 887      000000
+ 888 0a0b E860F6FF 	               call func_EQ                     # EQ
+ 888      FF
+ 889 0a10 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 890 0a13 83ED04   	               subl $4, %ebp
+ 891 0a16 39050000 	               cmp %eax, 0
+ 891      0000
+ 892 0a1c 7437     	               jz L00000499
+ 893 0a1e E8F2F7FF 	               call func_RTOD                   # RTOD
+ 893      FF
+ 894 0a23 E868F7FF 	               call func_DUP
+ 894      FF
+ 895 0a28 E8C3F7FF 	               call func_DTOR                   # DTOR
+ 895      FF
+ 896 0a2d E866FEFF 	               call L000003F7
+ 896      FF
+ 897 0a32 83ED04   	               subl $4, %ebp                    # DROP
+ 898 0a35 E856F7FF 	               call func_DUP
+ 898      FF
+ 899 0a3a E8FDF6FF 	               call func_EMIT                   # EMIT
+ 899      FF
+ 900 0a3f 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 901 0a42 C7450020 	               movl $32, (%ebp)
+ 901      000000
+ 902 0a49 E8EEF6FF 	               call func_EMIT                   # EMIT
+ 902      FF
+ 903 0a4e E8E9F6FF 	               call func_EMIT                   # EMIT
+ 903      FF
+ 904 0a53 EB4F     	               jmp L000004B8                    # JMP
+ 905 0a55 E836F7FF 	L00000499:     call func_DUP
+ 905      FF
+ 906 0a5a 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 907 0a5d C7450020 	               movl $32, (%ebp)
+ 907      000000
+ 908 0a64 83C504   	               addl $4, %ebp                    # PUSH $127, CLITERAL 127
+ 909 0a67 C745007F 	               movl $127, (%ebp)
+ 909      000000
+ 910 0a6e E893FEFF 	               call L0000041A
+ 910      FF
+ 911 0a73 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 912 0a76 83ED04   	               subl $4, %ebp
+ 913 0a79 39050000 	               cmp %eax, 0
+ 913      0000
+ 914 0a7f 7420     	               jz L000004B7
+ 915 0a81 E80AF7FF 	               call func_DUP
+ 915      FF
+ 916 0a86 E8B1F6FF 	               call func_EMIT                   # EMIT
+ 916      FF
+ 917 0a8b E885F7FF 	               call func_RTOD                   # RTOD
+ 917      FF
+ 918 0a90 E8FBF6FF 	               call func_DUP
+ 918      FF
+GAS LISTING forth.s 			page 23
+
+
+ 919 0a95 E856F7FF 	               call func_DTOR                   # DTOR
+ 919      FF
+ 920 0a9a E804FDFF 	               call L000003AD
+ 920      FF
+ 921 0a9f EB03     	               jmp L000004B8                    # JMP
+ 922 0aa1 83ED04   	L000004B7:     subl $4, %ebp                    # DROP
+ 923 0aa4 E9BEFEFF 	L000004B8:     jmp L00000441                    # JMP
+ 923      FF
+ 924 0aa9 C3       	               ret
+ 925              	L000004BE:                                      # WORD file-getLine (F8ED)
+ 926 0aaa E8A2FCFF 	               call L0000038E
+ 926      FF
+ 927 0aaf 83C504   	               addl $4, %ebp                    # PUSH $200, CLITERAL 200
+ 928 0ab2 C74500C8 	               movl $200, (%ebp)
+ 928      000000
+ 929 0ab9 E883FCFF 	               call L0000037E
+ 929      FF
+ 930 0abe E89BF6FF 	               call func_FETCH
+ 930      FF
+ 931              	                                                # FREADLINE (TODO)
+ 932 0ac3 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 933 0ac6 C7450000 	               movl $0, (%ebp)
+ 933      000000
+ 934 0acd E89EF5FF 	               call func_EQ                     # EQ
+ 934      FF
+ 935 0ad2 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 936 0ad5 83ED04   	               subl $4, %ebp
+ 937 0ad8 39050000 	               cmp %eax, 0
+ 937      0000
+ 938 0ade 7420     	               jz L000004ED
+ 939 0ae0 E85CFCFF 	               call L0000037E
+ 939      FF
+ 940 0ae5 E874F6FF 	               call func_FETCH
+ 940      FF
+ 941              	                                                # FCLOSE (TODO)
+ 942 0aea 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 943 0aed C7450000 	               movl $0, (%ebp)
+ 943      000000
+ 944 0af4 E848FCFF 	               call L0000037E
+ 944      FF
+ 945 0af9 E874F6FF 	               call func_STORE
+ 945      FF
+ 946 0afe EB1E     	               jmp L000004FF                    # JMP
+ 947 0b00 83C504   	L000004ED:     addl $4, %ebp                    # PUSH $46, CLITERAL 46
+ 948 0b03 C745002E 	               movl $46, (%ebp)
+ 948      000000
+ 949 0b0a E82DF6FF 	               call func_EMIT                   # EMIT
+ 949      FF
+ 950 0b0f E83DFCFF 	               call L0000038E
+ 950      FF
+ 951 0b14 E887FBFF 	               call L00000344
+ 951      FF
+ 952 0b19 E8A1FBFF 	               call L00000350
+ 952      FF
+ 953 0b1e E82EFCFF 	L000004FF:     call L0000038E
+ 953      FF
+ 954 0b23 C3       	               ret
+GAS LISTING forth.s 			page 24
+
+
+ 955              	L00000505:                                      # WORD get-line (F8DA)
+ 956 0b24 E818FCFF 	               call L0000037E
+ 956      FF
+ 957 0b29 E830F6FF 	               call func_FETCH
+ 957      FF
+ 958 0b2e 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 959 0b31 83ED04   	               subl $4, %ebp
+ 960 0b34 39050000 	               cmp %eax, 0
+ 960      0000
+ 961 0b3a 7407     	               jz L0000051F
+ 962 0b3c E869FFFF 	               call L000004BE
+ 962      FF
+ 963 0b41 EB05     	               jmp L00000524                    # JMP
+ 964 0b43 E801FEFF 	L0000051F:     call L00000432
+ 964      FF
+ 965 0b48 C3       	L00000524:     ret
+ 966              	L00000525:                                      # WORD skip-ws (F8C8)
+ 967 0b49 E842F6FF 	L0000052A:     call func_DUP
+ 967      FF
+ 968 0b4e E814F6FF 	               call func_CFETCH
+ 968      FF
+ 969 0b53 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 970 0b56 C7450001 	               movl $1, (%ebp)
+ 970      000000
+ 971 0b5d 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 972 0b60 C7450020 	               movl $32, (%ebp)
+ 972      000000
+ 973 0b67 E89AFDFF 	               call L0000041A
+ 973      FF
+ 974 0b6c 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 975 0b6f 83ED04   	               subl $4, %ebp
+ 976 0b72 39050000 	               cmp %eax, 0
+ 976      0000
+ 977 0b78 7411     	               jz L00000542
+ 978 0b7a 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 979 0b7d C7450001 	               movl $1, (%ebp)
+ 979      000000
+ 980 0b84 E83AF6FF 	               call func_ADD
+ 980      FF
+ 981 0b89 EB01     	               jmp L00000543                    # JMP
+ 982 0b8b C3       	L00000542:     ret
+ 983 0b8c EBBB     	L00000543:     jmp L0000052A                    # JMP
+ 984 0b8e C3       	               ret
+ 985              	L00000549:                                      # WORD get-word (F8B5)
+ 986 0b8f 83C504   	               addl $4, %ebp                    # PUSH $16, CLITERAL 16
+ 987 0b92 C7450010 	               movl $16, (%ebp)
+ 987      000000
+ 988 0b99 E8C0F5FF 	               call func_FETCH
+ 988      FF
+ 989 0b9e 83C504   	               addl $4, %ebp                    # PUSH $256, LITERAL 256
+ 990 0ba1 C7450000 	               movl $256, (%ebp)
+ 990      010000
+ 991 0ba8 E816F6FF 	               call func_ADD
+ 991      FF
+ 992 0bad E8DEF5FF 	               call func_DUP
+ 992      FF
+ 993 0bb2 E839F6FF 	               call func_DTOR                   # DTOR
+GAS LISTING forth.s 			page 25
+
+
+ 993      FF
+ 994 0bb7 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 995 0bba C7450000 	               movl $0, (%ebp)
+ 995      000000
+ 996 0bc1 E8D4F5FF 	               call func_SWAP
+ 996      FF
+ 997 0bc6 E8A7F5FF 	               call func_STORE
+ 997      FF
+ 998 0bcb E8C0F5FF 	L0000055D:     call func_DUP
+ 998      FF
+ 999 0bd0 E892F5FF 	               call func_CFETCH
+ 999      FF
+ 1000 0bd5 E8B6F5FF 	               call func_DUP
+ 1000      FF
+ 1001 0bda 83C504   	               addl $4, %ebp                    # PUSH $33, CLITERAL 33
+ 1002 0bdd C7450021 	               movl $33, (%ebp)
+ 1002      000000
+ 1003 0be4 E8C7F4FF 	               call func_LT                     # LT
+ 1003      FF
+ 1004 0be9 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1005 0bec 83ED04   	               subl $4, %ebp
+ 1006 0bef 39050000 	               cmp %eax, 0
+ 1006      0000
+ 1007 0bf5 7424     	               jz L00000579
+ 1008 0bf7 83ED04   	               subl $4, %ebp                    # DROP
+ 1009 0bfa E816F6FF 	               call func_RTOD                   # RTOD
+ 1009      FF
+ 1010 0bff E88CF5FF 	               call func_DUP
+ 1010      FF
+ 1011 0c04 E8E7F5FF 	               call func_DTOR                   # DTOR
+ 1011      FF
+ 1012 0c09 E862FBFF 	               call L0000039D
+ 1012      FF
+ 1013 0c0e E802F6FF 	               call func_RTOD                   # RTOD
+ 1013      FF
+ 1014 0c13 E882F5FF 	               call func_SWAP
+ 1014      FF
+ 1015 0c18 C3       	               ret
+ 1016 0c19 EB23     	               jmp L00000584                    # JMP
+ 1017 0c1b E8F5F5FF 	L00000579:     call func_RTOD                   # RTOD
+ 1017      FF
+ 1018 0c20 E86BF5FF 	               call func_DUP
+ 1018      FF
+ 1019 0c25 E8C6F5FF 	               call func_DTOR                   # DTOR
+ 1019      FF
+ 1020 0c2a E874FBFF 	               call L000003AD
+ 1020      FF
+ 1021 0c2f 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1022 0c32 C7450001 	               movl $1, (%ebp)
+ 1022      000000
+ 1023 0c39 E885F5FF 	               call func_ADD
+ 1023      FF
+ 1024 0c3e EB8B     	L00000584:     jmp L0000055D                    # JMP
+ 1025 0c40 C3       	               ret
+ 1026              	L0000058A:                                      # WORD DICT>NEXT (F8A1)
+ 1027 0c41 C3       	               ret
+ 1028              	L00000590:                                      # WORD DICT>XT (F88F)
+GAS LISTING forth.s 			page 26
+
+
+ 1029 0c42 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 1030 0c45 C7450004 	               movl $4, (%ebp)
+ 1030      000000
+ 1031 0c4c E872F5FF 	               call func_ADD
+ 1031      FF
+ 1032 0c51 C3       	               ret
+ 1033              	L00000599:                                      # WORD DICT>FLAGS (F87A)
+ 1034 0c52 83C504   	               addl $4, %ebp                    # PUSH $2, CLITERAL 2
+ 1035 0c55 C7450002 	               movl $2, (%ebp)
+ 1035      000000
+ 1036 0c5c 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 1037 0c5f C7450004 	               movl $4, (%ebp)
+ 1037      000000
+ 1038 0c66 E876F5FF 	               call func_MUL
+ 1038      FF
+ 1039 0c6b E853F5FF 	               call func_ADD
+ 1039      FF
+ 1040 0c70 C3       	               ret
+ 1041              	L000005A5:                                      # WORD DICT>NAME (F866)
+ 1042 0c71 83C504   	               addl $4, %ebp                    # PUSH $2, CLITERAL 2
+ 1043 0c74 C7450002 	               movl $2, (%ebp)
+ 1043      000000
+ 1044 0c7b 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 1045 0c7e C7450004 	               movl $4, (%ebp)
+ 1045      000000
+ 1046 0c85 E857F5FF 	               call func_MUL
+ 1046      FF
+ 1047 0c8a E834F5FF 	               call func_ADD
+ 1047      FF
+ 1048 0c8f 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1049 0c92 C7450001 	               movl $1, (%ebp)
+ 1049      000000
+ 1050 0c99 E825F5FF 	               call func_ADD
+ 1050      FF
+ 1051 0c9e C3       	               ret
+ 1052              	L000005B4:                                      # WORD FLAG_IMMEDIATE (F84D)
+ 1053 0c9f 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1054 0ca2 C7450001 	               movl $1, (%ebp)
+ 1054      000000
+ 1055 0ca9 C3       	               ret
+ 1056              	L000005BC:                                      # WORD FLAG_INLINE (F837)
+ 1057 0caa 83C504   	               addl $4, %ebp                    # PUSH $2, CLITERAL 2
+ 1058 0cad C7450002 	               movl $2, (%ebp)
+ 1058      000000
+ 1059 0cb4 C3       	               ret
+ 1060              	L000005C4:                                      # WORD find-word (F823)
+ 1061 0cb5 E8D6F4FF 	               call func_DUP
+ 1061      FF
+ 1062 0cba E8B1FAFF 	               call L0000039D
+ 1062      FF
+ 1063 0cbf 83C504   	               addl $4, %ebp                    # PUSH $20, CLITERAL 20
+ 1064 0cc2 C7450014 	               movl $20, (%ebp)
+ 1064      000000
+ 1065 0cc9 E890F4FF 	               call func_FETCH
+ 1065      FF
+ 1066 0cce E81DF5FF 	               call func_DTOR                   # DTOR
+ 1066      FF
+GAS LISTING forth.s 			page 27
+
+
+ 1067 0cd3 E83DF5FF 	L000005D3:     call func_RTOD                   # RTOD
+ 1067      FF
+ 1068 0cd8 E8B3F4FF 	               call func_DUP
+ 1068      FF
+ 1069 0cdd E80EF5FF 	               call func_DTOR                   # DTOR
+ 1069      FF
+ 1070 0ce2 E8A9F4FF 	               call func_DUP
+ 1070      FF
+ 1071 0ce7 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1072 0cea 83ED04   	               subl $4, %ebp
+ 1073 0ced 39050000 	               cmp %eax, 0
+ 1073      0000
+ 1074 0cf3 7467     	               jz L000005F6
+ 1075 0cf5 83C504   	               addl $4, %ebp                    # PUSH $2, CLITERAL 2
+ 1076 0cf8 C7450002 	               movl $2, (%ebp)
+ 1076      000000
+ 1077 0cff 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 1078 0d02 C7450004 	               movl $4, (%ebp)
+ 1078      000000
+ 1079 0d09 E8D3F4FF 	               call func_MUL
+ 1079      FF
+ 1080 0d0e E8B0F4FF 	               call func_ADD
+ 1080      FF
+ 1081 0d13 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1082 0d16 C7450001 	               movl $1, (%ebp)
+ 1082      000000
+ 1083 0d1d E8A1F4FF 	               call func_ADD
+ 1083      FF
+ 1084 0d22 E886F4FF 	               call func_OVER
+ 1084      FF
+ 1085 0d27 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 1086 0d2a 83ED04   	               subl $4, %ebp
+ 1087 0d2d 8B5D00   	               movl (%ebp), %ebx                # POP to %ebx
+ 1088 0d30 83ED04   	               subl $4, %ebp
+ 1089              	               # COMPAREI %eax, %ebx
+ 1090 0d33 83C504   	               addl $4, %ebp                    # PUSH %ebx
+ 1091 0d36 895D00   	               movl %ebx, (%ebp)
+ 1092 0d39 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1093 0d3c 83ED04   	               subl $4, %ebp
+ 1094 0d3f 39050000 	               cmp %eax, 0
+ 1094      0000
+ 1095 0d45 7413     	               jz L000005F1
+ 1096 0d47 83ED04   	               subl $4, %ebp                    # DROP
+ 1097 0d4a E8C6F4FF 	               call func_RTOD                   # RTOD
+ 1097      FF
+ 1098 0d4f 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1099 0d52 C7450001 	               movl $1, (%ebp)
+ 1099      000000
+ 1100 0d59 C3       	               ret
+ 1101 0d5a EB19     	L000005F1:     jmp L000005FD                    # JMP
+ 1102 0d5c 83ED04   	L000005F6:     subl $4, %ebp                    # DROP
+ 1103 0d5f 83ED04   	               subl $4, %ebp                    # DROP
+ 1104 0d62 E8AEF4FF 	               call func_RTOD                   # RTOD
+ 1104      FF
+ 1105 0d67 83ED04   	               subl $4, %ebp                    # DROP
+ 1106 0d6a 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1107 0d6d C7450000 	               movl $0, (%ebp)
+GAS LISTING forth.s 			page 28
+
+
+ 1107      000000
+ 1108 0d74 C3       	               ret
+ 1109 0d75 E89BF4FF 	L000005FD:     call func_RTOD                   # RTOD
+ 1109      FF
+ 1110 0d7a E8DFF3FF 	               call func_FETCH
+ 1110      FF
+ 1111 0d7f E86CF4FF 	               call func_DTOR                   # DTOR
+ 1111      FF
+ 1112 0d84 E94AFFFF 	               jmp L000005D3                    # JMP
+ 1112      FF
+ 1113 0d89 C3       	               ret
+ 1114              	L00000606:                                      # WORD define-word (F80D)
+ 1115 0d8a 83C504   	               addl $4, %ebp                    # PUSH $20, CLITERAL 20
+ 1116 0d8d C7450014 	               movl $20, (%ebp)
+ 1116      000000
+ 1117 0d94 E8C5F3FF 	               call func_FETCH
+ 1117      FF
+ 1118 0d99 E80FF4FF 	               call func_OVER
+ 1118      FF
+ 1119 0d9e E8C4F3FF 	               call func_CFETCH
+ 1119      FF
+ 1120 0da3 83C504   	               addl $4, %ebp                    # PUSH $2, CLITERAL 2
+ 1121 0da6 C7450002 	               movl $2, (%ebp)
+ 1121      000000
+ 1122 0dad 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 1123 0db0 C7450004 	               movl $4, (%ebp)
+ 1123      000000
+ 1124 0db7 E825F4FF 	               call func_MUL
+ 1124      FF
+ 1125 0dbc 83C504   	               addl $4, %ebp                    # PUSH $3, CLITERAL 3
+ 1126 0dbf C7450003 	               movl $3, (%ebp)
+ 1126      000000
+ 1127 0dc6 E8F8F3FF 	               call func_ADD
+ 1127      FF
+ 1128 0dcb E8F3F3FF 	               call func_ADD
+ 1128      FF
+ 1129 0dd0 E8FDF3FF 	               call func_SUB
+ 1129      FF
+ 1130 0dd5 E8B6F3FF 	               call func_DUP
+ 1130      FF
+ 1131 0dda E811F4FF 	               call func_DTOR                   # DTOR
+ 1131      FF
+ 1132 0ddf E80CF4FF 	               call func_DTOR                   # DTOR
+ 1132      FF
+ 1133 0de4 83C504   	               addl $4, %ebp                    # PUSH $20, CLITERAL 20
+ 1134 0de7 C7450014 	               movl $20, (%ebp)
+ 1134      000000
+ 1135 0dee E86BF3FF 	               call func_FETCH
+ 1135      FF
+ 1136 0df3 E81DF4FF 	               call func_RTOD                   # RTOD
+ 1136      FF
+ 1137 0df8 E893F3FF 	               call func_DUP
+ 1137      FF
+ 1138 0dfd E8EEF3FF 	               call func_DTOR                   # DTOR
+ 1138      FF
+ 1139 0e02 E86BF3FF 	               call func_STORE
+ 1139      FF
+GAS LISTING forth.s 			page 29
+
+
+ 1140 0e07 E809F4FF 	               call func_RTOD                   # RTOD
+ 1140      FF
+ 1141 0e0c 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 1142 0e0f C7450004 	               movl $4, (%ebp)
+ 1142      000000
+ 1143 0e16 E8A8F3FF 	               call func_ADD
+ 1143      FF
+ 1144 0e1b E8D0F3FF 	               call func_DTOR                   # DTOR
+ 1144      FF
+ 1145 0e20 83C504   	               addl $4, %ebp                    # PUSH $16, CLITERAL 16
+ 1146 0e23 C7450010 	               movl $16, (%ebp)
+ 1146      000000
+ 1147 0e2a E82FF3FF 	               call func_FETCH
+ 1147      FF
+ 1148 0e2f E8E1F3FF 	               call func_RTOD                   # RTOD
+ 1148      FF
+ 1149 0e34 E857F3FF 	               call func_DUP
+ 1149      FF
+ 1150 0e39 E8B2F3FF 	               call func_DTOR                   # DTOR
+ 1150      FF
+ 1151 0e3e E82FF3FF 	               call func_STORE
+ 1151      FF
+ 1152 0e43 E8CDF3FF 	               call func_RTOD                   # RTOD
+ 1152      FF
+ 1153 0e48 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 1154 0e4b C7450004 	               movl $4, (%ebp)
+ 1154      000000
+ 1155 0e52 E86CF3FF 	               call func_ADD
+ 1155      FF
+ 1156 0e57 E894F3FF 	               call func_DTOR                   # DTOR
+ 1156      FF
+ 1157 0e5c 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1158 0e5f C7450000 	               movl $0, (%ebp)
+ 1158      000000
+ 1159 0e66 E8AAF3FF 	               call func_RTOD                   # RTOD
+ 1159      FF
+ 1160 0e6b E820F3FF 	               call func_DUP
+ 1160      FF
+ 1161 0e70 E87BF3FF 	               call func_DTOR                   # DTOR
+ 1161      FF
+ 1162 0e75 E807F3FF 	               call func_CSTORE
+ 1162      FF
+ 1163 0e7a E896F3FF 	               call func_RTOD                   # RTOD
+ 1163      FF
+ 1164 0e7f 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1165 0e82 C7450001 	               movl $1, (%ebp)
+ 1165      000000
+ 1166 0e89 E835F3FF 	               call func_ADD
+ 1166      FF
+ 1167 0e8e E85DF3FF 	               call func_DTOR                   # DTOR
+ 1167      FF
+ 1168 0e93 E87DF3FF 	               call func_RTOD                   # RTOD
+ 1168      FF
+ 1169 0e98 E857F9FF 	               call L000003C3
+ 1169      FF
+ 1170 0e9d E873F3FF 	               call func_RTOD                   # RTOD
+ 1170      FF
+GAS LISTING forth.s 			page 30
+
+
+ 1171 0ea2 83C504   	               addl $4, %ebp                    # PUSH $20, CLITERAL 20
+ 1172 0ea5 C7450014 	               movl $20, (%ebp)
+ 1172      000000
+ 1173 0eac E8C1F2FF 	               call func_STORE
+ 1173      FF
+ 1174 0eb1 C3       	               ret
+ 1175              	L0000064B:                                      # WORD is-num-char? (F7F6)
+ 1176 0eb2 E8D9F2FF 	               call func_DUP
+ 1176      FF
+ 1177 0eb7 83C504   	               addl $4, %ebp                    # PUSH $48, CLITERAL 48
+ 1178 0eba C7450030 	               movl $48, (%ebp)
+ 1178      000000
+ 1179 0ec1 83C504   	               addl $4, %ebp                    # PUSH $57, CLITERAL 57
+ 1180 0ec4 C7450039 	               movl $57, (%ebp)
+ 1180      000000
+ 1181 0ecb E836FAFF 	               call L0000041A
+ 1181      FF
+ 1182 0ed0 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1183 0ed3 83ED04   	               subl $4, %ebp
+ 1184 0ed6 39050000 	               cmp %eax, 0
+ 1184      0000
+ 1185 0edc 741A     	               jz L00000665
+ 1186 0ede 83C504   	               addl $4, %ebp                    # PUSH $48, CLITERAL 48
+ 1187 0ee1 C7450030 	               movl $48, (%ebp)
+ 1187      000000
+ 1188 0ee8 E8E5F2FF 	               call func_SUB
+ 1188      FF
+ 1189 0eed 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1190 0ef0 C7450001 	               movl $1, (%ebp)
+ 1190      000000
+ 1191 0ef7 C3       	               ret
+ 1192 0ef8 83C504   	L00000665:     addl $4, %ebp                    # PUSH $6, CLITERAL 6
+ 1193 0efb C7450006 	               movl $6, (%ebp)
+ 1193      000000
+ 1194 0f02 E860F2FF 	               call func_CFETCH
+ 1194      FF
+ 1195 0f07 83C504   	               addl $4, %ebp                    # PUSH $16, CLITERAL 16
+ 1196 0f0a C7450010 	               movl $16, (%ebp)
+ 1196      000000
+ 1197 0f11 E85AF1FF 	               call func_EQ                     # EQ
+ 1197      FF
+ 1198 0f16 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1199 0f19 83ED04   	               subl $4, %ebp
+ 1200 0f1c 39050000 	               cmp %eax, 0
+ 1200      0000
+ 1201 0f22 0F848C00 	               jz L0000069A
+ 1201      0000
+ 1202 0f28 E863F2FF 	               call func_DUP
+ 1202      FF
+ 1203 0f2d 83C504   	               addl $4, %ebp                    # PUSH $65, CLITERAL 65
+ 1204 0f30 C7450041 	               movl $65, (%ebp)
+ 1204      000000
+ 1205 0f37 83C504   	               addl $4, %ebp                    # PUSH $70, CLITERAL 70
+ 1206 0f3a C7450046 	               movl $70, (%ebp)
+ 1206      000000
+ 1207 0f41 E8C0F9FF 	               call L0000041A
+ 1207      FF
+GAS LISTING forth.s 			page 31
+
+
+ 1208 0f46 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1209 0f49 83ED04   	               subl $4, %ebp
+ 1210 0f4c 39050000 	               cmp %eax, 0
+ 1210      0000
+ 1211 0f52 741A     	               jz L00000685
+ 1212 0f54 83C504   	               addl $4, %ebp                    # PUSH $55, CLITERAL 55
+ 1213 0f57 C7450037 	               movl $55, (%ebp)
+ 1213      000000
+ 1214 0f5e E86FF2FF 	               call func_SUB
+ 1214      FF
+ 1215 0f63 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1216 0f66 C7450001 	               movl $1, (%ebp)
+ 1216      000000
+ 1217 0f6d C3       	               ret
+ 1218 0f6e E81DF2FF 	L00000685:     call func_DUP
+ 1218      FF
+ 1219 0f73 83C504   	               addl $4, %ebp                    # PUSH $97, CLITERAL 97
+ 1220 0f76 C7450061 	               movl $97, (%ebp)
+ 1220      000000
+ 1221 0f7d 83C504   	               addl $4, %ebp                    # PUSH $102, CLITERAL 102
+ 1222 0f80 C7450066 	               movl $102, (%ebp)
+ 1222      000000
+ 1223 0f87 E87AF9FF 	               call L0000041A
+ 1223      FF
+ 1224 0f8c 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1225 0f8f 83ED04   	               subl $4, %ebp
+ 1226 0f92 39050000 	               cmp %eax, 0
+ 1226      0000
+ 1227 0f98 741A     	               jz L0000069A
+ 1228 0f9a 83C504   	               addl $4, %ebp                    # PUSH $87, CLITERAL 87
+ 1229 0f9d C7450057 	               movl $87, (%ebp)
+ 1229      000000
+ 1230 0fa4 E829F2FF 	               call func_SUB
+ 1230      FF
+ 1231 0fa9 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1232 0fac C7450001 	               movl $1, (%ebp)
+ 1232      000000
+ 1233 0fb3 C3       	               ret
+ 1234 0fb4 83ED04   	L0000069A:     subl $4, %ebp                    # DROP
+ 1235 0fb7 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1236 0fba C7450000 	               movl $0, (%ebp)
+ 1236      000000
+ 1237 0fc1 C3       	               ret
+ 1238              	L0000069E:                                      # WORD is-number? (F7E1)
+ 1239 0fc2 E8C9F1FF 	               call func_DUP
+ 1239      FF
+ 1240 0fc7 E8A4F7FF 	               call L0000039D
+ 1240      FF
+ 1241 0fcc 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1242 0fcf C7450001 	               movl $1, (%ebp)
+ 1242      000000
+ 1243 0fd6 E8E8F1FF 	               call func_ADD
+ 1243      FF
+ 1244 0fdb E8B0F1FF 	               call func_DUP
+ 1244      FF
+ 1245 0fe0 E882F1FF 	               call func_CFETCH
+ 1245      FF
+GAS LISTING forth.s 			page 32
+
+
+ 1246 0fe5 83C504   	               addl $4, %ebp                    # PUSH $45, CLITERAL 45
+ 1247 0fe8 C745002D 	               movl $45, (%ebp)
+ 1247      000000
+ 1248 0fef E87CF0FF 	               call func_EQ                     # EQ
+ 1248      FF
+ 1249 0ff4 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1250 0ff7 83ED04   	               subl $4, %ebp
+ 1251 0ffa 39050000 	               cmp %eax, 0
+ 1251      0000
+ 1252 1000 7420     	               jz L000006C1
+ 1253 1002 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1254 1005 C7450001 	               movl $1, (%ebp)
+ 1254      000000
+ 1255 100c E8DFF1FF 	               call func_DTOR                   # DTOR
+ 1255      FF
+ 1256 1011 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1257 1014 C7450001 	               movl $1, (%ebp)
+ 1257      000000
+ 1258 101b E8A3F1FF 	               call func_ADD
+ 1258      FF
+ 1259 1020 EB0F     	               jmp L000006C4                    # JMP
+ 1260 1022 83C504   	L000006C1:     addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1261 1025 C7450000 	               movl $0, (%ebp)
+ 1261      000000
+ 1262 102c E8BFF1FF 	               call func_DTOR                   # DTOR
+ 1262      FF
+ 1263 1031 E85AF1FF 	L000006C4:     call func_DUP
+ 1263      FF
+ 1264 1036 E82CF1FF 	               call func_CFETCH
+ 1264      FF
+ 1265 103b 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1266 103e C7450000 	               movl $0, (%ebp)
+ 1266      000000
+ 1267 1045 E826F0FF 	               call func_EQ                     # EQ
+ 1267      FF
+ 1268 104a 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1269 104d 83ED04   	               subl $4, %ebp
+ 1270 1050 39050000 	               cmp %eax, 0
+ 1270      0000
+ 1271 1056 7416     	               jz L000006D4
+ 1272 1058 83ED04   	               subl $4, %ebp                    # DROP
+ 1273 105b E8B5F1FF 	               call func_RTOD                   # RTOD
+ 1273      FF
+ 1274 1060 83ED04   	               subl $4, %ebp                    # DROP
+ 1275 1063 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1276 1066 C7450000 	               movl $0, (%ebp)
+ 1276      000000
+ 1277 106d C3       	               ret
+ 1278 106e 83C504   	L000006D4:     addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1279 1071 C7450000 	               movl $0, (%ebp)
+ 1279      000000
+ 1280 1078 E873F1FF 	               call func_DTOR                   # DTOR
+ 1280      FF
+ 1281 107d E80EF1FF 	L000006D7:     call func_DUP
+ 1281      FF
+ 1282 1082 E8E0F0FF 	               call func_CFETCH
+ 1282      FF
+GAS LISTING forth.s 			page 33
+
+
+ 1283 1087 E804F1FF 	               call func_DUP
+ 1283      FF
+ 1284 108c 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1285 108f C7450000 	               movl $0, (%ebp)
+ 1285      000000
+ 1286 1096 E8D5EFFF 	               call func_EQ                     # EQ
+ 1286      FF
+ 1287 109b 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1288 109e 83ED04   	               subl $4, %ebp
+ 1289 10a1 39050000 	               cmp %eax, 0
+ 1289      0000
+ 1290 10a7 743D     	               jz L000006F2
+ 1291 10a9 83ED04   	               subl $4, %ebp                    # DROP
+ 1292 10ac 83ED04   	               subl $4, %ebp                    # DROP
+ 1293 10af E861F1FF 	               call func_RTOD                   # RTOD
+ 1293      FF
+ 1294 10b4 E85CF1FF 	               call func_RTOD                   # RTOD
+ 1294      FF
+ 1295 10b9 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1296 10bc 83ED04   	               subl $4, %ebp
+ 1297 10bf 39050000 	               cmp %eax, 0
+ 1297      0000
+ 1298 10c5 7414     	               jz L000006EF
+ 1299 10c7 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1300 10ca C7450000 	               movl $0, (%ebp)
+ 1300      000000
+ 1301 10d1 E8C4F0FF 	               call func_SWAP
+ 1301      FF
+ 1302 10d6 E8F7F0FF 	               call func_SUB
+ 1302      FF
+ 1303 10db 83C504   	L000006EF:     addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1304 10de C7450001 	               movl $1, (%ebp)
+ 1304      000000
+ 1305 10e5 C3       	               ret
+ 1306 10e6 E8C7FDFF 	L000006F2:     call L0000064B
+ 1306      FF
+ 1307 10eb 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1308 10ee 83ED04   	               subl $4, %ebp
+ 1309 10f1 39050000 	               cmp %eax, 0
+ 1309      0000
+ 1310 10f7 7434     	               jz L0000070B
+ 1311 10f9 E817F1FF 	               call func_RTOD                   # RTOD
+ 1311      FF
+ 1312 10fe 83C504   	               addl $4, %ebp                    # PUSH $6, CLITERAL 6
+ 1313 1101 C7450006 	               movl $6, (%ebp)
+ 1313      000000
+ 1314 1108 E85AF0FF 	               call func_CFETCH
+ 1314      FF
+ 1315 110d E8CFF0FF 	               call func_MUL
+ 1315      FF
+ 1316 1112 E8ACF0FF 	               call func_ADD
+ 1316      FF
+ 1317 1117 E8D4F0FF 	               call func_DTOR                   # DTOR
+ 1317      FF
+ 1318 111c 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1319 111f C7450001 	               movl $1, (%ebp)
+ 1319      000000
+GAS LISTING forth.s 			page 34
+
+
+ 1320 1126 E898F0FF 	               call func_ADD
+ 1320      FF
+ 1321 112b EB1E     	               jmp L00000713                    # JMP
+ 1322 112d 83ED04   	L0000070B:     subl $4, %ebp                    # DROP
+ 1323 1130 E8E0F0FF 	               call func_RTOD                   # RTOD
+ 1323      FF
+ 1324 1135 83ED04   	               subl $4, %ebp                    # DROP
+ 1325 1138 E8D8F0FF 	               call func_RTOD                   # RTOD
+ 1325      FF
+ 1326 113d 83ED04   	               subl $4, %ebp                    # DROP
+ 1327 1140 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1328 1143 C7450000 	               movl $0, (%ebp)
+ 1328      000000
+ 1329 114a C3       	               ret
+ 1330 114b E92DFFFF 	L00000713:     jmp L000006D7                    # JMP
+ 1330      FF
+ 1331 1150 C3       	               ret
+ 1332              	L00000719:                                      # WORD >IN (F7D3)
+ 1333 1151 83C504   	               addl $4, %ebp                    # PUSH $1828, LITERAL 1828
+ 1334 1154 C7450024 	               movl $1828, (%ebp)
+ 1334      070000
+ 1335 115b C3       	               ret
+ 1336 115c 00       	               .byte 0x00
+ 1337 115d 00       	               .byte 0x00
+ 1338 115e 00       	               .byte 0x00
+ 1339 115f 00       	               .byte 0x00
+ 1340 1160 C3       	               ret
+ 1341              	L00000729:                                      # WORD CREATE-NAME (F7BD)
+ 1342 1161 E8EBFFFF 	               call L00000719
+ 1342      FF
+ 1343 1166 E8F3EFFF 	               call func_FETCH
+ 1343      FF
+ 1344 116b E8D9F9FF 	               call L00000525
+ 1344      FF
+ 1345 1170 E8DCFFFF 	               call L00000719
+ 1345      FF
+ 1346 1175 E8F8EFFF 	               call func_STORE
+ 1346      FF
+ 1347 117a E8D2FFFF 	               call L00000719
+ 1347      FF
+ 1348 117f E8DAEFFF 	               call func_FETCH
+ 1348      FF
+ 1349 1184 E8DEEFFF 	               call func_CFETCH
+ 1349      FF
+ 1350 1189 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1351 118c C7450000 	               movl $0, (%ebp)
+ 1351      000000
+ 1352 1193 E8D8EEFF 	               call func_EQ                     # EQ
+ 1352      FF
+ 1353 1198 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1354 119b 83ED04   	               subl $4, %ebp
+ 1355 119e 39050000 	               cmp %eax, 0
+ 1355      0000
+ 1356 11a4 7401     	               jz L0000074F
+ 1357 11a6 C3       	               ret
+ 1358 11a7 E8A5FFFF 	L0000074F:     call L00000719
+ 1358      FF
+GAS LISTING forth.s 			page 35
+
+
+ 1359 11ac E8ADEFFF 	               call func_FETCH
+ 1359      FF
+ 1360 11b1 E8D9F9FF 	               call L00000549
+ 1360      FF
+ 1361 11b6 E896FFFF 	               call L00000719
+ 1361      FF
+ 1362 11bb E8B2EFFF 	               call func_STORE
+ 1362      FF
+ 1363 11c0 E8C5FBFF 	               call L00000606
+ 1363      FF
+ 1364 11c5 83C504   	               addl $4, %ebp                    # PUSH $24, CLITERAL 24
+ 1365 11c8 C7450018 	               movl $24, (%ebp)
+ 1365      000000
+ 1366 11cf E89DF0FF 	               call L00000068
+ 1366      FF
+ 1367 11d4 83C504   	               addl $4, %ebp                    # PUSH $20, CLITERAL 20
+ 1368 11d7 C7450014 	               movl $20, (%ebp)
+ 1368      000000
+ 1369 11de E87BEFFF 	               call func_FETCH
+ 1369      FF
+ 1370 11e3 E8CBF0FF 	               call L0000007B
+ 1370      FF
+ 1371 11e8 C3       	               ret
+ 1372              	L00000775:                                      # WORD : (F7B1)
+ 1373 11e9 E873FFFF 	               call L00000729
+ 1373      FF
+ 1374 11ee 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1375 11f1 C7450001 	               movl $1, (%ebp)
+ 1375      000000
+ 1376 11f8 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 1377 11fb C7450020 	               movl $32, (%ebp)
+ 1377      000000
+ 1378 1202 E86BEFFF 	               call func_STORE
+ 1378      FF
+ 1379 1207 C3       	               ret
+ 1380              	L00000785:                                      # WORD ; (F7A5)
+ 1381 1208 E898F1FF 	               call L00000115
+ 1381      FF
+ 1382 120d 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1383 1210 C7450000 	               movl $0, (%ebp)
+ 1383      000000
+ 1384 1217 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 1385 121a C7450020 	               movl $32, (%ebp)
+ 1385      000000
+ 1386 1221 E84CEFFF 	               call func_STORE
+ 1386      FF
+ 1387 1226 C3       	               ret
+ 1388              	L00000795:                                      # WORD execute-word (F78E)
+ 1389 1227 E864EFFF 	               call func_DUP
+ 1389      FF
+ 1390 122c E891FDFF 	               call L0000069E
+ 1390      FF
+ 1391 1231 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1392 1234 83ED04   	               subl $4, %ebp
+ 1393 1237 39050000 	               cmp %eax, 0
+ 1393      0000
+ 1394 123d 745E     	               jz L000007D6
+GAS LISTING forth.s 			page 36
+
+
+ 1395 123f E856EFFF 	               call func_SWAP
+ 1395      FF
+ 1396 1244 83ED04   	               subl $4, %ebp                    # DROP
+ 1397 1247 E8F5F2FF 	               call L0000026C
+ 1397      FF
+ 1398 124c 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1399 124f 83ED04   	               subl $4, %ebp
+ 1400 1252 39050000 	               cmp %eax, 0
+ 1400      0000
+ 1401 1258 7442     	               jz L000007D5
+ 1402 125a E831EFFF 	               call func_DUP
+ 1402      FF
+ 1403 125f 83C504   	               addl $4, %ebp                    # PUSH $255, CLITERAL 255
+ 1404 1262 C74500FF 	               movl $255, (%ebp)
+ 1404      000000
+ 1405 1269 E865EEFF 	               call func_GT                     # GT
+ 1405      FF
+ 1406 126e 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1407 1271 83ED04   	               subl $4, %ebp
+ 1408 1274 39050000 	               cmp %eax, 0
+ 1408      0000
+ 1409 127a 740C     	               jz L000007C9
+ 1410 127c E8A8F0FF 	               call L000000A4
+ 1410      FF
+ 1411 1281 E82DF0FF 	               call L0000007B
+ 1411      FF
+ 1412 1286 EB14     	               jmp L000007D5                    # JMP
+ 1413 1288 83C504   	L000007C9:     addl $4, %ebp                    # PUSH $14, CLITERAL 14
+ 1414 128b C745000E 	               movl $14, (%ebp)
+ 1414      000000
+ 1415 1292 E8DAEFFF 	               call L00000068
+ 1415      FF
+ 1416 1297 E8D5EFFF 	               call L00000068
+ 1416      FF
+ 1417 129c C3       	L000007D5:     ret
+ 1418 129d E8EEEEFF 	L000007D6:     call func_DUP
+ 1418      FF
+ 1419 12a2 E80EFAFF 	               call L000005C4
+ 1419      FF
+ 1420 12a7 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1421 12aa 83ED04   	               subl $4, %ebp
+ 1422 12ad 39050000 	               cmp %eax, 0
+ 1422      0000
+ 1423 12b3 0F842301 	               jz L00000845
+ 1423      0000
+ 1424 12b9 E8DCEEFF 	               call func_SWAP
+ 1424      FF
+ 1425 12be 83ED04   	               subl $4, %ebp                    # DROP
+ 1426 12c1 E87BF2FF 	               call L0000026C
+ 1426      FF
+ 1427 12c6 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1428 12c9 83ED04   	               subl $4, %ebp
+ 1429 12cc 39050000 	               cmp %eax, 0
+ 1429      0000
+ 1430 12d2 0F84E900 	               jz L0000083E
+ 1430      0000
+ 1431 12d8 E8B3EEFF 	               call func_DUP
+GAS LISTING forth.s 			page 37
+
+
+ 1431      FF
+ 1432 12dd 83C504   	               addl $4, %ebp                    # PUSH $2, CLITERAL 2
+ 1433 12e0 C7450002 	               movl $2, (%ebp)
+ 1433      000000
+ 1434 12e7 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 1435 12ea C7450004 	               movl $4, (%ebp)
+ 1435      000000
+ 1436 12f1 E8EBEEFF 	               call func_MUL
+ 1436      FF
+ 1437 12f6 E8C8EEFF 	               call func_ADD
+ 1437      FF
+ 1438 12fb E867EEFF 	               call func_CFETCH
+ 1438      FF
+ 1439 1300 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1440 1303 C7450001 	               movl $1, (%ebp)
+ 1440      000000
+ 1441 130a E861EDFF 	               call func_EQ                     # EQ
+ 1441      FF
+ 1442 130f 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1443 1312 83ED04   	               subl $4, %ebp
+ 1444 1315 39050000 	               cmp %eax, 0
+ 1444      0000
+ 1445 131b 741F     	               jz L00000808
+ 1446 131d 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 1447 1320 C7450004 	               movl $4, (%ebp)
+ 1447      000000
+ 1448 1327 E897EEFF 	               call func_ADD
+ 1448      FF
+ 1449 132c E82DEEFF 	               call func_FETCH
+ 1449      FF
+ 1450 1331 E8BAEEFF 	               call func_DTOR                   # DTOR
+ 1450      FF
+ 1451 1336 C3       	               ret
+ 1452 1337 E9830000 	               jmp L00000839                    # JMP
+ 1452      00
+ 1453 133c E84FEEFF 	L00000808:     call func_DUP
+ 1453      FF
+ 1454 1341 83C504   	               addl $4, %ebp                    # PUSH $2, CLITERAL 2
+ 1455 1344 C7450002 	               movl $2, (%ebp)
+ 1455      000000
+ 1456 134b 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 1457 134e C7450004 	               movl $4, (%ebp)
+ 1457      000000
+ 1458 1355 E887EEFF 	               call func_MUL
+ 1458      FF
+ 1459 135a E864EEFF 	               call func_ADD
+ 1459      FF
+ 1460 135f E803EEFF 	               call func_CFETCH
+ 1460      FF
+ 1461 1364 83C504   	               addl $4, %ebp                    # PUSH $2, CLITERAL 2
+ 1462 1367 C7450002 	               movl $2, (%ebp)
+ 1462      000000
+ 1463 136e E8FDECFF 	               call func_EQ                     # EQ
+ 1463      FF
+ 1464 1373 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1465 1376 83ED04   	               subl $4, %ebp
+ 1466 1379 39050000 	               cmp %eax, 0
+GAS LISTING forth.s 			page 38
+
+
+ 1466      0000
+ 1467 137f 7420     	               jz L0000082B
+ 1468 1381 E80FF0FF 	               call L00000108
+ 1468      FF
+ 1469 1386 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 1470 1389 C7450004 	               movl $4, (%ebp)
+ 1470      000000
+ 1471 1390 E82EEEFF 	               call func_ADD
+ 1471      FF
+ 1472 1395 E8C4EDFF 	               call func_FETCH
+ 1472      FF
+ 1473 139a E814EFFF 	               call L0000007B
+ 1473      FF
+ 1474 139f EB1E     	               jmp L00000839                    # JMP
+ 1475 13a1 E8EFEFFF 	L0000082B:     call L00000108
+ 1475      FF
+ 1476 13a6 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 1477 13a9 C7450004 	               movl $4, (%ebp)
+ 1477      000000
+ 1478 13b0 E80EEEFF 	               call func_ADD
+ 1478      FF
+ 1479 13b5 E8A4EDFF 	               call func_FETCH
+ 1479      FF
+ 1480 13ba E8F4EEFF 	               call L0000007B
+ 1480      FF
+ 1481 13bf EB1A     	L00000839:     jmp L00000844                    # JMP
+ 1482 13c1 83C504   	L0000083E:     addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 1483 13c4 C7450004 	               movl $4, (%ebp)
+ 1483      000000
+ 1484 13cb E8F3EDFF 	               call func_ADD
+ 1484      FF
+ 1485 13d0 E889EDFF 	               call func_FETCH
+ 1485      FF
+ 1486 13d5 E816EEFF 	               call func_DTOR                   # DTOR
+ 1486      FF
+ 1487 13da C3       	               ret
+ 1488 13db C3       	L00000844:     ret
+ 1489 13dc E8BFF2FF 	L00000845:     call L00000344
+ 1489      FF
+ 1490 13e1 E8D9F2FF 	               call L00000350
+ 1490      FF
+ 1491 13e6 83C504   	               addl $4, %ebp                    # PUSH $63, CLITERAL 63
+ 1492 13e9 C745003F 	               movl $63, (%ebp)
+ 1492      000000
+ 1493 13f0 E89BEDFF 	               call func_DUP
+ 1493      FF
+ 1494 13f5 E842EDFF 	               call func_EMIT                   # EMIT
+ 1494      FF
+ 1495 13fa E83DEDFF 	               call func_EMIT                   # EMIT
+ 1495      FF
+ 1496 13ff E83DF3FF 	               call L0000037E
+ 1496      FF
+ 1497 1404 E855EDFF 	               call func_FETCH
+ 1497      FF
+ 1498 1409 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1499 140c 83ED04   	               subl $4, %ebp
+ 1500 140f 39050000 	               cmp %eax, 0
+GAS LISTING forth.s 			page 39
+
+
+ 1500      0000
+ 1501 1415 741E     	               jz L0000086E
+ 1502 1417 E825F3FF 	               call L0000037E
+ 1502      FF
+ 1503 141c E83DEDFF 	               call func_FETCH
+ 1503      FF
+ 1504              	                                                # FCLOSE (TODO)
+ 1505 1421 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1506 1424 C7450000 	               movl $0, (%ebp)
+ 1506      000000
+ 1507 142b E811F3FF 	               call L0000037E
+ 1507      FF
+ 1508 1430 E83DEDFF 	               call func_STORE
+ 1508      FF
+ 1509 1435 83C504   	L0000086E:     addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1510 1438 C7450000 	               movl $0, (%ebp)
+ 1510      000000
+ 1511 143f 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 1512 1442 C7450020 	               movl $32, (%ebp)
+ 1512      000000
+ 1513 1449 E824EDFF 	               call func_STORE
+ 1513      FF
+ 1514 144e C3       	               ret
+ 1515              	L00000874:                                      # WORD execute-line (F777)
+ 1516 144f E8FDFCFF 	L00000879:     call L00000719
+ 1516      FF
+ 1517 1454 E805EDFF 	               call func_FETCH
+ 1517      FF
+ 1518 1459 E8EBF6FF 	               call L00000525
+ 1518      FF
+ 1519 145e E8EEFCFF 	               call L00000719
+ 1519      FF
+ 1520 1463 E80AEDFF 	               call func_STORE
+ 1520      FF
+ 1521 1468 E8E4FCFF 	               call L00000719
+ 1521      FF
+ 1522 146d E8ECECFF 	               call func_FETCH
+ 1522      FF
+ 1523 1472 E8F0ECFF 	               call func_CFETCH
+ 1523      FF
+ 1524 1477 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1525 147a C7450000 	               movl $0, (%ebp)
+ 1525      000000
+ 1526 1481 E8EAEBFF 	               call func_EQ                     # EQ
+ 1526      FF
+ 1527 1486 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1528 1489 83ED04   	               subl $4, %ebp
+ 1529 148c 39050000 	               cmp %eax, 0
+ 1529      0000
+ 1530 1492 7401     	               jz L0000089A
+ 1531 1494 C3       	               ret
+ 1532 1495 E8B7FCFF 	L0000089A:     call L00000719
+ 1532      FF
+ 1533 149a E8BFECFF 	               call func_FETCH
+ 1533      FF
+ 1534 149f E8EBF6FF 	               call L00000549
+ 1534      FF
+GAS LISTING forth.s 			page 40
+
+
+ 1535 14a4 E8A8FCFF 	               call L00000719
+ 1535      FF
+ 1536 14a9 E8C4ECFF 	               call func_STORE
+ 1536      FF
+ 1537 14ae E874FDFF 	               call L00000795
+ 1537      FF
+ 1538 14b3 EB9A     	               jmp L00000879                    # JMP
+ 1539 14b5 C3       	               ret
+ 1540              	L000008B6:                                      # WORD ok (F76A)
+ 1541 14b6 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 1542 14b9 C7450020 	               movl $32, (%ebp)
+ 1542      000000
+ 1543 14c0 E899ECFF 	               call func_FETCH
+ 1543      FF
+ 1544 14c5 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1545 14c8 C7450000 	               movl $0, (%ebp)
+ 1545      000000
+ 1546 14cf E89CEBFF 	               call func_EQ                     # EQ
+ 1546      FF
+ 1547 14d4 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1548 14d7 83ED04   	               subl $4, %ebp
+ 1549 14da 39050000 	               cmp %eax, 0
+ 1549      0000
+ 1550 14e0 7456     	               jz L00000904
+ 1551 14e2 E85AF2FF 	               call L0000037E
+ 1551      FF
+ 1552 14e7 E872ECFF 	               call func_FETCH
+ 1552      FF
+ 1553 14ec 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1554 14ef C7450000 	               movl $0, (%ebp)
+ 1554      000000
+ 1555 14f6 E875EBFF 	               call func_EQ                     # EQ
+ 1555      FF
+ 1556 14fb 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1557 14fe 83ED04   	               subl $4, %ebp
+ 1558 1501 39050000 	               cmp %eax, 0
+ 1558      0000
+ 1559 1507 7419     	               jz L000008EE
+ 1560              	                                                # SLITERAL (08d5) [ Ok]
+ 1561 1509 E864ECFF 	               call func_STORE
+ 1561      FF
+ 1562              	                                                # FCLOSE (TODO)
+ 1563 150e 4F       	               .byte 0x4f
+ 1564 150f 6B       	               .byte 0x6b
+ 1565 1510 00       	               .byte 0x00
+ 1566 1511 E88AF1FF 	               call L00000344
+ 1566      FF
+ 1567 1516 E8A4F1FF 	               call L00000350
+ 1567      FF
+ 1568 151b E802F2FF 	               call L00000372
+ 1568      FF
+ 1569 1520 EB14     	               jmp L000008FF                    # JMP
+ 1570              	L000008EE:                                      # SLITERAL (08ef) [.ok.]
+ 1571 1522 E873ECFF 	               call func_SWAP
+ 1571      FF
+ 1572 1527 2E       	               .byte 0x2e
+ 1573 1528 6F       	               .byte 0x6f
+GAS LISTING forth.s 			page 41
+
+
+ 1574 1529 6B       	               .byte 0x6b
+ 1575 152a 2E       	               .byte 0x2e
+ 1576 152b 00       	               .byte 0x00
+ 1577 152c E86FF1FF 	               call L00000344
+ 1577      FF
+ 1578 1531 E889F1FF 	               call L00000350
+ 1578      FF
+ 1579 1536 EB24     	L000008FF:     jmp L00000915                    # JMP
+ 1580              	L00000904:                                      # SLITERAL (0905) [(ok)]
+ 1581 1538 E85DECFF 	               call func_SWAP
+ 1581      FF
+ 1582 153d 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 1583 1540 83ED04   	               subl $4, %ebp
+ 1584 1543 8B5D00   	               movl (%ebp), %ebx                # POP to %ebx
+ 1585 1546 83ED04   	               subl $4, %ebp
+ 1586              	               # COMPAREI %eax, %ebx
+ 1587 1549 83C504   	               addl $4, %ebp                    # PUSH %ebx
+ 1588 154c 895D00   	               movl %ebx, (%ebp)
+ 1589 154f 6F       	               .byte 0x6f
+ 1590 1550 6B       	               .byte 0x6b
+ 1591              	                                                # USINIT (TODO)
+ 1592 1551 00       	               .byte 0x00
+ 1593 1552 E849F1FF 	               call L00000344
+ 1593      FF
+ 1594 1557 E863F1FF 	               call L00000350
+ 1594      FF
+ 1595 155c C3       	L00000915:     ret
+ 1596              	L00000916:                                      # WORD mainloop (F757)
+ 1597 155d 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1598 1560 C7450000 	               movl $0, (%ebp)
+ 1598      000000
+ 1599 1567 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 1600 156a C7450020 	               movl $32, (%ebp)
+ 1600      000000
+ 1601 1571 E8FCEBFF 	               call func_STORE
+ 1601      FF
+ 1602 1576 E83BFFFF 	L00000920:     call L000008B6
+ 1602      FF
+ 1603 157b E8A4F5FF 	               call L00000505
+ 1603      FF
+ 1604 1580 E80BECFF 	               call func_DUP
+ 1604      FF
+ 1605 1585 E8DDEBFF 	               call func_CFETCH
+ 1605      FF
+ 1606 158a 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1607 158d 83ED04   	               subl $4, %ebp
+ 1608 1590 39050000 	               cmp %eax, 0
+ 1608      0000
+ 1609 1596 742A     	               jz L0000094A
+ 1610 1598 E8F3EBFF 	               call func_DUP
+ 1610      FF
+ 1611 159d E8CEF1FF 	               call L0000039D
+ 1611      FF
+ 1612 15a2 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1613 15a5 C7450001 	               movl $1, (%ebp)
+ 1613      000000
+ 1614 15ac E812ECFF 	               call func_ADD
+GAS LISTING forth.s 			page 42
+
+
+ 1614      FF
+ 1615 15b1 E89BFBFF 	               call L00000719
+ 1615      FF
+ 1616 15b6 E8B7EBFF 	               call func_STORE
+ 1616      FF
+ 1617 15bb E88FFEFF 	               call L00000874
+ 1617      FF
+ 1618 15c0 EB39     	               jmp L00000965                    # JMP
+ 1619 15c2 83ED04   	L0000094A:     subl $4, %ebp                    # DROP
+ 1620 15c5 E877F1FF 	               call L0000037E
+ 1620      FF
+ 1621 15ca E88FEBFF 	               call func_FETCH
+ 1621      FF
+ 1622 15cf 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1623 15d2 83ED04   	               subl $4, %ebp
+ 1624 15d5 39050000 	               cmp %eax, 0
+ 1624      0000
+ 1625 15db 741E     	               jz L00000965
+ 1626 15dd E85FF1FF 	               call L0000037E
+ 1626      FF
+ 1627 15e2 E877EBFF 	               call func_FETCH
+ 1627      FF
+ 1628              	                                                # FCLOSE (TODO)
+ 1629 15e7 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1630 15ea C7450000 	               movl $0, (%ebp)
+ 1630      000000
+ 1631 15f1 E84BF1FF 	               call L0000037E
+ 1631      FF
+ 1632 15f6 E877EBFF 	               call func_STORE
+ 1632      FF
+ 1633 15fb E976FFFF 	L00000965:     jmp L00000920                    # JMP
+ 1633      FF
+ 1634 1600 C3       	               ret
+ 1635              	L0000096B:                                      # WORD main (F748)
+ 1636              	                                                # SLITERAL (0971) [Hello.]
+ 1637 1601 E88AEBFF 	               call func_DUP
+ 1637      FF
+ 1638 1606 48       	               .byte 0x48
+ 1639 1607 65       	               .byte 0x65
+ 1640 1608 6C       	               .byte 0x6c
+ 1641 1609 6C       	               .byte 0x6c
+ 1642 160a 6F       	               .byte 0x6f
+ 1643 160b 2E       	               .byte 0x2e
+ 1644 160c 00       	               .byte 0x00
+ 1645 160d E88EF0FF 	               call L00000344
+ 1645      FF
+ 1646 1612 E8A8F0FF 	               call L00000350
+ 1646      FF
+ 1647 1617 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1648 161a C7450000 	               movl $0, (%ebp)
+ 1648      000000
+ 1649 1621 E81BF1FF 	               call L0000037E
+ 1649      FF
+ 1650 1626 E847EBFF 	               call func_STORE
+ 1650      FF
+ 1651 162b 83C504   	               addl $4, %ebp                    # PUSH $20, CLITERAL 20
+ 1652 162e C7450014 	               movl $20, (%ebp)
+GAS LISTING forth.s 			page 43
+
+
+ 1652      000000
+ 1653 1635 E824EBFF 	               call func_FETCH
+ 1653      FF
+ 1654 163a 83C504   	               addl $4, %ebp                    # PUSH $4, CLITERAL 4
+ 1655 163d C7450004 	               movl $4, (%ebp)
+ 1655      000000
+ 1656 1644 E87AEBFF 	               call func_ADD
+ 1656      FF
+ 1657 1649 E810EBFF 	               call func_FETCH
+ 1657      FF
+ 1658 164e 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1659 1651 C7450001 	               movl $1, (%ebp)
+ 1659      000000
+ 1660 1658 E815EBFF 	               call func_STORE
+ 1660      FF
+ 1661 165d E8FBFEFF 	               call L00000916
+ 1661      FF
+ 1662 1662 C3       	               ret
+ 1663              	L0000099B:                                      # WORD reset-data-stack (F72D)
+ 1664              	L000009A0:                                      # DEPTH (TODO)
+ 1665 1663 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1666 1666 83ED04   	               subl $4, %ebp
+ 1667 1669 39050000 	               cmp %eax, 0
+ 1667      0000
+ 1668 166f 7405     	               jz L000009AC
+ 1669 1671 83ED04   	               subl $4, %ebp                    # DROP
+ 1670 1674 EB01     	               jmp L000009AD                    # JMP
+ 1671 1676 C3       	L000009AC:     ret
+ 1672 1677 EBEA     	L000009AD:     jmp L000009A0                    # JMP
+ 1673 1679 C3       	               ret
+ 1674              	L000009B3:                                      # WORD RDEPTH (F71C)
+ 1675 167a 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1676 167d C7450000 	               movl $0, (%ebp)
+ 1676      000000
+ 1677 1684 C3       	               ret
+ 1678              	L000009BB:                                      # WORD reset-return-stack (F6FF)
+ 1679 1685 E88BEBFF 	               call func_RTOD                   # RTOD
+ 1679      FF
+ 1680 168a E8EBFFFF 	L000009C1:     call L000009B3
+ 1680      FF
+ 1681 168f 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1682 1692 83ED04   	               subl $4, %ebp
+ 1683 1695 39050000 	               cmp %eax, 0
+ 1683      0000
+ 1684 169b 740A     	               jz L000009D2
+ 1685 169d E873EBFF 	               call func_RTOD                   # RTOD
+ 1685      FF
+ 1686 16a2 83ED04   	               subl $4, %ebp                    # DROP
+ 1687 16a5 EB06     	               jmp L000009D4                    # JMP
+ 1688 16a7 E844EBFF 	L000009D2:     call func_DTOR                   # DTOR
+ 1688      FF
+ 1689 16ac C3       	               ret
+ 1690 16ad EBDB     	L000009D4:     jmp L000009C1                    # JMP
+ 1691 16af C3       	               ret
+ 1692              	L000009DA:                                      # WORD \ (F6F3)
+ 1693 16b0 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1694 16b3 C7450000 	               movl $0, (%ebp)
+GAS LISTING forth.s 			page 44
+
+
+ 1694      000000
+ 1695 16ba E892FAFF 	               call L00000719
+ 1695      FF
+ 1696 16bf E89AEAFF 	               call func_FETCH
+ 1696      FF
+ 1697 16c4 E8A9EAFF 	               call func_STORE
+ 1697      FF
+ 1698 16c9 C3       	               ret
+ 1699              	L000009E9:                                      # WORD /MOD (F6E4)
+ 1700 16ca E8DEEAFF 	               call func_OVER
+ 1700      FF
+ 1701 16cf E8D9EAFF 	               call func_OVER
+ 1701      FF
+ 1702 16d4 8B5D00   	               movl (%ebp), %ebx                # POP to %ebx, ADD
+ 1703 16d7 83ED04   	               subl $4, %ebp
+ 1704 16da 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 1705 16dd 83ED04   	               subl $4, %ebp
+ 1706 16e0 F7F3     	               divl %ebx
+ 1707 16e2 83C504   	               addl $4, %ebp                    # PUSH %eax
+ 1708 16e5 894500   	               movl %eax, (%ebp)
+ 1709 16e8 E8A3EAFF 	               call func_DUP
+ 1709      FF
+ 1710 16ed E8FEEAFF 	               call func_DTOR                   # DTOR
+ 1710      FF
+ 1711 16f2 E8EAEAFF 	               call func_MUL
+ 1711      FF
+ 1712 16f7 E8D6EAFF 	               call func_SUB
+ 1712      FF
+ 1713 16fc E814EBFF 	               call func_RTOD                   # RTOD
+ 1713      FF
+ 1714 1701 E894EAFF 	               call func_SWAP
+ 1714      FF
+ 1715 1706 C3       	               ret
+ 1716              	L000009F8:                                      # WORD (.) (F6D6)
+ 1717 1707 E884EAFF 	               call func_DUP
+ 1717      FF
+ 1718 170c 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1719 170f C7450000 	               movl $0, (%ebp)
+ 1719      000000
+ 1720 1716 E855E9FF 	               call func_EQ                     # EQ
+ 1720      FF
+ 1721 171b 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1722 171e 83ED04   	               subl $4, %ebp
+ 1723 1721 39050000 	               cmp %eax, 0
+ 1723      0000
+ 1724 1727 7413     	               jz L00000A0B
+ 1725 1729 83ED04   	               subl $4, %ebp                    # DROP
+ 1726 172c 83C504   	               addl $4, %ebp                    # PUSH $48, CLITERAL 48
+ 1727 172f C7450030 	               movl $48, (%ebp)
+ 1727      000000
+ 1728 1736 E801EAFF 	               call func_EMIT                   # EMIT
+ 1728      FF
+ 1729 173b C3       	               ret
+ 1730 173c E84FEAFF 	L00000A0B:     call func_DUP
+ 1730      FF
+ 1731 1741 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1732 1744 C7450000 	               movl $0, (%ebp)
+GAS LISTING forth.s 			page 45
+
+
+ 1732      000000
+ 1733 174b E860E9FF 	               call func_LT                     # LT
+ 1733      FF
+ 1734 1750 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1735 1753 83ED04   	               subl $4, %ebp
+ 1736 1756 39050000 	               cmp %eax, 0
+ 1736      0000
+ 1737 175c 741B     	               jz L00000A1E
+ 1738 175e 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1739 1761 C7450000 	               movl $0, (%ebp)
+ 1739      000000
+ 1740 1768 E865EAFF 	               call func_SUB
+ 1740      FF
+ 1741 176d 83C504   	               addl $4, %ebp                    # PUSH $1, CLITERAL 1
+ 1742 1770 C7450001 	               movl $1, (%ebp)
+ 1742      000000
+ 1743 1777 EB0A     	               jmp L00000A20                    # JMP
+ 1744 1779 83C504   	L00000A1E:     addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1745 177c C7450000 	               movl $0, (%ebp)
+ 1745      000000
+ 1746 1783 E868EAFF 	L00000A20:     call func_DTOR                   # DTOR
+ 1746      FF
+ 1747 1788 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1748 178b C7450000 	               movl $0, (%ebp)
+ 1748      000000
+ 1749 1792 E803EAFF 	               call func_SWAP
+ 1749      FF
+ 1750 1797 E8F4E9FF 	L00000A24:     call func_DUP
+ 1750      FF
+ 1751 179c 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1752 179f 83ED04   	               subl $4, %ebp
+ 1753 17a2 39050000 	               cmp %eax, 0
+ 1753      0000
+ 1754 17a8 745B     	               jz L00000A47
+ 1755 17aa 83C504   	               addl $4, %ebp                    # PUSH $6, CLITERAL 6
+ 1756 17ad C7450006 	               movl $6, (%ebp)
+ 1756      000000
+ 1757 17b4 E8AEE9FF 	               call func_CFETCH
+ 1757      FF
+ 1758 17b9 E80CFFFF 	               call L000009E9
+ 1758      FF
+ 1759 17be 83C504   	               addl $4, %ebp                    # PUSH $48, CLITERAL 48
+ 1760 17c1 C7450030 	               movl $48, (%ebp)
+ 1760      000000
+ 1761 17c8 E8E0E9FF 	               call func_OVER
+ 1761      FF
+ 1762 17cd 83C504   	               addl $4, %ebp                    # PUSH $9, CLITERAL 9
+ 1763 17d0 C7450009 	               movl $9, (%ebp)
+ 1763      000000
+ 1764 17d7 E8F7E8FF 	               call func_GT                     # GT
+ 1764      FF
+ 1765 17dc 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1766 17df 83ED04   	               subl $4, %ebp
+ 1767 17e2 39050000 	               cmp %eax, 0
+ 1767      0000
+ 1768 17e8 740F     	               jz L00000A40
+ 1769 17ea 83C504   	               addl $4, %ebp                    # PUSH $7, CLITERAL 7
+GAS LISTING forth.s 			page 46
+
+
+ 1770 17ed C7450007 	               movl $7, (%ebp)
+ 1770      000000
+ 1771 17f4 E8CAE9FF 	               call func_ADD
+ 1771      FF
+ 1772 17f9 E8C5E9FF 	L00000A40:     call func_ADD
+ 1772      FF
+ 1773 17fe E897E9FF 	               call func_SWAP
+ 1773      FF
+ 1774 1803 EB45     	               jmp L00000A64                    # JMP
+ 1775 1805 83ED04   	L00000A47:     subl $4, %ebp                    # DROP
+ 1776 1808 E808EAFF 	               call func_RTOD                   # RTOD
+ 1776      FF
+ 1777 180d 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1778 1810 83ED04   	               subl $4, %ebp
+ 1779 1813 39050000 	               cmp %eax, 0
+ 1779      0000
+ 1780 1819 740F     	               jz L00000A51
+ 1781 181b 83C504   	               addl $4, %ebp                    # PUSH $45, CLITERAL 45
+ 1782 181e C745002D 	               movl $45, (%ebp)
+ 1782      000000
+ 1783 1825 E812E9FF 	               call func_EMIT                   # EMIT
+ 1783      FF
+ 1784 182a E861E9FF 	L00000A51:     call func_DUP
+ 1784      FF
+ 1785 182f 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1786 1832 83ED04   	               subl $4, %ebp
+ 1787 1835 39050000 	               cmp %eax, 0
+ 1787      0000
+ 1788 183b 7407     	               jz L00000A5D
+ 1789 183d E8FAE8FF 	               call func_EMIT                   # EMIT
+ 1789      FF
+ 1790 1842 EB04     	               jmp L00000A5F                    # JMP
+ 1791 1844 83ED04   	L00000A5D:     subl $4, %ebp                    # DROP
+ 1792 1847 C3       	               ret
+ 1793 1848 EBE0     	L00000A5F:     jmp L00000A51                    # JMP
+ 1794 184a E948FFFF 	L00000A64:     jmp L00000A24                    # JMP
+ 1794      FF
+ 1795 184f C3       	               ret
+ 1796              	L00000A6A:                                      # WORD BL (F6C9)
+ 1797 1850 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 1798 1853 C7450020 	               movl $32, (%ebp)
+ 1798      000000
+ 1799 185a E8DDE8FF 	               call func_EMIT                   # EMIT
+ 1799      FF
+ 1800 185f C3       	               ret
+ 1801              	L00000A73:                                      # WORD . (F6BD)
+ 1802 1860 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 1803 1863 C7450020 	               movl $32, (%ebp)
+ 1803      000000
+ 1804 186a E8CDE8FF 	               call func_EMIT                   # EMIT
+ 1804      FF
+ 1805 186f E893FEFF 	               call L000009F8
+ 1805      FF
+ 1806 1874 C3       	               ret
+ 1807              	L00000A81:                                      # WORD LOAD (F6AE)
+ 1808 1875 E816E9FF 	               call func_DUP
+ 1808      FF
+GAS LISTING forth.s 			page 47
+
+
+ 1809 187a E8F1EEFF 	               call L0000039D
+ 1809      FF
+ 1810 187f 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1811 1882 C7450000 	               movl $0, (%ebp)
+ 1811      000000
+ 1812 1889 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1813 188c C7450000 	               movl $0, (%ebp)
+ 1813      000000
+ 1814              	                                                # FOPEN (TODO)
+ 1815 1893 8B4500   	               movl (%ebp), %eax                # POP to %eax, JMPZ
+ 1816 1896 83ED04   	               subl $4, %ebp
+ 1817 1899 39050000 	               cmp %eax, 0
+ 1817      0000
+ 1818 189f 740C     	               jz L00000AA1
+ 1819 18a1 E89BEEFF 	               call L0000037E
+ 1819      FF
+ 1820 18a6 E8C7E8FF 	               call func_STORE
+ 1820      FF
+ 1821 18ab EB27     	               jmp L00000AC8                    # JMP
+ 1822 18ad 83ED04   	L00000AA1:     subl $4, %ebp                    # DROP
+ 1823              	                                                # SLITERAL (0aa3) [ unable to open the file.]
+ 1824 18b0 E887E8FF 	               call func_EMIT                   # EMIT
+ 1824      FF
+ 1825              	                                                # FCLOSE (TODO)
+ 1826 18b5 75       	               .byte 0x75
+ 1827 18b6 6E       	               .byte 0x6e
+ 1828 18b7 61       	               .byte 0x61
+ 1829 18b8 62       	               .byte 0x62
+ 1830 18b9 6C       	               .byte 0x6c
+ 1831 18ba 65       	               .byte 0x65
+ 1832              	                                                # FCLOSE (TODO)
+ 1833 18bb 74       	               .byte 0x74
+ 1834 18bc 6F       	               .byte 0x6f
+ 1835              	                                                # FCLOSE (TODO)
+ 1836 18bd 6F       	               .byte 0x6f
+ 1837 18be 70       	               .byte 0x70
+ 1838 18bf 65       	               .byte 0x65
+ 1839 18c0 6E       	               .byte 0x6e
+ 1840              	                                                # FCLOSE (TODO)
+ 1841 18c1 74       	               .byte 0x74
+ 1842 18c2 68       	               .byte 0x68
+ 1843 18c3 65       	               .byte 0x65
+ 1844              	                                                # FCLOSE (TODO)
+ 1845 18c4 66       	               .byte 0x66
+ 1846 18c5 69       	               .byte 0x69
+ 1847 18c6 6C       	               .byte 0x6c
+ 1848 18c7 65       	               .byte 0x65
+ 1849 18c8 2E       	               .byte 0x2e
+ 1850 18c9 00       	               .byte 0x00
+ 1851 18ca E8D1EDFF 	               call L00000344
+ 1851      FF
+ 1852 18cf E8EBEDFF 	               call L00000350
+ 1852      FF
+ 1853 18d4 C3       	L00000AC8:     ret
+ 1854              	# L00000AC9:                                      # WORD LL (F6A1)
+ 1855              	#                                                # SLITERAL (0acf) [words.4th]
+ 1856              	#               movl (%ebp), %eax                # POP to %eax, JMPZ
+GAS LISTING forth.s 			page 48
+
+
+ 1857              	#               subl $4, %ebp
+ 1858              	#               cmp %eax, 0
+ 1859              	#               jz x1ret
+ 1860              	#               .byte 0x73
+ 1861              	#               .byte 0x2e
+ 1862              	#               .byte 0x34
+ 1863              	#               .byte 0x74
+ 1864              	#               .byte 0x68
+ 1865              	#               .byte 0x00
+ 1866              	#               call L00000A81
+ 1867              	#               ret
+ 1868              	L00000AE0:                                      # WORD exception (F68D)
+ 1869              	                                                # SLITERAL (0ae6) [ (exception) ]
+ 1870              	                                                # OR (TODO)
+ 1871              	                                                # FCLOSE (TODO)
+ 1872 18d5 8B4500   	               movl (%ebp), %eax                # POP to %eax
+ 1873 18d8 83ED04   	               subl $4, %ebp
+ 1874 18db 8B5D00   	               movl (%ebp), %ebx                # POP to %ebx
+ 1875 18de 83ED04   	               subl $4, %ebp
+ 1876              	               # COMPAREI %eax, %ebx
+ 1877 18e1 83C504   	               addl $4, %ebp                    # PUSH %ebx
+ 1878 18e4 895D00   	               movl %ebx, (%ebp)
+ 1879 18e7 65       	               .byte 0x65
+ 1880 18e8 78       	               .byte 0x78
+ 1881 18e9 63       	               .byte 0x63
+ 1882 18ea 65       	               .byte 0x65
+ 1883 18eb 70       	               .byte 0x70
+ 1884 18ec 74       	               .byte 0x74
+ 1885 18ed 69       	               .byte 0x69
+ 1886 18ee 6F       	               .byte 0x6f
+ 1887 18ef 6E       	               .byte 0x6e
+ 1888              	                                                # USINIT (TODO)
+ 1889              	                                                # FCLOSE (TODO)
+ 1890 18f0 00       	               .byte 0x00
+ 1891 18f1 E8AAEDFF 	               call L00000344
+ 1891      FF
+ 1892 18f6 E8C4EDFF 	               call L00000350
+ 1892      FF
+ 1893 18fb 83C504   	               addl $4, %ebp                    # PUSH $0, CLITERAL 0
+ 1894 18fe C7450000 	               movl $0, (%ebp)
+ 1894      000000
+ 1895 1905 83C504   	               addl $4, %ebp                    # PUSH $32, CLITERAL 32
+ 1896 1908 C7450020 	               movl $32, (%ebp)
+ 1896      000000
+ 1897 190f E85EE8FF 	               call func_STORE
+ 1897      FF
+ 1898 1914 E84AFDFF 	               call L0000099B
+ 1898      FF
+ 1899 1919 E867FDFF 	               call L000009BB
+ 1899      FF
+ 1900 191e E83AFCFF 	               call L00000916
+ 1900      FF
+ 1901 1923 C3       	               ret
+ 1902              	                                                # 
+ 1903              	# End of code, Dictionary:
+ 1904              	#
+ 1905              	
+GAS LISTING forth.s 			page 49
+
+
+ 1906              	L0000F68D:     # Next: 0000f6a1                 # # WORD: exception
+ 1907              	               # XT: 00000ae0                   # Flags: 0
+ 1908              	               # Len: 2784                      #  09 65 78 63 65 70 74 69 6f 6e
+ 1909              	L0000F6A1:     # Next: 0000f6ae                 # # WORD: LL
+ 1910              	               # XT: 00000ac9                   # Flags: 0
+ 1911              	               # Len: 2761                      #  02 4c 4c
+ 1912              	L0000F6AE:     # Next: 0000f6bd                 # # WORD: LOAD
+ 1913              	               # XT: 00000a81                   # Flags: 0
+ 1914              	               # Len: 2689                      #  04 4c 4f 41 44
+ 1915              	L0000F6BD:     # Next: 0000f6c9                 # # WORD: .
+ 1916              	               # XT: 00000a73                   # Flags: 0
+ 1917              	               # Len: 2675                      #  01 2e
+ 1918              	L0000F6C9:     # Next: 0000f6d6                 # # WORD: BL
+ 1919              	               # XT: 00000a6a                   # Flags: 2
+ 1920              	               # Len: 2666                      #  02 42 4c
+ 1921              	L0000F6D6:     # Next: 0000f6e4                 # # WORD: (.)
+ 1922              	               # XT: 000009f8                   # Flags: 0
+ 1923              	               # Len: 2552                      #  03 28 2e 29
+ 1924              	L0000F6E4:     # Next: 0000f6f3                 # # WORD: /MOD
+ 1925              	               # XT: 000009e9                   # Flags: 0
+ 1926              	               # Len: 2537                      #  04 2f 4d 4f 44
+ 1927              	L0000F6F3:     # Next: 0000f6ff                 # # WORD: \
+ 1928              	               # XT: 000009da                   # Flags: 1
+ 1929              	               # Len: 2522                      #  01 5c
+ 1930              	L0000F6FF:     # Next: 0000f71c                 # # WORD: reset-return-stack
+ 1931              	               # XT: 000009bb                   # Flags: 0
+ 1932              	               # Len: 2491                      #  12 72 65 73 65 74 2d 72 65 74 75 72 6e 2d 73 74 
+ 1933              	L0000F71C:     # Next: 0000f72d                 # # WORD: RDEPTH
+ 1934              	               # XT: 000009b3                   # Flags: 0
+ 1935              	               # Len: 2483                      #  06 52 44 45 50 54 48
+ 1936              	L0000F72D:     # Next: 0000f748                 # # WORD: reset-data-stack
+ 1937              	               # XT: 0000099b                   # Flags: 0
+ 1938              	               # Len: 2459                      #  10 72 65 73 65 74 2d 64 61 74 61 2d 73 74 61 63 
+ 1939              	L0000F748:     # Next: 0000f757                 # # WORD: main
+ 1940              	               # XT: 0000096b                   # Flags: 0
+ 1941              	               # Len: 2411                      #  04 6d 61 69 6e
+ 1942              	L0000F757:     # Next: 0000f76a                 # # WORD: mainloop
+ 1943              	               # XT: 00000916                   # Flags: 0
+ 1944              	               # Len: 2326                      #  08 6d 61 69 6e 6c 6f 6f 70
+ 1945              	L0000F76A:     # Next: 0000f777                 # # WORD: ok
+ 1946              	               # XT: 000008b6                   # Flags: 0
+ 1947              	               # Len: 2230                      #  02 6f 6b
+ 1948              	L0000F777:     # Next: 0000f78e                 # # WORD: execute-line
+ 1949              	               # XT: 00000874                   # Flags: 0
+ 1950              	               # Len: 2164                      #  0c 65 78 65 63 75 74 65 2d 6c 69 6e 65
+ 1951              	L0000F78E:     # Next: 0000f7a5                 # # WORD: execute-word
+ 1952              	               # XT: 00000795                   # Flags: 0
+ 1953              	               # Len: 1941                      #  0c 65 78 65 63 75 74 65 2d 77 6f 72 64
+ 1954              	L0000F7A5:     # Next: 0000f7b1                 # # WORD: ;
+ 1955              	               # XT: 00000785                   # Flags: 1
+ 1956              	               # Len: 1925                      #  01 3b
+ 1957              	L0000F7B1:     # Next: 0000f7bd                 # # WORD: :
+ 1958              	               # XT: 00000775                   # Flags: 0
+ 1959              	               # Len: 1909                      #  01 3a
+ 1960              	L0000F7BD:     # Next: 0000f7d3                 # # WORD: CREATE-NAME
+ 1961              	               # XT: 00000729                   # Flags: 0
+ 1962              	               # Len: 1833                      #  0b 43 52 45 41 54 45 2d 4e 41 4d 45
+GAS LISTING forth.s 			page 50
+
+
+ 1963              	L0000F7D3:     # Next: 0000f7e1                 # # WORD: >IN
+ 1964              	               # XT: 00000719                   # Flags: 0
+ 1965              	               # Len: 1817                      #  03 3e 49 4e
+ 1966              	L0000F7E1:     # Next: 0000f7f6                 # # WORD: is-number?
+ 1967              	               # XT: 0000069e                   # Flags: 0
+ 1968              	               # Len: 1694                      #  0a 69 73 2d 6e 75 6d 62 65 72 3f
+ 1969              	L0000F7F6:     # Next: 0000f80d                 # # WORD: is-num-char?
+ 1970              	               # XT: 0000064b                   # Flags: 0
+ 1971              	               # Len: 1611                      #  0c 69 73 2d 6e 75 6d 2d 63 68 61 72 3f
+ 1972              	L0000F80D:     # Next: 0000f823                 # # WORD: define-word
+ 1973              	               # XT: 00000606                   # Flags: 0
+ 1974              	               # Len: 1542                      #  0b 64 65 66 69 6e 65 2d 77 6f 72 64
+ 1975              	L0000F823:     # Next: 0000f837                 # # WORD: find-word
+ 1976              	               # XT: 000005c4                   # Flags: 0
+ 1977              	               # Len: 1476                      #  09 66 69 6e 64 2d 77 6f 72 64
+ 1978              	L0000F837:     # Next: 0000f84d                 # # WORD: FLAG_INLINE
+ 1979              	               # XT: 000005bc                   # Flags: 2
+ 1980              	               # Len: 1468                      #  0b 46 4c 41 47 5f 49 4e 4c 49 4e 45
+ 1981              	L0000F84D:     # Next: 0000f866                 # # WORD: FLAG_IMMEDIATE
+ 1982              	               # XT: 000005b4                   # Flags: 2
+ 1983              	               # Len: 1460                      #  0e 46 4c 41 47 5f 49 4d 4d 45 44 49 41 54 45
+ 1984              	L0000F866:     # Next: 0000f87a                 # # WORD: DICT>NAME
+ 1985              	               # XT: 000005a5                   # Flags: 2
+ 1986              	               # Len: 1445                      #  09 44 49 43 54 3e 4e 41 4d 45
+ 1987              	L0000F87A:     # Next: 0000f88f                 # # WORD: DICT>FLAGS
+ 1988              	               # XT: 00000599                   # Flags: 2
+ 1989              	               # Len: 1433                      #  0a 44 49 43 54 3e 46 4c 41 47 53
+ 1990              	L0000F88F:     # Next: 0000f8a1                 # # WORD: DICT>XT
+ 1991              	               # XT: 00000590                   # Flags: 2
+ 1992              	               # Len: 1424                      #  07 44 49 43 54 3e 58 54
+ 1993              	L0000F8A1:     # Next: 0000f8b5                 # # WORD: DICT>NEXT
+ 1994              	               # XT: 0000058a                   # Flags: 2
+ 1995              	               # Len: 1418                      #  09 44 49 43 54 3e 4e 45 58 54
+ 1996              	L0000F8B5:     # Next: 0000f8c8                 # # WORD: get-word
+ 1997              	               # XT: 00000549                   # Flags: 0
+ 1998              	               # Len: 1353                      #  08 67 65 74 2d 77 6f 72 64
+ 1999              	L0000F8C8:     # Next: 0000f8da                 # # WORD: skip-ws
+ 2000              	               # XT: 00000525                   # Flags: 0
+ 2001              	               # Len: 1317                      #  07 73 6b 69 70 2d 77 73
+ 2002              	L0000F8DA:     # Next: 0000f8ed                 # # WORD: get-line
+ 2003              	               # XT: 00000505                   # Flags: 0
+ 2004              	               # Len: 1285                      #  08 67 65 74 2d 6c 69 6e 65
+ 2005              	L0000F8ED:     # Next: 0000f904                 # # WORD: file-getLine
+ 2006              	               # XT: 000004be                   # Flags: 0
+ 2007              	               # Len: 1214                      #  0c 66 69 6c 65 2d 67 65 74 4c 69 6e 65
+ 2008              	L0000F904:     # Next: 0000f91c                 # # WORD: stdin-getline
+ 2009              	               # XT: 00000432                   # Flags: 0
+ 2010              	               # Len: 1074                      #  0d 73 74 64 69 6e 2d 67 65 74 6c 69 6e 65
+ 2011              	L0000F91C:     # Next: 0000f92e                 # # WORD: BETWEEN
+ 2012              	               # XT: 0000041a                   # Flags: 0
+ 2013              	               # Len: 1050                      #  07 42 45 54 57 45 45 4e
+ 2014              	L0000F92E:     # Next: 0000f944                 # # WORD: string-popc
+ 2015              	               # XT: 000003f7                   # Flags: 0
+ 2016              	               # Len: 1015                      #  0b 73 74 72 69 6e 67 2d 70 6f 70 63
+ 2017              	L0000F944:     # Next: 0000f95a                 # # WORD: string-copy
+ 2018              	               # XT: 000003c3                   # Flags: 0
+ 2019              	               # Len: 963                       #  0b 73 74 72 69 6e 67 2d 63 6f 70 79
+GAS LISTING forth.s 			page 51
+
+
+ 2020              	L0000F95A:     # Next: 0000f970                 # # WORD: string-catc
+ 2021              	               # XT: 000003ad                   # Flags: 0
+ 2022              	               # Len: 941                       #  0b 73 74 72 69 6e 67 2d 63 61 74 63
+ 2023              	L0000F970:     # Next: 0000f98a                 # # WORD: string-nullterm
+ 2024              	               # XT: 0000039d                   # Flags: 0
+ 2025              	               # Len: 925                       #  0f 73 74 72 69 6e 67 2d 6e 75 6c 6c 74 65 72 6d
+ 2026              	L0000F98A:     # Next: 0000f998                 # # WORD: PAD
+ 2027              	               # XT: 0000038e                   # Flags: 0
+ 2028              	               # Len: 910                       #  03 50 41 44
+ 2029              	L0000F998:     # Next: 0000f9ab                 # # WORD: INPUT-FP
+ 2030              	               # XT: 0000037e                   # Flags: 0
+ 2031              	               # Len: 894                       #  08 49 4e 50 55 54 2d 46 50
+ 2032              	L0000F9AB:     # Next: 0000f9b8                 # # WORD: CR
+ 2033              	               # XT: 00000372                   # Flags: 0
+ 2034              	               # Len: 882                       #  02 43 52
+ 2035              	L0000F9B8:     # Next: 0000f9c7                 # # WORD: TYPE
+ 2036              	               # XT: 00000350                   # Flags: 0
+ 2037              	               # Len: 848                       #  04 54 59 50 45
+ 2038              	L0000F9C7:     # Next: 0000f9d7                 # # WORD: COUNT
+ 2039              	               # XT: 00000344                   # Flags: 0
+ 2040              	               # Len: 836                       #  05 43 4f 55 4e 54
+ 2041              	L0000F9D7:     # Next: 0000f9e7                 # # WORD: LEAVE
+ 2042              	               # XT: 0000032f                   # Flags: 1
+ 2043              	               # Len: 815                       #  05 4c 45 41 56 45
+ 2044              	L0000F9E7:     # Next: 0000f9f7                 # # WORD: UNTIL
+ 2045              	               # XT: 00000315                   # Flags: 1
+ 2046              	               # Len: 789                       #  05 55 4e 54 49 4c
+ 2047              	L0000F9F7:     # Next: 0000fa07                 # # WORD: WHILE
+ 2048              	               # XT: 000002fb                   # Flags: 1
+ 2049              	               # Len: 763                       #  05 57 48 49 4c 45
+ 2050              	L0000FA07:     # Next: 0000fa17                 # # WORD: AGAIN
+ 2051              	               # XT: 000002e1                   # Flags: 1
+ 2052              	               # Len: 737                       #  05 41 47 41 49 4e
+ 2053              	L0000FA17:     # Next: 0000fa27                 # # WORD: BEGIN
+ 2054              	               # XT: 000002ce                   # Flags: 1
+ 2055              	               # Len: 718                       #  05 42 45 47 49 4e
+ 2056              	L0000FA27:     # Next: 0000fa36                 # # WORD: THEN
+ 2057              	               # XT: 000002b9                   # Flags: 1
+ 2058              	               # Len: 697                       #  04 54 48 45 4e
+ 2059              	L0000FA36:     # Next: 0000fa45                 # # WORD: ELSE
+ 2060              	               # XT: 00000294                   # Flags: 1
+ 2061              	               # Len: 660                       #  04 45 4c 53 45
+ 2062              	L0000FA45:     # Next: 0000fa52                 # # WORD: IF
+ 2063              	               # XT: 00000275                   # Flags: 1
+ 2064              	               # Len: 629                       #  02 49 46
+ 2065              	L0000FA52:     # Next: 0000fa67                 # # WORD: ?COMPILING
+ 2066              	               # XT: 0000026c                   # Flags: 0
+ 2067              	               # Len: 620                       #  0a 3f 43 4f 4d 50 49 4c 49 4e 47
+ 2068              	L0000FA67:     # Next: 0000fa76                 # # WORD: HERE
+ 2069              	               # XT: 00000263                   # Flags: 2
+ 2070              	               # Len: 611                       #  04 48 45 52 45
+ 2071              	L0000FA76:     # Next: 0000fa85                 # # WORD: LAST
+ 2072              	               # XT: 0000025a                   # Flags: 2
+ 2073              	               # Len: 602                       #  04 4c 41 53 54
+ 2074              	L0000FA85:     # Next: 0000fa95                 # # WORD: CELLS
+ 2075              	               # XT: 00000251                   # Flags: 2
+ 2076              	               # Len: 593                       #  05 43 45 4c 4c 53
+GAS LISTING forth.s 			page 52
+
+
+ 2077              	L0000FA95:     # Next: 0000faa9                 # # WORD: IMMEDIATE
+ 2078              	               # XT: 0000023b                   # Flags: 0
+ 2079              	               # Len: 571                       #  09 49 4d 4d 45 44 49 41 54 45
+ 2080              	L0000FAA9:     # Next: 0000faba                 # # WORD: INLINE
+ 2081              	               # XT: 00000225                   # Flags: 0
+ 2082              	               # Len: 549                       #  06 49 4e 4c 49 4e 45
+ 2083              	L0000FABA:     # Next: 0000fac7                 # # WORD: R@
+ 2084              	               # XT: 0000021c                   # Flags: 2
+ 2085              	               # Len: 540                       #  02 52 40
+ 2086              	L0000FAC7:     # Next: 0000fad5                 # # WORD: BYE
+ 2087              	               # XT: 00000215                   # Flags: 2
+ 2088              	               # Len: 533                       #  03 42 59 45
+ 2089              	L0000FAD5:     # Next: 0000fae5                 # # WORD: RESET
+ 2090              	               # XT: 0000020e                   # Flags: 2
+ 2091              	               # Len: 526                       #  05 52 45 53 45 54
+ 2092              	L0000FAE5:     # Next: 0000faf5                 # # WORD: BREAK
+ 2093              	               # XT: 00000207                   # Flags: 2
+ 2094              	               # Len: 519                       #  05 42 52 45 41 4b
+ 2095              	L0000FAF5:     # Next: 0000fb05                 # # WORD: USPOP
+ 2096              	               # XT: 00000200                   # Flags: 2
+ 2097              	               # Len: 512                       #  05 55 53 50 4f 50
+ 2098              	L0000FB05:     # Next: 0000fb16                 # # WORD: USPUSH
+ 2099              	               # XT: 000001f9                   # Flags: 2
+ 2100              	               # Len: 505                       #  06 55 53 50 55 53 48
+ 2101              	L0000FB16:     # Next: 0000fb27                 # # WORD: USINIT
+ 2102              	               # XT: 000001f2                   # Flags: 2
+ 2103              	               # Len: 498                       #  06 55 53 49 4e 49 54
+ 2104              	L0000FB27:     # Next: 0000fb3a                 # # WORD: COMPAREI
+ 2105              	               # XT: 000001eb                   # Flags: 2
+ 2106              	               # Len: 491                       #  08 43 4f 4d 50 41 52 45 49
+ 2107              	L0000FB3A:     # Next: 0000fb4a                 # # WORD: GETCH
+ 2108              	               # XT: 000001e4                   # Flags: 2
+ 2109              	               # Len: 484                       #  05 47 45 54 43 48
+ 2110              	L0000FB4A:     # Next: 0000fb5a                 # # WORD: DEPTH
+ 2111              	               # XT: 000001dd                   # Flags: 2
+ 2112              	               # Len: 477                       #  05 44 45 50 54 48
+ 2113              	L0000FB5A:     # Next: 0000fb69                 # # WORD: PICK
+ 2114              	               # XT: 000001d6                   # Flags: 2
+ 2115              	               # Len: 470                       #  04 50 49 43 4b
+ 2116              	L0000FB69:     # Next: 0000fb77                 # # WORD: AND
+ 2117              	               # XT: 000001cf                   # Flags: 2
+ 2118              	               # Len: 463                       #  03 41 4e 44
+ 2119              	L0000FB77:     # Next: 0000fb8a                 # # WORD: LOGLEVEL
+ 2120              	               # XT: 000001c8                   # Flags: 2
+ 2121              	               # Len: 456                       #  08 4c 4f 47 4c 45 56 45 4c
+ 2122              	L0000FB8A:     # Next: 0000fb97                 # # WORD: R>
+ 2123              	               # XT: 000001c1                   # Flags: 2
+ 2124              	               # Len: 449                       #  02 52 3e
+ 2125              	L0000FB97:     # Next: 0000fba4                 # # WORD: >R
+ 2126              	               # XT: 000001ba                   # Flags: 2
+ 2127              	               # Len: 442                       #  02 3e 52
+ 2128              	L0000FBA4:     # Next: 0000fbb5                 # # WORD: FCLOSE
+ 2129              	               # XT: 000001b3                   # Flags: 2
+ 2130              	               # Len: 435                       #  06 46 43 4c 4f 53 45
+ 2131              	L0000FBB5:     # Next: 0000fbc6                 # # WORD: FWRITE
+ 2132              	               # XT: 000001ac                   # Flags: 2
+ 2133              	               # Len: 428                       #  06 46 57 52 49 54 45
+GAS LISTING forth.s 			page 53
+
+
+ 2134              	L0000FBC6:     # Next: 0000fbda                 # # WORD: FREADLINE
+ 2135              	               # XT: 000001a5                   # Flags: 2
+ 2136              	               # Len: 421                       #  09 46 52 45 41 44 4c 49 4e 45
+ 2137              	L0000FBDA:     # Next: 0000fbea                 # # WORD: FREAD
+ 2138              	               # XT: 0000019e                   # Flags: 2
+ 2139              	               # Len: 414                       #  05 46 52 45 41 44
+ 2140              	L0000FBEA:     # Next: 0000fbfa                 # # WORD: FOPEN
+ 2141              	               # XT: 00000197                   # Flags: 2
+ 2142              	               # Len: 407                       #  05 46 4f 50 45 4e
+ 2143              	L0000FBFA:     # Next: 0000fc0c                 # # WORD: COMPARE
+ 2144              	               # XT: 00000190                   # Flags: 2
+ 2145              	               # Len: 400                       #  07 43 4f 4d 50 41 52 45
+ 2146              	L0000FC0C:     # Next: 0000fc1b                 # # WORD: OVER
+ 2147              	               # XT: 00000189                   # Flags: 2
+ 2148              	               # Len: 393                       #  04 4f 56 45 52
+ 2149              	L0000FC1B:     # Next: 0000fc2a                 # # WORD: EMIT
+ 2150              	               # XT: 00000182                   # Flags: 2
+ 2151              	               # Len: 386                       #  04 45 4d 49 54
+ 2152              	L0000FC2A:     # Next: 0000fc3a                 # # WORD: DICTP
+ 2153              	               # XT: 00000175                   # Flags: 2
+ 2154              	               # Len: 373                       #  05 44 49 43 54 50
+ 2155              	L0000FC3A:     # Next: 0000fc46                 # # WORD: >
+ 2156              	               # XT: 0000016e                   # Flags: 2
+ 2157              	               # Len: 366                       #  01 3e
+ 2158              	L0000FC46:     # Next: 0000fc52                 # # WORD: =
+ 2159              	               # XT: 00000167                   # Flags: 2
+ 2160              	               # Len: 359                       #  01 3d
+ 2161              	L0000FC52:     # Next: 0000fc5e                 # # WORD: <
+ 2162              	               # XT: 00000160                   # Flags: 2
+ 2163              	               # Len: 352                       #  01 3c
+ 2164              	L0000FC5E:     # Next: 0000fc6a                 # # WORD: /
+ 2165              	               # XT: 00000159                   # Flags: 2
+ 2166              	               # Len: 345                       #  01 2f
+ 2167              	L0000FC6A:     # Next: 0000fc76                 # # WORD: *
+ 2168              	               # XT: 00000152                   # Flags: 2
+ 2169              	               # Len: 338                       #  01 2a
+ 2170              	L0000FC76:     # Next: 0000fc82                 # # WORD: -
+ 2171              	               # XT: 0000014b                   # Flags: 2
+ 2172              	               # Len: 331                       #  01 2d
+ 2173              	L0000FC82:     # Next: 0000fc8e                 # # WORD: +
+ 2174              	               # XT: 00000144                   # Flags: 2
+ 2175              	               # Len: 324                       #  01 2b
+ 2176              	L0000FC8E:     # Next: 0000fc9b                 # # WORD: C!
+ 2177              	               # XT: 0000013d                   # Flags: 2
+ 2178              	               # Len: 317                       #  02 43 21
+ 2179              	L0000FC9B:     # Next: 0000fca8                 # # WORD: C@
+ 2180              	               # XT: 00000136                   # Flags: 2
+ 2181              	               # Len: 310                       #  02 43 40
+ 2182              	L0000FCA8:     # Next: 0000fcbb                 # # WORD: CLITERAL
+ 2183              	               # XT: 00000129                   # Flags: 2
+ 2184              	               # Len: 297                       #  08 43 4c 49 54 45 52 41 4c
+ 2185              	L0000FCBB:     # Next: 0000fcc8                 # # WORD: OR
+ 2186              	               # XT: 00000122                   # Flags: 2
+ 2187              	               # Len: 290                       #  02 4f 52
+ 2188              	L0000FCC8:     # Next: 0000fcd6                 # # WORD: RET
+ 2189              	               # XT: 00000115                   # Flags: 0
+ 2190              	               # Len: 277                       #  03 52 45 54
+GAS LISTING forth.s 			page 54
+
+
+ 2191              	L0000FCD6:     # Next: 0000fce5                 # # WORD: CALL
+ 2192              	               # XT: 00000108                   # Flags: 0
+ 2193              	               # Len: 264                       #  04 43 41 4c 4c
+ 2194              	L0000FCE5:     # Next: 0000fcf5                 # # WORD: JMPNZ
+ 2195              	               # XT: 000000fb                   # Flags: 0
+ 2196              	               # Len: 251                       #  05 4a 4d 50 4e 5a
+ 2197              	L0000FCF5:     # Next: 0000fd04                 # # WORD: JMPZ
+ 2198              	               # XT: 000000ee                   # Flags: 0
+ 2199              	               # Len: 238                       #  04 4a 4d 50 5a
+ 2200              	L0000FD04:     # Next: 0000fd12                 # # WORD: JMP
+ 2201              	               # XT: 000000e1                   # Flags: 0
+ 2202              	               # Len: 225                       #  03 4a 4d 50
+ 2203              	L0000FD12:     # Next: 0000fd25                 # # WORD: SLITERAL
+ 2204              	               # XT: 000000d4                   # Flags: 0
+ 2205              	               # Len: 212                       #  08 53 4c 49 54 45 52 41 4c
+ 2206              	L0000FD25:     # Next: 0000fd33                 # # WORD: DUP
+ 2207              	               # XT: 000000cd                   # Flags: 2
+ 2208              	               # Len: 205                       #  03 44 55 50
+ 2209              	L0000FD33:     # Next: 0000fd42                 # # WORD: DROP
+ 2210              	               # XT: 000000c6                   # Flags: 2
+ 2211              	               # Len: 198                       #  04 44 52 4f 50
+ 2212              	L0000FD42:     # Next: 0000fd51                 # # WORD: SWAP
+ 2213              	               # XT: 000000bf                   # Flags: 2
+ 2214              	               # Len: 191                       #  04 53 57 41 50
+ 2215              	L0000FD51:     # Next: 0000fd5d                 # # WORD: !
+ 2216              	               # XT: 000000b8                   # Flags: 2
+ 2217              	               # Len: 184                       #  01 21
+ 2218              	L0000FD5D:     # Next: 0000fd69                 # # WORD: @
+ 2219              	               # XT: 000000b1                   # Flags: 2
+ 2220              	               # Len: 177                       #  01 40
+ 2221              	L0000FD69:     # Next: 0000fd7b                 # # WORD: LITERAL
+ 2222              	               # XT: 000000a4                   # Flags: 0
+ 2223              	               # Len: 164                       #  07 4c 49 54 45 52 41 4c
+ 2224              	L0000FD7B:     # Next: 0000fd87                 # # WORD: ]
+ 2225              	               # XT: 00000099                   # Flags: 1
+ 2226              	               # Len: 153                       #  01 5d
+ 2227              	L0000FD87:     # Next: 0000fd93                 # # WORD: [
+ 2228              	               # XT: 0000008e                   # Flags: 1
+ 2229              	               # Len: 142                       #  01 5b
+ 2230              	L0000FD93:     # Next: 0000fd9f                 # # WORD: ,
+ 2231              	               # XT: 0000007b                   # Flags: 0
+ 2232              	               # Len: 123                       #  01 2c
+ 2233              	L0000FD9F:     # Next: 0000fdac                 # # WORD: C,
+ 2234              	               # XT: 00000068                   # Flags: 0
+ 2235              	               # Len: 104                       #  02 43 2c
+ 2236              	L0000FDAC:     # Next: 0000fdbc                 # # WORD: STATE
+ 2237              	               # XT: 00000060                   # Flags: 2
+ 2238              	               # Len: 96                        #  05 53 54 41 54 45
+ 2239              	L0000FDBC:     # Next: 0000fdcb                 # # WORD: BASE
+ 2240              	               # XT: 00000058                   # Flags: 2
+ 2241              	               # Len: 88                        #  04 42 41 53 45
+ 2242              	L0000FDCB:     # Next: 0000fdda                 # # WORD: CELL
+ 2243              	               # XT: 00000050                   # Flags: 2
+ 2244              	               # Len: 80                        #  04 43 45 4c 4c
+ 2245              	L0000FDDA:     # Next: 0000fdeb                 # # WORD: (LAST)
+ 2246              	               # XT: 00000048                   # Flags: 2
+ 2247              	               # Len: 72                        #  06 28 4c 41 53 54 29
+GAS LISTING forth.s 			page 55
+
+
+ 2248              	L0000FDEB:     # Next: 0000fdfc                 # # WORD: (HERE)
+ 2249              	               # XT: 00000040                   # Flags: 2
+ 2250              	               # Len: 64                        #  06 28 48 45 52 45 29
+ 2251              	L0000FDFC:                                      # End.
+GAS LISTING forth.s 			page 56
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 fake
+             forth.s:24     .text:00000000 main
+             forth.s:9      .data:00000000 DSP
+             forth.s:10     .data:00000002 data_stack
+             forth.s:13     .data:00000102 RSP
+             forth.s:14     .data:00000104 return_stack
+             forth.s:17     .data:00000204 OK
+             forth.s:18     .data:00000206 stdin
+             forth.s:19     .data:0000020a buf
+             forth.s:144    .text:0000013c func_EMIT
+             forth.s:56     .text:00000070 func_EQ
+             forth.s:64     .text:00000084 EQ_true
+             forth.s:65     .text:00000089 EQ_done
+             forth.s:69     .text:0000008d func_NEQ
+             forth.s:78     .text:000000a4 NEQ_true
+             forth.s:79     .text:000000a9 NEQ_done
+             forth.s:84     .text:000000b0 func_LT
+             forth.s:99     .text:000000d3 func_GT
+             forth.s:108    .text:000000ea GT_true
+             forth.s:109    .text:000000ef GT_done
+             forth.s:114    .text:000000f6 func_LTE
+             forth.s:129    .text:00000119 func_GTE
+             forth.s:138    .text:00000130 GTE_true
+             forth.s:139    .text:00000135 GTE_done
+             forth.s:160    .text:0000015e func_FETCH
+             forth.s:167    .text:00000167 func_CFETCH
+             forth.s:174    .text:00000172 func_STORE
+             forth.s:183    .text:00000181 func_CSTORE
+             forth.s:192    .text:00000190 func_DUP
+             forth.s:199    .text:0000019a func_SWAP
+             forth.s:209    .text:000001ad func_OVER
+             forth.s:220    .text:000001c3 func_ADD
+             forth.s:229    .text:000001d2 func_SUB
+             forth.s:238    .text:000001e1 func_MUL
+             forth.s:247    .text:000001f0 func_DTOR
+             forth.s:259    .text:00000215 func_RTOD
+
+UNDEFINED SYMBOLS
+_GetStdHandle@4
+_WriteConsoleA@20
+_ExitProcess@4

@@ -11,6 +11,9 @@ RSP:           .word 0
 return_stack:
 .skip 256
 
+buf:
+.skip 256
+
 OK:            .ascii "OK"
 stdin:          .int 0
 
@@ -33,6 +36,17 @@ main:
                pushl   $OK
                pushl   stdin
                call    _WriteConsoleA@20
+
+               add $4, %ebp
+               movl $65, (%ebp)
+               add $4, %ebp
+               movl $66, (%ebp)
+               add $4, %ebp
+               movl $67, (%ebp)
+
+               call func_EMIT            
+               call func_EMIT            
+               call func_EMIT            
 
                pushl $0
                call _ExitProcess@4
@@ -127,9 +141,18 @@ GTE_done:      addl $4, %ebp                    # PUSH %eax
                
 # -------------------------------------------------------------------------------------
 func_EMIT:                                      # Implementation of EMIT
-               movl (%ebp), %edi                # POP to %edi
+               movl (%ebp), %eax                # POP to %edi
                subl $4, %ebp
-               call putchar
+
+               mov %al, buf
+
+               pushl   $0
+               pushl   $0
+               pushl   $1
+               pushl   $buf
+               pushl   stdin
+               call    _WriteConsoleA@20
+
                ret
                
 # -------------------------------------------------------------------------------------
