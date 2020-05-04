@@ -1,5 +1,8 @@
+# --------------------------------------------------------------------------
+
                .global main
 
+# --------------------------------------------------------------------------
                .data
                .align 2
 
@@ -11,37 +14,45 @@ RSP:           .word 0
 return_stack:
 .skip 256
 
+STDIN:         .int 0
+
 buf:
 .skip 256
 
-stdin:          .int 0
-
+# --------------------------------------------------------------------------
                .text
 
-main_loop:
-              ret
-main:
+sys_init:
                movl $data_stack, DSP
                movl $return_stack, RSP
                movl DSP, %ebp
+               ret
 
+sys_reset:
+              call sys_init
+
+main_loop:
+               add $4, %ebp
+               movl $'.', (%ebp)
+               add $4, %ebp
+               movl $'k', (%ebp)
+               add $4, %ebp
+               movl $'O', (%ebp)
+
+               call func_EMIT            
+               call func_EMIT            
+               call func_EMIT            
+               call L00000372
+               call func_BYE
+               jmp main_loop
+               ret
+main:
                /* handle = GetStdHandle(-11) */
                pushl   $-11
                call    _GetStdHandle@4
-               mov     %eax, stdin
+               mov     %eax, STDIN
                
-               movl $46, (%ebp)
-               add $4, %ebp
-               movl $75, (%ebp)
-               add $4, %ebp
-               movl $79, (%ebp)
-
-               call func_EMIT            
-               call func_EMIT            
-               call func_EMIT            
-
-               pushl $0
-               call _ExitProcess@4
+               jmp sys_reset
 
 # -------------------------------------------------------------------------------------
 func_PUSH_doesntwork:                                        # Implementation of PUSH
@@ -150,7 +161,7 @@ func_EMIT:                                      # Implementation of EMIT
                pushl   $0
                pushl   $1
                pushl   $buf
-               pushl   stdin
+               pushl   STDIN
                call    _WriteConsoleA@20
 
                ret
@@ -244,26 +255,58 @@ func_MUL:                                       # Implementation of MUL
                
 # -------------------------------------------------------------------------------------
 func_DTOR:                                      # Implementation of DTOR
-               movl (%ebp), %eax                # POP to %eax
+               push %eax
+               push %ebx
+
+               # Get the value to move (into %eax) ...
+               movl (%ebp), %eax
                subl $4, %ebp
-               mov %ebp, DSP
-               mov RSP, %ebp
-               addl $4, %ebp                    # PUSH %eax
-               movl %eax, (%ebp)
-               mov %ebp, RSP
-               mov DSP, %ebp
+
+               # Put the value onto the RETURN stack ...
+               mov RSP, %ebx                    # Get the RETURN SP
+               addl $4, %ebx
+               movl (%ebx), %eax
+               mov %ebx, RSP                    # Save it back
+
+               pop %ebx
+               pop %eax
                ret
                
 # -------------------------------------------------------------------------------------
 func_RTOD:                                      # Implementation of RTOD
-               mov %ebp, DSP
-               mov RSP, %ebp
-               movl (%ebp), %eax                # POP to %eax
-               subl $4, %ebp
-               mov %ebp, RSP
-               mov DSP, %ebp
+               push %eax
+               push %ebx
+
+               # Get the value to move (into %eax) ...
+               mov RSP, %ebx                    # Get the RETURN SP
+               subl $4, %ebx
+               movl (%ebx), %eax
+               mov %ebx, RSP                    # Save the RETURN SP
+
+               # Put the value onto the DATA stack ...
                addl $4, %ebp                    # PUSH %eax
                movl %eax, (%ebp)
+
+               pop %ebx
+               pop %eax
+               ret
+               
+# -------------------------------------------------------------------------------------
+func_BYE:                                      # Implementation of BYE
+
+               add $4, %ebp
+               movl $'E', (%ebp)
+               add $4, %ebp
+               movl $'Y', (%ebp)
+               add $4, %ebp
+               movl $'B', (%ebp)
+
+               call func_EMIT            
+               call func_EMIT            
+               call func_EMIT            
+
+               pushl $0
+               call _ExitProcess@4
                ret
                
 # -------------------------------------------------------------------------------------
