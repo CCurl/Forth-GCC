@@ -92,7 +92,10 @@ echo gcc -g -o %output% %c-files%
 gcc -g -o tmp %c-files%
 strip -o %output%.exe -g -S -d -X tmp.exe
 del tmp.exe
-if "--%2%--" NEQ "----" forth-dis2
+if "--%2%--" == "----" goto done
+forth-dis2
+gcc -c forth.s
+ld -e main forth.o -lkernel32
 goto done
 
 :make-nd

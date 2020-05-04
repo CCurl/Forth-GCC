@@ -431,12 +431,15 @@ void prim_FREADLINE()
 		}
 		arg2 = (CELL)strlen(pBuf+1);
 		// Strip off the trailing newline if there
+		/*
+		// Don't strip off the trailing newline if there
 		if ((arg2 > 0) && (pBuf[arg2] == '\n'))
 		{
 			pBuf[arg2--] = (char)NULL;
 		}
+		*/
 		*(pBuf) = (char)(arg2);
-		push((arg2 > 0) ? arg2 : 1);
+		push(arg2);
 		trace("%d: [%s]\n", (int)pBuf[0], pBuf+1);
 	}
 }

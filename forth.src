@@ -5,7 +5,7 @@
 \ The image file is read by the VM when it boots.
 \
 \ The compiler does these things ...
-\ - it generates the following words: C, , [ ] (LAST) (HERE) STATE BASE CELL INPUT-FP
+\ - it generates the following words: C, , [ ] (LAST) (HERE) STATE BASE CELL
 \
 \ NB: don't inline anything with a 12 in it ... that is RET
 \ -----------------------------------------------------------------------------------------------
@@ -58,22 +58,15 @@
 : BYE		[ 255 C, ] ; .INLINE
 
 \ ------------------------------------------------------------------------------------
+: R@        R> DUP >R  ; .INLINE
+
+\ ------------------------------------------------------------------------------------
 : INLINE    (LAST) @ 2 CELL * + DUP C@ 2 OR SWAP C! ;
 : IMMEDIATE (LAST) @ 2 CELL * + DUP C@ 1 OR SWAP C! ;
 : CELLS CELL * ; INLINE
 
 : LAST (LAST) @ ; INLINE
 : HERE (HERE) @ ; INLINE
-
-\ ------------------------------------------------------------------------------------
-: R@      R> DUP >R       ; INLINE
-: RDROP   R> DROP         ; INLINE
-: 2DUP    OVER OVER       ; INLINE
-: 2DROP   DROP DROP       ; INLINE
-: TUCK    SWAP OVER       ; INLINE
-: NIP     SWAP DROP       ; INLINE
-: ROT     >R SWAP R> SWAP ; INLINE
-: -ROT    SWAP >R SWAP R> ; INLINE
 
 \ ------------------------------------------------------------------------------------
 : ?COMPILING STATE @ ;
@@ -93,7 +86,7 @@
 : TYPE                          \ ( addr count -- ) 
 	OVER + 1 - SWAP
 	BEGIN
-		2DUP < IF 
+		OVER OVER < IF 
             DROP DROP LEAVE 
         THEN
 		DUP C@ EMIT 1 +
@@ -111,8 +104,23 @@
 
 \ ------------------------------------------------------------------------------------
 : string-catc          			\ ( ch addr -- )
-    TUCK DUP C@ + 1 + C!
+    SWAP OVER DUP C@ + 1 + C!
     DUP C@ 1 + SWAP C! ;
+
+\ ------------------------------------------------------------------------------------
+: string-copy                   \ ( from-cstr to-ctr -- )
+    >R DUP C@ OVER + 1 + SWAP
+    BEGIN
+        OVER OVER = IF
+            DROP DROP
+            R> DROP
+            LEAVE
+        ELSE
+            DUP C@ 
+            R@ C! R> 1 + >R
+            1 +
+        THEN
+    AGAIN ;
 
 \ ------------------------------------------------------------------------------------
 : string-popc          			\ ( addr -- ch )
@@ -129,15 +137,6 @@
         DROP DROP 0 LEAVE 
     THEN
 	< 0 = ;
-
-\ ------------------------------------------------------------------------------------
-: file-getLine		            \ ( fp -- counted-str )
-	PAD SWAP 200 SWAP
-	FREADLINE                   \ ( addr sz fp -- num-read )
-    \ NOTE: 0 bytes read means <EOF>
-	PAD C! 
-	\ PAD COUNT TYPE CR \ DEBUG
-    PAD ;
 
 \ ------------------------------------------------------------------------------------
 : stdin-getline		            \ ( -- counted-str )
@@ -158,6 +157,11 @@
             LEAVE
 		THEN
 
+        \ <TAB>?
+        DUP 9 = IF
+            DROP 32
+        THEN
+
         \ <BACKSPACE>?
         DUP 8 = IF
             R@ string-popc DROP
@@ -173,11 +177,24 @@
     AGAIN ;
 
 \ ------------------------------------------------------------------------------------
+: file-getLine		                        \ ( -- counted-str )
+	PAD 200 INPUT-FP @ FREADLINE            \ FREADLINE: ( addr sz fp -- num-read )
+    \ NOTE: 0 bytes read means <EOF>
+    0 = IF
+        INPUT-FP @ FCLOSE
+        0 INPUT-FP !
+    ELSE
+        46 EMIT PAD COUNT TYPE \ DEBUG
+
+    THEN
+    PAD ;
+
+\ ------------------------------------------------------------------------------------
 : get-line                      \ ( -- counted-str )
-    INPUT-FP @ DUP IF
+    INPUT-FP @ IF
         file-getLine
     ELSE
-        DROP stdin-getline
+        stdin-getline
     THEN ;
 
 \ ------------------------------------------------------------------------------------
@@ -199,12 +216,12 @@
 	\ leading whitespace has already been skipped.
     \ addr1 => input: start of input string
     \ addr2 => output: next char in string after the word
-    HERE 64 + DUP >R 0 SWAP !
+    HERE 256 + DUP >R 0 SWAP !
     BEGIN
         DUP C@ DUP
         33 < IF 
-            DROP R> SWAP DUP string-nullterm
-            LEAVE
+            DROP R@ string-nullterm
+            R> SWAP LEAVE
         ELSE
             R@ string-catc
             1 +
@@ -213,11 +230,11 @@
 
 \ ------------------------------------------------------------------------------------
 : DICT>NEXT                  ;  INLINE
-: DICT>XT     CELL +         ;  INLINE
+: DICT>XT       CELL  +      ;  INLINE
 : DICT>FLAGS  2 CELLS +      ;  INLINE
 : DICT>NAME   DICT>FLAGS 1 + ;  INLINE
-: FLAG_IMMEDIATE 1 ; INLINE
-: FLAG_INLINE    2 ; INLINE
+: FLAG_IMMEDIATE 1           ; INLINE
+: FLAG_INLINE    2           ; INLINE
 
 \ ------------------------------------------------------------------------------------
 : find-word						\ ( counted-str -- (addr 1) | 0 )
@@ -229,7 +246,7 @@
             \ DUP DICT>NAME COUNT TYPE
 			DICT>NAME OVER COMPAREI
 			IF
-                \ S" .word." COUNT TYPE
+                \ S" .found-it." COUNT TYPE
 				DROP R> 1
 				LEAVE
 			THEN
@@ -238,8 +255,17 @@
 			DROP DROP R> DROP 0 LEAVE
 		THEN
 		R> @ >R
-	AGAIN
-;
+	AGAIN ;
+
+\ ------------------------------------------------------------------------------------
+: define-word		                \ ( name-cstr -- )
+	LAST OVER C@ 2 CELLS 3 + + -    \ New-LAST
+	DUP >R >R					    \ Save it
+	LAST R@  !  R> CELL + >R	    \ NEXT
+	HERE R@  !  R> CELL + >R	    \ XT
+	0    R@ C!  R> 1    + >R        \ FLAGS
+	R> string-copy				    \ LEN + NAME
+	R> (LAST) ! ;
 
 \ ------------------------------------------------------------------------------------
 : is-num-char?						\ ( ch -- (val 1) | 0 )
@@ -250,6 +276,7 @@
 	THEN
 	DROP 0 ;
 
+\ ------------------------------------------------------------------------------------
 : is-number?                        \ ( counted-str -- (num 1) | 0 )
     \ null-terminate it and skip the count-byte
     DUP string-nullterm 1 +
@@ -260,7 +287,10 @@
     ELSE
         0 >R
     THEN
-	
+
+    \ '-' by itself is not a number
+    DUP C@ 0 = IF DROP R> DROP 0 LEAVE THEN
+
 	\ accumulate the result on the return stack
 	0 >R
 	BEGIN
@@ -286,6 +316,26 @@
 	AGAIN ;
 
 \ ------------------------------------------------------------------------------------
+: >IN [ LITERAL HERE CELL + 1 + , ] ; 0 , RET
+
+\ ------------------------------------------------------------------------------------
+: CREATE-NAME		                \ ( -- )
+	>IN @ skip-ws >IN ! 
+
+    \ <EOL>?
+	>IN @ C@ 0 = IF 
+        LEAVE
+    THEN
+
+    >IN @ get-word >IN ! 
+    define-word
+    DICTP
+    LAST , ;
+
+: : CREATE-NAME 1 STATE ! ;
+: ; RET         0 STATE ! ; IMMEDIATE
+
+\ ------------------------------------------------------------------------------------
 : execute-word                  \ ( counted-str -- )
     \ check to see if it's a number
     DUP is-number? IF
@@ -302,28 +352,40 @@
         LEAVE
     THEN
 
+    \ DUP COUNT TYPE
     DUP find-word IF
         SWAP DROP
         \ Execute the word or compile it here
-        \ Get the XT
-        DICT>XT @
         ?COMPILING IF
             \ IF it's IMMEDIATE, call it
-            \ ELSE IF it's INLINE, copy the bytes until the first RET (12)
-            \ ELSE, compile a CALL to it
-            CALL , DROP
+            DUP DICT>FLAGS C@ FLAG_IMMEDIATE = IF
+                \ S" (imm)" COUNT TYPE
+                DICT>XT @
+                >R LEAVE
+            ELSE
+                DUP DICT>FLAGS C@ FLAG_INLINE = IF
+                    \ INLINE ... copy the bytes until the first RET (12)
+                    CALL DICT>XT @ ,
+                ELSE
+                    \ Compile a CALL to it
+                    CALL DICT>XT @ ,
+                THEN
+            THEN
         ELSE
             \ Execute it
-            >R
+            DICT>XT @
+            >R LEAVE
         THEN
         LEAVE
     THEN
 
     \ If we get here, it is neither a word nor a number ... ERROR!
-    COUNT TYPE 63 DUP EMIT EMIT ;
-
-\ ------------------------------------------------------------------------------------
-: >IN [ LITERAL HERE CELL + 1 + , ] ; 0 , RET
+    COUNT TYPE 63 DUP EMIT EMIT 
+    INPUT-FP @ IF
+        INPUT-FP @ FCLOSE
+        0 INPUT-FP !
+    THEN
+    0 STATE ! ;
 
 \ ------------------------------------------------------------------------------------
 : execute-line                  \ ( -- )
@@ -344,11 +406,14 @@
 : ok STATE @ 0 = IF 
         INPUT-FP @ 0 = IF
             S"  Ok" COUNT TYPE CR
+        ELSE S" .ok." COUNT TYPE
         THEN
+    ELSE S" (ok)" COUNT TYPE
     THEN ;
 
 \ ------------------------------------------------------------------------------------
-: mainloop 0 STATE ! 
+: mainloop 
+    0 STATE ! 
     BEGIN 
         ok get-line
         DUP C@ IF
@@ -364,36 +429,6 @@
         THEN
         \ BYE
     AGAIN ;
-
-\ ------------------------------------------------------------------------------------
-: /MOD 2DUP / DUP >R * - R> SWAP ;     \ ( num1 num2 -- num3 mod )
-
-\ ------------------------------------------------------------------------------------
-: (.)			\ ( num -- )
-	DUP 0 = 
-	IF
-		DROP 48 EMIT LEAVE
-	THEN
-	
-	DUP 0 < IF 0 - 1 ELSE 0 THEN >R
-
-	0 SWAP
-	BEGIN
-		DUP
-		IF
-			BASE C@ /MOD
-			48 OVER 9 > IF 7 + THEN
-			+ SWAP
-		ELSE
-			\ spit out the string
-			DROP
-			R> IF 45 EMIT THEN
-			BEGIN DUP IF EMIT ELSE DROP LEAVE THEN AGAIN
-		THEN
-	AGAIN
-;
-
-: . 32 EMIT (.) ;
 
 \ ------------------------------------------------------------------------------------
 : main S" Hello." COUNT TYPE 
@@ -430,6 +465,49 @@
         THEN
     AGAIN ;
 
+: \ 0 >IN @ ! ; IMMEDIATE
+
+\ ------------------------------------------------------------------------------------
+: /MOD OVER OVER / DUP >R * - R> SWAP ;     \ ( num1 num2 -- num3 mod )
+
+\ ------------------------------------------------------------------------------------
+: (.)
+	DUP 0 = 
+	IF
+		DROP 48 EMIT LEAVE
+	THEN
+	
+	DUP 0 < IF 0 - 1 ELSE 0 THEN >R
+
+	0 SWAP
+	BEGIN
+		DUP
+		IF
+			BASE C@ /MOD
+			48 OVER 9 > IF 7 + THEN
+			+ SWAP
+		ELSE
+			DROP
+			R> IF 45 EMIT THEN
+			BEGIN DUP IF EMIT ELSE DROP LEAVE THEN AGAIN
+		THEN
+	AGAIN ;
+
+: BL 32 EMIT ; INLINE
+
+: . BL (.) ;
+
+: LOAD                          \ ( name-cstr -- )
+    DUP string-nullterm
+    0 0 FOPEN IF
+        INPUT-FP !
+    ELSE
+        DROP 
+        S"  unable to open the file." COUNT TYPE
+    THEN ;
+
+: LL S" words.4th" LOAD ;
+
 \ ------------------------------------------------------------------------------------
 : exception 
     S"  (exception) " COUNT TYPE 
@@ -437,3 +515,4 @@
     reset-data-stack
     reset-return-stack
     mainloop ;
+

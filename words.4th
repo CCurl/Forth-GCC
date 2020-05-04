@@ -1,38 +1,53 @@
+: \ 0 >IN @ ! ; IMMEDIATE
+
+5 5 + BASE C!
+: DECIMAL 10 BASE C! ;
+: HEX 16 BASE C! ;
+: BINARY 2 BASE C! ;
+
+: DECIMAL. BASE C@ SWAP DECIMAL (.) BASE C! ;
+: HEX.     BASE C@ SWAP HEX     (.) BASE C! ;
+: BINARY.  BASE C@ SWAP BINARY  (.) BASE C! ;
+
 : ?DUP DUP IF DUP THEN ;
+: 2DUP  OVER OVER ; INLINE
+: 2DROP DROP DROP ; INLINE
+: 1+ 1 + ; INLINE
+: 1- 1 - ; INLINE
+: 0= 0 = ; INLINE
+
 : (const) LITERAL , RET ;
 : CONSTANT  CREATE-NAME (const) ;
 : VARIABLE  CREATE-NAME HERE 2 + CELL + (const) 0 , ;
 : CVARIABLE CREATE-NAME HERE 2 + CELL + (const) 0 C, ;
 
+: BL   32 EMIT         ; INLINE
+: CRLF 13 EMIT 10 EMIT ; INLINE
+
 : ascii. DUP HEX. BL DUP DECIMAL. BL EMIT ;
-: ascii 2DUP < IF SWAP THEN BEGIN CRLF DUP ascii. 1+ 2DUP > WHILE 2DROP ;
 
-: dump ( start end -- ) 
-    CR 2DUP < 
-    IF 
-        SWAP 
-    THEN 
+65 HEX.
+
+: ascii                         \ ( from to -- )
+    2DUP < IF SWAP THEN 
     BEGIN 
-        2DUP <
-        IF 2DROP LEAVE 
+        CRLF DUP ascii. 1 + 
+        2DUP > 
+    WHILE
+    2DROP ;
+
+: dump                          \ ( start end -- ) 
+    CR 2DUP < IF SWAP THEN 
+    BEGIN 
+        2DUP < IF 
+            2DROP LEAVE 
         THEN 
         DUP BL C@ HEX. 1+ 
     AGAIN ;
 
-: dump-n ( start num -- ) 
-    OVER + 1-
-    CR 2DUP < 
-    IF 
-        SWAP 
-    THEN 
-    BEGIN 
-        2DUP < 
-        IF 2DROP LEAVE 
-        THEN 
-        DUP BL C@ HEX. 1+ 
-    AGAIN ;
+: dump-n OVER + 1 - dump ;      \ ( start num -- ) 
 
-: dump-w ( start end -- ) 
+: dump-w                \ ( start end -- ) 
     CR 2DUP < 
     IF 
         SWAP 
@@ -44,7 +59,7 @@
         DUP BL @ HEX. CELL + 
     AGAIN ;
 
-: dump-nw ( start num -- ) 
+: dump-nw               \ ( start num -- ) 
     CELLS OVER +
     CR 2DUP < 
     IF 
@@ -57,9 +72,10 @@
         DUP BL @ HEX. CELL + 
     AGAIN ;
 
-: dump.num ( start num -- ) OVER + dump ;
+: dump.num              \ ( start num -- ) 
+    OVER + dump ;
 
-: img-save ( file-name -- )
+: img-save              \ ( file-name -- )
     1 1 FOPEN IF
        >R
        0 MEM_SZ R@ FWRITE 
