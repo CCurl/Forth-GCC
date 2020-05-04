@@ -8,6 +8,7 @@ if "--%1%--" == "--ex--" goto make-ex
 if "--%1%--" == "--forth--" goto make-forth
 if "--%1%--" == "--nc--" goto make-nc
 if "--%1%--" == "--nd--" goto make-nd
+if "--%1%--" == "--aa--" goto make-aa
 goto unknown
 
 :make-fc
@@ -82,6 +83,15 @@ forth -i:ex.bin
 goto done
 
 :make-aa
+set output=fasm
+echo making %output% ...
+set inp-files=%output%.s
+set options=-Xassembler -a=%output%.lst
+echo gcc -ggdb -c %inp-files% %options%
+gcc -c %inp-files%  %options%
+echo ld -e main %output%.o -o %output%.exe -lkernel32
+ld -e main %output%.o -o %output%.exe -lkernel32
+if "--%2%--" NEQ "----" fasm
 goto done
 
 :make-fa

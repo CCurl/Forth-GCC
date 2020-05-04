@@ -14,11 +14,12 @@ return_stack:
 buf:
 .skip 256
 
-OK:            .ascii "OK"
 stdin:          .int 0
 
                .text
 
+main_loop:
+              ret
 main:
                movl $data_stack, DSP
                movl $return_stack, RSP
@@ -29,20 +30,11 @@ main:
                call    _GetStdHandle@4
                mov     %eax, stdin
                
-               /* WriteConsole(handle, &msg[0], num_chars, &written, 0) */
-               pushl   $0
-               pushl   $0
-               pushl   $2
-               pushl   $OK
-               pushl   stdin
-               call    _WriteConsoleA@20
-
+               movl $46, (%ebp)
                add $4, %ebp
-               movl $65, (%ebp)
+               movl $75, (%ebp)
                add $4, %ebp
-               movl $66, (%ebp)
-               add $4, %ebp
-               movl $67, (%ebp)
+               movl $79, (%ebp)
 
                call func_EMIT            
                call func_EMIT            
@@ -50,6 +42,15 @@ main:
 
                pushl $0
                call _ExitProcess@4
+
+# -------------------------------------------------------------------------------------
+func_PUSH_doesntwork:                                        # Implementation of PUSH
+              pushl %eax
+              movl -8(%esp), %eax
+              addl $4, %ebp
+              mov %eax, (%ebp)
+              popl %eax
+              ret
 
 # -------------------------------------------------------------------------------------
 func_EQ:                                        # Implementation of EQ
@@ -68,15 +69,13 @@ EQ_done:       movl %eax, (%ebp)                # set TOS from %eax
 func_NEQ:                                       # Implementation of NEQ
                movl (%ebp), %eax                # POP to %eax
                subl $4, %ebp
-               movl (%ebp), %ebx                # POP to %ebx
-               subl $4, %ebp
+               movl (%ebp), %ebx                # get TOS to %ebx
                cmpl %ebx, %eax
                jnz NEQ_true
                movl $0, %eax
                jmp NEQ_done
 NEQ_true:      movl $1, %eax
-NEQ_done:      addl $4, %ebp                    # PUSH %eax
-               movl %eax, (%ebp)
+NEQ_done:      movl %eax, (%ebp)                # set TOS from %eax
                ret
                
 # -------------------------------------------------------------------------------------
@@ -146,6 +145,7 @@ func_EMIT:                                      # Implementation of EMIT
 
                mov %al, buf
 
+               /* WriteConsole(handle, &msg[0], num_chars, &written, 0) */
                pushl   $0
                pushl   $0
                pushl   $1
@@ -267,4 +267,3 @@ func_RTOD:                                      # Implementation of RTOD
                ret
                
 # -------------------------------------------------------------------------------------
-
