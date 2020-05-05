@@ -250,7 +250,7 @@ LINE_T *dis_POP(char *tgt)
 	// make_code(line, "pop %s", tgt);
 	line = dis_getTOS(tgt);
 	make_comment(line, "POP to %s", tgt);
-	make_code(NULL, "subl $4, %s", "%ebp");
+	make_code(NULL, "sub $4, %s", "%ebp");
 	return line;
 }
 
@@ -270,8 +270,7 @@ void dis_one()
 		arg1 = GETAT(PC);
 		PC += CELL_SZ;
 		// push(arg1);
-		sprintf(tmp, "$%ld", arg1);
-		line = dis_PUSH(tmp);
+		line = make_code(0, "m_push %ld", arg1);
 		make_comment(line, "LITERAL %ld", arg1);
 		return;
 
@@ -279,8 +278,7 @@ void dis_one()
 		arg1 = the_memory[PC];
 		PC++;
 		// push(arg1);
-		sprintf(tmp, "$%ld", arg1);
-		line = dis_PUSH(tmp);
+		line = make_code(0, "m_push %ld", arg1);
 		make_comment(line, "CLITERAL %ld", arg1);
 		return;
 
@@ -308,7 +306,7 @@ void dis_one()
 
 	case DROP:
 		// arg1 = pop();
-		line = make_code(NULL, "subl $4, %%ebp");
+		line = make_code(NULL, "sub ebp, 4");
 		make_comment(line, "DROP");
 		return;
 
@@ -328,14 +326,14 @@ void dis_one()
 		// arg1 = pop();
 		// arg2 = *(DSP - arg1);
 		// push(arg2);
-		make_code(NULL, "# PICK");
+		make_comment(NULL, "PICK");
 		return;
 
 	case LOGLEVEL:
 		// arg1 = pop();
 		// arg2 = *(DSP - arg1);
 		// push(arg2);
-		make_code(NULL, "# LOGLEVEL");
+		make_comment(NULL, "LOGLEVEL");
 		return;
 
 	case JMP:
@@ -359,9 +357,9 @@ void dis_one()
 		arg1 = GETAT(PC);
 		PC += CELL_SZ;
 		set_tag(arg1, 0);
-		line = dis_POP("%eax");
-		make_comment(line, "JMPZ");
-		make_code(NULL, "cmp %s, 0", "%eax");
+		line = make_code(NULL, "m_pop eax");
+		line = make_comment(line, "JMPZ");
+		line = make_code(NULL, "cmp eax, 0");
 		line = make_code(NULL, "jz L%08lX", arg1);
 		return;
 
@@ -378,9 +376,9 @@ void dis_one()
 		arg1 = GETAT(PC);
 		PC += CELL_SZ;
 		set_tag(arg1, 0);
-		line = dis_POP("%eax");
-		make_comment(line, "JMPNZ");
-		line = make_code(NULL, "cmp %s, 0", "%eax");
+		line = make_code(NULL, "m_pop eax");
+		line = make_comment(line, "JMPNZ");
+		line = make_code(NULL, "cmp eax, 0");
 		line = make_code(NULL, "jnz L%08lX", arg1);
 		return;
 
@@ -423,10 +421,9 @@ void dis_one()
 		// 	push(arg3);
 		// }
 		// isBYE = true;
-		dis_POP("%eax");
-		dis_POP("%ebx");
-		line = make_code(NULL, "# COMPARE %s, %s", "%eax", "%ebx");
-		dis_PUSH("%ebx");
+		line = make_code(NULL, "mov eax, 0");
+		line = make_comment(line, "COMPARE");
+		line = make_code(NULL, "call func_COMPARE");
 		return;
 
 	case COMPAREI:
@@ -439,10 +436,9 @@ void dis_one()
 		// 	push(arg3);
 		// }
 		// isBYE = true;
-		dis_POP("%eax");
-		dis_POP("%ebx");
-		line = make_code(NULL, "# COMPAREI %s, %s", "%eax", "%ebx");
-		dis_PUSH("%ebx");
+		line = make_code(NULL, "mov eax, 1");
+		line = make_comment(line, "COMPAREI");
+		line = make_code(NULL, "call func_COMPARE");
 		return;
 
 	case SLITERAL:
@@ -454,9 +450,9 @@ void dis_one()
 
 		arg1 = the_memory[PC]; // count-byte (and the beginning of the counted string)
 		arg2 = arg1 + 2;  // count-byte + count + NULL
-		// PC += arg2;
+		PC += arg2;
 		// push(arg1);
-		make_comment(NULL, "SLITERAL (%04lx) [%s]", PC, (char *)&the_memory[PC+1]);
+		make_comment(NULL, "SLITERAL (%04lx)", PC);
 		return;
 
 	case CFETCH:
@@ -497,11 +493,7 @@ void dis_one()
 		// arg1 = pop();
 		// arg2 = pop();
 		// push(arg2 / arg1);
-		line = dis_POP("%ebx");
-		make_comment(line, "ADD");
-		dis_POP("%eax");
-		line = make_code(NULL, "divl %s", "%ebx");
-		dis_PUSH("%eax");
+		make_code(NULL, "call func_DIV");
 		return;
 
 	case LT:
@@ -698,7 +690,7 @@ void dis_one()
 		// RSP = rsp_init;
 		// PC = 0;
 		// isBYE = isEmbedded;
-		make_code(NULL, ".byte 0x%02x", IR);
+		make_comment(NULL, ".byte 0x%02x, '%c'", IR, (IR > 31) ? IR : '~');
 		return;
 	}
 	return;
@@ -821,7 +813,7 @@ void gen_SUB()
 
 	dis_POP("%ebx");
 	dis_getTOS("%eax");
-	make_code(NULL, "subl %%ebx, %%eax");
+	make_code(NULL, "sub ebx, eax");
 	dis_setTOS("%eax");
 
 	make_code(NULL, "ret");
@@ -872,23 +864,19 @@ void gen_cmpFunction(char *name, char *operator)
 	gen_funcHeader(name);
 	LINE_T *line = NULL;
 
-	dis_POP("%eax");
-	dis_POP("%ebx");
+	make_code(NULL, "m_pop ebx");
+	make_code(NULL, "m_getTOS eax");
 
-	make_code(NULL, "cmpl %s, %s", "%ebx", "%eax");
+	make_code(NULL, "cmp eax, ebx");
 	make_code(NULL, "%s %s_true", operator, name);
 
 	// FALSE case
-	make_code(NULL, "movl $0, %s", "%eax");
-	make_code(NULL, "jmp %s_done", name);
+	make_code(NULL, "m_setTOS 0");
+	make_code(NULL, "ret");
 
 	// TRUE case
-	line = make_code(NULL, "movl $1, %s", "%eax");
+	line = make_code(NULL, "m_setTOS 1");
 	make_tagf(line, "%s_true", name);
-
-	// end of function
-	line = dis_PUSH("%eax");
-	make_tagf(line, "%s_done", name);
 	make_code(NULL, "ret");
 }
 
@@ -912,20 +900,20 @@ void dis_dict(CELL dict_addr)
 	// Next
 	line = new_line(addr);
 	make_tag(line);
-	make_code(line, "# Next: %08lx", dp->next);
-	make_comment(line, "# WORD: %s", dp->name);
+	make_code(line, "; Next: %08lx", dp->next);
+	make_comment(line, "; WORD: %s", dp->name);
 
 	// XT, flags
 	addr += CELL_SZ;
 	line = new_line(addr);
-	make_code(line, "# XT: %08lx", dp->XT);
+	make_code(line, "; XT: %08lx", dp->XT);
 	make_comment(line, "Flags: %d", dp->flags);
 	addr += 1;
 
 	// Name
 	addr += CELL_SZ;
 	line = new_line(addr);
-	make_code(line, "# Len: %d", dp->XT);
+	make_code(line, "; Len: %d", dp->len);
 	dis_start(addr, dp->len+1, line->comment);
 }
 
@@ -969,7 +957,7 @@ void dis_vm()
 		dis_one();
 	}
 
-	make_comment(NULL, "\n# End of code, Dictionary:\n#\n");
+	make_comment(NULL, "\n; End of code, Dictionary:\n;\n");
 
 	// Dictionary
 	PC = GETAT(ADDR_LAST);
@@ -1019,7 +1007,7 @@ char *make_len(char *buf, int len)
 // *********************************************************************
 void p_include(char *filename, FILE *output_fp)
 {
-    printf("#including '%s' ... ", filename);
+    printf("including '%s' ... ", filename);
 	int n = 0;
     FILE *fp = fopen(filename, "rt");
     if (!fp)
@@ -1049,11 +1037,11 @@ void write_output()
         return;
     }
 
-    fprintf(output_fp, "# memory-size: %ld bytes, (%04lx hex)\n", memory_size, memory_size);
-    fprintf(output_fp, "# data-stack: %04lx, grows up\n", memory_size - STACKS_SZ);
-    fprintf(output_fp, "# return-stack: %04lx, grows down\n", memory_size - CELL_SZ);
+    fprintf(output_fp, "; memory-size: %ld bytes, (%04lx hex)\n", memory_size, memory_size);
+    fprintf(output_fp, "; data-stack: %04lx, grows up\n", memory_size - STACKS_SZ);
+    fprintf(output_fp, "; return-stack: %04lx, grows down\n", memory_size - CELL_SZ);
 
-	p_include("forth_inc.s", output_fp);
+	// p_include("forth_inc.s", output_fp);
 
 	char buf[512];
 	for (int i = 0; i < num_lines; i++)
@@ -1065,7 +1053,7 @@ void write_output()
 		if (strlen(line->comment) > 0)
 		{
 			make_len(buf, 47);
-			strcat(buf, " # ");
+			strcat(buf, " ; ");
 			strcat(buf, line->comment);
 		}
 		fputs(buf, output_fp);
@@ -1078,6 +1066,11 @@ void write_output()
 void do_dis()
 {
     printf("disassembling to file %s... ", output_fn);
+
+	gen_cmpFunction("EQ", "jz");
+	gen_cmpFunction("LT", "jl");
+	gen_cmpFunction("GT", "jg");
+
 	dis_vm();
 
 	resolve_fwd_refs();

@@ -83,15 +83,13 @@ forth -i:ex.bin
 goto done
 
 :make-aa
-set output=fasm
+set output=NewForth
 echo making %output% ...
-set inp-files=%output%.s
-set options=-Xassembler -a=%output%.lst
-echo gcc -ggdb -c %inp-files% %options%
-gcc -c %inp-files%  %options%
-echo ld -e main %output%.o -o %output%.exe -lkernel32
-ld -e main %output%.o -o %output%.exe -lkernel32
-if "--%2%--" NEQ "----" fasm
+set inp-files=%output%.asm
+rem set options=-Xassembler -a=%output%.lst
+echo fasm %inp-files%
+fasm %inp-files%
+if "--%2%--" NEQ "----" NewForth
 goto done
 
 :make-fa
@@ -107,8 +105,8 @@ strip -o %output%.exe -g -S -d -X tmp.exe
 del tmp.exe
 if "--%2%--" == "----" goto done
 forth-dis2
-gcc -c forth.s
-ld -e main forth.o -lkernel32
+rem gcc -c forth.s
+rem ld -e main forth.o -lkernel32
 goto done
 
 :make-nd
