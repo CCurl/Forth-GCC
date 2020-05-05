@@ -11,22 +11,26 @@ include "macros.s"
 ; ------------------------------------------------------------------------------
 .data
 
+MEMORY_SIZE = 0x8000
+
 ; our "MEMORY" starts here
+STDOUT    dd 0
 HERE_ADDR dd 0x11223344
 LAST_ADDR dd 0x778899aa
-tmp_buf db 256 dup (0)
+BASE_ADDR dd 16
 
-HERE db 1024 dup (0)
-LAST dd 0
-stk_ptr dd 0
-rstk_ptr dd 0
-stk_data dd 256 dup (0)
+tmp_buf   db 256 dup (0)
+
+HERE      db MEMORY_SIZE dup (0)
+LAST      dd 0
+
+stk_ptr   dd 0
+stk_data  dd 256 dup (0)
+
+rstk_ptr  dd 0
 rstk_data dd 256 dup (0)
 ; our "MEMORY" ends here
 
-STDOUT dd 0
-
-; ------------------------------------------------------------------------------
 ; ------------------------------------------------------------------------------
 ; ------------------------------------------------------------------------------
 ; ------------------------------------------------------------------------------
@@ -40,8 +44,6 @@ include "../../GitRepos/Forth-GCC/forth.s"
   start:
 
         call sys_init
-        mov [HERE_ADDR], HERE
-        mov [LAST_ADDR], LAST
 
         m_push 'H'
         call func_EMIT
@@ -53,9 +55,11 @@ include "../../GitRepos/Forth-GCC/forth.s"
         call func_EMIT
         m_push 'o'
         call func_EMIT
-        call L00000372                                      ; WORD CR
+        call func_CR                                      ; WORD CR
 
         jmp main_loop
 
+; ------------------------------------------------------------------------------
+; ------------------------------------------------------------------------------
 ; ------------------------------------------------------------------------------
 .end start

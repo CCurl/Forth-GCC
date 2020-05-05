@@ -7,6 +7,9 @@
         mov [rstk_ptr], rstk_ptr
         mov ebp, stk_ptr
 
+        mov [HERE_ADDR], HERE
+        mov [LAST_ADDR], LAST
+
         push STD_OUTPUT_HANDLE
         call [GetStdHandle]
         mov [STDOUT], eax
@@ -23,27 +26,9 @@
         call func_EMIT
         call func_EMIT
         call func_EMIT
-        call L00000372              ; CR
+        call func_CR              ; CR
 
-        m_push 3
-        m_push 2
-        call func_MUL
-        call L00000A73                                      ; WORD .
-;
-;        m_push HERE_ADDR
-;        call L00000A73                                      ; WORD .
-;
-;        mov eax, [HERE_ADDR]
-;        m_push eax
-;        call L00000A73                                      ; WORD .
-;
-;        m_push LAST_ADDR
-;        call L00000A73                                      ; WORD .
-;
-;        mov eax, [LAST_ADDR]
-;        m_push eax
-;        call L00000A73                                      ; WORD .
-
+        call do_tests
         call func_BYE
         jmp main_loop
 
@@ -86,20 +71,35 @@ func_PUSH_doesntwork:                                        ; Implementation of
 
 ; -------------------------------------------------------------------------------------
 func_FETCH:                                     ; Implementation of FETCH
+        ;m_push '@'
+        ;call func_EMIT
+        ;call func_DUP
+        ;call func_DOT
                m_pop edx
+               mov eax, [edx]
                m_push eax
+        ;call func_DUP
+        ;call func_DOT
                ret
                
 ; -------------------------------------------------------------------------------------
 func_CFETCH:                                    ; Implementation of CFETCH
                m_pop edx
                xor eax, eax
-               mov al, [ebp]
+               mov al, [edx]
                m_push eax
                ret
                
 func_STORE:                                     ; Implementation of STORE
+        ;m_push '!'
+        ;call func_EMIT
+        ;call func_DUP
+        ;call func_DOT
                m_pop edx
+        ;push edx
+        ;call func_DUP
+        ;call func_DOT
+        ;pop edx
                m_pop eax
                mov [edx], eax
                ret
@@ -212,7 +212,9 @@ func_BYE:                                      ; Implementation of BYE
                m_push 'E'
                m_push 'Y'
                m_push 'B'
+               m_push ' '
 
+               call func_EMIT            
                call func_EMIT            
                call func_EMIT            
                call func_EMIT            
@@ -221,4 +223,54 @@ func_BYE:                                      ; Implementation of BYE
                call [ExitProcess]
                ret
                
+; -------------------------------------------------------------------------------------
+
+; -------------------------------------------------------------------------------------
+; -------------------------------------------------------------------------------------
+; ------------------------------------------------------------------------------
+do_tests:
+        m_push 10
+        call func_BASE
+        call func_STORE
+
+        m_push 0
+        call func_DOT                                      ; WORD .
+
+        call func_pHERE
+        call func_DOT                                      ; WORD .
+
+        call func_HERE
+        call func_DOT                                      ; WORD .
+
+        call func_pLAST
+        call func_DOT                                      ; WORD .
+
+        call func_LAST
+        call func_DOT                                      ; WORD .
+
+        call func_LAST
+        call func_HERE
+        call func_SUB
+        call func_DOT                                      ; WORD .
+
+        call func_CR              ; CR
+
+        m_push 0x3344
+        call func_HERE              ; HERE
+        call func_STORE
+
+        call func_HERE              ; HERE
+        call func_FETCH
+        call func_DUP
+        call func_DOT              ; .
+        m_push 16
+        call func_BASE
+        call func_STORE
+        call func_DOT              ; .
+
+        call func_CR              ; CR
+
+        ret
+; ------------------------------------------------------------------------------
+; -------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------

@@ -31,17 +31,25 @@ func_GT:                                        ; Implementation of GT
                ret
 GT_true:       m_setTOS 1
                ret
-L00000040:                                      ; WORD (HERE) (FDEB)
-               m_push 16                        ; CLITERAL 16
+func_pHERE:                                      ; WORD (HERE) (FDEB)
+               m_push HERE_ADDR
                ret
-L00000048:                                      ; WORD (LAST) (FDDA)
-               m_push 20                        ; CLITERAL 20
+func_HERE:                                      ; WORD (LAST) (FDDA)
+               call func_pHERE
+               call func_FETCH
+               ret
+func_pLAST:                                      ; WORD (LAST) (FDDA)
+               m_push LAST_ADDR
+               ret
+func_LAST:                                      ; WORD (LAST) (FDDA)
+               call func_pLAST
+               call func_FETCH
                ret
 L00000050:                                      ; WORD CELL (FDCB)
                m_push 4                         ; CLITERAL 4
                ret
-L00000058:                                      ; WORD BASE (FDBC)
-               m_push 6                         ; CLITERAL 6
+func_BASE:                                      ; WORD BASE (FDBC)
+               m_push BASE_ADDR
                ret
 L00000060:                                      ; WORD STATE (FDAC)
                m_push 32                        ; CLITERAL 32
@@ -264,14 +272,6 @@ L00000251:                                      ; WORD CELLS (FA85)
                m_push 4                         ; CLITERAL 4
                call func_MUL
                ret
-L0000025A:                                      ; WORD LAST (FA76)
-               m_push 20                        ; CLITERAL 20
-               call func_FETCH
-               ret
-L00000263:                                      ; WORD HERE (FA67)
-               m_push 16                        ; CLITERAL 16
-               call func_FETCH
-               ret
 L0000026C:                                      ; WORD ?COMPILING (FA52)
                m_push 32                        ; CLITERAL 32
                call func_FETCH
@@ -381,7 +381,7 @@ L00000366:     call func_DUP
                call func_ADD
                jmp L0000035B                    ; JMP
                ret
-L00000372:                                      ; WORD CR (F9AB)
+func_CR:                                      ; WORD CR (F9AB)
                m_push 13                        ; CLITERAL 13
                call func_EMIT                   ; EMIT
                m_push 10                        ; CLITERAL 10
@@ -1081,7 +1081,7 @@ L000008B6:                                      ; WORD ok (F76A)
                                                 ; SLITERAL (08da)
                call L00000344
                call L00000350
-               call L00000372
+               call func_CR
                jmp L000008FF                    ; JMP
 L000008EE:                                      ; SLITERAL (08f5)
                call L00000344
@@ -1213,9 +1213,8 @@ L00000A24:     call func_DUP
                m_pop eax                        ; JMPZ
                cmp eax, 0
                jz L00000A47
-               m_push 16
-               ;m_push 6                         ; CLITERAL 6
-               ;call func_CFETCH
+               call func_BASE                   ; BASE
+               call func_FETCH
                call L000009E9
                m_push 48                        ; CLITERAL 48
                call func_OVER
@@ -1251,7 +1250,7 @@ L00000A6A:                                      ; WORD BL (F6C9)
                m_push 32                        ; CLITERAL 32
                call func_EMIT                   ; EMIT
                ret
-L00000A73:                                      ; WORD . (F6BD)
+func_DOT:                                      ; WORD . (F6BD)
                m_push 32                        ; CLITERAL 32
                call func_EMIT                   ; EMIT
                call L000009F8
