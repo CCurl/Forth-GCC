@@ -10,7 +10,6 @@ include 'win32ax.inc'
 ; ------------------------------------------------------------------------------
 .data
 
-hello db "Hello.", 0
 stk_ptr dd 0
 stk_data dd 256 dup (0)
 
