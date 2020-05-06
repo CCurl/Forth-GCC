@@ -37,8 +37,8 @@ rstk_data dd 256 dup (0)
 .code
 
 ; ------------------------------------------------------------------------------
-include "../../GitRepos/Forth-GCC/forth_inc.s"
-include "../../GitRepos/Forth-GCC/forth.s"
+include "forth_inc.s"
+include "forth.s"
 ; ------------------------------------------------------------------------------
 
   start:
