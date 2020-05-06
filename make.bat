@@ -3,12 +3,14 @@
 if "--%1%--" == "--fc--" goto make-fc
 if "--%1%--" == "--fd--" goto make-fd
 if "--%1%--" == "--fa--" goto make-fa
+if "--%1%--" == "--fi--" goto make-fi
 if "--%1%--" == "--fb--" goto make-fb
 if "--%1%--" == "--ex--" goto make-ex
 if "--%1%--" == "--forth--" goto make-forth
 if "--%1%--" == "--nc--" goto make-nc
 if "--%1%--" == "--nd--" goto make-nd
 if "--%1%--" == "--aa--" goto make-aa
+if "--%1%--" == "--ai--" goto make-ai
 goto unknown
 
 :make-fc
@@ -92,6 +94,16 @@ fasm %inp-files%
 if "--%2%--" NEQ "----" NewForth
 goto done
 
+:make-ai
+set output=NewForth
+echo making %output% ...
+set inp-files=%output%.asm
+rem set options=-Xassembler -a=%output%.lst
+echo fasm %inp-files%
+fasm %inp-files%
+if "--%2%--" NEQ "----" NewForth
+goto done
+
 :make-fa
 set output=forth-dis2
 set c-files=forth-dis2.c 
@@ -105,6 +117,23 @@ strip -o %output%.exe -g -S -d -X tmp.exe
 del tmp.exe
 if "--%2%--" == "----" goto done
 forth-dis2
+rem gcc -c forth.s
+rem ld -e main forth.o -lkernel32
+goto done
+
+:make-fi
+set output=forth-disIT
+set c-files=forth-disIT.c 
+set c-files=%c-files% forth-vm.c
+set c-files=%c-files% vm-prims.c
+set c-files=%c-files% logger.c
+echo making %output% ...
+echo gcc -g -o %output% %c-files%
+gcc -g -o tmp %c-files%
+strip -o %output%.exe -g -S -d -X tmp.exe
+del tmp.exe
+if "--%2%--" == "----" goto done
+forth-disIT
 rem gcc -c forth.s
 rem ld -e main forth.o -lkernel32
 goto done
