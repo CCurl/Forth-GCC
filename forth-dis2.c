@@ -63,7 +63,7 @@ LINE_T *make_tag(LINE_T *line)
 	{
 		line = new_line(0);
 	}
-	sprintf(line->tag, "L%08lX:", line->addr);
+	sprintf(line->tag, "L%08lX", line->addr);
 	return line;
 }
 
@@ -75,7 +75,6 @@ void make_tagf(LINE_T *line, char *fmt, ...)
 	va_start(args, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, args);
 	va_end(args);
-	strcat(buf, ":");
 
 	strcpy(line->tag, buf);
 }
@@ -132,13 +131,22 @@ LINE_T *make_line(int addr, char *code, char *comment)
 }
 
 // ------------------------------------------------------------------------------------------
-void set_tag(int addr, int error_notfound)
+LINE_T *set_tag(int addr, int error_notfound)
 {
 	LINE_T *line = find_line(addr);
 	if (line)
 	{
-		make_tag(line);
-		return;
+		// The tag may have already been set
+		if (strlen(line->tag) == 0) 
+		{
+			make_tag(line);
+		}
+		else
+		{
+			printf("%04lx: tag already set (%s)\n", addr, line->tag);
+		}
+		
+		return line;
 	}
 
 	if (error_notfound == 1)
@@ -149,6 +157,7 @@ void set_tag(int addr, int error_notfound)
 	{
 		fwd_ref[fwd_ref_num++] = addr;
 	}
+	return NULL;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -255,6 +264,53 @@ LINE_T *dis_POP(char *tgt)
 }
 
 // ------------------------------------------------------------------------------------------
+int isallAlphaNumeric(char *name)
+{
+	char ch;
+	while (*name != (char)NULL)
+	{
+		ch = *(name++);
+		int isOk = 0;
+		if ((ch >= 'A') && (ch <= 'Z'))
+			isOk = 1;
+		if ((ch >= 'a') && (ch <= 'z'))
+			isOk = 1;
+		if ((ch >= '0') && (ch <= '9'))
+			isOk = 1;
+		if (ch == '_')
+			isOk = 1;
+		
+		if (isOk == 0)
+			return 0;
+	}
+	return 1;
+}
+
+// ------------------------------------------------------------------------------------------
+int isNameOkForTag(char *name)
+{
+	if (isallAlphaNumeric(name))
+		return 1;
+	return 0;
+}
+
+// ------------------------------------------------------------------------------------------
+char *gen_tagW(LINE_T *line, char *name, int addr)
+{
+	if (isNameOkForTag(name))
+	{
+		printf("name [%s] is OK for a tag (%08lX)! ... ", name, line->addr);
+		make_tagf(line, "fw_%s", name);
+		printf("[%s]\n", line->tag);
+	}
+	else
+	{
+		printf("name [%s] is NOT OK for a tag (%08lX)!\n", name, line->addr);
+		make_tag(line);
+	}
+}
+
+// ------------------------------------------------------------------------------------------
 // Where all the work is done
 // ------------------------------------------------------------------------------------------
 void dis_one()
@@ -340,7 +396,7 @@ void dis_one()
 		// PC = GETAT(PC);
 		arg1 = GETAT(PC);
 		PC += CELL_SZ;
-		set_tag(arg1, 0);
+		line = set_tag(arg1, 0);
 		line = make_code(NULL, "jmp L%08lX", arg1);
 		make_comment(line, "JMP");
 		return;
@@ -356,11 +412,12 @@ void dis_one()
 		// }
 		arg1 = GETAT(PC);
 		PC += CELL_SZ;
-		set_tag(arg1, 0);
+		line = set_tag(arg1, 0);
 		line = make_code(NULL, "m_pop eax");
 		line = make_comment(line, "JMPZ");
 		line = make_code(NULL, "cmp eax, 0");
 		line = make_code(NULL, "jz L%08lX", arg1);
+		// line = make_code(NULL, "jz %s", line->tag);
 		return;
 
 	case JMPNZ:
@@ -375,7 +432,7 @@ void dis_one()
 		// }
 		arg1 = GETAT(PC);
 		PC += CELL_SZ;
-		set_tag(arg1, 0);
+		line = set_tag(arg1, 0);
 		line = make_code(NULL, "m_pop eax");
 		line = make_comment(line, "JMPNZ");
 		line = make_code(NULL, "cmp eax, 0");
@@ -388,8 +445,18 @@ void dis_one()
 		// PC = arg1;
 		arg1 = GETAT(PC);
 		PC += CELL_SZ;
-		set_tag(arg1, 0);
-		make_code(line, "call L%08lX", arg1);
+		line = find_line(arg1);
+		if (line && (strlen(line->tag) > 0))
+		{
+			printf("CALL: tag=[%s]\n", line->tag);
+			make_code(NULL, "call %s", line->tag);
+		}
+		else
+		{
+
+			set_tag(arg1, 0);
+			make_code(NULL, "call %08lX", arg1);
+		}
 		return;
 
 	case RET:
@@ -530,7 +597,7 @@ void dis_one()
 			PC += CELL_SZ;
 			DICT_T *dict = (DICT_T *)&the_memory[arg1];
 			line = make_comment(NULL, "WORD %s (%04lX)", dict->name, arg1);
-			make_tag(line);
+			gen_tagW(line, dict->name, LAST_PC);
 		}
 		return;
 
@@ -1048,7 +1115,12 @@ void write_output()
 	{
 		LINE_T *line = lines[i];
 		strcpy(buf, line->tag);
+		if (strlen(line->tag) > 0)
+		{
+			strcat(buf, ":");
+		}
 		make_len(buf, 15);
+		strcat(buf, " ");
 		strcat(buf, line->code);
 		if (strlen(line->comment) > 0)
 		{

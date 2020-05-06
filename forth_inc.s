@@ -26,7 +26,7 @@
         call func_EMIT
         call func_EMIT
         call func_EMIT
-        call func_CR              ; CR
+        call fw_CR              ; CR
 
         call do_tests
         call func_BYE
@@ -230,45 +230,45 @@ func_BYE:                                      ; Implementation of BYE
 ; ------------------------------------------------------------------------------
 do_tests:
         m_push 10
-        call func_BASE
-        call func_STORE
+        call fw_BASE
+        call L000000B8 ; STORE
 
         m_push 0
-        call func_DOT                                      ; WORD .
+        call L00000FDB                                      ; WORD .
 
-        call func_pHERE
-        call func_DOT                                      ; WORD .
+        call L00000040                                      ; (HERE)
+        call L00000FDB                                      ; WORD .
 
-        call func_HERE
-        call func_DOT                                      ; WORD .
+        call fw_HERE
+        call L00000FDB                                      ; WORD .
 
-        call func_pLAST
-        call func_DOT                                      ; WORD .
+        call L00000048                                          ; (LAST)
+        call L00000FDB                                      ; WORD .
 
-        call func_LAST
-        call func_DOT                                      ; WORD .
+        call fw_LAST
+        call L00000FDB                                      ; WORD .
 
-        call func_LAST
-        call func_HERE
-        call func_SUB
-        call func_DOT                                      ; WORD .
+        call fw_LAST
+        call fw_HERE
+        call L0000014B                                      ;  -
+        call L00000FDB                                      ; WORD .
 
-        call func_CR              ; CR
+        call fw_CR                  ; CR
 
         m_push 0x3344
-        call func_HERE              ; HERE
-        call func_STORE
+        call fw_HERE                ; HERE
+        call L000000B8              ; !
 
-        call func_HERE              ; HERE
-        call func_FETCH
-        call func_DUP
-        call func_DOT              ; .
+        call fw_HERE                ; HERE
+        call L000000B1              ; @
+        call fw_DUP
+        call L00000FDB              ; .
         m_push 16
-        call func_BASE
-        call func_STORE
-        call func_DOT              ; .
+        call fw_BASE
+        call L000000B8
+        call L00000FDB              ; .
 
-        call func_CR              ; CR
+        call fw_CR              ; CR
 
         ret
 ; ------------------------------------------------------------------------------

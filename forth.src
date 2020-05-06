@@ -61,7 +61,7 @@
 : R@        R> DUP >R  ; .INLINE
 
 \ ------------------------------------------------------------------------------------
-: INLINE    (LAST) @ 2 CELL * + DUP C@ 2 OR SWAP C! ;
+: INLINE 0 DROP ;              \    (LAST) @ 2 CELL * + DUP C@ 2 OR SWAP C! ;
 : IMMEDIATE (LAST) @ 2 CELL * + DUP C@ 1 OR SWAP C! ;
 : CELLS CELL * ; INLINE
 

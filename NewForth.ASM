@@ -14,21 +14,22 @@ include "macros.s"
 MEMORY_SIZE = 0x8000
 
 ; our "MEMORY" starts here
-STDOUT    dd 0
-HERE_ADDR dd 0x11223344
-LAST_ADDR dd 0x778899aa
-BASE_ADDR dd 16
+STDOUT     dd 0
+HERE_ADDR  dd 0x11223344
+LAST_ADDR  dd 0x778899aa
+BASE_ADDR  dd 10
+STATE_ADDR dd 0
 
-tmp_buf   db 256 dup (0)
+tmp_buf    db 256 dup (0)
 
-HERE      db MEMORY_SIZE dup (0)
-LAST      dd 0
+HERE       db MEMORY_SIZE dup (0)
+LAST       dd 0
 
-stk_ptr   dd 0
-stk_data  dd 256 dup (0)
+stk_ptr    dd 0
+stk_data   dd 256 dup (0)
 
-rstk_ptr  dd 0
-rstk_data dd 256 dup (0)
+rstk_ptr   dd 0
+rstk_data  dd 256 dup (0)
 ; our "MEMORY" ends here
 
 ; ------------------------------------------------------------------------------
@@ -46,16 +47,16 @@ include "forth.s"
         call sys_init
 
         m_push 'H'
-        call func_EMIT
+        call fw_EMIT
         m_push 'e'
-        call func_EMIT
+        call fw_EMIT
         m_push 'l'
-        call func_EMIT
+        call fw_EMIT
         m_push 'l'
-        call func_EMIT
+        call fw_EMIT
         m_push 'o'
-        call func_EMIT
-        call func_CR                                      ; WORD CR
+        call fw_EMIT
+        call fw_CR                                      ; WORD CR
 
         jmp main_loop
 
