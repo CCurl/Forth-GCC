@@ -1,15 +1,17 @@
-; A simple Forth kernel
+; A simple STC Forth implementation
 
 format pe console
 
 ; you can simply switch between win32ax, win32wx, win64ax and win64wx here
 include 'win32ax.inc'
-include "macros.s"
+include "./Forth-STC-Macros.inc"
 
 ; ------------------------------------------------------------------------------
 ; ------------------------------------------------------------------------------
 ; ------------------------------------------------------------------------------
 .data
+; ------------------------------------------------------------------------------
+; .code
 
 MEMORY_SIZE = 0x8000
 
@@ -21,7 +23,14 @@ BASE_ADDR dd 16
 
 tmp_buf   db 256 dup (0)
 
+FIRST     dd 0
+CCCtest: 
+        m_push '~'
+        call prim_EMIT
+        ret
+
 HERE      db MEMORY_SIZE dup (0)
+; HERE2     db MEMORY_SIZE dup (0)
 LAST      dd 0
 
 stk_ptr   dd 0
@@ -34,30 +43,60 @@ rstk_data dd 256 dup (0)
 ; ------------------------------------------------------------------------------
 ; ------------------------------------------------------------------------------
 ; ------------------------------------------------------------------------------
-.code
+; .code
+; ------------------------------------------------------------------------------
+
+include "./Forth-STC-Prims.inc"
+include "./Forth-STC-Words.inc"
+
+
+rstk_ptr1:  dd 0
+rstk_data1: dd 256 dup (0)
+
 
 ; ------------------------------------------------------------------------------
-include "../../GitRepos/Forth-GCC/forth_inc.s"
-include "../../GitRepos/Forth-GCC/forth-i.s"
+
+  sys_init:
+        mov [stk_ptr], stk_ptr
+        mov [rstk_ptr], rstk_ptr
+        mov ebp, stk_ptr
+
+        mov [rstk_ptr], rstk_ptr
+        mov ebp, stk_ptr
+
+        mov [HERE_ADDR], HERE
+        mov [LAST_ADDR], LAST
+
+        push STD_OUTPUT_HANDLE
+        call [GetStdHandle]
+        mov [STDOUT], eax
+        ret
 ; ------------------------------------------------------------------------------
 
   start:
 
         call sys_init
 
-        m_push 'H'
-        call func_EMIT
-        m_push 'e'
-        call func_EMIT
-        m_push 'l'
-        call func_EMIT
-        m_push 'l'
-        call func_EMIT
-        m_push 'o'
-        call func_EMIT
-        call func_CR                                      ; WORD CR
+        call CCCtest
+        mov eax, FIRST
+        add eax, 4
+        ; call DWORD [eax]
 
-        jmp main_loop
+        m_push 'H'
+        call prim_EMIT
+        m_push 'e'
+        call prim_EMIT
+        m_push 'l'
+        call prim_EMIT
+        m_push 'l'
+        call prim_EMIT
+        m_push 'o'
+        call prim_EMIT
+        call L00000372        ; WORD CR
+
+        ;jmp L0000096B        ; main
+
+        call L00000215        ; BYE
 
 ; ------------------------------------------------------------------------------
 ; ------------------------------------------------------------------------------

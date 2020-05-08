@@ -10,7 +10,7 @@ if "--%1%--" == "--forth--" goto make-forth
 if "--%1%--" == "--nc--" goto make-nc
 if "--%1%--" == "--nd--" goto make-nd
 if "--%1%--" == "--aa--" goto make-aa
-if "--%1%--" == "--ai--" goto make-ai
+if "--%1%--" == "--st--" goto make-st
 goto unknown
 
 :make-fc
@@ -94,14 +94,23 @@ fasm %inp-files%
 if "--%2%--" NEQ "----" NewForth
 goto done
 
-:make-ai
-set output=NewForth
+REM Gen and build a subroutine-threaded version in ASSEMBLER
+:make-st
+set output=Forth-STC
+set c-files=%output%-dis.c %output%-opcodes.c %output%-dis-opcode.c forth-vm.c vm-prims.c logger.c
+gcc -g -o %output%-dis %c-files%
+if "--%2%--" == "----" goto done
+Forth-STC-dis -i:forth.bin -o:Forth-STC-Words.inc
+fasm %output%.asm
+Forth-STC
+goto done
+
 echo making %output% ...
 set inp-files=%output%.asm
 rem set options=-Xassembler -a=%output%.lst
 echo fasm %inp-files%
 fasm %inp-files%
-if "--%2%--" NEQ "----" NewForth
+if "--%2%--" NEQ "----" NewForth-I
 goto done
 
 :make-fa

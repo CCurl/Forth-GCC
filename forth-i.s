@@ -342,7 +342,7 @@ L0000FBB5:     dd L0000FBC6                     ; NEXT
                db 2                             ; FLAGS
                db 6, 'FWRITE', 0                ; WORD: FWRITE
 L000001AC:     
-               dd FWRITE
+               dd prim_FWRITE
                dd prim_NEXT
                
 L0000FBA4:     dd L0000FBB5                     ; NEXT

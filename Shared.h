@@ -111,4 +111,11 @@ extern int MEM_SZ;
 
 #define LPCTSTR char *
 
+typedef struct {
+	int addr;
+	char tag[24];
+	char code[128];
+	char comment[128];
+} LINE_T;
+
 #endif

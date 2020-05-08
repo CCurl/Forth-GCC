@@ -16,13 +16,6 @@ char input_fn[64];
 char output_fn[64];
 FILE *input_fp = NULL;
 
-typedef struct {
-	int addr;
-	char tag[24];
-	char code[128];
-	char comment[128];
-} LINE_T;
-
 int fwd_ref[1000];
 int fwd_ref_num = 0;
 
@@ -34,6 +27,9 @@ int LAST_PC = 0;
 #define TGT_FASM  2
 
 int tgt_lang = TGT_FASM;
+
+void gen_opcodes();
+void dis_opcode(CELL);
 
 // ------------------------------------------------------------------------------------------
 LINE_T *new_line(int addr)
@@ -108,7 +104,7 @@ LINE_T *make_code(LINE_T *line, char *fmt, ...)
     }
     else
     {
-        strcat(line->code, "dd ");
+        strcat(line->code, "call ");
     }
     strncat(line->code, buf, sizeof(line->code));
 	return line;
@@ -166,7 +162,7 @@ LINE_T *make_line(int addr, char *code, char *comment)
 }
 
 // ------------------------------------------------------------------------------------------
-void set_tag(int addr, int error_notfound)
+void set_tag(CELL addr, int error_notfound)
 {
 	LINE_T *line = find_line(addr);
 	if (line)
@@ -177,7 +173,11 @@ void set_tag(int addr, int error_notfound)
 
 	if (error_notfound == 1)
 	{
-		printf("WARNING: fwd_ref (0x%08lX) not found!\n", addr);
+		printf("WARNING: fwd_ref (0x%08lX) not found! Making empty tag L%08lX ...\n", addr, addr);
+		line = new_line(addr);
+		make_comment(line, "Label for ");
+		make_codeU(line, "dd 0,0,0,0");
+		make_tag(line);
 	}
 	else
 	{
@@ -251,15 +251,18 @@ void dis_PC2(int num, char *bytes)
 // ------------------------------------------------------------------------------------------
 LINE_T *dis_getTOS(char *val)
 {
-	LINE_T *line = new_line(0);
-	make_code(line, "movl (%%ebp), %s", val);
+	// In this implementation, EBX s the top value on the stack and EBP in the DSP (Data Stack Pointer)
+	// So nothing needs to be done here!
+	// LINE_T *line = new_line(0);
+	// make_code(line, "movl (%%ebp), %s", val);
 	// make_comment(line, "get TOS to %s", val);
-	return line;
+	return NULL;
 }
 
 // ------------------------------------------------------------------------------------------
 LINE_T *dis_setTOS(char *val)
 {
+	// In this implementation, EBX s the top value on the stack and EBP in the DSP (Data Stack Pointer)
 	LINE_T *line = new_line(0);
 	make_code(line, "movl %s, (%%ebp)", val);
 	// make_comment(line, "set TOS to %s", val);
@@ -269,6 +272,7 @@ LINE_T *dis_setTOS(char *val)
 // ------------------------------------------------------------------------------------------
 LINE_T *dis_PUSH(char *val)
 {
+	// In this implementation, EBX s the top value on the stack and EBP in the DSP (Data Stack Pointer)
 	LINE_T *line = new_line(0);
 	// make_code(line, "push %s", val);
 	make_code(line, "addl $4, %s", "%ebp");
@@ -280,6 +284,7 @@ LINE_T *dis_PUSH(char *val)
 // ------------------------------------------------------------------------------------------
 LINE_T *dis_POP(char *tgt)
 {
+	// In this implementation, EBX s the top value on the stack and EBP in the DSP (Data Stack Pointer)
 	LINE_T *line = NULL; // new_line(0);
 	// make_code(line, "pop %s", tgt);
 	line = dis_getTOS(tgt);
@@ -295,10 +300,14 @@ LINE_T *dis_POP(char *tgt)
 // ------------------------------------------------------------------------------------------
 void dis_one_FASM()
 {
-	char tmp[256];
-	LINE_T *line = NULL; // new_line(PC);
 	LAST_PC = PC;
 	IR = the_memory[PC++];
+
+	dis_opcode(IR);
+	return;
+
+	char tmp[256];
+	LINE_T *line = NULL; // new_line(PC);
 
 	switch (IR)
 	{
@@ -306,30 +315,33 @@ void dis_one_FASM()
 		arg1 = GETAT(PC);
 		PC += CELL_SZ;
 		// push(arg1);
-		line = make_code(NULL, "prim_LITERAL");
-		make_code(line, "%ld", arg1);
+		// line = make_code(NULL, "prim_LITERAL");
+		make_codeU(NULL, "m_push %ld", arg1);
 		return;
 
 	case CLITERAL:
 		arg1 = the_memory[PC];
 		PC++;
 		// push(arg1);
-		line = make_code(NULL, "prim_LITERAL");
-		make_code(line, "%ld", arg1);
+		// line = make_code(NULL, "prim_LITERAL");
+		make_codeU(NULL, "m_push %ld", arg1);
 		return;
 
 	case FETCH:
 		// arg1 = GETTOS();
 		// arg2 = GETAT(arg1);
 		// SETTOS(arg2);
-		make_code(NULL, "prim_FETCH");
+		// make_code(NULL, "prim_FETCH");
+		line = make_codeU(NULL, "mov ebx, [ebx]");
+		line = make_comment(line, "FETCH,NB ebx is the TOS");
+		line = make_comment(line, "FETCH");
 		return;
 
 	case STORE:
 		// arg1 = pop();
 		// arg2 = pop();
 		// SETAT(arg1, arg2);
-		make_code(NULL, "prim_STORE");
+		line = make_code(line, "prim_STORE");
 		return;
 
 	case SWAP:
@@ -337,7 +349,8 @@ void dis_one_FASM()
 		// arg2 = GETTOS();
 		// SET2ND(arg2);
 		// SETTOS(arg1);
-		make_code(NULL, "prim_SWAP");
+
+		line = make_code(line, "prim_SWAP");
 		return;
 
 	case DROP:
@@ -448,7 +461,7 @@ void dis_one_FASM()
 		// {
 		// 	PC = rpop();
 		// }
-		line = make_code(NULL, "prim_NEXT");
+		line = make_codeU(NULL, "ret");
 		return;
 
 	case COMPARE:
@@ -658,7 +671,7 @@ void dis_one_FASM()
 		// 	int num = fwrite(pBuf, sizeof(BYTE), arg2, arg3 == 0 ? stdin : (FILE *)arg3);
 		// 	push(num);
 		// }
-		make_code(NULL, "FWRITE");
+		make_code(NULL, "prim_FWRITE");
 		return;
 
 	case FCLOSE:
@@ -781,156 +794,6 @@ LINE_T *gen_funcHeader(char *name)
 }
 
 // ------------------------------------------------------------------------------------------
-void gen_FETCH()
-{
-	gen_funcHeader("FETCH");
-	dis_getTOS("%edx");
-	make_code(NULL, "movl (%%edx), %%eax");
-	dis_setTOS("%eax");
-	make_code(NULL, "ret");
-}
-
-// ------------------------------------------------------------------------------------------
-void gen_CFETCH()
-{
-	gen_funcHeader("CFETCH");
-	dis_getTOS("%edx");
-	make_code(NULL, "xor %%eax, %%eax");
-	make_code(NULL, "movb (%%edx), %%al");
-	dis_setTOS("%eax");
-	make_code(NULL, "ret");
-}
-
-// ------------------------------------------------------------------------------------------
-void gen_STORE()
-{
-	gen_funcHeader("STORE");
-	dis_POP("%edx");
-	dis_POP("%eax");
-	make_code(NULL, "movl %%eax, (%%edx)");
-	make_code(NULL, "ret");
-}
-
-// ------------------------------------------------------------------------------------------
-void gen_CSTORE()
-{
-	gen_funcHeader("CSTORE");
-	dis_POP("%edx");
-	dis_POP("%eax");
-	make_code(NULL, "movb %%al, (%%edx)");
-	make_code(NULL, "ret");
-}
-
-
-// ------------------------------------------------------------------------------------------
-void gen_DUP()
-{
-	gen_funcHeader("DUP");
-
-	dis_getTOS("%eax");
-	dis_PUSH("%eax");
-
-	make_code(NULL, "ret");
-}
-
-// ------------------------------------------------------------------------------------------
-void gen_SWAP()
-{
-	gen_funcHeader("SWAP");
-	dis_POP("%eax");
-	dis_getTOS("%ebx");
-	dis_setTOS("%eax");
-	dis_PUSH("%ebx");
-	make_code(NULL, "ret");
-}
-
-// ------------------------------------------------------------------------------------------
-void gen_OVER()
-{
-	gen_funcHeader("OVER");
-
-	dis_POP("%eax");
-	dis_getTOS("%edx");
-	dis_PUSH("%eax");
-	dis_PUSH("%edx");
-
-	make_code(NULL, "ret");
-}
-
-// ------------------------------------------------------------------------------------------
-void gen_EMIT()
-{
-	gen_funcHeader("EMIT");
-	dis_POP("%edi");
-	make_code(NULL, "putchar");
-	make_code(NULL, "ret");
-}
-
-// ------------------------------------------------------------------------------------------
-void gen_ADD()
-{
-	gen_funcHeader("ADD");
-
-	dis_POP("%ebx");
-	dis_getTOS("%eax");
-	make_code(NULL, "addl %%ebx, %%eax");
-	dis_setTOS("%eax");
-
-	make_code(NULL, "ret");
-}
-
-// ------------------------------------------------------------------------------------------
-void gen_SUB()
-{
-	gen_funcHeader("SUB");
-
-	dis_POP("%ebx");
-	dis_getTOS("%eax");
-	make_code(NULL, "sub ebx, eax");
-	dis_setTOS("%eax");
-
-	make_code(NULL, "ret");
-}
-
-// ------------------------------------------------------------------------------------------
-void gen_MUL()
-{
-	gen_funcHeader("MUL");
-
-	dis_POP("%ebx");
-	dis_getTOS("%eax");
-	make_code(NULL, "mull %%ebx");
-	dis_setTOS("%eax");
-
-	make_code(NULL, "ret");
-}
-
-// *********************************************************************
-void gen_DTOR()
-{
-	gen_funcHeader("DTOR");
-	dis_POP("%eax");
-	make_code(NULL, "mov %%ebp, DSP");
-	make_code(NULL, "mov RSP, %%ebp");
-	dis_PUSH("%eax");
-	make_code(NULL, "mov %%ebp, RSP");
-	make_code(NULL, "mov DSP, %%ebp");
-	make_code(NULL, "ret");
-}
-
-// *********************************************************************
-void gen_RTOD()
-{
-	gen_funcHeader("RTOD");
-	make_code(NULL, "mov %%ebp, DSP");
-	make_code(NULL, "mov RSP, %%ebp");
-	dis_POP("%eax");
-	make_code(NULL, "mov %%ebp, RSP");
-	make_code(NULL, "mov DSP, %%ebp");
-	dis_PUSH("%eax");
-	make_code(NULL, "ret");
-}
-
 // ------------------------------------------------------------------------------------------
 void gen_cmpFunction(char *name, char *operator)
 {
@@ -952,6 +815,10 @@ void gen_cmpFunction(char *name, char *operator)
 	make_tagf(line, "%s_true", name);
 	make_codeU(NULL, "ret");
 }
+
+// ------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------------
 void dis_dict(CELL dict_addr)
@@ -1125,6 +992,7 @@ void write_output()
 		LINE_T *line = lines[i];
 		strcpy(buf, line->tag);
 		make_len(buf, 15);
+		strcat(buf, " ");
 		strcat(buf, line->code);
 		if (strlen(line->comment) > 0)
 		{
@@ -1143,9 +1011,11 @@ void do_dis()
 {
     printf("disassembling to file %s... ", output_fn);
 
-	gen_cmpFunction("EQ", "jz");
-	gen_cmpFunction("LT", "jl");
-	gen_cmpFunction("GT", "jg");
+	// gen_cmpFunction("EQ", "jz");
+	// gen_cmpFunction("LT", "jl");
+	// gen_cmpFunction("GT", "jg");
+
+	gen_opcodes();
 
 	dis_vm();
 
@@ -1199,7 +1069,7 @@ void process_arg(char *arg)
 int main (int argc, char **argv)
 {
     strcpy(input_fn, "forth.bin");
-	strcpy(output_fn, "forth-i.s");
+	strcpy(output_fn, "Forth-STC-Words.inc");
 	debug_off();
 
     for (int i = 1; i < argc; i++)
@@ -1213,7 +1083,5 @@ int main (int argc, char **argv)
 
     load_vm();
 	do_dis();
-
-	printf("all done.");
     return 0;
 }
