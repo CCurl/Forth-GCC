@@ -325,14 +325,16 @@ L0000FB97:      dd L0000FBA4                    ; DICTP: (FB97), NEXT
                 db 2                            ; FLAGS
                 db 2, '>R', 0                   ; WORD: >R
 L000001BA:      
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 ret
                 
 L0000FB8A:      dd L0000FB97                    ; DICTP: (FB8A), NEXT
                 db 2                            ; FLAGS
                 db 2, 'R>', 0                   ; WORD: R>
 L000001C1:      
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 ret
                 
 L0000FB77:      dd L0000FB8A                    ; DICTP: (FB77), NEXT
@@ -423,9 +425,11 @@ L0000FABA:      dd L0000FAC7                    ; DICTP: (FABA), NEXT
                 db 2                            ; FLAGS
                 db 2, 'R@', 0                   ; WORD: R@
 L0000021C:      
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push ebx                      ; DUP
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 ret
                 
 L0000FAA9:      dd L0000FABA                    ; DICTP: (FAA9), NEXT
@@ -707,7 +711,8 @@ L0000F944:      dd L0000F95A                    ; DICTP: (F944), NEXT
                 db 0                            ; FLAGS
                 db 11, 'string-copy', 0         ; WORD: string-copy
 L000003C3:      
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 m_push ebx                      ; DUP
                 call prim_CFETCH
                 call prim_OVER
@@ -723,20 +728,25 @@ L000003D1:      call prim_OVER
                 je L000003E3                    ; JMPZ
                 m_pop eax                       ; DROP
                 m_pop eax                       ; DROP
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_pop eax                       ; DROP
                 ret
                 jmp L000003F1                   ; JMP
 L000003E3:      m_push ebx                      ; DUP
                 call prim_CFETCH
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push ebx                      ; DUP
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 call prim_CSTORE
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push 1                        ; CLITERAL (0001)
                 call prim_ADD
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 m_push 1                        ; CLITERAL (0001)
                 call prim_ADD
 L000003F1:      jmp L000003D1                   ; JMP
@@ -795,7 +805,8 @@ L00000432:
                 m_push 0                        ; CLITERAL (0000)
                 call prim_OVER
                 call prim_STORE
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
 L00000441:      call prim_GETCH
                 m_push ebx                      ; DUP
                 m_push 3                        ; CLITERAL (0003)
@@ -814,7 +825,8 @@ L00000461:      m_push ebx                      ; DUP
                 cmp eax, 0
                 je L00000470                    ; JMPZ
                 m_pop eax                       ; DROP
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push 32                       ; CLITERAL (0020)
                 call prim_EMIT
                 ret
@@ -832,9 +844,11 @@ L0000047C:      m_push ebx                      ; DUP
                 m_pop eax
                 cmp eax, 0
                 je L00000499                    ; JMPZ
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push ebx                      ; DUP
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 call L000003F7                  ; CALL 03F7, string-popc
                 m_pop eax                       ; DROP
                 m_push ebx                      ; DUP
@@ -852,9 +866,11 @@ L00000499:      m_push ebx                      ; DUP
                 je L000004B7                    ; JMPZ
                 m_push ebx                      ; DUP
                 call prim_EMIT
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push ebx                      ; DUP
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 call L000003AD                  ; CALL 03AD, string-catc
                 jmp L000004B8                   ; JMP
 L000004B7:      m_pop eax                       ; DROP
@@ -932,7 +948,8 @@ L00000549:
                 m_push 256                      ; LITERAL
                 call prim_ADD
                 m_push ebx                      ; DUP
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 m_push 0                        ; CLITERAL (0000)
                 call prim_SWAP
                 call prim_STORE
@@ -945,17 +962,22 @@ L0000055D:      m_push ebx                      ; DUP
                 cmp eax, 0
                 je L00000579                    ; JMPZ
                 m_pop eax                       ; DROP
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push ebx                      ; DUP
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 call L0000039D                  ; CALL 039D, string-nullterm
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 call prim_SWAP
                 ret
                 jmp L00000584                   ; JMP
-L00000579:      call prim_RTOD
+L00000579:      m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push ebx                      ; DUP
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 call L000003AD                  ; CALL 03AD, string-catc
                 m_push 1                        ; CLITERAL (0001)
                 call prim_ADD
@@ -1020,10 +1042,13 @@ L000005C4:
                 call L0000039D                  ; CALL 039D, string-nullterm
                 m_push 20                       ; CLITERAL (0014)
                 mov ebx, [ebx]                  ; FETCH
-                call prim_DTOR
-L000005D3:      call prim_RTOD
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
+L000005D3:      m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push ebx                      ; DUP
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 m_push ebx                      ; DUP
                 m_pop eax
                 cmp eax, 0
@@ -1040,19 +1065,23 @@ L000005D3:      call prim_RTOD
                 cmp eax, 0
                 je L000005F1                    ; JMPZ
                 m_pop eax                       ; DROP
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push 1                        ; CLITERAL (0001)
                 ret
 L000005F1:      jmp L000005FD                   ; JMP
 L000005F6:      m_pop eax                       ; DROP
                 m_pop eax                       ; DROP
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_pop eax                       ; DROP
                 m_push 0                        ; CLITERAL (0000)
                 ret
-L000005FD:      call prim_RTOD
+L000005FD:      m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 mov ebx, [ebx]                  ; FETCH
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 jmp L000005D3                   ; JMP
                 ret
                 
@@ -1072,40 +1101,56 @@ L00000606:
                 call prim_ADD
                 call prim_SUB
                 m_push ebx                      ; DUP
-                call prim_DTOR
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 m_push 20                       ; CLITERAL (0014)
                 mov ebx, [ebx]                  ; FETCH
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push ebx                      ; DUP
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 call prim_STORE
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push 4                        ; CLITERAL (0004)
                 call prim_ADD
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 m_push 16                       ; CLITERAL (0010)
                 mov ebx, [ebx]                  ; FETCH
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push ebx                      ; DUP
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 call prim_STORE
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push 4                        ; CLITERAL (0004)
                 call prim_ADD
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 m_push 0                        ; CLITERAL (0000)
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push ebx                      ; DUP
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 call prim_CSTORE
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push 1                        ; CLITERAL (0001)
                 call prim_ADD
-                call prim_DTOR
-                call prim_RTOD
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 call L000003C3                  ; CALL 03C3, string-copy
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push 20                       ; CLITERAL (0014)
                 call prim_STORE
                 ret
@@ -1174,12 +1219,14 @@ L0000069E:
                 cmp eax, 0
                 je L000006C1                    ; JMPZ
                 m_push 1                        ; CLITERAL (0001)
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 m_push 1                        ; CLITERAL (0001)
                 call prim_ADD
                 jmp L000006C4                   ; JMP
 L000006C1:      m_push 0                        ; CLITERAL (0000)
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
 L000006C4:      m_push ebx                      ; DUP
                 call prim_CFETCH
                 m_push 0                        ; CLITERAL (0000)
@@ -1188,12 +1235,14 @@ L000006C4:      m_push ebx                      ; DUP
                 cmp eax, 0
                 je L000006D4                    ; JMPZ
                 m_pop eax                       ; DROP
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_pop eax                       ; DROP
                 m_push 0                        ; CLITERAL (0000)
                 ret
 L000006D4:      m_push 0                        ; CLITERAL (0000)
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
 L000006D7:      m_push ebx                      ; DUP
                 call prim_CFETCH
                 m_push ebx                      ; DUP
@@ -1204,8 +1253,10 @@ L000006D7:      m_push ebx                      ; DUP
                 je L000006F2                    ; JMPZ
                 m_pop eax                       ; DROP
                 m_pop eax                       ; DROP
-                call prim_RTOD
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_pop eax
                 cmp eax, 0
                 je L000006EF                    ; JMPZ
@@ -1218,19 +1269,23 @@ L000006F2:      call L0000064B                  ; CALL 064B, is-num-char?
                 m_pop eax
                 cmp eax, 0
                 je L0000070B                    ; JMPZ
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_push 6                        ; CLITERAL (0006)
                 call prim_CFETCH
                 call prim_MUL
                 call prim_ADD
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 m_push 1                        ; CLITERAL (0001)
                 call prim_ADD
                 jmp L00000713                   ; JMP
 L0000070B:      m_pop eax                       ; DROP
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_pop eax                       ; DROP
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_pop eax                       ; DROP
                 m_push 0                        ; CLITERAL (0000)
                 ret
@@ -1349,7 +1404,8 @@ L000007D6:      m_push ebx                      ; DUP
                 m_push 4                        ; CLITERAL (0004)
                 call prim_ADD
                 mov ebx, [ebx]                  ; FETCH
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 ret
                 jmp L00000839                   ; JMP
 L00000808:      m_push ebx                      ; DUP
@@ -1378,7 +1434,8 @@ L00000839:      jmp L00000844                   ; JMP
 L0000083E:      m_push 4                        ; CLITERAL (0004)
                 call prim_ADD
                 mov ebx, [ebx]                  ; FETCH
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 ret
 L00000844:      ret
 L00000845:      call L00000344                  ; CALL 0344, COUNT
@@ -1544,15 +1601,18 @@ L0000F6FF:      dd L0000F71C                    ; DICTP: (F6FF), NEXT
                 db 0                            ; FLAGS
                 db 18, 'reset-return-stack', 0  ; WORD: reset-return-stack
 L000009BB:      
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
 L000009C1:      call L000009B3                  ; CALL 09B3, RDEPTH
                 m_pop eax
                 cmp eax, 0
                 je L000009D2                    ; JMPZ
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_pop eax                       ; DROP
                 jmp L000009D4                   ; JMP
-L000009D2:      call prim_DTOR
+L000009D2:      m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 ret
 L000009D4:      jmp L000009C1                   ; JMP
                 ret
@@ -1575,10 +1635,12 @@ L000009E9:
                 call prim_OVER
                 call prim_DIV
                 m_push ebx                      ; DUP
-                call prim_DTOR
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 call prim_MUL
                 call prim_SUB
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 call prim_SWAP
                 ret
                 
@@ -1607,7 +1669,8 @@ L00000A0B:      m_push ebx                      ; DUP
                 m_push 1                        ; CLITERAL (0001)
                 jmp L00000A20                   ; JMP
 L00000A1E:      m_push 0                        ; CLITERAL (0000)
-L00000A20:      call prim_DTOR
+L00000A20:      m_pop eax                       ; DTOR (>R)
+                m_rpush eax
                 m_push 0                        ; CLITERAL (0000)
                 call prim_SWAP
 L00000A24:      m_push ebx                      ; DUP
@@ -1630,7 +1693,8 @@ L00000A40:      call prim_ADD
                 call prim_SWAP
                 jmp L00000A64                   ; JMP
 L00000A47:      m_pop eax                       ; DROP
-                call prim_RTOD
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
                 m_pop eax
                 cmp eax, 0
                 je L00000A51                    ; JMPZ
@@ -1707,5 +1771,40 @@ L00000AE0:
                 call L0000099B                  ; CALL 099B, reset-data-stack
                 call L000009BB                  ; CALL 09BB, reset-return-stack
                 call L00000916                  ; CALL 0916, mainloop
+                ret
+                
+L0000F67B:      dd L0000F68D                    ; DICTP: (F67B), NEXT
+                db 0                            ; FLAGS
+                db 7, 'countTo', 0              ; WORD: countTo
+L00000B14:      
+L00000B19:      call prim_OVER
+                call prim_OVER
+                call prim_LT
+                m_pop eax
+                cmp eax, 0
+                je L00000B24                    ; JMPZ
+                m_pop eax                       ; DROP
+                m_pop eax                       ; DROP
+                ret
+L00000B24:      m_push ebx                      ; DUP
+                m_push ebx                      ; DUP
+                m_pop eax                       ; DROP
+                m_pop eax                       ; DROP
+                m_push ebx                      ; DUP
+                m_push ebx                      ; DUP
+                m_pop eax                       ; DROP
+                m_pop eax                       ; DROP
+                m_push 1                        ; CLITERAL (0001)
+                call prim_ADD
+                jmp L00000B19                   ; JMP
+                ret
+                
+L0000F669:      dd L0000F67B                    ; DICTP: (F669), NEXT
+                db 0                            ; FLAGS
+                db 7, 'doCount', 0              ; WORD: doCount
+L00000B35:      
+                m_push 100000000                ; LITERAL
+                m_push 0                        ; CLITERAL (0000)
+                call L00000B14                  ; CALL 0B14, countTo
                 ret
 L0000FDFC:      dd 0,0,0,0                      ; Label for 

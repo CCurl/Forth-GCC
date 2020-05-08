@@ -16,6 +16,7 @@ include "./Forth-STC-Macros.inc"
 MEMORY_SIZE = 0x8000
 
 ; our "MEMORY" starts here
+init_esp  dd 0
 STDOUT    dd 0
 HERE_ADDR dd 0x11223344
 LAST_ADDR dd 0x778899aa
@@ -25,7 +26,14 @@ tmp_buf   db 256 dup (0)
 
 FIRST     dd 0
 CCCtest: 
-        m_push '~'
+        m_push '-'
+        m_push '!'
+
+        ; call L00000B51
+
+        m_push '.'
+        call prim_EMIT
+        call prim_EMIT
         call prim_EMIT
         ret
 
@@ -33,11 +41,13 @@ HERE      db MEMORY_SIZE dup (0)
 ; HERE2     db MEMORY_SIZE dup (0)
 LAST      dd 0
 
-stk_ptr   dd 0
-stk_data  dd 256 dup (0)
+; The DATA stack
+dstk_ptr   dd 0
+dstk_data  dd 64 dup (0)
 
+; The RETURN stack
 rstk_ptr  dd 0
-rstk_data dd 256 dup (0)
+rstk_data dd 64 dup (0)
 ; our "MEMORY" ends here
 
 ; ------------------------------------------------------------------------------
@@ -57,12 +67,11 @@ rstk_data1: dd 256 dup (0)
 ; ------------------------------------------------------------------------------
 
   sys_init:
-        mov [stk_ptr], stk_ptr
+        mov [dstk_ptr], dstk_ptr
         mov [rstk_ptr], rstk_ptr
-        mov ebp, stk_ptr
+        mov ebp, dstk_ptr
 
         mov [rstk_ptr], rstk_ptr
-        mov ebp, stk_ptr
 
         mov [HERE_ADDR], HERE
         mov [LAST_ADDR], LAST
@@ -77,10 +86,13 @@ rstk_data1: dd 256 dup (0)
 
         call sys_init
 
+        ; Save the initial value of the stack pointer, esp
+        mov [init_esp], esp
+
         call CCCtest
-        mov eax, FIRST
-        add eax, 4
-        ; call DWORD [eax]
+        mov edx, FIRST
+        add edx, 4
+        ; call RWORD [edx]
 
         m_push 'H'
         call prim_EMIT

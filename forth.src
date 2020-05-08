@@ -44,7 +44,7 @@
 : FCLOSE	[ 32 C, ] ; .INLINE
 : >R		[ 33 C, ] ; .INLINE
 : R>		[ 34 C, ] ; .INLINE
-: LOGLEVEL	[ 35 C, ]  ; .INLINE
+: LOGLEVEL	[ 35 C, ] ; .INLINE
 : AND		[ 36 C, ] ; .INLINE
 : PICK		[ 37 C, ] ; .INLINE
 : DEPTH		[ 38 C, ] ; .INLINE
@@ -61,7 +61,8 @@
 : R@        R> DUP >R  ; .INLINE
 
 \ ------------------------------------------------------------------------------------
-: INLINE 0 DROP ;              \    (LAST) @ 2 CELL * + DUP C@ 2 OR SWAP C! ;
+\ : INLINE 0 DROP ;              \    (LAST) @ 2 CELL * + DUP C@ 2 OR SWAP C! ;
+: INLINE    (LAST) @ 2 CELL * + DUP C@ 2 OR SWAP C! ;
 : IMMEDIATE (LAST) @ 2 CELL * + DUP C@ 1 OR SWAP C! ;
 : CELLS CELL * ; INLINE
 
@@ -516,3 +517,12 @@
     reset-return-stack
     mainloop ;
 
+: countTo 
+    BEGIN
+        OVER OVER < IF DROP DROP LEAVE THEN
+        DUP DUP DROP DROP
+        DUP DUP DROP DROP
+        1 +
+    AGAIN ;
+
+: doCount 100000000 0 countTo ;

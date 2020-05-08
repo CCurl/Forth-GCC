@@ -213,11 +213,15 @@ void dis_opcode(int opcode)
             return;
 
         case DTOR:
-            line = make_codeU(NULL, "call prim_DTOR");
+            line = make_codeU(NULL, "m_pop eax");
+            make_comment(line, "DTOR (>R)");
+            line = make_codeU(NULL, "m_rpush eax");
             return;
 
         case RTOD:
-            line = make_codeU(NULL, "call prim_RTOD");
+            line = make_codeU(NULL, "m_rpop eax");
+            make_comment(line, "RTOD (R>)");
+            line = make_codeU(NULL, "m_push eax");
             return;
 
         case LOGLEVEL:

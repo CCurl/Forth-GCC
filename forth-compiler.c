@@ -230,7 +230,7 @@ char *ParseWord(char *word, char *line)
 	if (strcmp(word, ".INLINE") == 0)
 	{
 		DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
-		// dp->flags |= IS_INLINE;
+		dp->flags |= IS_INLINE;
 		return line;
 	}
 
