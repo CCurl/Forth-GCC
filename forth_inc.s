@@ -57,7 +57,7 @@ prim_PUSH_doesntwork:                                        ; Implementation of
               ret
 
 ; -------------------------------------------------------------------------------------
-  prim_LITERAL:
+  prim_LITERAL_XXX:
                 ; xxx
                 m_push 10
                 ret

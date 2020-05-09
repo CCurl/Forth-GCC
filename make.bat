@@ -98,10 +98,15 @@ REM Gen and build a subroutine-threaded version in ASSEMBLER
 :make-st
 set output=Forth-STC
 set c-files=%output%-dis.c %output%-opcodes.c %output%-dis-opcode.c forth-vm.c vm-prims.c logger.c
+echo gcc -g -o %output%-dis %c-files%
 gcc -g -o %output%-dis %c-files%
 if "--%2%--" == "----" goto done
-Forth-STC-dis -i:forth.bin -o:Forth-STC-Words.inc
+REM Forth-STC-dis -i:forth.bin -o:Forth-STC-Words.inc
+echo del Forth-STC.exe
+del Forth-STC.exe
+echo fasm %output%.asm
 fasm %output%.asm
+echo Forth-STC ...
 Forth-STC
 goto done
 

@@ -86,14 +86,14 @@ void SyncMem(bool isSet)
 	{
 		Store(ADDR_LAST, LAST);
 		Store(ADDR_HERE, HERE);
-		CStore(ADDR_BASE, BASE);
+		Store(ADDR_BASE, BASE);
 		Store(ADDR_STATE, STATE);
 	}
 	else
 	{
 		LAST = Fetch(ADDR_LAST);
 		HERE = Fetch(ADDR_HERE);
-		BASE = CFetch(ADDR_BASE);
+		BASE = Fetch(ADDR_BASE);
 		STATE = Fetch(ADDR_STATE);
 	}
 }
@@ -467,20 +467,20 @@ void generate_RightBracket()
 
 void generate_constant(char *name, BYTE val)
 {
-	DefineWord(name, IS_INLINE);
+	DefineWord(name, 0);
 	CComma(DICTP);
 	Comma(LAST);
-	CComma(CLITERAL);
-	CComma(val);
+	CComma(LITERAL);
+	Comma(val);
 	CComma(RET);
 }
 
 void generate_constants()
 {
-	generate_constant("(HERE)", ADDR_HERE);
-	generate_constant("(LAST)", ADDR_LAST);
 	generate_constant("CELL", CELL_SZ);
 	generate_constant("BASE", ADDR_BASE);
+	generate_constant("(HERE)", ADDR_HERE);
+	generate_constant("(LAST)", ADDR_LAST);
 	generate_constant("STATE", ADDR_STATE);
 }
 
@@ -495,8 +495,8 @@ void CompilerInit()
 	STATE = 0;
 
 	Store(LAST, 0);
-	CStore(ADDR_CELL, CELL_SZ);
-	CStore(ADDR_BASE, BASE);
+	Store(ADDR_CELL, CELL_SZ);
+	Store(ADDR_BASE, BASE);
 }
 
 void Compile(FILE *fp_in)
@@ -554,7 +554,7 @@ void do_compile()
     }
 
 	Compile(input_fp);
-	CStore(ADDR_BASE, 10);
+	Store(ADDR_BASE, 10);
     fclose(input_fp);
     input_fp = NULL;
 }

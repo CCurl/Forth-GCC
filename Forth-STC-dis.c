@@ -474,9 +474,9 @@ void dis_one_FASM()
 		// 	push(arg3);
 		// }
 		// isBYE = true;
-		line = make_code(NULL, "prim_LITERAL, 0");
+		line = make_codeU(NULL, "m_push 0");
         make_comment(line, "COMPARE");
-		line = make_code(NULL, "prim_COMPARE");
+		line = make_codeU(NULL, "call prim_COMPARE");
 		return;
 
 	case COMPAREI:
@@ -489,9 +489,9 @@ void dis_one_FASM()
 		// 	push(arg3);
 		// }
 		// isBYE = true;
-		line = make_code(NULL, "prim_LITERAL, 1");
+		line = make_codeU(NULL, "m_push 1");
         make_comment(line, "COMPAREI");
-		line = make_code(NULL, "prim_COMPARE");
+		line = make_codeU(NULL, "call prim_COMPARE");
 		return;
 
 	case SLITERAL:

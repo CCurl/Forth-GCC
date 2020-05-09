@@ -1,7 +1,7 @@
 ; -------------------------------------------------------------------------
 ; -------------------------------------------------------------------------
 ; -------------------------------------------------------------------------
-prim_LITERAL:                                   ; Implementation of LITERAL
+xxprim_LITERAL:                                   ; Implementation of LITERAL
                ; TODO
                m_push [HERE_ADDR]
                m_pop [ecx]
@@ -9,7 +9,7 @@ prim_LITERAL:                                   ; Implementation of LITERAL
                m_setTOS eax
                ret
                
-prim_FETCH:                                     ; Implementation of FETCH
+xxprim_FETCH:                                     ; Implementation of FETCH
                ; TODO
                m_push [HERE_ADDR]
                m_pop [ecx]
@@ -30,20 +30,12 @@ prim_SWAP:                                      ; Implementation of SWAP
                m_push ecx
                ret
                
-prim_DROP:                                      ; Implementation of DROP
-               ; TODO
-               m_push [HERE_ADDR]
-               m_pop [ecx]
-               m_getTOS edx
-               m_setTOS eax
+xxprim_DROP:                                      ; Implementation of DROP
+               m_pop eax
                ret
                
 prim_DUP:                                       ; Implementation of DUP
-               ; TODO
-               m_push [HERE_ADDR]
-               m_pop [ecx]
-               m_getTOS edx
-               m_setTOS eax
+               m_push ebx
                ret
                
 prim_SLITERAL:                                  ; Implementation of SLITERAL
@@ -54,7 +46,7 @@ prim_SLITERAL:                                  ; Implementation of SLITERAL
                m_setTOS eax
                ret
                
-prim_JMP:                                       ; Implementation of JMP
+xxprim_JMP:                                       ; Implementation of JMP
                ; TODO
                m_push [HERE_ADDR]
                m_pop [ecx]
@@ -62,7 +54,7 @@ prim_JMP:                                       ; Implementation of JMP
                m_setTOS eax
                ret
                
-prim_JMPZ:                                      ; Implementation of JMPZ
+xxprim_JMPZ:                                      ; Implementation of JMPZ
                ; TODO
                m_push [HERE_ADDR]
                m_pop [ecx]
@@ -70,7 +62,7 @@ prim_JMPZ:                                      ; Implementation of JMPZ
                m_setTOS eax
                ret
                
-prim_JMPNZ:                                     ; Implementation of JMPNZ
+xxprim_JMPNZ:                                     ; Implementation of JMPNZ
                ; TODO
                m_push [HERE_ADDR]
                m_pop [ecx]
@@ -78,7 +70,7 @@ prim_JMPNZ:                                     ; Implementation of JMPNZ
                m_setTOS eax
                ret
                
-prim_CALL:                                      ; Implementation of CALL
+xxprim_CALL:                                      ; Implementation of CALL
                ; TODO
                m_push [HERE_ADDR]
                m_pop [ecx]
@@ -86,7 +78,7 @@ prim_CALL:                                      ; Implementation of CALL
                m_setTOS eax
                ret
                
-prim_RET:                                       ; Implementation of RET
+xxprim_RET:                                       ; Implementation of RET
                ; TODO
                m_push [HERE_ADDR]
                m_pop [ecx]
@@ -102,8 +94,7 @@ prim_OR:                                        ; Implementation of OR
                m_setTOS eax
                ret
                
-prim_CLITERAL:                                  ; Implementation of CLITERAL
-               ; TODO
+xxprim_CLITERAL:                                  ; Implementation of CLITERAL
                m_push [HERE_ADDR]
                m_pop [ecx]
                m_getTOS edx
@@ -111,78 +102,107 @@ prim_CLITERAL:                                  ; Implementation of CLITERAL
                ret
                
 prim_CFETCH:                                    ; Implementation of CFETCH
-               ; TODO
-               m_push [HERE_ADDR]
-               m_pop [ecx]
-               m_getTOS edx
+               xor eax, eax
+               mov al, [ebx]
                m_setTOS eax
                ret
                
 prim_CSTORE:                                    ; Implementation of CSTORE
-               ; TODO
-               m_push [HERE_ADDR]
-               m_pop [ecx]
-               m_getTOS edx
-               m_setTOS eax
+               m_pop eax
+               m_pop edx
+               mov [edx], al
                ret
                
 prim_ADD:                                       ; Implementation of ADD
-               ; TODO
-               m_push [HERE_ADDR]
-               m_pop [ecx]
-               m_getTOS edx
-               m_setTOS eax
+               m_pop eax
+               add ebx, eax
                ret
                
 prim_SUB:                                       ; Implementation of SUB
-               ; TODO
-               m_push [HERE_ADDR]
-               m_pop [ecx]
-               m_getTOS edx
-               m_setTOS eax
+               m_pop eax
+               sub ebx, eax
                ret
                
 prim_MUL:                                       ; Implementation of MUL
-               ; TODO
-               m_push [HERE_ADDR]
-               m_pop [ecx]
-               m_getTOS edx
+               m_pop ecx
+               m_pop eax
+               mul ecx
                m_setTOS eax
                ret
+               
+prim_SLASHMOD:                                       ; Implementation of /MOD
+               m_pop ecx
+               m_pop eax
+               cmp ecx, 0
+               je smDivBy0
+               xor edx, edx
+               div ecx
+               m_push eax
+               m_push edx
+               ret
+smDivBy0:
+    m_push 'm'
+    call prim_EMIT
+    m_push '?'
+    call prim_EMIT
+               m_push 0
+               m_push 0
+               ret;
                
 prim_DIV:                                       ; Implementation of DIV
-               ; TODO
-               m_push [HERE_ADDR]
-               m_pop [ecx]
-               m_getTOS edx
-               m_setTOS eax
+               m_pop ecx
+               m_pop eax
+               cmp ecx, 0
+               je divBy0
+               xor edx, edx
+               div ecx
+               m_push eax
                ret
+divBy0:
+    m_push 'v'
+    call prim_EMIT
+    m_push '?'
+    call prim_EMIT
+               m_setTOS 0
+               ret;
                
 prim_LT:                                        ; Implementation of LT
-               ; TODO
-               m_push [HERE_ADDR]
-               m_pop [ecx]
-               m_getTOS edx
-               m_setTOS eax
+               m_pop eax
+               m_getTOS ecx
+               cmp ecx, eax
+               jl LT_T
+               m_setTOS 0
+               ret
+LT_T:          
+               m_setTOS 1
                ret
                
 prim_EQ:                                        ; Implementation of EQ
-               ; TODO
-               m_push [HERE_ADDR]
-               m_pop [ecx]
-               m_getTOS edx
-               m_setTOS eax
+               m_pop eax
+               m_getTOS ecx
+               cmp ecx, eax
+               je EQ_T
+               m_setTOS 0
+        ;m_push 'n'
+        ;call prim_EMIT
+               ret
+EQ_T:          m_setTOS 1
+        ;m_push 'y'
+        ;call prim_EMIT
+
                ret
                
 prim_GT:                                        ; Implementation of GT
-               ; TODO
-               m_push [HERE_ADDR]
-               m_pop [ecx]
-               m_getTOS edx
-               m_setTOS eax
+               m_pop eax
+               m_getTOS ecx
+               cmp ecx, eax
+               jg GT_T
+               m_setTOS 0
+               ret
+GT_T:          m_setTOS 1
                ret
                
-prim_DICTP:                                     ; Implementation of DICTP
+xxprim_DICTP:                                     ; Implementation of DICTP
                ; TODO
                m_push [HERE_ADDR]
                m_pop [ecx]
@@ -194,7 +214,7 @@ prim_EMIT:                                      ; Implementation of EMIT
                 ; 
                 ; BOOL WINAPI WriteConsole(
                 ; _In_             HANDLE  hConsoleOutput,
-                ; _In_       const VOID    *lpBuffer,
+                ; _In_             const VOID    *lpBuffer,
                 ; _In_             DWORD   nNumberOfCharsToWrite,
                 ; _Out_opt_        LPDWORD lpNumberOfCharsWritten,
                 ; _Reserved_       LPVOID  lpReserved
@@ -209,11 +229,10 @@ prim_EMIT:                                      ; Implementation of EMIT
                 ret
                
 prim_OVER:                                      ; Implementation of OVER
-               ; TODO
-               m_push [HERE_ADDR]
-               m_pop [ecx]
+               m_pop ecx
                m_getTOS edx
-               m_setTOS eax
+               m_push ecx
+               m_push edx
                ret
                
 prim_COMPARE:                                   ; Implementation of COMPARE
@@ -264,7 +283,7 @@ prim_FCLOSE:                                    ; Implementation of FCLOSE
                m_setTOS eax
                ret
                
-prim_DTOR:                                      ; Implementation of DTOR
+xxprim_DTOR:                                      ; Implementation of DTOR
                ; TODO
                m_push [HERE_ADDR]
                m_pop [ecx]
@@ -272,7 +291,7 @@ prim_DTOR:                                      ; Implementation of DTOR
                m_setTOS eax
                ret
                
-prim_RTOD:                                      ; Implementation of RTOD
+xxprim_RTOD:                                      ; Implementation of RTOD
                ; TODO
                m_push [HERE_ADDR]
                m_pop [ecx]
@@ -313,12 +332,25 @@ prim_DEPTH:                                     ; Implementation of DEPTH
                ret
                
 prim_GETCH:                                     ; Implementation of GETCH
-               ; TODO
-               m_push [HERE_ADDR]
-               m_pop [ecx]
-               m_getTOS edx
-               m_setTOS eax
-               ret
+              ;BOOL WINAPI ReadConsole(
+              ;  _In_     HANDLE  hConsoleInput,
+              ;  _Out_    LPVOID  lpBuffer,
+              ;  _In_     DWORD   nNumberOfCharsToRead,
+              ;  _Out_    LPDWORD lpNumberOfCharsRead,
+              ;  _In_opt_ LPVOID  pInputControl
+              ;
+              push 0
+              push 0
+              push 1
+              push tmp_buf
+              push DWORD [STDIN]
+              call [ReadConsoleA]
+              xor eax, eax
+              mov al, [tmp_buf]
+              m_push eax
+              m_push eax
+              call prim_EMIT
+              ret
                
 prim_COMPAREI:                                  ; Implementation of COMPAREI
                ; TODO
@@ -369,6 +401,8 @@ prim_RESET:                                     ; Implementation of RESET
                ret
                
 prim_BYE:                                       ; Implementation of BYE
+                m_push ' '
+                call prim_EMIT
                 m_push 'B'
                 call prim_EMIT
                 m_push 'Y'
