@@ -1808,16 +1808,17 @@ L00000BAF:      call prim_OVER
                 ret
 L00000BBA:      m_push ebx                      ; DUP
                 m_pop eax                       ; DROP
-                m_push ebx                      ; DUP
-                m_pop eax                       ; DROP
-                m_push ebx                      ; DUP
-                m_pop eax                       ; DROP
-                m_push ebx                      ; DUP
-                m_pop eax                       ; DROP
-                m_push ebx                      ; DUP
-                call L00000B06                  ; .
-                m_push 1                        ; CLITERAL (0001)
-                call prim_ADD
+                ;m_push ebx                      ; DUP
+                ;m_pop eax                       ; DROP
+                ;m_push ebx                      ; DUP
+                ;m_pop eax                       ; DROP
+                ;m_push ebx                      ; DUP
+                ;m_pop eax                       ; DROP
+                ;m_push ebx                      ; DUP
+                ;call L00000B06                  ; .
+                m_onePlus
+                ;m_push 1                        ; CLITERAL (0001)
+                ;call prim_ADD
                 jmp L00000BAF                   ; JMP
                 ret
                 
@@ -1825,10 +1826,14 @@ L0000F669:      dd L0000F67B                    ; DICTP: (F669), NEXT
                 db 0                            ; FLAGS
                 db 7, 'doCount', 0              ; WORD: doCount
 L00000BCB:
-                m_push 10                       ; LITERAL
-                m_push 0                        ; CLITERAL (0000)
+                m_push 444222333                 ; LITERAL 444,222,333
+                m_push ebx                      ; DUP
+                call L00000B06                  ; .
+                m_push 1                        ; CLITERAL (0001)
+                m_push ebx                      ; DUP
+                call L00000B06                  ; .
                 call L00000BAA                  ; CALL 0BAA, countTo
                 m_push '.'
                 call prim_EMIT
                 ret
-L0000FDFC:      dd 0,0,0,0                      ; Label for 
+L0000FDFC:      dd 0,0,0,0                      ; Label for address 0xFDFC

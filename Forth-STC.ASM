@@ -87,6 +87,7 @@ mainLoop:
         mov esp, [init_esp]
 
         call CCCtest
+        jmp prim_BYE
 
         ; jmp mainLoop
         ret
@@ -143,6 +144,8 @@ CCCtest:
         m_push BASE_ADDR      ; (BASE)
         call prim_STORE
 
+        call L00000BCB        ; doCount
+
         m_push OK
         call L0000037A        ; COUNT
         call L00000386        ; TYPE
@@ -176,6 +179,8 @@ CCCtest:
         call L00000386        ; TYPE
 
         call prim_GETCH
+        call prim_EMIT
+        
         m_push OK
         call L0000037A        ; COUNT
         call L00000386        ; TYPE
@@ -227,7 +232,7 @@ zz:
 ; our "MEMORY" ends here
 
 ; ------------------------------------------------------------------------------
-include "./Forth-STC-Words.inc"
+include "./Forth-STC-Words.ASM"
 ; ------------------------------------------------------------------------------
 
 xxx123:

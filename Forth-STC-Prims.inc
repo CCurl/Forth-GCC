@@ -125,7 +125,7 @@ prim_SUB:                                       ; Implementation of SUB
                
 prim_MUL:                                       ; Implementation of MUL
                m_pop ecx
-               m_pop eax
+               m_getTOS eax
                mul ecx
                m_setTOS eax
                ret
@@ -183,12 +183,8 @@ prim_EQ:                                        ; Implementation of EQ
                cmp ecx, eax
                je EQ_T
                m_setTOS 0
-        ;m_push 'n'
-        ;call prim_EMIT
                ret
 EQ_T:          m_setTOS 1
-        ;m_push 'y'
-        ;call prim_EMIT
 
                ret
                
@@ -236,6 +232,14 @@ prim_OVER:                                      ; Implementation of OVER
                ret
                
 prim_COMPARE:                                   ; Implementation of COMPARE
+               ; TODO
+               m_push [HERE_ADDR]
+               m_pop [ecx]
+               m_getTOS edx
+               m_setTOS eax
+               ret
+               
+prim_COMPAREI:                                  ; Implementation of COMPAREI
                ; TODO
                m_push [HERE_ADDR]
                m_pop [ecx]
@@ -330,7 +334,8 @@ prim_DEPTH:                                     ; Implementation of DEPTH
                m_getTOS edx
                m_setTOS eax
                ret
-               
+
+GETCH_num_chars dd 0
 prim_GETCH:                                     ; Implementation of GETCH
               ;BOOL WINAPI ReadConsole(
               ;  _In_     HANDLE  hConsoleInput,
@@ -340,7 +345,7 @@ prim_GETCH:                                     ; Implementation of GETCH
               ;  _In_opt_ LPVOID  pInputControl
               ;
               push 0
-              push 0
+              push GETCH_num_chars
               push 1
               push tmp_buf
               push DWORD [STDIN]
@@ -348,17 +353,7 @@ prim_GETCH:                                     ; Implementation of GETCH
               xor eax, eax
               mov al, [tmp_buf]
               m_push eax
-              m_push eax
-              call prim_EMIT
               ret
-               
-prim_COMPAREI:                                  ; Implementation of COMPAREI
-               ; TODO
-               m_push [HERE_ADDR]
-               m_pop [ecx]
-               m_getTOS edx
-               m_setTOS eax
-               ret
                
 prim_USINIT:                                    ; Implementation of USINIT
                ; TODO

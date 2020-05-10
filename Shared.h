@@ -47,6 +47,8 @@
 #define USINIT     41	// 29 ( size addr -- )
 #define USPUSH     42	// 2A ( val addr -- )
 #define USPOP      43	// 2B ( addr -- val )
+#define INC        44   // 2C
+#define DEC        45   // 2D
 #define BREAK     253	// FD
 #define RESET     254	// FE
 #define BYE       255	// FF

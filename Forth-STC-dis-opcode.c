@@ -260,6 +260,14 @@ void dis_opcode(int opcode)
             line = make_codeU(NULL, "call prim_USPOP");
             return;
 
+        case INC:
+            line = make_codeU(NULL, "m_onePlus");
+            return;
+
+        case DEC:
+            line = make_codeU(NULL, "m_oneMinus");
+            return;
+
         case BREAK:
             line = make_codeU(NULL, "call prim_BREAK");
             return;
