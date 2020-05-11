@@ -36,7 +36,7 @@ LAST      = the_memory + 0x0040
 HERE      = LAST + 4
 
 Hello db 5, 'Hello', 0
-OK db 5, ' ok', 13, 10, 0
+OK    db 5, ' ok', 13, 10, 0
 
 ; ------------------------------------------------------------------------------
 
@@ -174,19 +174,41 @@ CCCtest:
         mov ebx, [ebx]        ; @
         call L00000B06        ; .
 
-        m_push OK
+kk:     m_push OK
         call L0000037A        ; COUNT
         call L00000386        ; TYPE
 
-        call prim_GETCH
-        call prim_EMIT
-        
-        m_push OK
-        call L0000037A        ; COUNT
-        call L00000386        ; TYPE
-        call prim_EMIT
+ml:     call prim_GETCH
 
+        m_push ebx              ; DUP 13 = IF <eol> THEN
+        m_push 13
+        call prim_EQ
+        m_pop eax
+        cmp eax, 1
+        jne ml1
+eol:    m_drop
+        jmp kk
         ret
+
+ml1:    m_push ebx                ; DUP ' ' < IF DROP <continue> THEN
+        m_push 32
+        call prim_LT
+        m_pop eax
+        cmp eax, 0
+        je bbq
+        m_drop
+        jmp ml
+
+bbq:    m_push ebx                ; DUP 'x' < IF BYE THEN
+        m_push 'x'
+        call prim_EQ
+        m_pop eax
+        cmp eax, 1
+        je prim_BYE
+
+        call prim_EMIT
+        jmp ml
+        
 
         ;push es
         ;pop eax

@@ -87,11 +87,13 @@ xxprim_RET:                                       ; Implementation of RET
                ret
                
 prim_OR:                                        ; Implementation of OR
-               ; TODO
-               m_push [HERE_ADDR]
-               m_pop [ecx]
-               m_getTOS edx
-               m_setTOS eax
+               m_pop eax
+               or ebx, eax
+               ret
+               
+prim_XOR:                                        ; Implementation of OR
+               m_pop eax
+               xor ebx, eax
                ret
                
 xxprim_CLITERAL:                                  ; Implementation of CLITERAL
@@ -141,6 +143,8 @@ prim_SLASHMOD:                                       ; Implementation of /MOD
                m_push edx
                ret
 smDivBy0:
+    m_push '/'
+    call prim_EMIT
     m_push 'm'
     call prim_EMIT
     m_push '?'
@@ -168,8 +172,7 @@ divBy0:
                
 prim_LT:                                        ; Implementation of LT
                m_pop eax
-               m_getTOS ecx
-               cmp ecx, eax
+               cmp ebx, eax
                jl LT_T
                m_setTOS 0
                ret
@@ -179,19 +182,16 @@ LT_T:
                
 prim_EQ:                                        ; Implementation of EQ
                m_pop eax
-               m_getTOS ecx
-               cmp ecx, eax
+               cmp ebx, eax
                je EQ_T
                m_setTOS 0
                ret
 EQ_T:          m_setTOS 1
-
                ret
                
 prim_GT:                                        ; Implementation of GT
                m_pop eax
-               m_getTOS ecx
-               cmp ecx, eax
+               cmp ebx, eax
                jg GT_T
                m_setTOS 0
                ret
@@ -312,11 +312,8 @@ prim_LOGLEVEL:                                  ; Implementation of LOGLEVEL
                ret
                
 prim_AND:                                       ; Implementation of AND
-               ; TODO
-               m_push [HERE_ADDR]
-               m_pop [ecx]
-               m_getTOS edx
-               m_setTOS eax
+               m_pop eax
+               and ebx, eax
                ret
                
 prim_PICK:                                      ; Implementation of PICK
