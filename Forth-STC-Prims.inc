@@ -18,9 +18,9 @@ xxprim_FETCH:                                     ; Implementation of FETCH
                ret
                
 prim_STORE:                                     ; Implementation of STORE
+               m_pop edx
                m_pop eax
-               m_pop ecx
-               mov [eax], ecx
+               mov [edx], eax
                ret
                
 prim_SWAP:                                      ; Implementation of SWAP
@@ -110,8 +110,8 @@ prim_CFETCH:                                    ; Implementation of CFETCH
                ret
                
 prim_CSTORE:                                    ; Implementation of CSTORE
-               m_pop eax
                m_pop edx
+               m_pop eax
                mov [edx], al
                ret
                

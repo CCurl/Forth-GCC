@@ -16,28 +16,28 @@ L0000FDDE:      dd L0000FDED                    ; DICTP: (FDDE), NEXT
                 db 0                            ; FLAGS
                 db 4, 'BASE', 0                 ; WORD: BASE
 L0000004B:      
-                m_push BASE_ADDR                ; LITERAL
+                m_push 12                       ; LITERAL
                 ret
                 
 L0000FDCD:      dd L0000FDDE                    ; DICTP: (FDCD), NEXT
                 db 0                            ; FLAGS
                 db 6, '(HERE)', 0               ; WORD: (HERE)
 L00000056:      
-                m_push HERE_ADDR                ; LITERAL
+                m_push 16                       ; LITERAL
                 ret
                 
 L0000FDBC:      dd L0000FDCD                    ; DICTP: (FDBC), NEXT
                 db 0                            ; FLAGS
                 db 6, '(LAST)', 0               ; WORD: (LAST)
 L00000061:      
-                m_push LAST_ADDR                ; LITERAL
+                m_push 20                       ; LITERAL
                 ret
                 
 L0000FDAC:      dd L0000FDBC                    ; DICTP: (FDAC), NEXT
                 db 0                            ; FLAGS
                 db 5, 'STATE', 0                ; WORD: STATE
 L0000006C:      
-                m_push STATE_ADDR                       ; LITERAL
+                m_push 32                       ; LITERAL
                 ret
                 
 L0000FD9F:      dd L0000FDAC                    ; DICTP: (FD9F), NEXT
@@ -1170,9 +1170,8 @@ L000006AB:
                 call prim_SUB
                 m_push 1                        ; CLITERAL (0001)
                 ret
-L000006C5:
-                call L0000004B                  ; CALL 004B, BASE
-                mov ebx, [ebx]
+L000006C5:      call L0000004B                  ; CALL 004B, BASE
+                call prim_CFETCH
                 m_push 16                       ; CLITERAL (0010)
                 call prim_EQ
                 m_pop eax
@@ -1632,15 +1631,9 @@ L0000F6E4:      dd L0000F6F3                    ; DICTP: (F6E4), NEXT
                 db 0                            ; FLAGS
                 db 4, '/MOD', 0                 ; WORD: /MOD
 L00000A79:      
-    call prim_SLASHMOD
-    ret
                 call prim_OVER
                 call prim_OVER
                 call prim_DIV
-    m_push ebx
-    m_push '0'
-    call prim_ADD
-    call prim_EMIT
                 m_push ebx                      ; DUP
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
@@ -1648,10 +1641,6 @@ L00000A79:
                 call prim_SUB
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
-    m_push ebx
-    m_push '0'
-    call prim_ADD
-    call prim_EMIT
                 call prim_SWAP
                 ret
                 
@@ -1669,8 +1658,7 @@ L00000A88:
                 m_push 48                       ; CLITERAL (0030)
                 call prim_EMIT
                 ret
-L00000A9B:      
-                m_push ebx                      ; DUP
+L00000A9B:      m_push ebx                      ; DUP
                 m_push 0                        ; CLITERAL (0000)
                 call prim_LT
                 m_pop eax
@@ -1681,8 +1669,7 @@ L00000A9B:
                 m_push 1                        ; CLITERAL (0001)
                 jmp L00000AB0                   ; JMP
 L00000AAE:      m_push 0                        ; CLITERAL (0000)
-L00000AB0:
-                m_pop eax                       ; DTOR (>R)
+L00000AB0:      m_pop eax                       ; DTOR (>R)
                 m_rpush eax
                 m_push 0                        ; CLITERAL (0000)
                 call prim_SWAP
@@ -1691,12 +1678,8 @@ L00000AB4:      m_push ebx                      ; DUP
                 cmp eax, 0
                 je L00000ADA                    ; JMPZ
                 call L0000004B                  ; CALL 004B, BASE
-                mov ebx, [ebx]
+                call prim_CFETCH
                 call L00000A79                  ; CALL 0A79, /MOD
-    ;m_push 'x'
-    ;call prim_EMIT
-    ;m_rpop eax
-    ;ret
                 m_push 48                       ; CLITERAL (0030)
                 call prim_OVER
                 m_push 9                        ; CLITERAL (0009)
@@ -1706,10 +1689,7 @@ L00000AB4:      m_push ebx                      ; DUP
                 je L00000AD3                    ; JMPZ
                 m_push 7                        ; CLITERAL (0007)
                 call prim_ADD
-L00000AD3:      
-                call prim_ADD
-    ;m_push ebx
-    ;call prim_EMIT
+L00000AD3:      call prim_ADD
                 call prim_SWAP
                 jmp L00000AF7                   ; JMP
 L00000ADA:      m_pop eax                       ; DROP
@@ -1807,33 +1787,89 @@ L00000BAF:      call prim_OVER
                 m_pop eax                       ; DROP
                 ret
 L00000BBA:      m_push ebx                      ; DUP
+                m_push ebx                      ; DUP
                 m_pop eax                       ; DROP
-                ;m_push ebx                      ; DUP
-                ;m_pop eax                       ; DROP
-                ;m_push ebx                      ; DUP
-                ;m_pop eax                       ; DROP
-                ;m_push ebx                      ; DUP
-                ;m_pop eax                       ; DROP
-                ;m_push ebx                      ; DUP
-                ;call L00000B06                  ; .
-                m_onePlus
-                ;m_push 1                        ; CLITERAL (0001)
-                ;call prim_ADD
+                m_pop eax                       ; DROP
+                m_push ebx                      ; DUP
+                m_push ebx                      ; DUP
+                m_pop eax                       ; DROP
+                m_pop eax                       ; DROP
+                m_push 1                        ; CLITERAL (0001)
+                call prim_ADD
                 jmp L00000BAF                   ; JMP
                 ret
                 
 L0000F669:      dd L0000F67B                    ; DICTP: (F669), NEXT
                 db 0                            ; FLAGS
                 db 7, 'doCount', 0              ; WORD: doCount
-L00000BCB:
-                m_push 444222333                 ; LITERAL 444,222,333
-                m_push ebx                      ; DUP
-                call L00000B06                  ; .
-                m_push 1                        ; CLITERAL (0001)
-                m_push ebx                      ; DUP
-                call L00000B06                  ; .
+L00000BCB:      
+                m_push 100000000                ; LITERAL
+                m_push 0                        ; CLITERAL (0000)
                 call L00000BAA                  ; CALL 0BAA, countTo
-                m_push '.'
-                call prim_EMIT
                 ret
-L0000FDFC:      dd 0,0,0,0                      ; Label for address 0xFDFC
+                
+L0000F657:      dd L0000F669                    ; DICTP: (F657), NEXT
+                db 0                            ; FLAGS
+                db 7, 'getWord', 0              ; WORD: getWord
+L00000BDD:      
+                call L00000056                  ; CALL 0056, (HERE)
+                mov ebx, [ebx]                  ; FETCH
+                m_push 256                      ; LITERAL
+                call prim_ADD
+                m_push 0                        ; CLITERAL (0000)
+                call prim_OVER
+                call prim_STORE
+                m_push ebx                      ; DUP
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
+L00000BF4:      call prim_GETCH
+                m_push ebx                      ; DUP
+                m_push 33                       ; CLITERAL (0021)
+                call prim_LT
+                m_pop eax
+                cmp eax, 0
+                je L00000C12                    ; JMPZ
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
+                m_push ebx                      ; DUP
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
+                call prim_CFETCH
+                m_pop eax
+                cmp eax, 0
+                je L00000C0C                    ; JMPZ
+                m_pop eax                       ; DROP
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
+                m_push ebx                      ; DUP
+                call prim_CFETCH
+                ret
+L00000C0C:      m_pop eax                       ; DROP
+                jmp L00000C29                   ; JMP
+L00000C12:      m_push ebx                      ; DUP
+                m_push 128                      ; CLITERAL (0080)
+                call prim_LT
+                m_pop eax
+                cmp eax, 0
+                je L00000C28                    ; JMPZ
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
+                m_push ebx                      ; DUP
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
+                call L000003E6                  ; CALL 03E6, string-catc
+                jmp L00000C29                   ; JMP
+L00000C28:      m_pop eax                       ; DROP
+L00000C29:      jmp L00000BF4                   ; JMP
+                ret
+                
+L0000F645:      dd L0000F657                    ; DICTP: (F645), NEXT
+                db 0                            ; FLAGS
+                db 7, 'test-gw', 0              ; WORD: test-gw
+L00000C2F:      
+                call L00000BDD                  ; CALL 0BDD, getWord
+                call L00000B06                  ; CALL 0B06, .
+                call L0000037A                  ; CALL 037A, COUNT
+                call L00000386                  ; CALL 0386, TYPE
+                ret
+L0000FDFC:      dd 0,0,0,0                      ; Label for 

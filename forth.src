@@ -526,3 +526,21 @@
     AGAIN ;
 
 : doCount 100000000 0 countTo ;
+
+: getWord HERE 256 + 0 OVER ! DUP >R
+    BEGIN
+        GETCH DUP 33 < IF
+            R@ C@ IF
+                DROP R> DUP C@ LEAVE
+            THEN
+            DROP
+        ELSE
+            DUP 128 < IF
+                R@ string-catc
+            ELSE 
+                DROP
+            THEN
+        THEN
+    AGAIN ;
+
+: test-gw getWord . COUNT TYPE ;

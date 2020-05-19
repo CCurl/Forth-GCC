@@ -178,6 +178,19 @@ kk:     m_push OK
         call L0000037A        ; COUNT
         call L00000386        ; TYPE
 
+
+                call L00000C2F
+                call L00000C2F
+                call L00000C2F
+                call L00000C2F
+                call L00000C2F
+                call L00000C2F
+                call L00000C2F
+                jmp prim_BYE
+        ret
+
+
+
 ml:     call prim_GETCH
 
         m_push ebx              ; DUP 13 = IF <eol> THEN
@@ -252,6 +265,18 @@ zz:
 ;rstk_ptr  dd 0
 ;rstk_data dd 64 dup (0)
 ; our "MEMORY" ends here
+
+; ------------------------------------------------------------------------------
+getWord:
+        ; This gets one word from the input stream.
+        ; Note, the word is counted and null-terminated.
+        ; It also puts a pointer to that word and the word-length on the stack.
+        ; If the length = 0, that implies that we have hit <EOF> on the input stream.
+        ; For STDIN, the length should never be 0.
+
+        call L00000C2F
+        ret
+
 
 ; ------------------------------------------------------------------------------
 include "./Forth-STC-Words.ASM"

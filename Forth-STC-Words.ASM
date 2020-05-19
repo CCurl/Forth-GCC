@@ -1839,4 +1839,72 @@ L00000BCB:
                 m_push '.'
                 call prim_EMIT
                 ret
+
+L0000F657:      dd L0000F669                    ; DICTP: (F657), NEXT
+                db 0                            ; FLAGS
+                db 7, 'getWord', 0              ; WORD: getWord ( -- addr count )
+L00000BDD:      
+                call L00000056                  ; CALL 0056, (HERE)
+                mov ebx, [ebx]                  ; FETCH
+                m_push 256                      ; LITERAL
+                call prim_ADD
+                m_push 0                        ; CLITERAL (0000)
+                call prim_OVER
+                call prim_STORE
+                m_push ebx                      ; DUP
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
+L00000BF4:      
+                call prim_GETCH
+                m_push ebx                      ; DUP
+                m_push 33                       ; CLITERAL (0021)
+                call prim_LT
+                m_pop eax
+                cmp eax, 0
+                je L00000C12                    ; JMPZ
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
+                m_push ebx                      ; DUP
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
+                call prim_CFETCH
+                m_pop eax
+                cmp eax, 0
+                je L00000C0C                    ; JMPZ
+                m_pop eax                       ; DROP
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
+                m_push ebx                      ; DUP
+                call prim_CFETCH
+                ret
+L00000C0C:      m_pop eax                       ; DROP
+                jmp L00000C29                   ; JMP
+L00000C12:      m_push ebx                      ; DUP
+                m_push 128                      ; CLITERAL (0080)
+                call prim_LT
+                m_pop eax
+                cmp eax, 0
+                je L00000C28                    ; JMPZ
+                m_rpop eax                      ; RTOD (R>)
+                m_push eax
+                m_push ebx                      ; DUP
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
+                call L000003E6                  ; CALL 03E6, string-catc
+                jmp L00000C29                   ; JMP
+L00000C28:      m_pop eax                       ; DROP
+L00000C29:      jmp L00000BF4                   ; JMP
+                ret
+                
+L0000F645:      dd L0000F657                    ; DICTP: (F645), NEXT
+                db 0                            ; FLAGS
+                db 7, 'test-gw', 0              ; WORD: test-gw
+L00000C2F:      
+                call L00000BDD                  ; CALL 0BDD, getWord
+                call L00000B06                  ; CALL 0B06, .
+                call L0000037A                  ; CALL 037A, COUNT
+                call L00000386                  ; CALL 0386, TYPE
+                ret
+
+
 L0000FDFC:      dd 0,0,0,0                      ; Label for address 0xFDFC

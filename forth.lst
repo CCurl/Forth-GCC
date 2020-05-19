@@ -6,7 +6,7 @@
 ;
 0005: 00 00 00
 0008: 00000004 0000000a
-0010: 00000bdd 0000f669 00000000 00000000
+0010: 00000c49 0000f645 00000000 00000000
 0020: 00000000 00010000 00000000 00000000
 0030: 00000000 00000000 00000000 00000000
 ;
@@ -1294,7 +1294,62 @@
 0bd7: 0b aa 0b 00 00             ; CALL countTo (0baa)
 0bdc: 0c                         ; RET
 ;
+0bdd: 18 57 f6 00 00             ; DICTP getWord (f657)
+0be2: 0b 56 00 00 00             ; CALL (HERE) (0056)
+0be7: 02                         ; FETCH
+0be8: 01 00 01 00 00             ; LITERAL 256 (100)
+0bed: 11                         ; ADD
+0bee: 0e 00                      ; CLITERAL 0
+0bf0: 1a                         ; OVER
+0bf1: 03                         ; STORE
+0bf2: 06                         ; DUP
+0bf3: 21                         ; DTOR
+0bf4: 27                         ; GETCH
+0bf5: 06                         ; DUP
+0bf6: 0e 21                      ; CLITERAL 33
+0bf8: 15                         ; LT
+0bf9: 09 12 0c 00 00             ; JMPZ 0c12
+0bfe: 22                         ; RTOD
+0bff: 06                         ; DUP
+0c00: 21                         ; DTOR
+0c01: 0f                         ; CFETCH
+0c02: 09 0c 0c 00 00             ; JMPZ 0c0c
+0c07: 05                         ; DROP
+0c08: 22                         ; RTOD
+0c09: 06                         ; DUP
+0c0a: 0f                         ; CFETCH
+0c0b: 0c                         ; RET
+0c0c: 05                         ; DROP
+0c0d: 08 29 0c 00 00             ; JMP 0c29
+0c12: 06                         ; DUP
+0c13: 0e 80                      ; CLITERAL 128
+0c15: 15                         ; LT
+0c16: 09 28 0c 00 00             ; JMPZ 0c28
+0c1b: 22                         ; RTOD
+0c1c: 06                         ; DUP
+0c1d: 21                         ; DTOR
+0c1e: 0b e6 03 00 00             ; CALL string-catc (03e6)
+0c23: 08 29 0c 00 00             ; JMP 0c29
+0c28: 05                         ; DROP
+0c29: 08 f4 0b 00 00             ; JMP 0bf4
+0c2e: 0c                         ; RET
+;
+0c2f: 18 45 f6 00 00             ; DICTP test-gw (f645)
+0c34: 0b dd 0b 00 00             ; CALL getWord (0bdd)
+0c39: 0b 06 0b 00 00             ; CALL . (0b06)
+0c3e: 0b 7a 03 00 00             ; CALL COUNT (037a)
+0c43: 0b 86 03 00 00             ; CALL TYPE (0386)
+0c48: 0c                         ; RET
+;
 ; End of code, Dictionary:
+;
+f645: 57 f6 00 00                ; test-gw - (next: f657 getWord)
+f649: 2f 0c 00 00 00             ; XT=0c2f, flags=00
+f64e: 07 74 65 73 74 2d 67 77 00 ; 7, test-gw
+;
+f657: 69 f6 00 00                ; getWord - (next: f669 doCount)
+f65b: dd 0b 00 00 00             ; XT=0bdd, flags=00
+f660: 07 67 65 74 57 6f 72 64 00 ; 7, getWord
 ;
 f669: 7b f6 00 00                ; doCount - (next: f67b countTo)
 f66d: cb 0b 00 00 00             ; XT=0bcb, flags=00
