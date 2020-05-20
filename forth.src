@@ -54,6 +54,8 @@
 : USINIT	[ 41 C, ] ; .INLINE
 : USPUSH	[ 42 C, ] ; .INLINE
 : USPOP		[ 43 C, ] ; .INLINE
+: INC		[ 44 C, ] ; .INLINE
+: RDEPTH	[ 45 C, ] ; .INLINE
 : BREAK		[ 253 C, ] ; .INLINE
 : RESET		[ 254 C, ] ; .INLINE
 : BYE		[ 255 C, ] ; .INLINE
@@ -91,8 +93,8 @@
 : UNTIL ?COMPILING IF JMPZ  , THEN ;    IMMEDIATE
 : LEAVE ?COMPILING IF RET     THEN ;    IMMEDIATE
 
-: >IN      [ LITERAL HERE CELL + 1 + , ] ; 0 , RET
-: isNeg    [ LITERAL HERE CELL + 1 + , ] ; 0 , RET
+: >IN      [ LITERAL HERE CELL + INC , ] ; 0 , RET
+: isNeg    [ LITERAL HERE CELL + INC , ] ; 0 , RET
 
 HEX : MEM_SZ 24 @ ; DECIMAL
 
@@ -111,7 +113,7 @@ HEX : MEM_SZ 24 @ ; DECIMAL
 : ROT   >R SWAP R> SWAP ; INLINE
 : -ROT  SWAP >R SWAP R> ; INLINE
 
-: 1+ 1 + ; INLINE
+: 1+ INC ; INLINE
 : 1- 1 - ; INLINE
 
 : 2* 2 * ; INLINE 
@@ -138,13 +140,13 @@ HEX : MEM_SZ 24 @ ; DECIMAL
 : FALSE 0 ; INLINE
 : NOT 0 = ; INLINE
 
-: COUNT DUP 1 + SWAP C@ ;		\ ( addr1 --  addr2 num )
+: COUNT DUP 1+ SWAP C@ ;		\ ( addr1 --  addr2 num )
 
 : TYPE     \ ( addr count -- ) 
 	OVER + SWAP
 	BEGIN
 		2DUP <= IF 2DROP LEAVE THEN
-		DUP C@ EMIT 1 +
+		DUP C@ EMIT 1+
 	AGAIN ;
 
 : CT COUNT TYPE ;
@@ -172,7 +174,7 @@ HEX : MEM_SZ 24 @ ; DECIMAL
 	< 0=
 ;
 
-: (tmp) [ LITERAL HERE CELL + 1 + , ] ; 0 , RET
+: (tmp) [ LITERAL HERE CELL + 1+ , ] ; 0 , RET
 : tmp-init LAST (tmp) ! ;							\ ( -- )
 : tmp-cur (tmp) @ ;
 : tmp-alloc (tmp) TUCK @ SWAP - SWAP ! tmp-cur ;	\ ( size -- addr )
@@ -732,6 +734,19 @@ DECIMAL
 	.(HERE)   44 EMIT BL 
 	.(LAST)   44 EMIT BL
 	.FREE CR ;
+
+
+: countTo 
+    S" counting to" CT DUP . S"  ..." CT
+    1
+    BEGIN
+        2DUP < 
+        IF
+            S"  done." CT CR
+            2DROP LEAVE
+        THEN
+        1+ 
+    AGAIN ;
 
 sys-info
 99 STATE !

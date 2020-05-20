@@ -14,6 +14,7 @@ extern CELL arg1, arg2, arg3;
 
 extern CELL *RSP; // the return stack pointer
 extern CELL *DSP; // the data stack pointer
+extern CELL TOS; // The top of the stack
 
 extern bool isEmbedded;
 extern bool isBYE;

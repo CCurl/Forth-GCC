@@ -56,13 +56,15 @@ void Comma(CELL num)
 {
 	if ((0 <= HERE) && (HERE < LAST))
 	{
-		trace(", %04lx (%04lx)", num, HERE);
+		// printf(" , %04lx (%04lx)", num, HERE);
 		Store(HERE, num);
 		HERE += CELL_SZ;
 	}
 	else
 	{
-		printf("Comma(%04lx): out of memory!", num);
+		printf("Comma(%04lx): out of memory!\n", num);
+		printf("HERE = %04lx, LAST = %04lx\n", HERE, LAST);
+		exit(0);
 	}
 }
 
@@ -70,13 +72,15 @@ void CComma(BYTE num)
 {
 	if (HERE < LAST)
 	{
-		trace("C, %02lx (%04lx)", num, HERE);
+		// printf(" C, %02lx (%04lx)", num, HERE);
 		the_memory[HERE] = num;
 		HERE += 1;
 	}
 	else
 	{
-		printf("CComma(%02x): out of memory!", (int)num);
+		printf("CComma(%02x): out of memory!\n", (int)num);
+		printf("HERE = %04lx, LAST = %04lx\n", HERE, LAST);
+		exit(0);
 	}
 }
 
@@ -295,12 +299,14 @@ char *ParseWord(char *word, char *line)
 			debug("compiling into current word\n", dp->name, dp->XT, STATE);
 			if (dp->flags & IS_IMMEDIATE)
 			{
+				// printf("executing 0x%04lx ...", dp->XT);
 				ExecuteXT(dp->XT);
 			}
 			else if (dp->flags & IS_INLINE)
 			{
 				// Skip the DICTP instruction
 				CELL addr = dp->XT + 1 + CELL_SZ;
+				// printf("inlining 0x%04lx ...", dp->XT);
 
 				// Copy bytes until the first RET
 				while (true)
@@ -393,6 +399,7 @@ void ParseLine(char *line)
 	}
 }
 
+// : C, (HERE) @ C! (HERE) @ 1+ (HERE) ! ;
 CELL CComma_XT = 0;
 void generate_CComma()
 {
@@ -407,15 +414,14 @@ void generate_CComma()
 	CComma(CLITERAL);
 	CComma(ADDR_HERE);
 	CComma(FETCH);
-	CComma(CLITERAL);
-	CComma(1);
-	CComma(ADD);
+	CComma(INC);
 	CComma(CLITERAL);
 	CComma(ADDR_HERE);
 	CComma(STORE);
 	CComma(RET);
 }
 
+// : , (HERE) @ C! (HERE) @ CELL + (HERE) ! ;
 CELL Comma_XT = 0;
 void generate_Comma()
 {
@@ -510,6 +516,7 @@ void Compile(FILE *fp_in)
     {
 		string_rtrim(buf);
         ++line_no;
+		// printf("(%d) HERE = 0x%04lx\n", line_no, HERE);
         strcpy(line, buf);
         ParseLine(buf);
 		if (_QUIT_HIT == 1)
@@ -540,6 +547,7 @@ void do_compile()
 {
     printf("compiling from %s...\n", input_fn);
 	CompilerInit();
+	// return;
 
 	generate_constants();
 	generate_CComma();

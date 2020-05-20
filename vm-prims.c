@@ -5,18 +5,20 @@
 #include "logger.h"
 #include "forth-vm.h"
 
-static inline CELL GETTOS() { return *(DSP-1); }
-static inline CELL GET2ND() { return *(DSP-2); }
-static inline void SETTOS(CELL val) { *(DSP-1) = (val); }
-static inline void SET2ND(CELL val) { *(DSP-2) = (val); }
+
+static inline CELL GETTOS() { return TOS; }
+static inline CELL GET2ND() { return *(DSP); }
+static inline void SETTOS(CELL val) { TOS = (val); }
+static inline void SET2ND(CELL val) { *(DSP) = (val); }
 
 void (*vm_prims[257])();
 
 CELL arg1, arg2, arg3;
 
-extern CELL *RSP; // the return stack pointer
-extern CELL *DSP; // the data stack pointer
-extern CELL PC;
+extern CELL *RSP, rdepth;		// the return stack pointer
+extern CELL *DSP, depth;  		// the data stack pointer
+extern CELL TOS; 				// the top of stack
+extern CELL PC;					// The program counter
 extern CELL *rsp_init;
 extern CELL *dsp_init;
 
@@ -61,40 +63,70 @@ CELL stk_pop(CELL stack)
 }
 
 // The data stack starts at (MEM_SZ - STACKS_SZ) and grows upwards towards the return stack
-void push(CELL val)
+void overflow()
 {
-	// trace(" push(%ld, DSP=0x%08lx) ", val, DSP);
-	if (RSP <= DSP)
-	{
 		printf(" stack overflow!");
 		reset_vm();
 		// _QUIT_HIT = 1;
 		// isBYE = 1;
-		return;
-	}
-	*(DSP) = (CELL)(val);
-	++DSP;
 }
 
-CELL pop() 
+void underflow()
 {
-	if (DSP <= dsp_init)
-	{
 		printf(" stack underflow!");
 		reset_vm();
 		// _QUIT_HIT = 1;
 		// isBYE = 1;
-		return 0;
+}
+
+void push(CELL val)
+{
+	// trace(" push(%ld, DSP=0x%08lx) ", val, DSP);
+	if (depth > 63)
+	{
+		overflow();
 	}
-	DSP--;
-	// trace(" pop(%ld, DSP=0x%08lx) ", *(DSP), DSP);
-	return *(DSP);
+	else
+	{
+		++depth;
+		*(++DSP) = TOS;
+		TOS = val;
+	}
+}
+
+CELL pop() 
+{
+	CELL ret = TOS;
+	if (depth == 0)
+	{
+		underflow();
+	}
+	else
+	{
+		--depth;
+		TOS = *(DSP--);
+	}
+	return ret;
+}
+
+CELL drop() 
+{
+	if (depth > 0)
+	{
+		--depth;
+		TOS = *(DSP--);
+	}
+	else
+	{
+		underflow();
+	}
+	
 }
 
 // The return stack starts at (MEM_SZ) and grows downwards towards the data stack
 void rpush(CELL val)
 {
-	if (RSP <= DSP)
+	if (rdepth  > 63)
 	{
 		printf(" return stack overflow!");
 		reset_vm();
@@ -102,14 +134,15 @@ void rpush(CELL val)
 		// isBYE = 1;
 		return;
 	}
-	// trace(" rpush %ld ", val);
-	--RSP;
-	*(RSP) = (CELL)(val);
+
+	// printf(" rpush(%ld) ", val);
+	++rdepth;
+	*(--RSP) = (CELL)(val);
 }
 
 CELL rpop()
 {
-	if (RSP >= rsp_init)
+	if (rdepth == 0)
 	{
 		printf(" return stack underflow! (at PC=0x%04lx)", PC-1);
 		reset_vm();
@@ -117,10 +150,9 @@ CELL rpop()
 		// isBYE = 1;
 		return PC;
 	}
-	CELL val = *(RSP);
-	// trace(" rpop(%ld) ", val);
-	RSP++;
-	return val;
+	// printf(" rpop(%ld) ", *(RSP));
+	--rdepth;
+	return *(RSP++);
 }
 
 // LITERAL - Doeswhat
@@ -135,10 +167,8 @@ void prim_LITERAL()
 // FETCH - Doeswhat
 void prim_FETCH()
 {
-    arg1 = GETTOS();
-    arg2 = GETAT(arg1);
-	trace("FETCH (from 0x%04lx - %04lx)\n", arg1, arg2);
-    SETTOS(arg2);
+	// printf("FETCH (from 0x%04lx - %04lx)\n", TOS, GETAT(TOS));
+    TOS = GETAT(TOS);
 }
 
 // STORE - Doeswhat
@@ -146,16 +176,21 @@ void prim_STORE()
 {
     arg2 = pop();
     arg1 = pop();
-	trace("STORE (0x%04lx to 0x%04lx)\n", arg1, arg2);
+	// printf("STORE (0x%04lx to 0x%04lx)\n", arg1, arg2);
     SETAT(arg2, arg1);
 }
 
 // SWAP - Doeswhat
 void prim_SWAP()
 {
+	if (depth < 1)
+	{
+		underflow();
+		return;
+	}
     arg1 = GET2ND();
     arg2 = GETTOS();
-	trace("SWAP (%ld and %ld)\n", arg1, arg2);
+	// trace("SWAP (%ld and %ld)\n", arg1, arg2);
     SET2ND(arg2);
     SETTOS(arg1);
 }
@@ -163,25 +198,37 @@ void prim_SWAP()
 // DROP - Doeswhat
 void prim_DROP()
 {
-	trace("DROP\n");
-    arg1 = pop();
+	//trace("DROP\n");
+	if (depth)
+	{
+    	drop();
+	}
+	else
+	{
+		underflow();
+	}
 }
 
 // DUP - Doeswhat
 void prim_DUP()
 {
-	arg1 = GETTOS();
-	trace("DUP (%ld)\n", arg1);
-    push(arg1);
+	//trace("DUP (%ld)\n", arg1);
+	if (depth)
+	{
+    	push(TOS);
+	}
+	else
+	{
+		overflow();
+	}
 }
 
 // SLITERAL - Doeswhat
 void prim_SLITERAL()
 {
-	trace("SLITERAL\n");
-	arg1 = PC; // addr
+	// trace("SLITERAL\n");
 	arg2 = the_memory[PC]; // count-byte
-	push(arg1);
+	push(PC);
 	PC += (arg2 + 2); // +2 => count-byte and NULL-terminator
 }
 
@@ -189,40 +236,42 @@ void prim_SLITERAL()
 void prim_JMP()
 {
 	PC = GETAT(PC);
-	trace("JMP (to %04lx)\n", PC);
+	// trace("JMP (to %04lx)\n", PC);
 }
 
 // JMPZ - Doeswhat
 void prim_JMPZ()
 {
-	arg1 = pop();
-	arg2 = GETAT(PC);
-	trace("JMPZ (to %04lx)\n", arg2);
-	if (arg1 == 0)
-		PC = arg2;
+	if (TOS == 0)
+	{
+		PC = GETAT(PC);
+	}
 	else
+	{
 		PC += CELL_SZ;
+	}
+	drop();
 }
 
 // JMPNZ - Doeswhat
 void prim_JMPNZ()
 {
-	arg1 = pop();
-	arg2 = GETAT(PC);
-	trace("JMPNZ (to %04lx)\n", arg2);
-	if (arg1 != 0)
-		PC = arg2;
+	if (TOS != 0)
+	{
+		PC = GETAT(PC);
+	}
 	else
+	{
 		PC += CELL_SZ;
+	}
+	drop();
 }
 
 // CALL - Doeswhat
 void prim_CALL()
 {
-	arg1 = GETAT(PC);
-	trace("CALL %04lx\n", arg1);
 	rpush(PC+CELL_SZ);
-	PC = arg1;
+	PC = GETAT(PC);
 }
 
 // RET - Doeswhat
@@ -246,9 +295,8 @@ void prim_RET()
 void prim_OR()
 {
 	arg1 = pop();
-	arg2 = pop();
 	trace("OR (%04x & %04x)\n", arg1, arg2);
-	push(arg2 | arg1);
+	TOS = (TOS | arg1);
 }
 
 // CLITERAL - Doeswhat
@@ -262,10 +310,7 @@ void prim_CLITERAL()
 // CFETCH - Doeswhat
 void prim_CFETCH()
 {
-	arg1 = GETTOS();
-	arg2 = the_memory[arg1];
-	trace("CFETCH (from 0x%04lx, %ld)\n", arg1, arg2);
-	SETTOS(arg2);
+	TOS = the_memory[TOS];
 }
 
 // CSTORE - Doeswhat
@@ -273,7 +318,7 @@ void prim_CSTORE()
 {
 	arg1 = pop();
 	arg2 = pop();
-	trace("CSTORE (%ld to 0x%04lx)\n", arg2, arg1);
+	// printf("CSTORE (%ld to 0x%04lx)\n", arg2, arg1);
 	the_memory[arg1] = (BYTE)arg2;
 }
 
@@ -281,71 +326,60 @@ void prim_CSTORE()
 void prim_ADD()
 {
 	arg1 = pop();
-	arg2 = pop();
-	trace("ADD (%ld + %ld = %ld)\n", arg1, arg2, arg1+arg2);
-	push(arg2 + arg1);
+	TOS += arg1;
 }
 
 // SUB - Doeswhat
 void prim_SUB()
 {
 	arg1 = pop();
-	arg2 = pop();
-	trace("SUB (%ld - %ld = %ld)\n", arg1, arg2, arg2-arg1);
-	push(arg2 - arg1);
+	TOS -= arg1;
 }
 
 // MUL - Doeswhat
 void prim_MUL()
 {
-	arg2 = pop();
 	arg1 = pop();
-	trace("SUB (%ld * %ld = %ld)\n", arg1, arg2, arg1*arg2);
-	push(arg1 * arg2);
+	TOS *= arg1;
 }
 
 // DIV - Doeswhat
 void prim_DIV()
 {
-	arg1 = pop();
-	arg2 = pop();
-	if (arg1 == 0)
+	if (TOS == 0)
 	{
 		printf("Divide by 0!");
 		reset_vm();
 	}
 	else
 	{
-		trace("DIV\n");
-		push(arg2 / arg1);
+		arg1 = pop();
+		TOS /= arg1;
 	}
 }
 
 // LT - Doeswhat
 void prim_LT()
 {
-	trace("LT\n");
+	// trace("LT\n");
 	arg1 = pop();
-	arg2 = pop();
-	push(arg2 < arg1 ? 1 : 0);
+	TOS = (TOS < arg1) ? 1 : 0;
 }
 
 // EQ - Doeswhat
 void prim_EQ()
 {
-	trace("EQ\n");
+	// trace("EQ\n");
 	arg1 = pop();
-	arg2 = pop();
-	push(arg2 == arg1 ? 1 : 0);
+	TOS = (TOS == arg1) ? 1 : 0;
 }
 
 // GT - Doeswhat
 void prim_GT()
 {
-	trace("GT\n");
+	// trace("GT\n");
 	arg1 = pop();
-	arg2 = pop();
-	push(arg2 > arg1 ? 1 : 0);
+	TOS = (TOS > arg1) ? 1 : 0;
 }
 
 // DICTP - Doeswhat
@@ -353,8 +387,8 @@ void prim_DICTP()
 {
 	arg1 = GETAT(PC);
 	PC += CELL_SZ;
-	trace("DICTP %04lx", arg1);
-	trace(" ; %s\n", &(the_memory[arg1+10]));
+	//trace("DICTP %04lx", arg1);
+	//trace(" ; %s\n", &(the_memory[arg1+10]));
 }
 
 // EMIT - Doeswhat
@@ -368,9 +402,9 @@ void prim_EMIT()
 // OVER - Doeswhat
 void prim_OVER()
 {
-    arg1 = GET2ND();
-	trace("OVER (%ld)\n", arg1);
-    push(arg1);
+    // arg1 = GET2ND();
+	// trace("OVER (%ld)\n", arg1);
+    push(GET2ND());
 }
 
 // COMPARE - Doeswhat
@@ -476,17 +510,13 @@ void prim_FCLOSE()
 // DTOR - Doeswhat
 void prim_DTOR()
 {
-	arg1 = pop();
-	trace("DTOR (%d)\n", arg1);
-	rpush(arg1);
+	rpush(pop());
 }
 
 // RTOD - Doeswhat
 void prim_RTOD()
 {
-	trace("RTOD\n");
-	arg1 = rpop();
-	push(arg1);
+	push(rpop());
 }
 
 // LOGLEVEL - Doeswhat
@@ -494,46 +524,41 @@ void prim_LOGLEVEL()
 {
 	arg1 = pop();
 	__DEBUG__ = arg1;
-	printf("LOGLEVEL (set to %d)", arg1);
+	// printf("LOGLEVEL (set to %d)", arg1);
 }
 
 // AND - Doeswhat
 void prim_AND()
 {
 		arg1 = pop();
-		arg2 = pop();
-		trace("AND (%04x & %04x)\n", arg1, arg2);
-		push(arg2 & arg1);
+		TOS = (TOS & arg1);
 }
 
 // PICK - Doeswhat
 void prim_PICK()
 {
-	arg1 = pop() + 1;
-	arg2 = *(DSP - arg1);
-	push(arg2);
+	arg1 = TOS;
+	TOS = *(DSP - (arg1));
 	trace("PICK\n");
 }
 
 // DEPTH - Doeswhat
 void prim_DEPTH()
 {
-	arg1 = DSP - dsp_init;
-	trace("DEPTH (%ld)\n", arg1);
-	push(arg1);
+	//trace("DEPTH (%ld)\n", depth);
+	push(depth);
 }
 
 // GETCH - Doeswhat
 void prim_GETCH()
 {
-	arg1 = getch();
-	push(arg1);
+	push(getch());
 }
 
 // COMPAREI - Doeswhat
 void prim_COMPAREI()
 {
-	trace("COMPAREI\n");
+	//trace("COMPAREI\n");
 	arg2 = pop();
 	arg1 = pop();
 	{
@@ -575,6 +600,18 @@ void prim_USPOP()
 	trace("USPOP from stack [0x%04lx]\n", arg1);
 	arg2 = stk_pop(arg1);
 	push(arg2);
+}
+
+// INC - Doeswhat
+void prim_INC()
+{
+	++TOS;
+}
+
+// RDEPTH - Doeswhat
+void prim_RDEPTH()
+{
+	push(rdepth);
 }
 
 // BREAK - Doeswhat
@@ -642,6 +679,8 @@ void init_vm_vectors()
 	vm_prims[41] = prim_USINIT;
 	vm_prims[42] = prim_USPUSH;
 	vm_prims[43] = prim_USPOP;
+	vm_prims[44] = prim_INC;
+	vm_prims[45] = prim_RDEPTH;
 	// vm_prims[253] = prim_BREAK;
 	// vm_prims[254] = prim_RESET;
 	// vm_prims[255] = prim_BYE;

@@ -146,6 +146,18 @@ next-test: 10 pow-2 1024 p= \ 54
 
 \ wordsv
 
+: countTo 
+    " counting to" ct dup . "  ..." ct
+    1
+    begin 
+        2dup < 
+        if
+            "  done." ct cr
+            2drop leave
+        then 
+        1+ 
+    again ;
+
 : count-to
     " counting to" ct dup . "  ..." ct
     1
@@ -161,7 +173,10 @@ next-test: 10 pow-2 1024 p= \ 54
         1+ 
     again ;
 
-1024 dup * 16 * cr count-to
+\ 1000 dup * 500 * cr countTo
+\ 1000 dup * 100 * cr countTo
+1024 dup * 64 * cr countTo
+\ 1024 dup * 3 * cr count-to
 
 \ 20 .lastx
 CR test-results
