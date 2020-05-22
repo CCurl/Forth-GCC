@@ -146,48 +146,14 @@ next-test: 10 pow-2 1024 p= \ 54
 
 \ wordsv
 
-: countTo 
-    " counting to " ct dup . " ..." ct
-    1
-    begin 
-        2dup < 
-        if
-            "  done." ct cr
-            2drop leave
-        then 
-        1+ 
-    again ;
+: countTo1 1 begin 2dup < if 2drop leave then 1+ again ;
+: countTo2 begin 1- dup while drop ;
 
-: countTo2
-    begin 
-        1-
-        dup
-    while
-    drop ;
-
-: count-to
-    " counting to " ct dup . " ..." ct
-    1
-    begin 
-        2dup < 
-        if
-            "  done." ct cr
-            2drop leave
-        then 
-        >R >R 
-        R> R@ 2000000 mod 0= if R@ . then >R
-        R> R> 
-        1+ 
-    again ;
-
-\ 1000 dup * 500 * cr countTo
-\ 1000 dup * 100 * cr countTo
-\ 1024 dup * 64 * cr countTo
-
-: doit 1000 dup * 100 * countTo2 ;
-
-" running bench ... " ct start-timer doit elapsed cr
-\ 1024 dup * 3 * cr count-to
+: MIL 1000 dup * * ;
+: bench1 mil start-timer swap countTo1 elapsed ;
+: bench2 mil start-timer swap countTo2 elapsed ;
+: do-benches cr 1 . dup bench1 cr 2 . bench2 cr ;
+cr " Running benchmarks ..." ct 100 do-benches
 
 \ 20 .lastx
 CR test-results
