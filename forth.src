@@ -308,13 +308,15 @@ HEX : MEM_SZ 24 @ ; DECIMAL
 : SPACE 32 EMIT ;
 
 \ variable isNeg
-: isNeg [ LITERAL HERE CELL + 1+ , ] ; 0 , RET
-: .isNeg isNeg @ IF 45 EMIT THEN ;
-: <# 0 SWAP DUP 0 < IF NEGATE 1 ELSE 0 THEN isNeg ! ; \ ( u1 -- 0 u2 )
-: # BASE C@ /MOD SWAP 48 + DUP 57 > IF 7 + THEN SWAP ; \  ( u1 -- c u2 )
-: #S BEGIN # DUP 0= UNTIL ; \  ( u1 -- u2 )
+: #NEG [ LITERAL HERE CELL + 1+ , ] ; 0 , RET
+: #LEN [ LITERAL HERE CELL + 1+ , ] ; 0 , RET
+: <# #NEG OFF #LEN OFF DUP 0 < IF NEGATE #NEG ON THEN 0 SWAP ; \ ( u1 -- 0 u2 )
+: # BASE C@ /MOD SWAP 48 + DUP 57 > IF 7 + THEN #LEN ++ SWAP ; \  ( u1 -- c u2 )
+: #S BEGIN # DUP 0= UNTIL ;                  \  ( u1 -- u2 )
 : #> ;
-: (.) <# #S #> DROP .isNeg BEGIN EMIT DUP 0= UNTIL DROP ;
+: #P- DROP #NEG @ IF 45 EMIT THEN ;
+: #P #P- BEGIN EMIT DUP 0= UNTIL DROP ;      \ ( 0 ... n 0 -- )
+: (.) <# #S #> #P ;
 : . (.) SPACE ;
 
 HEX 
