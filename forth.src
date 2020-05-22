@@ -56,6 +56,7 @@
 : USPOP		[ 43 C, ] ; .INLINE
 : INC		[ 44 C, ] ; .INLINE
 : RDEPTH	[ 45 C, ] ; .INLINE
+: DEC		[ 46 C, ] ; .INLINE
 : BREAK		[ 253 C, ] ; .INLINE
 : RESET		[ 254 C, ] ; .INLINE
 : BYE		[ 255 C, ] ; .INLINE
@@ -114,7 +115,7 @@ HEX : MEM_SZ 24 @ ; DECIMAL
 : -ROT  SWAP >R SWAP R> ; INLINE
 
 : 1+ INC ; INLINE
-: 1- 1 - ; INLINE
+: 1- DEC ; INLINE
 
 : 2* 2 * ; INLINE 
 : 2/ 2 / ; INLINE
@@ -301,35 +302,19 @@ HEX : MEM_SZ 24 @ ; DECIMAL
 	AGAIN
 ;
 
-: MOD 2DUP / * - ;
+: MOD 2DUP / * - ;                \ ( n1 n2 -- r )
+: /MOD 2DUP / DUP >R * - R> ;     \ ( n1 n2 -- r q )
+: SPACE 32 EMIT ;
 
-: /MOD 2DUP / DUP >R * - R> SWAP ;     \ ( num1 num2 -- num3 mod )
-
-: (.)			\ ( num -- )
-	DUP 0 = 
-	IF
-		DROP 48 EMIT LEAVE
-	THEN
-	
-	DUP 0 < IF NEGATE 1 ELSE 0 THEN >R
-
-	0 SWAP
-	BEGIN
-		DUP
-		IF
-			BASE C@ /MOD
-			48 OVER 9 > IF 7 + THEN
-			+ SWAP
-		ELSE
-			\ spit out the string
-			DROP
-			R> IF 45 EMIT THEN
-			BEGIN DUP IF EMIT ELSE DROP LEAVE THEN AGAIN
-		THEN
-	AGAIN
-;
-
-: . BL (.) ;
+\ variable isNeg
+: isNeg [ LITERAL HERE CELL + 1+ , ] ; 0 , RET
+: .isNeg isNeg @ IF 45 EMIT THEN ;
+: <# 0 SWAP DUP 0 < IF NEGATE 1 ELSE 0 THEN isNeg ! ; \ ( u1 -- 0 u2 )
+: # BASE C@ /MOD SWAP 48 + DUP 57 > IF 7 + THEN SWAP ; \  ( u1 -- c u2 )
+: #S BEGIN # DUP 0= UNTIL ; \  ( u1 -- u2 )
+: #> ;
+: (.) <# #S #> DROP .isNeg BEGIN EMIT DUP 0= UNTIL DROP ;
+: . (.) SPACE ;
 
 HEX 
 : HEX.     BASE C@ SWAP HEX DUP 10 < IF 30 EMIT THEN (.) BASE C! ; 
@@ -345,14 +330,14 @@ DECIMAL
 	IF S" Stack underflow!" COUNT TYPE RESET THEN
 	DEPTH 0 =
 	IF 40 EMIT 237 EMIT 41 EMIT LEAVE THEN
-	40 EMIT
+	40 EMIT SPACE
 	DEPTH 1- >R
 	BEGIN 
 		R@ PICK . R@ 
 		IF
 			R> 1- >R
 		ELSE
-			RDROP BL 41 EMIT LEAVE
+			RDROP 41 EMIT LEAVE
 		THEN
 	AGAIN
 ;

@@ -614,6 +614,12 @@ void prim_RDEPTH()
 	push(rdepth);
 }
 
+// INC - Doeswhat
+void prim_DEC()
+{
+	--TOS;
+}
+
 // BREAK - Doeswhat
 void prim_BREAK()
 {
@@ -681,6 +687,7 @@ void init_vm_vectors()
 	vm_prims[43] = prim_USPOP;
 	vm_prims[44] = prim_INC;
 	vm_prims[45] = prim_RDEPTH;
+	vm_prims[46] = prim_DEC;
 	// vm_prims[253] = prim_BREAK;
 	// vm_prims[254] = prim_RESET;
 	// vm_prims[255] = prim_BYE;
