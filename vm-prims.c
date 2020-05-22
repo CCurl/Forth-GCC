@@ -1,3 +1,4 @@
+#include <winbase.h>
 #include <stdio.h>
 #include <memory.h>
 #include <conio.h>
@@ -620,6 +621,13 @@ void prim_DEC()
 	--TOS;
 }
 
+// GETTICK - Doeswhat
+void prim_GETTICK()
+{
+	arg1 = GetTickCount();
+	push(arg1);
+}
+
 // BREAK - Doeswhat
 void prim_BREAK()
 {
@@ -688,6 +696,7 @@ void init_vm_vectors()
 	vm_prims[44] = prim_INC;
 	vm_prims[45] = prim_RDEPTH;
 	vm_prims[46] = prim_DEC;
+	vm_prims[47] = prim_GETTICK;
 	// vm_prims[253] = prim_BREAK;
 	// vm_prims[254] = prim_RESET;
 	// vm_prims[255] = prim_BYE;

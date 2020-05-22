@@ -159,12 +159,10 @@ next-test: 10 pow-2 1024 p= \ 54
     again ;
 
 : countTo2
-    " counting to " ct dup . " ..." ct
     begin 
         1-
         dup
     while
-    "  done." ct cr
     drop ;
 
 : count-to
@@ -185,7 +183,10 @@ next-test: 10 pow-2 1024 p= \ 54
 \ 1000 dup * 500 * cr countTo
 \ 1000 dup * 100 * cr countTo
 \ 1024 dup * 64 * cr countTo
-1000 dup * 200 * cr countTo2
+
+: doit 1000 dup * 100 * countTo2 ;
+
+" running bench ... " ct start-timer doit elapsed cr
 \ 1024 dup * 3 * cr count-to
 
 \ 20 .lastx

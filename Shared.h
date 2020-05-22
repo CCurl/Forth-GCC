@@ -50,6 +50,7 @@
 #define INC        44	// 2C 
 #define RDEPTH     45	// 2D
 #define DEC        46	// 2E 
+#define GETTICK    47   // 2F
 #define BREAK     253	// FD
 #define RESET     254	// FE
 #define BYE       255	// FF

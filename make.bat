@@ -8,6 +8,7 @@ if "--%1%--" == "--ex--" goto make-ex
 if "--%1%--" == "--forth--" goto make-forth
 if "--%1%--" == "--nc--" goto make-nc
 if "--%1%--" == "--nd--" goto make-nd
+if "--%1%--" == "--br--" goto make-br
 goto unknown
 
 :make-fc
@@ -107,6 +108,12 @@ gcc -g -o tmp %c-files%
 strip -o %output%.exe -g -S -d -X tmp.exe
 del tmp.exe
 if "--%2%--" == "--1--" newfd
+goto done
+
+:make-br
+call make fc 1
+call make fd 1
+call make forth 1
 goto done
 
 :unknown

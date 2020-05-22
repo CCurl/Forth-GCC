@@ -57,6 +57,7 @@
 : INC		[ 44 C, ] ; .INLINE
 : RDEPTH	[ 45 C, ] ; .INLINE
 : DEC		[ 46 C, ] ; .INLINE
+: GETTICK	[ 47 C, ] ; .INLINE
 : BREAK		[ 253 C, ] ; .INLINE
 : RESET		[ 254 C, ] ; .INLINE
 : BYE		[ 255 C, ] ; .INLINE

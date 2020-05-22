@@ -151,3 +151,9 @@ decimal 64 ps stk-init
 	>R >R
 	2 *
 	R> R> 1+ again ;
+
+
+\ --------------------------------------------------------------------------------
+: start-timer gettick ;
+: .ms 1000 /mod . " seconds, " ct . " ms" ct ;
+: elapsed gettick swap - .ms ;

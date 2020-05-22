@@ -457,6 +457,14 @@ CELL dis_one(char *bytes, char *desc)
 		sprintf(desc, "RDEPTH");
 		return 0;
 
+	case DEC:
+		sprintf(desc, "DEC");
+		return 0;
+
+	case GETTICK:
+		sprintf(desc, "GETTICK");
+		return 0;
+
 	case BREAK:
 	// {
 	// 	arg1 = the_memory[ADDR_HERE];
