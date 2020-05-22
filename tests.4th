@@ -152,7 +152,9 @@ next-test: 10 pow-2 1024 p= \ 54
 : MIL 1000 dup * * ;
 : bench1 mil start-timer swap countTo1 elapsed ;
 : bench2 mil start-timer swap countTo2 elapsed ;
-: do-benches cr 1 . dup bench1 cr 2 . bench2 cr ;
+: do-benches 
+        cr " bench #1 " ct dup bench1 
+        cr " bench #2 " ct bench2 cr ;
 cr " Running benchmarks ..." ct 100 do-benches
 
 \ 20 .lastx

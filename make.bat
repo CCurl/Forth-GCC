@@ -122,6 +122,7 @@ echo.
 echo    fc - makes forth-compiler.exe
 echo    fd - makes forth-dis.exe
 echo    forth - makes forth.exe
+echo    br - builds and runs the above 3 programs
 echo    fb - builds the forth VM image from forth.src
 echo    ex - makes ex.exe (the stand-alone example)
 echo    nc - makes new-forth-compiler.exe
