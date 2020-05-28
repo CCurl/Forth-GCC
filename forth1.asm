@@ -362,7 +362,7 @@ dict_ENTRY fEMIT, fpWORD, 0, 4, "EMIT"
         pop ebx
         ret
 ; -----------------------------------------------------------------------------
-dict_ENTRY fpWORD, fWORDS, 0, 5, ".WORD"
+dict_ENTRY fpWORD, fWORDS, 0, 5, "WORDS"
         add ebx, 9
         call fCOUNT_XT
         jmp  fTYPE_XT
