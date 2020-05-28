@@ -18,8 +18,8 @@ variable passed
 : num-failed num-tests @ passed @ - ;
 
 : test-results
-    num-passed . "  tests passed," CT 
-    num-failed . "  failed." CT CR ;
+    num-passed . " tests passed, " CT 
+    num-failed . " failed." CT CR ;
 
 : passed?  ( status -- )
     dup 0= if 
@@ -154,8 +154,10 @@ next-test: 10 pow-2 1024 p= \ 54
 : bench2 mil start-timer swap countTo2 elapsed ;
 : do-benches 
         cr " bench #1 " ct dup bench1 
-        cr " bench #2 " ct bench2 cr ;
-cr " Running benchmarks ..." ct 100 do-benches
+        cr " bench #2 " ct bench2 ;
+
+cr " Running benchmarks ... " ct 200 dup MIL .
+do-benches cr
 
 \ 20 .lastx
 CR test-results

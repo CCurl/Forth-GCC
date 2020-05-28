@@ -77,7 +77,7 @@ void init_vm(int vm_size)
 CELL cpu_step()
 {
 	IR = the_memory[PC++];
-	trace("PC=%04lx, IR=%d - ", PC-1, (int)IR);
+	// trace("PC=%04lx, IR=%d - ", PC-1, (int)IR);
 	void (*f)() = vm_prims[IR];
 	if (f)
 	{
