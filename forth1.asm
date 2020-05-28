@@ -511,7 +511,7 @@ start:
         m_PUSH 'z'
         m_PUSH 'a'
         call fEMIT_XT
-        m_PUSH 500000000
+        m_PUSH 1000000000
         call fCOUNT_TO_XT
         call fEMIT_XT
 
