@@ -220,7 +220,7 @@ void prim_DUP()
 	}
 	else
 	{
-		overflow();
+		underflow();
 	}
 }
 
