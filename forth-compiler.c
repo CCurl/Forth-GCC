@@ -88,16 +88,16 @@ void SyncMem(bool isSet)
 {
 	if (isSet)
 	{
-		Store(ADDR_LAST, LAST);
-		Store(ADDR_HERE, HERE);
-		CStore(ADDR_BASE, BASE);
+		Store(ADDR_LAST,  LAST);
+		Store(ADDR_HERE,  HERE);
+		Store(ADDR_BASE,  BASE);
 		Store(ADDR_STATE, STATE);
 	}
 	else
 	{
-		LAST = Fetch(ADDR_LAST);
-		HERE = Fetch(ADDR_HERE);
-		BASE = CFetch(ADDR_BASE);
+		LAST  = Fetch(ADDR_LAST);
+		HERE  = Fetch(ADDR_HERE);
+		BASE  = Fetch(ADDR_BASE);
 		STATE = Fetch(ADDR_STATE);
 	}
 }
@@ -503,7 +503,7 @@ void CompilerInit()
 
 	Store(LAST, 0);
 	CStore(ADDR_CELL, CELL_SZ);
-	CStore(ADDR_BASE, BASE);
+	Store(ADDR_BASE, BASE);
 }
 
 void Compile(FILE *fp_in)

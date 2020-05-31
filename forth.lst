@@ -4,14 +4,14 @@
 ;
 0000: 08 35 11 00 00             ; JMP main (1135)
 ;
-0005: 00 0a 04
+0005: 00 00 04
 0008: 00000000 00000000
-0010: 0000138e 0000ef90 00000000 00000000
+0010: 0000138e 0000ef90 0000000a 00000000
 0020: 00000063 00010000 00000000 00000000
 0030: 00000000 00000000 00000000 00000000
 ;
 0040: 18 ed fd 00 00             ; DICTP BASE (fded)
-0045: 0e 06                      ; CLITERAL 6
+0045: 0e 18                      ; CLITERAL 24
 0047: 0c                         ; RET
 ;
 0048: 18 de fd 00 00             ; DICTP CELL (fdde)
@@ -357,26 +357,26 @@
 ;
 02bb: 18 cc f9 00 00             ; DICTP HEX (f9cc)
 02c0: 0e 10                      ; CLITERAL 16
-02c2: 0e 06                      ; CLITERAL 6
-02c4: 10                         ; CSTORE
+02c2: 0e 18                      ; CLITERAL 24
+02c4: 03                         ; STORE
 02c5: 0c                         ; RET
 ;
 02c6: 18 ba f9 00 00             ; DICTP DECIMAL (f9ba)
 02cb: 0e 0a                      ; CLITERAL 10
-02cd: 0e 06                      ; CLITERAL 6
-02cf: 10                         ; CSTORE
+02cd: 0e 18                      ; CLITERAL 24
+02cf: 03                         ; STORE
 02d0: 0c                         ; RET
 ;
 02d1: 18 aa f9 00 00             ; DICTP OCTAL (f9aa)
 02d6: 0e 08                      ; CLITERAL 8
-02d8: 0e 06                      ; CLITERAL 6
-02da: 10                         ; CSTORE
+02d8: 0e 18                      ; CLITERAL 24
+02da: 03                         ; STORE
 02db: 0c                         ; RET
 ;
 02dc: 18 99 f9 00 00             ; DICTP BINARY (f999)
 02e1: 0e 02                      ; CLITERAL 2
-02e3: 0e 06                      ; CLITERAL 6
-02e5: 10                         ; CSTORE
+02e3: 0e 18                      ; CLITERAL 24
+02e5: 03                         ; STORE
 02e6: 0c                         ; RET
 ;
 02e7: 18 8c f9 00 00             ; DICTP ON (f98c)
@@ -988,8 +988,8 @@
 07c0: 0c                         ; RET
 ;
 07c1: 18 64 f4 00 00             ; DICTP isHEX? (f464)
-07c6: 0e 06                      ; CLITERAL 6
-07c8: 0f                         ; CFETCH
+07c6: 0e 18                      ; CLITERAL 24
+07c8: 02                         ; FETCH
 07c9: 0e 10                      ; CLITERAL 16
 07cb: 16                         ; EQ
 07cc: 0c                         ; RET
@@ -1071,8 +1071,8 @@
 0877: 0b cd 07 00 00             ; CALL isNumChar? (07cd)
 087c: 09 8e 08 00 00             ; JMPZ 088e
 0881: 22                         ; RTOD
-0882: 0e 06                      ; CLITERAL 6
-0884: 0f                         ; CFETCH
+0882: 0e 18                      ; CLITERAL 24
+0884: 02                         ; FETCH
 0885: 13                         ; MUL
 0886: 11                         ; ADD
 0887: 21                         ; DTOR
@@ -1144,8 +1144,8 @@
 090f: 0c                         ; RET
 ;
 0910: 18 b8 f3 00 00             ; DICTP # (f3b8)
-0915: 0e 06                      ; CLITERAL 6
-0917: 0f                         ; CFETCH
+0915: 0e 18                      ; CLITERAL 24
+0917: 02                         ; FETCH
 0918: 0b a4 08 00 00             ; CALL /MOD (08a4)
 091d: 04                         ; SWAP
 091e: 0e 30                      ; CLITERAL 48
@@ -1204,8 +1204,8 @@
 09a7: 0c                         ; RET
 ;
 09a8: 18 5a f3 00 00             ; DICTP HEX. (f35a)
-09ad: 0e 06                      ; CLITERAL 6
-09af: 0f                         ; CFETCH
+09ad: 0e 18                      ; CLITERAL 24
+09af: 02                         ; FETCH
 09b0: 04                         ; SWAP
 09b1: 0b bb 02 00 00             ; CALL HEX (02bb)
 09b6: 06                         ; DUP
@@ -1215,28 +1215,28 @@
 09bf: 0e 30                      ; CLITERAL 48
 09c1: 19                         ; EMIT
 09c2: 0b 7e 09 00 00             ; CALL (.) (097e)
-09c7: 0e 06                      ; CLITERAL 6
-09c9: 10                         ; CSTORE
+09c7: 0e 18                      ; CLITERAL 24
+09c9: 03                         ; STORE
 09ca: 0c                         ; RET
 ;
 09cb: 18 47 f3 00 00             ; DICTP DECIMAL. (f347)
-09d0: 0e 06                      ; CLITERAL 6
-09d2: 0f                         ; CFETCH
+09d0: 0e 18                      ; CLITERAL 24
+09d2: 02                         ; FETCH
 09d3: 04                         ; SWAP
 09d4: 0b c6 02 00 00             ; CALL DECIMAL (02c6)
 09d9: 0b 7e 09 00 00             ; CALL (.) (097e)
-09de: 0e 06                      ; CLITERAL 6
-09e0: 10                         ; CSTORE
+09de: 0e 18                      ; CLITERAL 24
+09e0: 03                         ; STORE
 09e1: 0c                         ; RET
 ;
 09e2: 18 35 f3 00 00             ; DICTP BINARY. (f335)
-09e7: 0e 06                      ; CLITERAL 6
-09e9: 0f                         ; CFETCH
+09e7: 0e 18                      ; CLITERAL 24
+09e9: 02                         ; FETCH
 09ea: 04                         ; SWAP
 09eb: 0b dc 02 00 00             ; CALL BINARY (02dc)
 09f0: 0b 7e 09 00 00             ; CALL (.) (097e)
-09f5: 0e 06                      ; CLITERAL 6
-09f7: 10                         ; CSTORE
+09f5: 0e 18                      ; CLITERAL 24
+09f7: 03                         ; STORE
 09f8: 0c                         ; RET
 ;
 09f9: 18 27 f3 00 00             ; DICTP MIN (f327)

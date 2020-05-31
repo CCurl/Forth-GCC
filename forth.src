@@ -75,10 +75,10 @@
 : , HERE   ! HERE CELL + (HERE) ! ;
 : C, HERE C! HERE 1    + (HERE) ! ;
 
-: HEX     16 BASE C! ;
-: DECIMAL 10 BASE C! ;
-: OCTAL    8 BASE C! ;
-: BINARY   2 BASE C! ;
+: HEX     16 BASE ! ;
+: DECIMAL 10 BASE ! ;
+: OCTAL    8 BASE ! ;
+: BINARY   2 BASE ! ;
 
 : ON  1 SWAP ! ;
 : OFF 0 SWAP ! ;
@@ -263,7 +263,7 @@ HEX : MEM_SZ 24 @ ; DECIMAL
 	AGAIN
 ;
 
-: isHEX? BASE C@ 16 = ;
+: isHEX? BASE @ 16 = ;
 
 : isNumChar?						\ ( ch -- val bool )
 	DUP 48 57 BETWEEN IF 48 - 1 LEAVE THEN
@@ -295,7 +295,7 @@ HEX : MEM_SZ 24 @ ; DECIMAL
 
 		isNumChar? 
 		IF
-			R> BASE C@ * + >R
+			R> BASE @ * + >R
 			1+
 		ELSE
 			DROP R> 0 LEAVE
@@ -311,7 +311,7 @@ HEX : MEM_SZ 24 @ ; DECIMAL
 : #NEG [ LITERAL HERE CELL + 1+ , ] ; 0 , RET
 : #LEN [ LITERAL HERE CELL + 1+ , ] ; 0 , RET
 : <# #NEG OFF #LEN OFF DUP 0 < IF NEGATE #NEG ON THEN 0 SWAP ; \ ( u1 -- 0 u2 )
-: # BASE C@ /MOD SWAP 48 + DUP 57 > IF 7 + THEN #LEN ++ SWAP ; \  ( u1 -- c u2 )
+: # BASE @ /MOD SWAP 48 + DUP 57 > IF 7 + THEN #LEN ++ SWAP ; \  ( u1 -- c u2 )
 : #S BEGIN # DUP 0= UNTIL ;                  \  ( u1 -- u2 )
 : #> ;
 : #P- DROP #NEG @ IF 45 EMIT THEN ;
@@ -320,9 +320,9 @@ HEX : MEM_SZ 24 @ ; DECIMAL
 : . (.) SPACE ;
 
 HEX 
-: HEX.     BASE C@ SWAP HEX DUP 10 < IF 30 EMIT THEN (.) BASE C! ; 
-: DECIMAL. BASE C@ SWAP DECIMAL (.) BASE C! ;
-: BINARY.  BASE C@ SWAP BINARY  (.) BASE C! ;
+: HEX.     BASE @ SWAP HEX DUP 10 < IF 30 EMIT THEN (.) BASE ! ; 
+: DECIMAL. BASE @ SWAP DECIMAL (.) BASE ! ;
+: BINARY.  BASE @ SWAP BINARY  (.) BASE ! ;
 DECIMAL
 
 : MIN 2DUP > IF SWAP THEN DROP ; 

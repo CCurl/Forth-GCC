@@ -48,7 +48,7 @@
 	0 SWAP
 	BEGIN
 		DUP IF
-			BASE C@ /MOD 
+			BASE @ /MOD 
 			48 OVER 9 > IF 7 + THEN
 			+ SWAP
 		ELSE
@@ -59,13 +59,13 @@
 		THEN
 	AGAIN ;
 
-: DECIMAL 10 BASE C! ; 
-: HEX     16 BASE C! ;
+: DECIMAL 10 BASE ! ; 
+: HEX     16 BASE ! ;
 
 HEX
 : MEM_SZ 24 @ ;
-: H. BASE C@ SWAP HEX DUP 10 < IF 30 EMIT THEN (.) BASE C! ; 
-: D. BASE C@ SWAP DECIMAL (.) BASE C! ;
+: H. BASE @ SWAP HEX DUP 10 < IF 30 EMIT THEN (.) BASE ! ; 
+: D. BASE @ SWAP DECIMAL (.) BASE ! ;
 DECIMAL
 
 : . BL (.) ;

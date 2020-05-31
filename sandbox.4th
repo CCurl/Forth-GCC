@@ -105,10 +105,10 @@ variable rl
     DROP R> R> R> R> R> ;
 
 : posit? dup >posit 
-    base c@ >R
+    base @ >R
     hex .s
     binary .s 
-    R> base c! 
+    R> base ! 
     2drop 2drop 2drop ;
 
 \ s Fr eee ff ffff ffff
