@@ -473,7 +473,8 @@ void generate_RightBracket()
 
 void generate_constant(char *name, BYTE val)
 {
-	DefineWord(name, IS_INLINE);
+	// DefineWord(name, IS_INLINE);
+	DefineWord(name, 0);
 	CComma(DICTP);
 	Comma(LAST);
 	CComma(CLITERAL);
@@ -487,7 +488,7 @@ void generate_constants()
 	generate_constant("CELL", CELL_SZ);
 	generate_constant("(HERE)", ADDR_HERE);
 	generate_constant("(LAST)", ADDR_LAST);
-	generate_constant("INPUT-FP", 0x001C);
+	generate_constant("INPUT-FP", ADDR_INPUTFP);
 	generate_constant("STATE", ADDR_STATE);
 }
 
