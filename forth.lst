@@ -6,7 +6,7 @@
 ;
 0005: 00 00 00
 0008: 00000004 00000000
-0010: 0000138e 0000ef90 0000000a 00000000
+0010: 000013af 0000ef79 0000000a 00000000
 0020: 00000063 00010000 00000000 00000000
 0030: 00000000 00000000 00000000 00000000
 ;
@@ -2188,31 +2188,42 @@
 133b: 0c                         ; RET
 ;
 133c: 18 90 ef 00 00             ; DICTP countTo (ef90)
-1341: 07 0b 63 6f 75 6e 74 69 6e 67 20 74 6f 00 ; SLITERAL (1342) [counting to]
-134f: 0b 4e 05 00 00             ; CALL CT (054e)
-1354: 06                         ; DUP
-1355: 0b 98 09 00 00             ; CALL . (0998)
-135a: 07 04 20 2e 2e 2e 00       ; SLITERAL (135b) [ ...]
-1361: 0b 4e 05 00 00             ; CALL CT (054e)
-1366: 0e 01                      ; CLITERAL 1
-1368: 1a                         ; OVER
+1341: 07 0c 63 6f 75 6e 74 69 6e 67 20 74 6f 20 00 ; SLITERAL (1342) [counting to ]
+1350: 0b 4e 05 00 00             ; CALL CT (054e)
+1355: 06                         ; DUP
+1356: 0b 98 09 00 00             ; CALL . (0998)
+135b: 07 04 2e 2e 2e 20 00       ; SLITERAL (135c) [... ]
+1362: 0b 4e 05 00 00             ; CALL CT (054e)
+1367: 0e 01                      ; CLITERAL 1
 1369: 1a                         ; OVER
-136a: 15                         ; LT
-136b: 09 87 13 00 00             ; JMPZ 1387
-1370: 07 06 20 64 6f 6e 65 2e 00 ; SLITERAL (1371) [ done.]
-1379: 0b 4e 05 00 00             ; CALL CT (054e)
-137e: 0e 0d                      ; CLITERAL 13
-1380: 19                         ; EMIT
-1381: 0e 0a                      ; CLITERAL 10
-1383: 19                         ; EMIT
-1384: 05                         ; DROP
-1385: 05                         ; DROP
-1386: 0c                         ; RET
-1387: 2c                         ; INC
-1388: 08 68 13 00 00             ; JMP 1368
-138d: 0c                         ; RET
+136a: 1a                         ; OVER
+136b: 15                         ; LT
+136c: 09 74 13 00 00             ; JMPZ 1374
+1371: 05                         ; DROP
+1372: 05                         ; DROP
+1373: 0c                         ; RET
+1374: 2c                         ; INC
+1375: 08 69 13 00 00             ; JMP 1369
+137a: 0c                         ; RET
+;
+137b: 18 79 ef 00 00             ; DICTP countTo-FAST (ef79)
+1380: 07 0c 63 6f 75 6e 74 69 6e 67 20 74 6f 20 00 ; SLITERAL (1381) [counting to ]
+138f: 0b 4e 05 00 00             ; CALL CT (054e)
+1394: 06                         ; DUP
+1395: 0b 98 09 00 00             ; CALL . (0998)
+139a: 07 04 2e 2e 2e 20 00       ; SLITERAL (139b) [... ]
+13a1: 0b 4e 05 00 00             ; CALL CT (054e)
+13a6: 2e                         ; DEC
+13a7: 06                         ; DUP
+13a8: 0a a6 13 00 00             ; JMPNZ 13a6
+13ad: 05                         ; DROP
+13ae: 0c                         ; RET
 ;
 ; End of code, Dictionary:
+;
+ef79: 90 ef 00 00                ; countTo-FAST - (next: ef90 countTo)
+ef7d: 7b 13 00 00 00             ; XT=137b, flags=00
+ef82: 0c 63 6f 75 6e 74 54 6f 2d 46 41 53 54 00 ; 12, countTo-FAST
 ;
 ef90: a2 ef 00 00                ; countTo - (next: efa2 sys-info)
 ef94: 3c 13 00 00 00             ; XT=133c, flags=00

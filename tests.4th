@@ -150,14 +150,13 @@ next-test: 10 pow-2 1024 p= \ 54
 : countTo2 begin 1- dup while drop ;
 
 : MIL 1000 dup * * ;
-: bench1 mil start-timer swap countTo1 elapsed ;
-: bench2 mil start-timer swap countTo2 elapsed ;
+: bench1 start-timer swap countTo      elapsed ;
+: bench2 start-timer swap countTo-FAST elapsed ;
 : do-benches 
         cr " bench #1 " ct dup bench1 
-        cr " bench #2 " ct bench2 ;
+        cr " bench #2 " ct     bench2 ;
 
-cr " Running benchmarks ... " ct 200 dup MIL .
-do-benches cr
+cr " Running benchmarks ... " ct 200 MIL do-benches cr
 
 \ 20 .lastx
 CR test-results

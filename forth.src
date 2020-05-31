@@ -725,16 +725,23 @@ DECIMAL
 
 
 : countTo 
-    S" counting to" CT DUP . S"  ..." CT
+    S" counting to " CT DUP . S" ... " CT
     1
     BEGIN
         2DUP < 
         IF
-            S"  done." CT CR
             2DROP LEAVE
         THEN
         1+ 
     AGAIN ;
+
+: countTo-FAST
+    S" counting to " CT DUP . S" ... " CT
+    BEGIN
+		1-
+		DUP 
+	WHILE 
+    DROP ;
 
 sys-info
 99 STATE !
