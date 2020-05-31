@@ -782,7 +782,7 @@ void write_output_file()
 void CompilerInit()
 {
 	init_vm(MEM_SZ);
-	CStore(ADDR_CELL, CELL_SZ);
+	Store(ADDR_CELL, CELL_SZ);
 
 	HERE = 0x0040;
 	LAST = 0;

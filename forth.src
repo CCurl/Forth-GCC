@@ -8,7 +8,7 @@
 \ The compiler does these things ...
 \ - it generates the following word: C, , [ ] (LAST) (HERE) STATE BASE CELL INPUT-FP
 \
-\ NB: don't inline anything with a 12 in it ... that is RET
+\ NB: don't inline anything with a 12 (0x0C) in it ... that is RET
 \ -----------------------------------------------------------------------------------------------
 
 : LITERAL	   1 C,   ;

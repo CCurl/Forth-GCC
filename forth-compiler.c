@@ -502,7 +502,7 @@ void CompilerInit()
 	STATE = 0;
 
 	Store(LAST, 0);
-	CStore(ADDR_CELL, CELL_SZ);
+	Store(ADDR_CELL, CELL_SZ);
 	Store(ADDR_BASE, BASE);
 }
 

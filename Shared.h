@@ -94,10 +94,10 @@ typedef struct {
 #define STACK_BUF_CELLS 2
 #define STACK_BUF_SZ (STACK_BUF_CELLS * CELL_SZ)
 
-#define ADDR_BASE   0x18
-#define ADDR_CELL   0x07
+#define ADDR_CELL   0x08
 #define ADDR_HERE   0x10
 #define ADDR_LAST   0x14
+#define ADDR_BASE   0x18
 #define ADDR_STATE  0x20
 #define ADDR_MEM_SZ 0x24
 
