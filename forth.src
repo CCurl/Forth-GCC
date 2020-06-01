@@ -45,7 +45,7 @@
 : FCLOSE	[ 32 C, ] ; .INLINE
 : >R		[ 33 C, ] ; .INLINE
 : R>		[ 34 C, ] ; .INLINE
-: LOGLEVEL	[ 35 C, ]  ; .INLINE
+: LOGLEVEL	[ 35 C, ] ; .INLINE
 : AND		[ 36 C, ] ; .INLINE
 : PICK		[ 37 C, ] ; .INLINE
 : DEPTH		[ 38 C, ] ; .INLINE
@@ -69,12 +69,6 @@
 : FLAG_IMMEDIATE 1 ; INLINE
 : FLAG_INLINE    2 ; INLINE
 
-: LAST (LAST) @ ; INLINE
-: HERE (HERE) @ ; INLINE
-
-: , HERE   ! HERE CELL + (HERE) ! ;
-: C, HERE C! HERE 1    + (HERE) ! ;
-
 : HEX     16 BASE ! ;
 : DECIMAL 10 BASE ! ;
 : OCTAL    8 BASE ! ;
@@ -82,7 +76,6 @@
 
 : ON  1 SWAP ! ;
 : OFF 0 SWAP ! ;
-
 
 : ?COMPILING STATE @ ;
 : IF   ?COMPILING .IF JMPZ HERE 0 ,                  .THEN ; IMMEDIATE

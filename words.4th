@@ -1,9 +1,9 @@
 : \ 0 >IN @ ! ; IMMEDIATE
 
 5 5 + BASE C!
-: DECIMAL 10 BASE C! ;
-: HEX 16 BASE C! ;
-: BINARY 2 BASE C! ;
+\ : DECIMAL 10 BASE C! ;
+\ : HEX 16 BASE C! ;
+\ : BINARY 2 BASE C! ;
 
 : DECIMAL. BASE C@ SWAP DECIMAL (.) BASE C! ;
 : HEX.     BASE C@ SWAP HEX     (.) BASE C! ;
@@ -25,8 +25,6 @@
 : CRLF 13 EMIT 10 EMIT ; INLINE
 
 : ascii. DUP HEX. BL DUP DECIMAL. BL EMIT ;
-
-65 HEX.
 
 : ascii                         \ ( from to -- )
     2DUP < IF SWAP THEN 

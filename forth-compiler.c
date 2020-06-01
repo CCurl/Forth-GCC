@@ -399,7 +399,40 @@ void ParseLine(char *line)
 	}
 }
 
-// : C, (HERE) @ C! (HERE) @ 1+ (HERE) ! ;
+CELL XT_CELL;
+CELL XT_BASE;
+CELL XT_ADDR_HERE;
+CELL XT_ADDR_LAST;
+CELL XT_INPUTFP;
+CELL XT_STATE;
+
+CELL XT_HERE;
+void generate_HERE()
+{
+	DefineWord("HERE", 0);
+	XT_HERE = HERE;
+	CComma(DICTP);
+	Comma(LAST);
+	CComma(CALL);
+	Comma(XT_ADDR_HERE);
+	CComma(FETCH);
+	CComma(RET);
+}
+
+CELL XT_LAST;
+void generate_LAST()
+{
+	DefineWord("LAST", 0);
+	XT_LAST = HERE;
+	CComma(DICTP);
+	Comma(LAST);
+	CComma(CALL);
+	Comma(XT_ADDR_LAST);
+	CComma(FETCH);
+	CComma(RET);
+}
+
+// : C, HERE C! HERE 1+ (HERE) ! ;
 CELL CComma_XT = 0;
 void generate_CComma()
 {
@@ -407,21 +440,19 @@ void generate_CComma()
 	CComma_XT = HERE;
 	CComma(DICTP);
 	Comma(LAST);
-	CComma(CLITERAL);
-	CComma(ADDR_HERE);
-	CComma(FETCH);
+	CComma(CALL);
+	Comma(XT_HERE);
 	CComma(CSTORE);
-	CComma(CLITERAL);
-	CComma(ADDR_HERE);
-	CComma(FETCH);
+	CComma(CALL);
+	Comma(XT_HERE);
 	CComma(INC);
-	CComma(CLITERAL);
-	CComma(ADDR_HERE);
+	CComma(CALL);
+	Comma(XT_ADDR_HERE);
 	CComma(STORE);
 	CComma(RET);
 }
 
-// : , (HERE) @ C! (HERE) @ CELL + (HERE) ! ;
+// : , HERE C! HERE CELL + (HERE) ! ;
 CELL Comma_XT = 0;
 void generate_Comma()
 {
@@ -429,18 +460,16 @@ void generate_Comma()
 	Comma_XT = HERE;
 	CComma(DICTP);
 	Comma(LAST);
-	CComma(CLITERAL);
-	CComma(ADDR_HERE);
-	CComma(FETCH);
+	CComma(CALL);
+	Comma(XT_HERE);
 	CComma(STORE);
-	CComma(CLITERAL);
-	CComma(ADDR_HERE);
-	CComma(FETCH);
-	CComma(CLITERAL);
-	CComma(CELL_SZ);
+	CComma(CALL);
+	Comma(XT_HERE);
+	CComma(CALL);
+	Comma(XT_CELL);
 	CComma(ADD);
-	CComma(CLITERAL);
-	CComma(ADDR_HERE);
+	CComma(CALL);
+	Comma(XT_ADDR_HERE);
 	CComma(STORE);
 	CComma(RET);
 }
@@ -452,8 +481,8 @@ void generate_LeftBracket()
 	Comma(LAST);
 	CComma(CLITERAL);
 	CComma(0);
-	CComma(CLITERAL);
-	CComma(ADDR_STATE);
+	CComma(CALL);
+	Comma(XT_STATE);
 	CComma(STORE);
 	CComma(RET);
 }
@@ -465,31 +494,33 @@ void generate_RightBracket()
 	Comma(LAST);
 	CComma(CLITERAL);
 	CComma(1);
-	CComma(CLITERAL);
-	CComma(ADDR_STATE);
+	CComma(CALL);
+	Comma(XT_STATE);
 	CComma(STORE);
 	CComma(RET);
 }
 
-void generate_constant(char *name, BYTE val)
+CELL generate_constant(char *name, BYTE val)
 {
 	// DefineWord(name, IS_INLINE);
+	CELL ret = HERE;
 	DefineWord(name, 0);
 	CComma(DICTP);
 	Comma(LAST);
 	CComma(LITERAL);
 	Comma(val);
 	CComma(RET);
+	return ret;
 }
 
 void generate_constants()
 {
-	generate_constant("CELL", CELL_SZ);
-	generate_constant("BASE", ADDR_BASE);
-	generate_constant("(HERE)", ADDR_HERE);
-	generate_constant("(LAST)", ADDR_LAST);
-	generate_constant("INPUT-FP", ADDR_INPUTFP);
-	generate_constant("STATE", ADDR_STATE);
+	XT_CELL      = generate_constant("CELL",     CELL_SZ);
+	XT_BASE      = generate_constant("BASE",     ADDR_BASE);
+	XT_ADDR_HERE = generate_constant("(HERE)",   ADDR_HERE);
+	XT_ADDR_LAST = generate_constant("(LAST)",   ADDR_LAST);
+	XT_INPUTFP   = generate_constant("INPUT-FP", ADDR_INPUTFP);
+	XT_STATE     = generate_constant("STATE",    ADDR_STATE);
 }
 
 void CompilerInit()
@@ -551,6 +582,8 @@ void do_compile()
 	// return;
 
 	generate_constants();
+	generate_HERE();
+	generate_LAST();
 	generate_CComma();
 	generate_Comma();
 	generate_LeftBracket();

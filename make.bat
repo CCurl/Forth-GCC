@@ -184,6 +184,10 @@ echo    fb - builds the forth VM image from forth.src
 echo    ex - makes ex.exe (the stand-alone example)
 echo    nc - makes new-forth-compiler.exe
 echo    nd - makes new-forth-dis.exe
+echo    fa - makes forth-dis2.exe
+echo    fi - makes forth-disIT.exe
+echo    aa - makes NewForth.exe
+echo    st - makes forth-stc.exe
 echo.
 echo    NOTE: if arg2 is given it then runs the program
 
