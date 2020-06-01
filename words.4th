@@ -167,3 +167,38 @@ decimal 64 ps stk-init
 	>R >R
 	2 *
 	R> R> 1+ again ;
+
+
+\ --------------------------------------------------------------------------------
+
+\ real simple and stupid decimal words
+\ a decimal is a 2-cell thing ( integer fraction )
+
+\ usage: 123.45 543.21 should = 666.66
+\ 100 d.base !
+\ 12345 >d.b 54321 >d.b d.b+ d.b
+
+: .2 <# # # #> #P ;
+: .3 <# # # # #> #P ;
+: .4 <# # # # # #> #P ;
+: period 46 emit ;
+
+variable d.base 
+100 d.base !
+
+: >d.b d.base @ /mod swap ;
+: d.b swap (.) period d.base @ 
+     dup   100 = if drop .2 leave then
+     dup  1000 = if drop .3 leave then
+     dup 10000 = if drop .4 leave then
+     drop . ;
+: d.b> swap d.base @ * + ;
+: d.b>-2 d.b> -rot d.b> swap ;
+: d.b+ d.b>-2 + >d.b ;
+: d.b- d.b>-2 - >d.b ;
+: d.b* d.b>-2 * d.base @ / >d.b ;
+: d.b/ d.b> -rot d.b> d.base @ * swap / >d.b ;
+
+: start-timer gettick ;
+: .ms 1000 /mod (.) period . "  seconds" ct ;
+: elapsed gettick swap - .ms ;

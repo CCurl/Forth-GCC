@@ -17,7 +17,7 @@ char output_fn[256];
 FILE *input_fp = NULL;
 FILE *output_fp = NULL;
 
-BYTE BASE = 10, STATE = 0;
+CELL BASE = 10, STATE = 0;
 CELL ORG = 0x40;
 CELL HERE, LAST;
 
@@ -782,7 +782,7 @@ void write_output_file()
 void CompilerInit()
 {
 	init_vm(MEM_SZ);
-	CStore(ADDR_CELL, CELL_SZ);
+	Store(ADDR_CELL, CELL_SZ);
 
 	HERE = 0x0040;
 	LAST = 0;

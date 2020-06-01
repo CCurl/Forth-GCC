@@ -47,8 +47,10 @@
 #define USINIT     41	// 29 ( size addr -- )
 #define USPUSH     42	// 2A ( val addr -- )
 #define USPOP      43	// 2B ( addr -- val )
-#define INC        44   // 2C
-#define DEC        45   // 2D
+#define INC        44	// 2C 
+#define RDEPTH     45	// 2D
+#define DEC        46	// 2E 
+#define GETTICK    47   // 2F
 #define BREAK     253	// FD
 #define RESET     254	// FE
 #define BYE       255	// FF
@@ -92,12 +94,13 @@ typedef struct {
 #define STACK_BUF_CELLS 2
 #define STACK_BUF_SZ (STACK_BUF_CELLS * CELL_SZ)
 
-#define ADDR_CELL   0x08
-#define ADDR_BASE   0x0C
-#define ADDR_HERE   0x10
-#define ADDR_LAST   0x14
-#define ADDR_STATE  0x20
-#define ADDR_MEM_SZ 0x24
+#define ADDR_CELL     0x08
+#define ADDR_HERE     0x10
+#define ADDR_LAST     0x14
+#define ADDR_BASE     0x18
+#define ADDR_INPUTFP  0x1C
+#define ADDR_STATE    0x20
+#define ADDR_MEM_SZ   0x24
 
 #define ONE_KB (1024)
 #define ONE_MB (ONE_KB * ONE_KB)

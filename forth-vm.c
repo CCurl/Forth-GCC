@@ -12,8 +12,9 @@ long memory_size = 0;
 CELL PC = 0;		// The "program counter"
 BYTE IR = 0;		// The "instruction register"
 
-CELL *RSP = NULL;	// the return stack pointer
-CELL *DSP = NULL;	// the data stack pointer
+CELL *RSP = NULL, rdepth = 0;	// the return stack
+CELL *DSP = NULL, depth = 0;	// the data stack
+CELL TOS = 0;					// The top element on the stack
 
 CELL *dsp_init = NULL;
 CELL *rsp_init = NULL;
@@ -55,6 +56,8 @@ void reset_vm()
 	RSP = rsp_init;
 	DSP = dsp_init;
 	PC = 0;
+	depth = 0;
+	rdepth = 0;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -74,7 +77,7 @@ void init_vm(int vm_size)
 CELL cpu_step()
 {
 	IR = the_memory[PC++];
-	trace("PC=%04lx, IR=%d - ", PC-1, (int)IR);
+	// trace("PC=%04lx, IR=%d - ", PC-1, (int)IR);
 	void (*f)() = vm_prims[IR];
 	if (f)
 	{

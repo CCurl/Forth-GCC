@@ -18,8 +18,8 @@ variable passed
 : num-failed num-tests @ passed @ - ;
 
 : test-results
-    num-passed . "  tests passed," CT 
-    num-failed . "  failed." CT CR ;
+    num-passed . " tests passed, " CT 
+    num-failed . " failed." CT CR ;
 
 : passed?  ( status -- )
     dup 0= if 
@@ -146,22 +146,17 @@ next-test: 10 pow-2 1024 p= \ 54
 
 \ wordsv
 
-: count-to
-    " counting to" ct dup . "  ..." ct
-    1
-    begin 
-        2dup < 
-        if
-            "  done." ct cr
-            2drop leave
-        then 
-        >R >R 
-        R> R@ 2000000 mod 0= if R@ . then >R
-        R> R> 
-        1+ 
-    again ;
+: countTo1 1 begin 2dup < if 2drop leave then 1+ again ;
+: countTo2 begin 1- dup while drop ;
 
-1024 dup * 16 * cr count-to
+: MIL 1000 dup * * ;
+: bench1 start-timer swap countTo      elapsed ;
+: bench2 start-timer swap countTo-FAST elapsed ;
+: do-benches 
+        cr " bench #1 " ct dup bench1 
+        cr " bench #2 " ct     bench2 ;
+
+cr " Running benchmarks ... " ct 200 MIL do-benches cr
 
 \ 20 .lastx
 CR test-results

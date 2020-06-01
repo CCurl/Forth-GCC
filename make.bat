@@ -11,6 +11,7 @@ if "--%1%--" == "--nc--" goto make-nc
 if "--%1%--" == "--nd--" goto make-nd
 if "--%1%--" == "--aa--" goto make-aa
 if "--%1%--" == "--st--" goto make-st
+if "--%1%--" == "--br--" goto make-br
 goto unknown
 
 :make-fc
@@ -166,12 +167,19 @@ del tmp.exe
 if "--%2%--" == "--1--" newfd
 goto done
 
+:make-br
+call make fc 1
+call make fd 1
+call make forth 1
+goto done
+
 :unknown
 echo Unknown make. I know how to make these:
 echo.
 echo    fc - makes forth-compiler.exe
 echo    fd - makes forth-dis.exe
 echo    forth - makes forth.exe
+echo    br - builds and runs the above 3 programs
 echo    fb - builds the forth VM image from forth.src
 echo    ex - makes ex.exe (the stand-alone example)
 echo    nc - makes new-forth-compiler.exe
