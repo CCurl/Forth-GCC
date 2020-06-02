@@ -26,7 +26,7 @@ void dis_opcode(int opcode)
             arg1 = GETAT(PC);
             PC += CELL_SZ;
             line = make_codeU(NULL, "m_push %ld", arg1);
-            make_comment(line, "LITERAL");
+            // make_comment(line, "LITERAL");
             return;
 
         case FETCH:
@@ -160,19 +160,15 @@ void dis_opcode(int opcode)
             LAST_PC = 0;
             // return;
             {
+                char buf[256];
                 DICT_T *dict = (DICT_T *)&the_memory[arg1];
                 DICT_T *next = (dict->next > 0) ? (DICT_T *)&the_memory[dict->next] : NULL;
+                arg3 = (next && (next->next > 0)) ? next->XT : 0;
+                
                 new_line(0);
-                line = new_line(arg1);
-                line = make_codeU(line, "dd L%08lX", next ? dict->next : 0);
-                line = make_comment(line, "DICTP: (%04lX)", arg1);
-                line = make_comment(line, "NEXT");
-                line = make_tag(line);
-                line = make_codeU(NULL, "db %d", dict->flags);
-                line = make_comment(line, "FLAGS");
-                line = make_codeU(NULL, "db %d, '%s', 0", dict->len, dict->name);
-                line = make_comment(line, "WORD: %s", dict->name);
-                set_tag(dict->next, 0);
+                sprintf(buf, "dict_ENTRY L%04lX, L%04lX, %d, %d, \"%s\"", dict->XT, arg3, dict->flags, dict->len, dict->name);
+                line = make_codeU(NULL, "%s", buf);
+                // set_tag(dict->next, 0);
                 // set_tag(arg2, 0);
                 line = new_line(dict->XT);
                 make_tag(line);
@@ -262,6 +258,10 @@ void dis_opcode(int opcode)
 
         case INC:
             line = make_codeU(NULL, "m_onePlus");
+            return;
+
+        case GETTICK:
+            line = make_codeU(NULL, "call prim_GETTICK");
             return;
 
         case DEC:

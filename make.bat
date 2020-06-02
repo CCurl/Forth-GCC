@@ -86,13 +86,12 @@ forth -i:ex.bin
 goto done
 
 :make-aa
-set output=NewForth
-echo making %output% ...
-set inp-files=%output%.asm
-rem set options=-Xassembler -a=%output%.lst
-echo fasm %inp-files%
-fasm %inp-files%
-if "--%2%--" NEQ "----" NewForth
+set output=Forth-STC-dis
+set c-files=%output%.c Forth-STC-opcodes.c %output%-opcode.c forth-vm.c vm-prims.c logger.c
+echo gcc -g -o %output% %c-files%
+gcc -g -o %output% %c-files%
+if "--%2%--" == "----" goto done
+Forth-STC-dis -i:forth.bin -o:Forth-STC-Words.inc
 goto done
 
 REM Gen and build a subroutine-threaded version in ASSEMBLER

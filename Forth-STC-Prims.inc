@@ -375,6 +375,10 @@ prim_USPOP:                                     ; Implementation of USPOP
                m_getTOS edx
                m_setTOS eax
                ret
+
+prim_GETTICK:
+                ; TODO
+                ret
                
 prim_BREAK:                                     ; Implementation of BREAK
                ; TODO
