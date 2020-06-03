@@ -12,6 +12,15 @@ char output_fn[64];
 FILE *input_fp = NULL;
 FILE *output_fp = NULL;
 
+
+CELL ADDR_CELL     = 0x08;
+CELL ADDR_HERE     = 0x10;
+CELL ADDR_LAST     = 0x14;
+CELL ADDR_BASE     = 0x18;
+CELL ADDR_INPUTFP  = 0x1C;
+CELL ADDR_STATE    = 0x20;
+CELL ADDR_MEM_SZ   = 0x24;
+
 // ------------------------------------------------------------------------------------------
 void dis_range(CELL start, CELL end, char *bytes)
 {

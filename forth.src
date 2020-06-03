@@ -2,14 +2,26 @@
 \ This is the source code for the VM's boot loader.
 \ This file is compiled by forth-compiler.exe and an image of the VM's initial state is created.
 \ It then writes that image to a file specified by -i:<filename>. The default is forth.bin.
-\ It also disassembles that image, creating a listing file named by the -o arg, forth.asm.
-\ The image file is read by the VM when it boots.
-\
-\ The compiler does these things ...
-\ - it generates the following word: C, , [ ] (LAST) (HERE) STATE BASE CELL INPUT-FP
+\ The image file is read by the VM (forth.exe) when it boots.
 \
 \ NB: don't inline anything with a 12 (0x0C) in it ... that is RET
 \ -----------------------------------------------------------------------------------------------
+VARIABLE (HERE)
+VARIABLE (LAST)
+VARIABLE BASE
+VARIABLE STATE
+VARIABLE (MEM_SZ)
+
+: CELL 4 ;
+
+: HERE (HERE) .FETCH. ;
+: LAST (LAST) .FETCH. ;
+
+: C, HERE .CSTORE. HERE 1    .ADD. (HERE) .STORE. ;
+: ,  HERE .STORE.  HERE CELL .ADD. (HERE) .STORE. ;
+
+: [ 0 STATE .STORE. ; .IMMEDIATE
+: ] 1 STATE .STORE. ; .IMMEDIATE
 
 : LITERAL	   1 C,   ;
 : @			[  2 C, ] ; .INLINE
@@ -62,8 +74,8 @@
 : RESET		[ 254 C, ] ; .INLINE
 : BYE		[ 255 C, ] ; .INLINE
 
-: INLINE    (LAST) @ 2 CELL * + DUP C@ 2 OR SWAP C! ;
-: IMMEDIATE (LAST) @ 2 CELL * + DUP C@ 1 OR SWAP C! ;
+: INLINE    LAST 2 CELL * + DUP C@ 2 OR SWAP C! ;
+: IMMEDIATE LAST 2 CELL * + DUP C@ 1 OR SWAP C! ;
 : CELLS CELL * ; INLINE
 
 : FLAG_IMMEDIATE 1 ; INLINE
@@ -91,7 +103,7 @@
 : >IN      [ LITERAL HERE CELL + INC , ] ; 0 , RET
 : isNeg    [ LITERAL HERE CELL + INC , ] ; 0 , RET
 
-HEX : MEM_SZ 24 @ ; DECIMAL
+: MEM_SZ (MEM_SZ) @ ;
 
 : TRACE-ON  2 LOGLEVEL ; INLINE
 : TRACE-OFF 0 LOGLEVEL ; INLINE
@@ -489,6 +501,7 @@ DECIMAL
 	THEN
 ; 
 
+VARIABLE INPUT-FP
 : LoadingFromFile? INPUT-FP @ ;		\ ( -- bool ) 
 
 : getLineFromFile		\ ( addr sz fp -- )
@@ -737,4 +750,21 @@ DECIMAL
     DROP ;
 
 sys-info
+
+\ This is so that forth-dis behaves as it used to
+HEX
+	CELL   08 !
+	HERE   10 !
+	LAST   14 !
+	0A     18 ! \ BASE
+	0      20 ! \ STATE
+	MEM_SZ 24 !
+DECIMAL
 99 STATE !
+
+\ CELL ADDR_CELL     = 0x08;
+\ CELL ADDR_HERE     = 0x10;
+\ CELL ADDR_LAST     = 0x14;
+\ CELL ADDR_BASE     = 0x18;
+\ CELL ADDR_STATE    = 0x20;
+\ CELL ADDR_MEM_SZ   = 0x24;

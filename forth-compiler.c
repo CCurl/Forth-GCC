@@ -17,6 +17,13 @@ int mem_size_KB = 64;
 CELL HERE, LAST, STATE;
 CELL BASE = 10;
 
+CELL ADDR_CELL     = 0x08;
+CELL ADDR_HERE     = 0x10;
+CELL ADDR_LAST     = 0x14;
+CELL ADDR_BASE     = 0x18;
+CELL ADDR_STATE    = 0x20;
+CELL ADDR_MEM_SZ   = 0x24;
+
 extern int _QUIT_HIT;
 
 /*
@@ -92,6 +99,7 @@ void SyncMem(bool isSet)
 		Store(ADDR_HERE,  HERE);
 		Store(ADDR_BASE,  BASE);
 		Store(ADDR_STATE, STATE);
+		Store(ADDR_MEM_SZ, MEM_SZ);
 	}
 	else
 	{
@@ -228,6 +236,63 @@ char *ParseWord(char *word, char *line)
 		CComma(DICTP);
 		Comma(LAST);
 		STATE = 1;
+
+		return line;
+	}
+
+
+	if (string_equals(word, "VARIABLE"))
+	{
+		trace("\n");
+		line = GetWord(line, word);
+		DefineWord(word, 0);
+		CComma(DICTP);
+		Comma(LAST);
+		CComma(LITERAL);
+		Comma(HERE + 5);
+		CComma(RET);
+
+		if (strcmp(word, "(HERE)") == 0)
+			ADDR_HERE = HERE;
+
+		if (strcmp(word, "(LAST)") == 0)
+			ADDR_LAST = HERE;
+
+		if (strcmp(word, "BASE") == 0)
+			ADDR_BASE = HERE;
+
+		if (strcmp(word, "STATE") == 0)
+			ADDR_STATE = HERE;
+
+		if (strcmp(word, "(MEM_SZ)") == 0)
+			ADDR_MEM_SZ = HERE;
+
+		Comma(0);
+		SyncMem(true);
+		return line;
+	}
+
+	if (strcmp(word, ".FETCH.") == 0)
+	{
+		CComma(FETCH);
+		return line;
+	}
+
+	if (strcmp(word, ".STORE.") == 0)
+	{
+		CComma(STORE);
+		return line;
+	}
+
+	if (strcmp(word, ".CSTORE.") == 0)
+	{
+		CComma(CSTORE);
+		return line;
+	}
+
+	if (strcmp(word, ".ADD.") == 0)
+	{
+		CComma(ADD);
 		return line;
 	}
 
@@ -235,6 +300,13 @@ char *ParseWord(char *word, char *line)
 	{
 		DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
 		dp->flags |= IS_INLINE;
+		return line;
+	}
+
+	if (strcmp(word, ".IMMEDIATE") == 0)
+	{
+		DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
+		dp->flags |= IS_IMMEDIATE;
 		return line;
 	}
 
@@ -399,129 +471,6 @@ void ParseLine(char *line)
 	}
 }
 
-CELL XT_CELL;
-CELL XT_BASE;
-CELL XT_ADDR_HERE;
-CELL XT_ADDR_LAST;
-CELL XT_INPUTFP;
-CELL XT_STATE;
-
-CELL XT_HERE;
-void generate_HERE()
-{
-	DefineWord("HERE", 0);
-	XT_HERE = HERE;
-	CComma(DICTP);
-	Comma(LAST);
-	CComma(CALL);
-	Comma(XT_ADDR_HERE);
-	CComma(FETCH);
-	CComma(RET);
-}
-
-CELL XT_LAST;
-void generate_LAST()
-{
-	DefineWord("LAST", 0);
-	XT_LAST = HERE;
-	CComma(DICTP);
-	Comma(LAST);
-	CComma(CALL);
-	Comma(XT_ADDR_LAST);
-	CComma(FETCH);
-	CComma(RET);
-}
-
-// : C, HERE C! HERE 1+ (HERE) ! ;
-CELL CComma_XT = 0;
-void generate_CComma()
-{
-	DefineWord("C,", 0);
-	CComma_XT = HERE;
-	CComma(DICTP);
-	Comma(LAST);
-	CComma(CALL);
-	Comma(XT_HERE);
-	CComma(CSTORE);
-	CComma(CALL);
-	Comma(XT_HERE);
-	CComma(INC);
-	CComma(CALL);
-	Comma(XT_ADDR_HERE);
-	CComma(STORE);
-	CComma(RET);
-}
-
-// : , HERE C! HERE CELL + (HERE) ! ;
-CELL Comma_XT = 0;
-void generate_Comma()
-{
-	DefineWord(",", 0);
-	Comma_XT = HERE;
-	CComma(DICTP);
-	Comma(LAST);
-	CComma(CALL);
-	Comma(XT_HERE);
-	CComma(STORE);
-	CComma(CALL);
-	Comma(XT_HERE);
-	CComma(CALL);
-	Comma(XT_CELL);
-	CComma(ADD);
-	CComma(CALL);
-	Comma(XT_ADDR_HERE);
-	CComma(STORE);
-	CComma(RET);
-}
-
-void generate_LeftBracket()
-{
-	DefineWord("[", IS_IMMEDIATE);
-	CComma(DICTP);
-	Comma(LAST);
-	CComma(CLITERAL);
-	CComma(0);
-	CComma(CALL);
-	Comma(XT_STATE);
-	CComma(STORE);
-	CComma(RET);
-}
-
-void generate_RightBracket()
-{
-	DefineWord("]", IS_IMMEDIATE);
-	CComma(DICTP);
-	Comma(LAST);
-	CComma(CLITERAL);
-	CComma(1);
-	CComma(CALL);
-	Comma(XT_STATE);
-	CComma(STORE);
-	CComma(RET);
-}
-
-CELL generate_constant(char *name, BYTE val)
-{
-	// DefineWord(name, IS_INLINE);
-	CELL ret = HERE;
-	DefineWord(name, 0);
-	CComma(DICTP);
-	Comma(LAST);
-	CComma(LITERAL);
-	Comma(val);
-	CComma(RET);
-	return ret;
-}
-
-void generate_constants()
-{
-	XT_CELL      = generate_constant("CELL",     CELL_SZ);
-	XT_BASE      = generate_constant("BASE",     ADDR_BASE);
-	XT_ADDR_HERE = generate_constant("(HERE)",   ADDR_HERE);
-	XT_ADDR_LAST = generate_constant("(LAST)",   ADDR_LAST);
-	XT_INPUTFP   = generate_constant("INPUT-FP", ADDR_INPUTFP);
-	XT_STATE     = generate_constant("STATE",    ADDR_STATE);
-}
 
 void CompilerInit()
 {
@@ -580,14 +529,6 @@ void do_compile()
     printf("compiling from %s...\n", input_fn);
 	CompilerInit();
 	// return;
-
-	generate_constants();
-	generate_HERE();
-	generate_LAST();
-	generate_CComma();
-	generate_Comma();
-	generate_LeftBracket();
-	generate_RightBracket();
 
     input_fp = fopen(input_fn, "rt");
     if (!input_fp)

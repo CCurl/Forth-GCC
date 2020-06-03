@@ -1,6 +1,6 @@
 # Forth-GCC
 
-This is a simple implementation of Forth, written in C for GCC.
+This is a simple token-threaded (byte-code) implementation of Forth, written in C for GCC.
 
 Yes, I know ... ANOTHER Forth implementation. This one creates a "bare metal" Forth virtual machine. The goal of this project is to create a basic, easy to understand, and easily extendable implementation of a Forth virtual machine. To that end, the virtual CPU has less than 50 instructions, which make up the VM's opcodes. They are also the Forth system's primitives. See "Shared.h" for that list.
 

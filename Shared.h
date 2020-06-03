@@ -94,13 +94,12 @@ typedef struct {
 #define STACK_BUF_CELLS 2
 #define STACK_BUF_SZ (STACK_BUF_CELLS * CELL_SZ)
 
-#define ADDR_CELL     0x08
-#define ADDR_HERE     0x10
-#define ADDR_LAST     0x14
-#define ADDR_BASE     0x18
-#define ADDR_INPUTFP  0x1C
-#define ADDR_STATE    0x20
-#define ADDR_MEM_SZ   0x24
+extern CELL ADDR_CELL;     // 0x08
+extern CELL ADDR_HERE;     // 0x10
+extern CELL ADDR_LAST;     // 0x14
+extern CELL ADDR_BASE;     // 0x18
+extern CELL ADDR_STATE;    // 0x20
+extern CELL ADDR_MEM_SZ;   // 0x24
 
 #define ONE_KB (1024)
 #define ONE_MB (ONE_KB * ONE_KB)

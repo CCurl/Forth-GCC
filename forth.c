@@ -7,6 +7,8 @@
 #include "string.h"
 #include "logger.h"
 
+CELL ADDR_MEM_SZ   = 0x24;
+
 char input_fn[256];
 FILE *input_fp = NULL;
 

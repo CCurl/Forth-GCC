@@ -89,9 +89,9 @@ CELL cpu_step()
 	{
 	case BREAK:
 		{
-			arg1 = the_memory[ADDR_HERE];
-			arg2 = the_memory[ADDR_LAST];
-			arg3 = arg2 - arg1;
+			// arg1 = the_memory[ADDR_HERE];
+			// arg2 = the_memory[ADDR_LAST];
+			// arg3 = arg2 - arg1;
 		}
 		trace("BREAK\n");
 		isBYE = true;
