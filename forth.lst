@@ -2,25 +2,25 @@
 ; data-stack: fe00, grows up
 ; return-stack: fffc, grows down
 ;
-0000: 08 0b 12 00 00             ; JMP main (120b)
+0000: 08 a5 12 00 00             ; JMP main (12a5)
 ;
 0005: 00 00 00
 0008: 00000004 00000000
-0010: 000014a0 0000ef7f 0000000a 00000000
+0010: 0000153a 0000ef38 0000000a 00000000
 0020: 00000000 00010000 00000000 00000000
 0030: 00000000 00000000 00000000 00000000
 ;
 0040: 18 eb fd 00 00             ; DICTP (HERE) (fdeb)
 0045: 01 4b 00 00 00             ; LITERAL 75 (4b)
 004a: 0c                         ; RET
-004b: a0                         ; RESET
-004c: 14                         ; DIV
+004b: 3a                         ; RESET
+004c: 15                         ; LT
 004d: 00                         ; RESET
 004e: 00                         ; RESET
 004f: 18 da fd 00 00             ; DICTP (LAST) (fdda)
 0054: 01 5a 00 00 00             ; LITERAL 90 (5a)
 0059: 0c                         ; RET
-005a: 7f                         ; RESET
+005a: 38                         ; RESET
 005b: ef                         ; RESET
 005c: 00                         ; RESET
 005d: 00                         ; RESET
@@ -1182,1237 +1182,1298 @@
 0a03: 0b 10 09 00 00             ; CALL SPACE (0910)
 0a08: 0c                         ; RET
 ;
-0a09: 18 73 f3 00 00             ; DICTP HEX. (f373)
-0a0e: 0b 5e 00 00 00             ; CALL BASE (005e)
-0a13: 02                         ; FETCH
-0a14: 04                         ; SWAP
-0a15: 0b e4 02 00 00             ; CALL HEX (02e4)
-0a1a: 06                         ; DUP
-0a1b: 0e 10                      ; CLITERAL 16
-0a1d: 15                         ; LT
-0a1e: 09 26 0a 00 00             ; JMPZ 0a26
-0a23: 0e 30                      ; CLITERAL 48
-0a25: 19                         ; EMIT
-0a26: 0b df 09 00 00             ; CALL (.) (09df)
-0a2b: 0b 5e 00 00 00             ; CALL BASE (005e)
-0a30: 03                         ; STORE
-0a31: 0c                         ; RET
+0a09: 18 75 f3 00 00             ; DICTP .2 (f375)
+0a0e: 0b 39 09 00 00             ; CALL <# (0939)
+0a13: 0b 6e 09 00 00             ; CALL # (096e)
+0a18: 0b 6e 09 00 00             ; CALL # (096e)
+0a1d: 0b ae 09 00 00             ; CALL #> (09ae)
+0a22: 0b c9 09 00 00             ; CALL #P (09c9)
+0a27: 0c                         ; RET
 ;
-0a32: 18 60 f3 00 00             ; DICTP DECIMAL. (f360)
-0a37: 0b 5e 00 00 00             ; CALL BASE (005e)
-0a3c: 02                         ; FETCH
-0a3d: 04                         ; SWAP
-0a3e: 0b f2 02 00 00             ; CALL DECIMAL (02f2)
-0a43: 0b df 09 00 00             ; CALL (.) (09df)
-0a48: 0b 5e 00 00 00             ; CALL BASE (005e)
-0a4d: 03                         ; STORE
-0a4e: 0c                         ; RET
+0a28: 18 68 f3 00 00             ; DICTP .3 (f368)
+0a2d: 0b 39 09 00 00             ; CALL <# (0939)
+0a32: 0b 6e 09 00 00             ; CALL # (096e)
+0a37: 0b 6e 09 00 00             ; CALL # (096e)
+0a3c: 0b 6e 09 00 00             ; CALL # (096e)
+0a41: 0b ae 09 00 00             ; CALL #> (09ae)
+0a46: 0b c9 09 00 00             ; CALL #P (09c9)
+0a4b: 0c                         ; RET
 ;
-0a4f: 18 4e f3 00 00             ; DICTP BINARY. (f34e)
-0a54: 0b 5e 00 00 00             ; CALL BASE (005e)
-0a59: 02                         ; FETCH
-0a5a: 04                         ; SWAP
-0a5b: 0b 0e 03 00 00             ; CALL BINARY (030e)
-0a60: 0b df 09 00 00             ; CALL (.) (09df)
-0a65: 0b 5e 00 00 00             ; CALL BASE (005e)
-0a6a: 03                         ; STORE
-0a6b: 0c                         ; RET
+0a4c: 18 5b f3 00 00             ; DICTP .4 (f35b)
+0a51: 0b 39 09 00 00             ; CALL <# (0939)
+0a56: 0b 6e 09 00 00             ; CALL # (096e)
+0a5b: 0b 6e 09 00 00             ; CALL # (096e)
+0a60: 0b 6e 09 00 00             ; CALL # (096e)
+0a65: 0b 6e 09 00 00             ; CALL # (096e)
+0a6a: 0b ae 09 00 00             ; CALL #> (09ae)
+0a6f: 0b c9 09 00 00             ; CALL #P (09c9)
+0a74: 0c                         ; RET
 ;
-0a6c: 18 40 f3 00 00             ; DICTP MIN (f340)
-0a71: 1a                         ; OVER
-0a72: 1a                         ; OVER
-0a73: 17                         ; GT
-0a74: 09 7a 0a 00 00             ; JMPZ 0a7a
-0a79: 04                         ; SWAP
-0a7a: 05                         ; DROP
-0a7b: 0c                         ; RET
+0a75: 18 4c f3 00 00             ; DICTP HEX. (f34c)
+0a7a: 0b 5e 00 00 00             ; CALL BASE (005e)
+0a7f: 02                         ; FETCH
+0a80: 04                         ; SWAP
+0a81: 0b e4 02 00 00             ; CALL HEX (02e4)
+0a86: 0b df 09 00 00             ; CALL (.) (09df)
+0a8b: 0b 5e 00 00 00             ; CALL BASE (005e)
+0a90: 03                         ; STORE
+0a91: 0c                         ; RET
 ;
-0a7c: 18 32 f3 00 00             ; DICTP MAX (f332)
-0a81: 1a                         ; OVER
-0a82: 1a                         ; OVER
-0a83: 15                         ; LT
-0a84: 09 8a 0a 00 00             ; JMPZ 0a8a
-0a89: 04                         ; SWAP
-0a8a: 05                         ; DROP
-0a8b: 0c                         ; RET
+0a92: 18 3c f3 00 00             ; DICTP HEX.2 (f33c)
+0a97: 0b 5e 00 00 00             ; CALL BASE (005e)
+0a9c: 02                         ; FETCH
+0a9d: 04                         ; SWAP
+0a9e: 0b e4 02 00 00             ; CALL HEX (02e4)
+0aa3: 0b 09 0a 00 00             ; CALL .2 (0a09)
+0aa8: 0b 5e 00 00 00             ; CALL BASE (005e)
+0aad: 03                         ; STORE
+0aae: 0c                         ; RET
 ;
-0a8c: 18 25 f3 00 00             ; DICTP .S (f325)
-0a91: 0e 20                      ; CLITERAL 32
-0a93: 19                         ; EMIT
-0a94: 26                         ; DEPTH
-0a95: 0e 00                      ; CLITERAL 0
-0a97: 15                         ; LT
-0a98: 09 bb 0a 00 00             ; JMPZ 0abb
-0a9d: 07 10 53 74 61 63 6b 20 75 6e 64 65 72 66 6c 6f 77 21 00 ; SLITERAL (0a9e) [Stack underflow!]
-0ab0: 0b 69 05 00 00             ; CALL COUNT (0569)
-0ab5: 0b 73 05 00 00             ; CALL TYPE (0573)
-0aba: fe                         ; RESET
-0abb: 26                         ; DEPTH
-0abc: 0e 00                      ; CLITERAL 0
-0abe: 16                         ; EQ
-0abf: 09 ce 0a 00 00             ; JMPZ 0ace
-0ac4: 0e 28                      ; CLITERAL 40
-0ac6: 19                         ; EMIT
-0ac7: 0e ed                      ; CLITERAL 237
-0ac9: 19                         ; EMIT
-0aca: 0e 29                      ; CLITERAL 41
-0acc: 19                         ; EMIT
-0acd: 0c                         ; RET
-0ace: 0e 28                      ; CLITERAL 40
-0ad0: 19                         ; EMIT
-0ad1: 0b 10 09 00 00             ; CALL SPACE (0910)
-0ad6: 26                         ; DEPTH
-0ad7: 2e                         ; DEC
-0ad8: 21                         ; DTOR
-0ad9: 22                         ; RTOD
-0ada: 06                         ; DUP
-0adb: 21                         ; DTOR
-0adc: 25                         ; PICK
-0add: 0b f9 09 00 00             ; CALL . (09f9)
-0ae2: 22                         ; RTOD
-0ae3: 06                         ; DUP
-0ae4: 21                         ; DTOR
-0ae5: 09 f2 0a 00 00             ; JMPZ 0af2
-0aea: 22                         ; RTOD
-0aeb: 2e                         ; DEC
-0aec: 21                         ; DTOR
-0aed: 08 f8 0a 00 00             ; JMP 0af8
-0af2: 22                         ; RTOD
-0af3: 05                         ; DROP
-0af4: 0e 29                      ; CLITERAL 41
-0af6: 19                         ; EMIT
-0af7: 0c                         ; RET
-0af8: 08 d9 0a 00 00             ; JMP 0ad9
-0afd: 0c                         ; RET
+0aaf: 18 2c f3 00 00             ; DICTP HEX.4 (f32c)
+0ab4: 0b 5e 00 00 00             ; CALL BASE (005e)
+0ab9: 02                         ; FETCH
+0aba: 04                         ; SWAP
+0abb: 0b e4 02 00 00             ; CALL HEX (02e4)
+0ac0: 0b 4c 0a 00 00             ; CALL .4 (0a4c)
+0ac5: 0b 5e 00 00 00             ; CALL BASE (005e)
+0aca: 03                         ; STORE
+0acb: 0c                         ; RET
 ;
-0afe: 18 11 f3 00 00             ; DICTP .(MEM_SZ) (f311)
-0b03: 07 08 4d 65 6d 6f 72 79 3a 20 00 ; SLITERAL (0b04) [Memory: ]
-0b0e: 0b 93 05 00 00             ; CALL CT (0593)
-0b13: 0b 35 04 00 00             ; CALL MEM_SZ (0435)
-0b18: 06                         ; DUP
-0b19: 0b 09 0a 00 00             ; CALL HEX. (0a09)
-0b1e: 07 02 20 28 00             ; SLITERAL (0b1f) [ (]
-0b23: 0b 93 05 00 00             ; CALL CT (0593)
-0b28: 0b df 09 00 00             ; CALL (.) (09df)
-0b2d: 07 01 29 00                ; SLITERAL (0b2e) [)]
-0b31: 0b 93 05 00 00             ; CALL CT (0593)
-0b36: 0c                         ; RET
+0acc: 18 19 f3 00 00             ; DICTP DECIMAL. (f319)
+0ad1: 0b 5e 00 00 00             ; CALL BASE (005e)
+0ad6: 02                         ; FETCH
+0ad7: 04                         ; SWAP
+0ad8: 0b f2 02 00 00             ; CALL DECIMAL (02f2)
+0add: 0b df 09 00 00             ; CALL (.) (09df)
+0ae2: 0b 5e 00 00 00             ; CALL BASE (005e)
+0ae7: 03                         ; STORE
+0ae8: 0c                         ; RET
 ;
-0b37: 18 ff f2 00 00             ; DICTP .(HERE) (f2ff)
-0b3c: 07 06 48 45 52 45 3a 20 00 ; SLITERAL (0b3d) [HERE: ]
-0b45: 0b 93 05 00 00             ; CALL CT (0593)
-0b4a: 0b 93 00 00 00             ; CALL HERE (0093)
-0b4f: 06                         ; DUP
-0b50: 0b 09 0a 00 00             ; CALL HEX. (0a09)
-0b55: 07 02 20 28 00             ; SLITERAL (0b56) [ (]
-0b5a: 0b 93 05 00 00             ; CALL CT (0593)
-0b5f: 0b df 09 00 00             ; CALL (.) (09df)
-0b64: 07 01 29 00                ; SLITERAL (0b65) [)]
-0b68: 0b 93 05 00 00             ; CALL CT (0593)
-0b6d: 0c                         ; RET
+0ae9: 18 07 f3 00 00             ; DICTP BINARY. (f307)
+0aee: 0b 5e 00 00 00             ; CALL BASE (005e)
+0af3: 02                         ; FETCH
+0af4: 04                         ; SWAP
+0af5: 0b 0e 03 00 00             ; CALL BINARY (030e)
+0afa: 0b df 09 00 00             ; CALL (.) (09df)
+0aff: 0b 5e 00 00 00             ; CALL BASE (005e)
+0b04: 03                         ; STORE
+0b05: 0c                         ; RET
 ;
-0b6e: 18 ed f2 00 00             ; DICTP .(LAST) (f2ed)
-0b73: 07 06 4c 41 53 54 3a 20 00 ; SLITERAL (0b74) [LAST: ]
-0b7c: 0b 93 05 00 00             ; CALL CT (0593)
-0b81: 0b 9f 00 00 00             ; CALL LAST (009f)
-0b86: 06                         ; DUP
-0b87: 0b 09 0a 00 00             ; CALL HEX. (0a09)
-0b8c: 07 02 20 28 00             ; SLITERAL (0b8d) [ (]
-0b91: 0b 93 05 00 00             ; CALL CT (0593)
-0b96: 0b df 09 00 00             ; CALL (.) (09df)
-0b9b: 07 01 29 00                ; SLITERAL (0b9c) [)]
-0b9f: 0b 93 05 00 00             ; CALL CT (0593)
-0ba4: 0c                         ; RET
+0b06: 18 f9 f2 00 00             ; DICTP MIN (f2f9)
+0b0b: 1a                         ; OVER
+0b0c: 1a                         ; OVER
+0b0d: 17                         ; GT
+0b0e: 09 14 0b 00 00             ; JMPZ 0b14
+0b13: 04                         ; SWAP
+0b14: 05                         ; DROP
+0b15: 0c                         ; RET
 ;
-0ba5: 18 d7 f2 00 00             ; DICTP .WORD-SHORT (f2d7)
-0baa: 06                         ; DUP
-0bab: 0b 23 07 00 00             ; CALL DICT>NAME (0723)
-0bb0: 0b 93 05 00 00             ; CALL CT (0593)
-0bb5: 0e 20                      ; CLITERAL 32
-0bb7: 19                         ; EMIT
-0bb8: 02                         ; FETCH
-0bb9: 0c                         ; RET
+0b16: 18 eb f2 00 00             ; DICTP MAX (f2eb)
+0b1b: 1a                         ; OVER
+0b1c: 1a                         ; OVER
+0b1d: 15                         ; LT
+0b1e: 09 24 0b 00 00             ; JMPZ 0b24
+0b23: 04                         ; SWAP
+0b24: 05                         ; DROP
+0b25: 0c                         ; RET
 ;
-0bba: 18 c7 f2 00 00             ; DICTP WORDS (f2c7)
-0bbf: 0b 9f 00 00 00             ; CALL LAST (009f)
-0bc4: 06                         ; DUP
-0bc5: 02                         ; FETCH
-0bc6: 0e 00                      ; CLITERAL 0
-0bc8: 16                         ; EQ
-0bc9: 09 d6 0b 00 00             ; JMPZ 0bd6
-0bce: 05                         ; DROP
-0bcf: 0e 0d                      ; CLITERAL 13
-0bd1: 19                         ; EMIT
-0bd2: 0e 0a                      ; CLITERAL 10
-0bd4: 19                         ; EMIT
-0bd5: 0c                         ; RET
-0bd6: 0b a5 0b 00 00             ; CALL .WORD-SHORT (0ba5)
-0bdb: 08 c4 0b 00 00             ; JMP 0bc4
-0be0: 0c                         ; RET
+0b26: 18 de f2 00 00             ; DICTP .S (f2de)
+0b2b: 0e 20                      ; CLITERAL 32
+0b2d: 19                         ; EMIT
+0b2e: 26                         ; DEPTH
+0b2f: 0e 00                      ; CLITERAL 0
+0b31: 15                         ; LT
+0b32: 09 55 0b 00 00             ; JMPZ 0b55
+0b37: 07 10 53 74 61 63 6b 20 75 6e 64 65 72 66 6c 6f 77 21 00 ; SLITERAL (0b38) [Stack underflow!]
+0b4a: 0b 69 05 00 00             ; CALL COUNT (0569)
+0b4f: 0b 73 05 00 00             ; CALL TYPE (0573)
+0b54: fe                         ; RESET
+0b55: 26                         ; DEPTH
+0b56: 0e 00                      ; CLITERAL 0
+0b58: 16                         ; EQ
+0b59: 09 68 0b 00 00             ; JMPZ 0b68
+0b5e: 0e 28                      ; CLITERAL 40
+0b60: 19                         ; EMIT
+0b61: 0e ed                      ; CLITERAL 237
+0b63: 19                         ; EMIT
+0b64: 0e 29                      ; CLITERAL 41
+0b66: 19                         ; EMIT
+0b67: 0c                         ; RET
+0b68: 0e 28                      ; CLITERAL 40
+0b6a: 19                         ; EMIT
+0b6b: 0b 10 09 00 00             ; CALL SPACE (0910)
+0b70: 26                         ; DEPTH
+0b71: 2e                         ; DEC
+0b72: 21                         ; DTOR
+0b73: 22                         ; RTOD
+0b74: 06                         ; DUP
+0b75: 21                         ; DTOR
+0b76: 25                         ; PICK
+0b77: 0b f9 09 00 00             ; CALL . (09f9)
+0b7c: 22                         ; RTOD
+0b7d: 06                         ; DUP
+0b7e: 21                         ; DTOR
+0b7f: 09 8c 0b 00 00             ; JMPZ 0b8c
+0b84: 22                         ; RTOD
+0b85: 2e                         ; DEC
+0b86: 21                         ; DTOR
+0b87: 08 92 0b 00 00             ; JMP 0b92
+0b8c: 22                         ; RTOD
+0b8d: 05                         ; DROP
+0b8e: 0e 29                      ; CLITERAL 41
+0b90: 19                         ; EMIT
+0b91: 0c                         ; RET
+0b92: 08 73 0b 00 00             ; JMP 0b73
+0b97: 0c                         ; RET
 ;
-0be1: 18 b2 f2 00 00             ; DICTP .WORD-LONG (f2b2)
-0be6: 06                         ; DUP
-0be7: 0b 09 0a 00 00             ; CALL HEX. (0a09)
-0bec: 0e 3a                      ; CLITERAL 58
-0bee: 19                         ; EMIT
-0bef: 0e 20                      ; CLITERAL 32
-0bf1: 19                         ; EMIT
-0bf2: 06                         ; DUP
-0bf3: 0b 23 07 00 00             ; CALL DICT>NAME (0723)
-0bf8: 0b 93 05 00 00             ; CALL CT (0593)
-0bfd: 0e 20                      ; CLITERAL 32
-0bff: 19                         ; EMIT
-0c00: 06                         ; DUP
-0c01: 0b 60 07 00 00             ; CALL DICT.GetXT (0760)
-0c06: 0e 28                      ; CLITERAL 40
-0c08: 19                         ; EMIT
-0c09: 0b 09 0a 00 00             ; CALL HEX. (0a09)
-0c0e: 0e 29                      ; CLITERAL 41
-0c10: 19                         ; EMIT
-0c11: 06                         ; DUP
-0c12: 0b 14 07 00 00             ; CALL DICT>FLAGS (0714)
-0c17: 0f                         ; CFETCH
-0c18: 06                         ; DUP
-0c19: 07 09 2c 20 46 6c 61 67 73 3a 20 00 ; SLITERAL (0c1a) [, Flags: ]
-0c25: 0b 93 05 00 00             ; CALL CT (0593)
-0c2a: 0b 09 0a 00 00             ; CALL HEX. (0a09)
-0c2f: 06                         ; DUP
-0c30: 0b a7 07 00 00             ; CALL FLAGS.ISINLINE? (07a7)
-0c35: 09 4b 0c 00 00             ; JMPZ 0c4b
-0c3a: 07 09 20 28 49 4e 4c 49 4e 45 29 00 ; SLITERAL (0c3b) [ (INLINE)]
-0c46: 0b 93 05 00 00             ; CALL CT (0593)
-0c4b: 0b 9e 07 00 00             ; CALL FLAGS.ISIMMEDIATE? (079e)
-0c50: 09 69 0c 00 00             ; JMPZ 0c69
-0c55: 07 0c 20 28 49 4d 4d 45 44 49 41 54 45 29 00 ; SLITERAL (0c56) [ (IMMEDIATE)]
-0c64: 0b 93 05 00 00             ; CALL CT (0593)
+0b98: 18 ca f2 00 00             ; DICTP .(MEM_SZ) (f2ca)
+0b9d: 07 08 4d 65 6d 6f 72 79 3a 20 00 ; SLITERAL (0b9e) [Memory: ]
+0ba8: 0b 93 05 00 00             ; CALL CT (0593)
+0bad: 0b 35 04 00 00             ; CALL MEM_SZ (0435)
+0bb2: 06                         ; DUP
+0bb3: 0b 75 0a 00 00             ; CALL HEX. (0a75)
+0bb8: 07 02 20 28 00             ; SLITERAL (0bb9) [ (]
+0bbd: 0b 93 05 00 00             ; CALL CT (0593)
+0bc2: 0b df 09 00 00             ; CALL (.) (09df)
+0bc7: 07 01 29 00                ; SLITERAL (0bc8) [)]
+0bcb: 0b 93 05 00 00             ; CALL CT (0593)
+0bd0: 0c                         ; RET
+;
+0bd1: 18 b8 f2 00 00             ; DICTP .(HERE) (f2b8)
+0bd6: 07 06 48 45 52 45 3a 20 00 ; SLITERAL (0bd7) [HERE: ]
+0bdf: 0b 93 05 00 00             ; CALL CT (0593)
+0be4: 0b 93 00 00 00             ; CALL HERE (0093)
+0be9: 06                         ; DUP
+0bea: 0b 75 0a 00 00             ; CALL HEX. (0a75)
+0bef: 07 02 20 28 00             ; SLITERAL (0bf0) [ (]
+0bf4: 0b 93 05 00 00             ; CALL CT (0593)
+0bf9: 0b df 09 00 00             ; CALL (.) (09df)
+0bfe: 07 01 29 00                ; SLITERAL (0bff) [)]
+0c02: 0b 93 05 00 00             ; CALL CT (0593)
+0c07: 0c                         ; RET
+;
+0c08: 18 a6 f2 00 00             ; DICTP .(LAST) (f2a6)
+0c0d: 07 06 4c 41 53 54 3a 20 00 ; SLITERAL (0c0e) [LAST: ]
+0c16: 0b 93 05 00 00             ; CALL CT (0593)
+0c1b: 0b 9f 00 00 00             ; CALL LAST (009f)
+0c20: 06                         ; DUP
+0c21: 0b 75 0a 00 00             ; CALL HEX. (0a75)
+0c26: 07 02 20 28 00             ; SLITERAL (0c27) [ (]
+0c2b: 0b 93 05 00 00             ; CALL CT (0593)
+0c30: 0b df 09 00 00             ; CALL (.) (09df)
+0c35: 07 01 29 00                ; SLITERAL (0c36) [)]
+0c39: 0b 93 05 00 00             ; CALL CT (0593)
+0c3e: 0c                         ; RET
+;
+0c3f: 18 90 f2 00 00             ; DICTP .WORD-SHORT (f290)
+0c44: 06                         ; DUP
+0c45: 0b 23 07 00 00             ; CALL DICT>NAME (0723)
+0c4a: 0b 93 05 00 00             ; CALL CT (0593)
+0c4f: 0e 20                      ; CLITERAL 32
+0c51: 19                         ; EMIT
+0c52: 02                         ; FETCH
+0c53: 0c                         ; RET
+;
+0c54: 18 80 f2 00 00             ; DICTP WORDS (f280)
+0c59: 0b 9f 00 00 00             ; CALL LAST (009f)
+0c5e: 06                         ; DUP
+0c5f: 02                         ; FETCH
+0c60: 0e 00                      ; CLITERAL 0
+0c62: 16                         ; EQ
+0c63: 09 70 0c 00 00             ; JMPZ 0c70
+0c68: 05                         ; DROP
 0c69: 0e 0d                      ; CLITERAL 13
 0c6b: 19                         ; EMIT
 0c6c: 0e 0a                      ; CLITERAL 10
 0c6e: 19                         ; EMIT
-0c6f: 02                         ; FETCH
-0c70: 0c                         ; RET
+0c6f: 0c                         ; RET
+0c70: 0b 3f 0c 00 00             ; CALL .WORD-SHORT (0c3f)
+0c75: 08 5e 0c 00 00             ; JMP 0c5e
+0c7a: 0c                         ; RET
 ;
-0c71: 18 a1 f2 00 00             ; DICTP WORDSV (f2a1)
-0c76: 0b 6e 0b 00 00             ; CALL .(LAST) (0b6e)
-0c7b: 0e 0d                      ; CLITERAL 13
-0c7d: 19                         ; EMIT
-0c7e: 0e 0a                      ; CLITERAL 10
-0c80: 19                         ; EMIT
-0c81: 0b 9f 00 00 00             ; CALL LAST (009f)
-0c86: 06                         ; DUP
-0c87: 02                         ; FETCH
-0c88: 0e 00                      ; CLITERAL 0
-0c8a: 16                         ; EQ
-0c8b: 09 98 0c 00 00             ; JMPZ 0c98
-0c90: 05                         ; DROP
-0c91: 0e 0d                      ; CLITERAL 13
-0c93: 19                         ; EMIT
-0c94: 0e 0a                      ; CLITERAL 10
-0c96: 19                         ; EMIT
-0c97: 0c                         ; RET
-0c98: 0b e1 0b 00 00             ; CALL .WORD-LONG (0be1)
-0c9d: 08 86 0c 00 00             ; JMP 0c86
-0ca2: 0c                         ; RET
+0c7b: 18 6b f2 00 00             ; DICTP .WORD-LONG (f26b)
+0c80: 06                         ; DUP
+0c81: 0b 75 0a 00 00             ; CALL HEX. (0a75)
+0c86: 0e 3a                      ; CLITERAL 58
+0c88: 19                         ; EMIT
+0c89: 0e 20                      ; CLITERAL 32
+0c8b: 19                         ; EMIT
+0c8c: 06                         ; DUP
+0c8d: 0b 23 07 00 00             ; CALL DICT>NAME (0723)
+0c92: 0b 93 05 00 00             ; CALL CT (0593)
+0c97: 0e 20                      ; CLITERAL 32
+0c99: 19                         ; EMIT
+0c9a: 06                         ; DUP
+0c9b: 0b 60 07 00 00             ; CALL DICT.GetXT (0760)
+0ca0: 0e 28                      ; CLITERAL 40
+0ca2: 19                         ; EMIT
+0ca3: 0b af 0a 00 00             ; CALL HEX.4 (0aaf)
+0ca8: 0e 29                      ; CLITERAL 41
+0caa: 19                         ; EMIT
+0cab: 06                         ; DUP
+0cac: 0b 14 07 00 00             ; CALL DICT>FLAGS (0714)
+0cb1: 0f                         ; CFETCH
+0cb2: 06                         ; DUP
+0cb3: 07 09 2c 20 46 6c 61 67 73 3a 20 00 ; SLITERAL (0cb4) [, Flags: ]
+0cbf: 0b 93 05 00 00             ; CALL CT (0593)
+0cc4: 0b 92 0a 00 00             ; CALL HEX.2 (0a92)
+0cc9: 06                         ; DUP
+0cca: 0b a7 07 00 00             ; CALL FLAGS.ISINLINE? (07a7)
+0ccf: 09 e5 0c 00 00             ; JMPZ 0ce5
+0cd4: 07 09 20 28 49 4e 4c 49 4e 45 29 00 ; SLITERAL (0cd5) [ (INLINE)]
+0ce0: 0b 93 05 00 00             ; CALL CT (0593)
+0ce5: 0b 9e 07 00 00             ; CALL FLAGS.ISIMMEDIATE? (079e)
+0cea: 09 03 0d 00 00             ; JMPZ 0d03
+0cef: 07 0c 20 28 49 4d 4d 45 44 49 41 54 45 29 00 ; SLITERAL (0cf0) [ (IMMEDIATE)]
+0cfe: 0b 93 05 00 00             ; CALL CT (0593)
+0d03: 0e 0d                      ; CLITERAL 13
+0d05: 19                         ; EMIT
+0d06: 0e 0a                      ; CLITERAL 10
+0d08: 19                         ; EMIT
+0d09: 02                         ; FETCH
+0d0a: 0c                         ; RET
 ;
-0ca3: 18 8d f2 00 00             ; DICTP NUM-WORDS (f28d)
-0ca8: 0e 00                      ; CLITERAL 0
-0caa: 21                         ; DTOR
-0cab: 0b 9f 00 00 00             ; CALL LAST (009f)
-0cb0: 06                         ; DUP
-0cb1: 02                         ; FETCH
-0cb2: 0e 00                      ; CLITERAL 0
-0cb4: 16                         ; EQ
-0cb5: 09 c3 0c 00 00             ; JMPZ 0cc3
-0cba: 05                         ; DROP
-0cbb: 22                         ; RTOD
-0cbc: 0e 0d                      ; CLITERAL 13
-0cbe: 19                         ; EMIT
-0cbf: 0e 0a                      ; CLITERAL 10
-0cc1: 19                         ; EMIT
-0cc2: 0c                         ; RET
-0cc3: 22                         ; RTOD
-0cc4: 2c                         ; INC
-0cc5: 21                         ; DTOR
-0cc6: 02                         ; FETCH
-0cc7: 08 b0 0c 00 00             ; JMP 0cb0
-0ccc: 0c                         ; RET
+0d0b: 18 5a f2 00 00             ; DICTP WORDSV (f25a)
+0d10: 0b 08 0c 00 00             ; CALL .(LAST) (0c08)
+0d15: 0e 0d                      ; CLITERAL 13
+0d17: 19                         ; EMIT
+0d18: 0e 0a                      ; CLITERAL 10
+0d1a: 19                         ; EMIT
+0d1b: 0b 9f 00 00 00             ; CALL LAST (009f)
+0d20: 06                         ; DUP
+0d21: 02                         ; FETCH
+0d22: 0e 00                      ; CLITERAL 0
+0d24: 16                         ; EQ
+0d25: 09 32 0d 00 00             ; JMPZ 0d32
+0d2a: 05                         ; DROP
+0d2b: 0e 0d                      ; CLITERAL 13
+0d2d: 19                         ; EMIT
+0d2e: 0e 0a                      ; CLITERAL 10
+0d30: 19                         ; EMIT
+0d31: 0c                         ; RET
+0d32: 0b 7b 0c 00 00             ; CALL .WORD-LONG (0c7b)
+0d37: 08 20 0d 00 00             ; JMP 0d20
+0d3c: 0c                         ; RET
 ;
-0ccd: 18 7c f2 00 00             ; DICTP .lastx (f27c)
-0cd2: 0e 0d                      ; CLITERAL 13
-0cd4: 19                         ; EMIT
-0cd5: 0e 0a                      ; CLITERAL 10
-0cd7: 19                         ; EMIT
-0cd8: 0b 9f 00 00 00             ; CALL LAST (009f)
-0cdd: 04                         ; SWAP
-0cde: 0e 00                      ; CLITERAL 0
-0ce0: 1a                         ; OVER
-0ce1: 1a                         ; OVER
-0ce2: 17                         ; GT
-0ce3: 09 fb 0c 00 00             ; JMPZ 0cfb
-0ce8: 21                         ; DTOR
-0ce9: 04                         ; SWAP
-0cea: 22                         ; RTOD
-0ceb: 04                         ; SWAP
-0cec: 0b e1 0b 00 00             ; CALL .WORD-LONG (0be1)
-0cf1: 04                         ; SWAP
-0cf2: 21                         ; DTOR
-0cf3: 04                         ; SWAP
-0cf4: 22                         ; RTOD
-0cf5: 2c                         ; INC
-0cf6: 08 ff 0c 00 00             ; JMP 0cff
-0cfb: 05                         ; DROP
-0cfc: 05                         ; DROP
-0cfd: 05                         ; DROP
-0cfe: 0c                         ; RET
-0cff: 08 e0 0c 00 00             ; JMP 0ce0
-0d04: 0c                         ; RET
+0d3d: 18 46 f2 00 00             ; DICTP NUM-WORDS (f246)
+0d42: 0e 00                      ; CLITERAL 0
+0d44: 21                         ; DTOR
+0d45: 0b 9f 00 00 00             ; CALL LAST (009f)
+0d4a: 06                         ; DUP
+0d4b: 02                         ; FETCH
+0d4c: 0e 00                      ; CLITERAL 0
+0d4e: 16                         ; EQ
+0d4f: 09 5d 0d 00 00             ; JMPZ 0d5d
+0d54: 05                         ; DROP
+0d55: 22                         ; RTOD
+0d56: 0e 0d                      ; CLITERAL 13
+0d58: 19                         ; EMIT
+0d59: 0e 0a                      ; CLITERAL 10
+0d5b: 19                         ; EMIT
+0d5c: 0c                         ; RET
+0d5d: 22                         ; RTOD
+0d5e: 2c                         ; INC
+0d5f: 21                         ; DTOR
+0d60: 02                         ; FETCH
+0d61: 08 4a 0d 00 00             ; JMP 0d4a
+0d66: 0c                         ; RET
 ;
-0d05: 18 6a f2 00 00             ; DICTP EXECUTE (f26a)
-0d0a: 22                         ; RTOD
-0d0b: 05                         ; DROP
-0d0c: 21                         ; DTOR
-0d0d: 0c                         ; RET
-;
-0d0e: 18 57 f2 00 00             ; DICTP find.ret (f257)
-0d13: 06                         ; DUP
-0d14: 0f                         ; CFETCH
-0d15: 0e 0c                      ; CLITERAL 12
-0d17: 16                         ; EQ
-0d18: 09 1e 0d 00 00             ; JMPZ 0d1e
-0d1d: 0c                         ; RET
-0d1e: 2c                         ; INC
-0d1f: 08 13 0d 00 00             ; JMP 0d13
-0d24: 0c                         ; RET
-;
-0d25: 18 44 f2 00 00             ; DICTP (inline) (f244)
-0d2a: 1a                         ; OVER
-0d2b: 1a                         ; OVER
-0d2c: 15                         ; LT
-0d2d: 09 33 0d 00 00             ; JMPZ 0d33
-0d32: 04                         ; SWAP
-0d33: 06                         ; DUP
-0d34: 0f                         ; CFETCH
-0d35: 0b ab 00 00 00             ; CALL C, (00ab)
-0d3a: 2c                         ; INC
-0d3b: 1a                         ; OVER
-0d3c: 1a                         ; OVER
-0d3d: 17                         ; GT
-0d3e: 0a 33 0d 00 00             ; JMPNZ 0d33
-0d43: 05                         ; DROP
-0d44: 05                         ; DROP
-0d45: 0c                         ; RET
-;
-0d46: 18 34 f2 00 00             ; DICTP DOES> (f234)
-0d4b: 22                         ; RTOD
-0d4c: 06                         ; DUP
-0d4d: 0b 0e 0d 00 00             ; CALL find.ret (0d0e)
-0d52: 06                         ; DUP
-0d53: 21                         ; DTOR
-0d54: 2c                         ; INC
-0d55: 0b 25 0d 00 00             ; CALL (inline) (0d25)
-0d5a: 0c                         ; RET
-;
-0d5b: 18 1e f2 00 00             ; DICTP Copy.INLINE (f21e)
-0d60: 06                         ; DUP
-0d61: 0f                         ; CFETCH
-0d62: 0e 18                      ; CLITERAL 24
-0d64: 16                         ; EQ
-0d65: 09 71 0d 00 00             ; JMPZ 0d71
-0d6a: 2c                         ; INC
-0d6b: 0b 8b 00 00 00             ; CALL CELL (008b)
-0d70: 11                         ; ADD
-0d71: 06                         ; DUP
-0d72: 0b 0e 0d 00 00             ; CALL find.ret (0d0e)
-0d77: 0b 25 0d 00 00             ; CALL (inline) (0d25)
-0d7c: 0c                         ; RET
-;
-0d7d: 18 0d f2 00 00             ; DICTP strlen (f20d)
-0d82: 0e 00                      ; CLITERAL 0
-0d84: 04                         ; SWAP
+0d67: 18 35 f2 00 00             ; DICTP .lastx (f235)
+0d6c: 0e 0d                      ; CLITERAL 13
+0d6e: 19                         ; EMIT
+0d6f: 0e 0a                      ; CLITERAL 10
+0d71: 19                         ; EMIT
+0d72: 0b 9f 00 00 00             ; CALL LAST (009f)
+0d77: 04                         ; SWAP
+0d78: 0e 00                      ; CLITERAL 0
+0d7a: 1a                         ; OVER
+0d7b: 1a                         ; OVER
+0d7c: 17                         ; GT
+0d7d: 09 95 0d 00 00             ; JMPZ 0d95
+0d82: 21                         ; DTOR
+0d83: 04                         ; SWAP
+0d84: 22                         ; RTOD
 0d85: 04                         ; SWAP
-0d86: 1a                         ; OVER
-0d87: 0f                         ; CFETCH
-0d88: 06                         ; DUP
-0d89: 09 94 0d 00 00             ; JMPZ 0d94
-0d8e: 05                         ; DROP
+0d86: 0b 7b 0c 00 00             ; CALL .WORD-LONG (0c7b)
+0d8b: 04                         ; SWAP
+0d8c: 21                         ; DTOR
+0d8d: 04                         ; SWAP
+0d8e: 22                         ; RTOD
 0d8f: 2c                         ; INC
-0d90: 04                         ; SWAP
-0d91: 2c                         ; INC
-0d92: 0e 01                      ; CLITERAL 1
-0d94: 0a 85 0d 00 00             ; JMPNZ 0d85
-0d99: 04                         ; SWAP
-0d9a: 05                         ; DROP
-0d9b: 0c                         ; RET
+0d90: 08 99 0d 00 00             ; JMP 0d99
+0d95: 05                         ; DROP
+0d96: 05                         ; DROP
+0d97: 05                         ; DROP
+0d98: 0c                         ; RET
+0d99: 08 7a 0d 00 00             ; JMP 0d7a
+0d9e: 0c                         ; RET
 ;
-0d9c: 18 fd f1 00 00             ; DICTP cstr, (f1fd)
-0da1: 06                         ; DUP
-0da2: 0f                         ; CFETCH
-0da3: 1a                         ; OVER
-0da4: 11                         ; ADD
-0da5: 2c                         ; INC
-0da6: 2c                         ; INC
-0da7: 0b 25 0d 00 00             ; CALL (inline) (0d25)
-0dac: 0c                         ; RET
+0d9f: 18 23 f2 00 00             ; DICTP EXECUTE (f223)
+0da4: 22                         ; RTOD
+0da5: 05                         ; DROP
+0da6: 21                         ; DTOR
+0da7: 0c                         ; RET
 ;
-0dad: 18 e9 f1 00 00             ; DICTP [COMPILE] (f1e9)
-0db2: 0b a7 07 00 00             ; CALL FLAGS.ISINLINE? (07a7)
-0db7: 09 c6 0d 00 00             ; JMPZ 0dc6
-0dbc: 0b 5b 0d 00 00             ; CALL Copy.INLINE (0d5b)
-0dc1: 08 d0 0d 00 00             ; JMP 0dd0
-0dc6: 0b 62 01 00 00             ; CALL CALL (0162)
-0dcb: 0b c5 00 00 00             ; CALL , (00c5)
-0dd0: 0c                         ; RET
+0da8: 18 10 f2 00 00             ; DICTP find.ret (f210)
+0dad: 06                         ; DUP
+0dae: 0f                         ; CFETCH
+0daf: 0e 0c                      ; CLITERAL 12
+0db1: 16                         ; EQ
+0db2: 09 b8 0d 00 00             ; JMPZ 0db8
+0db7: 0c                         ; RET
+0db8: 2c                         ; INC
+0db9: 08 ad 0d 00 00             ; JMP 0dad
+0dbe: 0c                         ; RET
 ;
-0dd1: 18 d3 f1 00 00             ; DICTP executeWord (f1d3)
-0dd6: 21                         ; DTOR
-0dd7: 22                         ; RTOD
-0dd8: 06                         ; DUP
-0dd9: 21                         ; DTOR
-0dda: 0b d0 07 00 00             ; CALL findInDict (07d0)
-0ddf: 09 1b 0e 00 00             ; JMPZ 0e1b
-0de4: 22                         ; RTOD
-0de5: 05                         ; DROP
-0de6: 0b 30 03 00 00             ; CALL ?COMPILING (0330)
-0deb: 09 10 0e 00 00             ; JMPZ 0e10
-0df0: 06                         ; DUP
-0df1: 0b 9e 07 00 00             ; CALL FLAGS.ISIMMEDIATE? (079e)
-0df6: 09 06 0e 00 00             ; JMPZ 0e06
-0dfb: 05                         ; DROP
-0dfc: 0b 05 0d 00 00             ; CALL EXECUTE (0d05)
-0e01: 08 0b 0e 00 00             ; JMP 0e0b
-0e06: 0b ad 0d 00 00             ; CALL [COMPILE] (0dad)
-0e0b: 08 16 0e 00 00             ; JMP 0e16
-0e10: 05                         ; DROP
-0e11: 0b 05 0d 00 00             ; CALL EXECUTE (0d05)
-0e16: 08 71 0e 00 00             ; JMP 0e71
-0e1b: 05                         ; DROP
-0e1c: 05                         ; DROP
-0e1d: 22                         ; RTOD
-0e1e: 06                         ; DUP
-0e1f: 21                         ; DTOR
-0e20: 0b 97 08 00 00             ; CALL isNumber? (0897)
-0e25: 09 63 0e 00 00             ; JMPZ 0e63
-0e2a: 0b 30 03 00 00             ; CALL ?COMPILING (0330)
-0e2f: 09 5e 0e 00 00             ; JMPZ 0e5e
-0e34: 06                         ; DUP
-0e35: 0e 00                      ; CLITERAL 0
-0e37: 0e ff                      ; CLITERAL 255
-0e39: 0b 1d 06 00 00             ; CALL BETWEEN (061d)
-0e3e: 09 54 0e 00 00             ; JMPZ 0e54
-0e43: 0e 0e                      ; CLITERAL 14
-0e45: 0b ab 00 00 00             ; CALL C, (00ab)
-0e4a: 0b ab 00 00 00             ; CALL C, (00ab)
-0e4f: 08 5e 0e 00 00             ; JMP 0e5e
-0e54: 0b fe 00 00 00             ; CALL LITERAL (00fe)
-0e59: 0b c5 00 00 00             ; CALL , (00c5)
-0e5e: 08 6f 0e 00 00             ; JMP 0e6f
-0e63: 05                         ; DROP
-0e64: 07 02 3f 3f 00             ; SLITERAL (0e65) [??]
-0e69: 0b 93 05 00 00             ; CALL CT (0593)
-0e6e: fe                         ; RESET
-0e6f: 22                         ; RTOD
-0e70: 05                         ; DROP
-0e71: 0c                         ; RET
+0dbf: 18 fd f1 00 00             ; DICTP (inline) (f1fd)
+0dc4: 1a                         ; OVER
+0dc5: 1a                         ; OVER
+0dc6: 15                         ; LT
+0dc7: 09 cd 0d 00 00             ; JMPZ 0dcd
+0dcc: 04                         ; SWAP
+0dcd: 06                         ; DUP
+0dce: 0f                         ; CFETCH
+0dcf: 0b ab 00 00 00             ; CALL C, (00ab)
+0dd4: 2c                         ; INC
+0dd5: 1a                         ; OVER
+0dd6: 1a                         ; OVER
+0dd7: 17                         ; GT
+0dd8: 0a cd 0d 00 00             ; JMPNZ 0dcd
+0ddd: 05                         ; DROP
+0dde: 05                         ; DROP
+0ddf: 0c                         ; RET
 ;
-0e72: 18 bc f1 00 00             ; DICTP executeInput (f1bc)
-0e77: 0b 15 04 00 00             ; CALL >IN (0415)
-0e7c: 02                         ; FETCH
-0e7d: 0b a1 06 00 00             ; CALL skipWS (06a1)
-0e82: 0b 15 04 00 00             ; CALL >IN (0415)
-0e87: 03                         ; STORE
-0e88: 0b 15 04 00 00             ; CALL >IN (0415)
-0e8d: 02                         ; FETCH
-0e8e: 0f                         ; CFETCH
-0e8f: 09 af 0e 00 00             ; JMPZ 0eaf
-0e94: 0b 15 04 00 00             ; CALL >IN (0415)
-0e99: 02                         ; FETCH
-0e9a: 0b ca 06 00 00             ; CALL getOneWord (06ca)
-0e9f: 0b 15 04 00 00             ; CALL >IN (0415)
-0ea4: 03                         ; STORE
-0ea5: 0b d1 0d 00 00             ; CALL executeWord (0dd1)
-0eaa: 08 b0 0e 00 00             ; JMP 0eb0
-0eaf: 0c                         ; RET
-0eb0: 08 77 0e 00 00             ; JMP 0e77
-0eb5: 0c                         ; RET
+0de0: 18 ed f1 00 00             ; DICTP DOES> (f1ed)
+0de5: 22                         ; RTOD
+0de6: 06                         ; DUP
+0de7: 0b a8 0d 00 00             ; CALL find.ret (0da8)
+0dec: 06                         ; DUP
+0ded: 21                         ; DTOR
+0dee: 2c                         ; INC
+0def: 0b bf 0d 00 00             ; CALL (inline) (0dbf)
+0df4: 0c                         ; RET
 ;
-0eb6: 18 ae f1 00 00             ; DICTP Pad (f1ae)
-0ebb: 0b 9f 00 00 00             ; CALL LAST (009f)
-0ec0: 0e c8                      ; CLITERAL 200
-0ec2: 12                         ; SUB
-0ec3: 06                         ; DUP
-0ec4: 0b 93 00 00 00             ; CALL HERE (0093)
-0ec9: 15                         ; LT
-0eca: 09 e1 0e 00 00             ; JMPZ 0ee1
-0ecf: 07 0e 4f 75 74 20 6f 66 20 4d 65 6d 6f 72 79 21 00 ; SLITERAL (0ed0) [Out of Memory!]
-0ee0: fe                         ; RESET
-0ee1: 0c                         ; RET
+0df5: 18 d7 f1 00 00             ; DICTP Copy.INLINE (f1d7)
+0dfa: 06                         ; DUP
+0dfb: 0f                         ; CFETCH
+0dfc: 0e 18                      ; CLITERAL 24
+0dfe: 16                         ; EQ
+0dff: 09 0b 0e 00 00             ; JMPZ 0e0b
+0e04: 2c                         ; INC
+0e05: 0b 8b 00 00 00             ; CALL CELL (008b)
+0e0a: 11                         ; ADD
+0e0b: 06                         ; DUP
+0e0c: 0b a8 0d 00 00             ; CALL find.ret (0da8)
+0e11: 0b bf 0d 00 00             ; CALL (inline) (0dbf)
+0e16: 0c                         ; RET
 ;
-0ee2: 18 9b f1 00 00             ; DICTP INPUT-FP (f19b)
-0ee7: 01 ed 0e 00 00             ; LITERAL 3821 (eed)
-0eec: 0c                         ; RET
-0eed: 00                         ; RESET
-0eee: 00                         ; RESET
-0eef: 00                         ; RESET
-0ef0: 00                         ; RESET
-0ef1: 18 80 f1 00 00             ; DICTP LoadingFromFile? (f180)
-0ef6: 0b e2 0e 00 00             ; CALL INPUT-FP (0ee2)
-0efb: 02                         ; FETCH
-0efc: 0c                         ; RET
+0e17: 18 c6 f1 00 00             ; DICTP strlen (f1c6)
+0e1c: 0e 00                      ; CLITERAL 0
+0e1e: 04                         ; SWAP
+0e1f: 04                         ; SWAP
+0e20: 1a                         ; OVER
+0e21: 0f                         ; CFETCH
+0e22: 06                         ; DUP
+0e23: 09 2e 0e 00 00             ; JMPZ 0e2e
+0e28: 05                         ; DROP
+0e29: 2c                         ; INC
+0e2a: 04                         ; SWAP
+0e2b: 2c                         ; INC
+0e2c: 0e 01                      ; CLITERAL 1
+0e2e: 0a 1f 0e 00 00             ; JMPNZ 0e1f
+0e33: 04                         ; SWAP
+0e34: 05                         ; DROP
+0e35: 0c                         ; RET
 ;
-0efd: 18 66 f1 00 00             ; DICTP getLineFromFile (f166)
-0f02: 0e c8                      ; CLITERAL 200
-0f04: 0b e2 0e 00 00             ; CALL INPUT-FP (0ee2)
-0f09: 02                         ; FETCH
-0f0a: 1e                         ; FREADLINE
-0f0b: 0e 00                      ; CLITERAL 0
-0f0d: 16                         ; EQ
-0f0e: 09 1d 0f 00 00             ; JMPZ 0f1d
-0f13: 0b e2 0e 00 00             ; CALL INPUT-FP (0ee2)
-0f18: 0b 26 03 00 00             ; CALL OFF (0326)
-0f1d: 0c                         ; RET
+0e36: 18 b6 f1 00 00             ; DICTP cstr, (f1b6)
+0e3b: 06                         ; DUP
+0e3c: 0f                         ; CFETCH
+0e3d: 1a                         ; OVER
+0e3e: 11                         ; ADD
+0e3f: 2c                         ; INC
+0e40: 2c                         ; INC
+0e41: 0b bf 0d 00 00             ; CALL (inline) (0dbf)
+0e46: 0c                         ; RET
 ;
-0f1e: 18 54 f1 00 00             ; DICTP getLine (f154)
-0f23: 0e 00                      ; CLITERAL 0
-0f25: 0b b6 0e 00 00             ; CALL Pad (0eb6)
-0f2a: 06                         ; DUP
-0f2b: 2c                         ; INC
-0f2c: 0b 15 04 00 00             ; CALL >IN (0415)
-0f31: 03                         ; STORE
-0f32: 10                         ; CSTORE
-0f33: 0b f1 0e 00 00             ; CALL LoadingFromFile? (0ef1)
-0f38: 09 48 0f 00 00             ; JMPZ 0f48
-0f3d: 0b b6 0e 00 00             ; CALL Pad (0eb6)
-0f42: 0b fd 0e 00 00             ; CALL getLineFromFile (0efd)
-0f47: 0c                         ; RET
-0f48: 0e 00                      ; CLITERAL 0
-0f4a: 0b 15 04 00 00             ; CALL >IN (0415)
-0f4f: 02                         ; FETCH
-0f50: 10                         ; CSTORE
-0f51: 27                         ; GETCH
-0f52: 06                         ; DUP
-0f53: 0e 0d                      ; CLITERAL 13
-0f55: 16                         ; EQ
-0f56: 09 65 0f 00 00             ; JMPZ 0f65
-0f5b: 05                         ; DROP
-0f5c: 0b b6 0e 00 00             ; CALL Pad (0eb6)
-0f61: 0e 20                      ; CLITERAL 32
-0f63: 19                         ; EMIT
-0f64: 0c                         ; RET
-0f65: 06                         ; DUP
-0f66: 0e 09                      ; CLITERAL 9
-0f68: 16                         ; EQ
-0f69: 09 71 0f 00 00             ; JMPZ 0f71
-0f6e: 05                         ; DROP
-0f6f: 0e 20                      ; CLITERAL 32
-0f71: 06                         ; DUP
-0f72: 0e 03                      ; CLITERAL 3
-0f74: 16                         ; EQ
-0f75: 09 7b 0f 00 00             ; JMPZ 0f7b
-0f7a: ff                         ; BYE
-0f7b: 06                         ; DUP
-0f7c: 0e 08                      ; CLITERAL 8
-0f7e: 16                         ; EQ
-0f7f: 09 b7 0f 00 00             ; JMPZ 0fb7
-0f84: 0b b6 0e 00 00             ; CALL Pad (0eb6)
-0f89: 0f                         ; CFETCH
-0f8a: 0e 00                      ; CLITERAL 0
-0f8c: 17                         ; GT
-0f8d: 09 b1 0f 00 00             ; JMPZ 0fb1
-0f92: 0b b6 0e 00 00             ; CALL Pad (0eb6)
-0f97: 0b 06 05 00 00             ; CALL C-- (0506)
-0f9c: 0b 15 04 00 00             ; CALL >IN (0415)
-0fa1: 0b ee 04 00 00             ; CALL -- (04ee)
-0fa6: 06                         ; DUP
-0fa7: 19                         ; EMIT
-0fa8: 0e 20                      ; CLITERAL 32
-0faa: 19                         ; EMIT
-0fab: 19                         ; EMIT
-0fac: 08 b2 0f 00 00             ; JMP 0fb2
-0fb1: 05                         ; DROP
-0fb2: 08 e9 0f 00 00             ; JMP 0fe9
-0fb7: 06                         ; DUP
-0fb8: 0e 20                      ; CLITERAL 32
-0fba: 0e 7f                      ; CLITERAL 127
-0fbc: 0b 1d 06 00 00             ; CALL BETWEEN (061d)
-0fc1: 09 e8 0f 00 00             ; JMPZ 0fe8
-0fc6: 06                         ; DUP
-0fc7: 19                         ; EMIT
-0fc8: 0b 15 04 00 00             ; CALL >IN (0415)
-0fcd: 02                         ; FETCH
-0fce: 10                         ; CSTORE
-0fcf: 0b 15 04 00 00             ; CALL >IN (0415)
-0fd4: 0b e1 04 00 00             ; CALL ++ (04e1)
-0fd9: 0b b6 0e 00 00             ; CALL Pad (0eb6)
-0fde: 0b fb 04 00 00             ; CALL C++ (04fb)
-0fe3: 08 e9 0f 00 00             ; JMP 0fe9
-0fe8: 05                         ; DROP
-0fe9: 08 48 0f 00 00             ; JMP 0f48
-0fee: 0c                         ; RET
+0e47: 18 a2 f1 00 00             ; DICTP [COMPILE] (f1a2)
+0e4c: 0b a7 07 00 00             ; CALL FLAGS.ISINLINE? (07a7)
+0e51: 09 60 0e 00 00             ; JMPZ 0e60
+0e56: 0b f5 0d 00 00             ; CALL Copy.INLINE (0df5)
+0e5b: 08 6a 0e 00 00             ; JMP 0e6a
+0e60: 0b 62 01 00 00             ; CALL CALL (0162)
+0e65: 0b c5 00 00 00             ; CALL , (00c5)
+0e6a: 0c                         ; RET
 ;
-0fef: 18 41 f1 00 00             ; DICTP strcpy2c (f141)
-0ff4: 06                         ; DUP
-0ff5: 21                         ; DTOR
-0ff6: 0e 00                      ; CLITERAL 0
-0ff8: 1a                         ; OVER
-0ff9: 10                         ; CSTORE
-0ffa: 2c                         ; INC
-0ffb: 04                         ; SWAP
-0ffc: 06                         ; DUP
-0ffd: 0f                         ; CFETCH
-0ffe: 06                         ; DUP
-0fff: 09 19 10 00 00             ; JMPZ 1019
-1004: 0e 02                      ; CLITERAL 2
-1006: 25                         ; PICK
-1007: 10                         ; CSTORE
-1008: 04                         ; SWAP
-1009: 2c                         ; INC
-100a: 04                         ; SWAP
-100b: 2c                         ; INC
-100c: 22                         ; RTOD
-100d: 06                         ; DUP
-100e: 21                         ; DTOR
-100f: 0b fb 04 00 00             ; CALL C++ (04fb)
-1014: 08 22 10 00 00             ; JMP 1022
-1019: 21                         ; DTOR
-101a: 04                         ; SWAP
-101b: 22                         ; RTOD
-101c: 04                         ; SWAP
-101d: 10                         ; CSTORE
-101e: 05                         ; DROP
-101f: 22                         ; RTOD
-1020: 05                         ; DROP
-1021: 0c                         ; RET
-1022: 08 fc 0f 00 00             ; JMP 0ffc
-1027: 0c                         ; RET
+0e6b: 18 8c f1 00 00             ; DICTP executeWord (f18c)
+0e70: 21                         ; DTOR
+0e71: 22                         ; RTOD
+0e72: 06                         ; DUP
+0e73: 21                         ; DTOR
+0e74: 0b d0 07 00 00             ; CALL findInDict (07d0)
+0e79: 09 b5 0e 00 00             ; JMPZ 0eb5
+0e7e: 22                         ; RTOD
+0e7f: 05                         ; DROP
+0e80: 0b 30 03 00 00             ; CALL ?COMPILING (0330)
+0e85: 09 aa 0e 00 00             ; JMPZ 0eaa
+0e8a: 06                         ; DUP
+0e8b: 0b 9e 07 00 00             ; CALL FLAGS.ISIMMEDIATE? (079e)
+0e90: 09 a0 0e 00 00             ; JMPZ 0ea0
+0e95: 05                         ; DROP
+0e96: 0b 9f 0d 00 00             ; CALL EXECUTE (0d9f)
+0e9b: 08 a5 0e 00 00             ; JMP 0ea5
+0ea0: 0b 47 0e 00 00             ; CALL [COMPILE] (0e47)
+0ea5: 08 b0 0e 00 00             ; JMP 0eb0
+0eaa: 05                         ; DROP
+0eab: 0b 9f 0d 00 00             ; CALL EXECUTE (0d9f)
+0eb0: 08 0b 0f 00 00             ; JMP 0f0b
+0eb5: 05                         ; DROP
+0eb6: 05                         ; DROP
+0eb7: 22                         ; RTOD
+0eb8: 06                         ; DUP
+0eb9: 21                         ; DTOR
+0eba: 0b 97 08 00 00             ; CALL isNumber? (0897)
+0ebf: 09 fd 0e 00 00             ; JMPZ 0efd
+0ec4: 0b 30 03 00 00             ; CALL ?COMPILING (0330)
+0ec9: 09 f8 0e 00 00             ; JMPZ 0ef8
+0ece: 06                         ; DUP
+0ecf: 0e 00                      ; CLITERAL 0
+0ed1: 0e ff                      ; CLITERAL 255
+0ed3: 0b 1d 06 00 00             ; CALL BETWEEN (061d)
+0ed8: 09 ee 0e 00 00             ; JMPZ 0eee
+0edd: 0e 0e                      ; CLITERAL 14
+0edf: 0b ab 00 00 00             ; CALL C, (00ab)
+0ee4: 0b ab 00 00 00             ; CALL C, (00ab)
+0ee9: 08 f8 0e 00 00             ; JMP 0ef8
+0eee: 0b fe 00 00 00             ; CALL LITERAL (00fe)
+0ef3: 0b c5 00 00 00             ; CALL , (00c5)
+0ef8: 08 09 0f 00 00             ; JMP 0f09
+0efd: 05                         ; DROP
+0efe: 07 02 3f 3f 00             ; SLITERAL (0eff) [??]
+0f03: 0b 93 05 00 00             ; CALL CT (0593)
+0f08: fe                         ; RESET
+0f09: 22                         ; RTOD
+0f0a: 05                         ; DROP
+0f0b: 0c                         ; RET
 ;
-1028: 18 2b f1 00 00             ; DICTP Define-Word (f12b)
-102d: 0b 9f 00 00 00             ; CALL LAST (009f)
-1032: 1a                         ; OVER
-1033: 0b 7d 0d 00 00             ; CALL strlen (0d7d)
-1038: 0e 02                      ; CLITERAL 2
-103a: 0b 8b 00 00 00             ; CALL CELL (008b)
-103f: 13                         ; MUL
-1040: 0e 03                      ; CLITERAL 3
-1042: 11                         ; ADD
-1043: 11                         ; ADD
-1044: 12                         ; SUB
-1045: 06                         ; DUP
-1046: 21                         ; DTOR
-1047: 21                         ; DTOR
-1048: 0b 9f 00 00 00             ; CALL LAST (009f)
-104d: 22                         ; RTOD
-104e: 06                         ; DUP
-104f: 21                         ; DTOR
-1050: 03                         ; STORE
-1051: 22                         ; RTOD
-1052: 0b 8b 00 00 00             ; CALL CELL (008b)
-1057: 11                         ; ADD
-1058: 21                         ; DTOR
-1059: 0b 93 00 00 00             ; CALL HERE (0093)
-105e: 22                         ; RTOD
-105f: 06                         ; DUP
-1060: 21                         ; DTOR
-1061: 03                         ; STORE
-1062: 22                         ; RTOD
-1063: 0b 8b 00 00 00             ; CALL CELL (008b)
-1068: 11                         ; ADD
-1069: 21                         ; DTOR
-106a: 0e 00                      ; CLITERAL 0
-106c: 22                         ; RTOD
-106d: 06                         ; DUP
-106e: 21                         ; DTOR
-106f: 10                         ; CSTORE
-1070: 22                         ; RTOD
-1071: 2c                         ; INC
-1072: 21                         ; DTOR
-1073: 22                         ; RTOD
-1074: 0b ef 0f 00 00             ; CALL strcpy2c (0fef)
-1079: 22                         ; RTOD
-107a: 0b 4f 00 00 00             ; CALL (LAST) (004f)
-107f: 03                         ; STORE
-1080: 0c                         ; RET
+0f0c: 18 75 f1 00 00             ; DICTP executeInput (f175)
+0f11: 0b 15 04 00 00             ; CALL >IN (0415)
+0f16: 02                         ; FETCH
+0f17: 0b a1 06 00 00             ; CALL skipWS (06a1)
+0f1c: 0b 15 04 00 00             ; CALL >IN (0415)
+0f21: 03                         ; STORE
+0f22: 0b 15 04 00 00             ; CALL >IN (0415)
+0f27: 02                         ; FETCH
+0f28: 0f                         ; CFETCH
+0f29: 09 49 0f 00 00             ; JMPZ 0f49
+0f2e: 0b 15 04 00 00             ; CALL >IN (0415)
+0f33: 02                         ; FETCH
+0f34: 0b ca 06 00 00             ; CALL getOneWord (06ca)
+0f39: 0b 15 04 00 00             ; CALL >IN (0415)
+0f3e: 03                         ; STORE
+0f3f: 0b 6b 0e 00 00             ; CALL executeWord (0e6b)
+0f44: 08 4a 0f 00 00             ; JMP 0f4a
+0f49: 0c                         ; RET
+0f4a: 08 11 0f 00 00             ; JMP 0f11
+0f4f: 0c                         ; RET
 ;
-1081: 18 15 f1 00 00             ; DICTP CREATE-NAME (f115)
-1086: 0b 15 04 00 00             ; CALL >IN (0415)
-108b: 02                         ; FETCH
-108c: 0b a1 06 00 00             ; CALL skipWS (06a1)
-1091: 0b 15 04 00 00             ; CALL >IN (0415)
-1096: 03                         ; STORE
-1097: 0b 15 04 00 00             ; CALL >IN (0415)
-109c: 02                         ; FETCH
-109d: 0f                         ; CFETCH
-109e: 09 d8 10 00 00             ; JMPZ 10d8
-10a3: 0b 15 04 00 00             ; CALL >IN (0415)
-10a8: 02                         ; FETCH
-10a9: 0b ca 06 00 00             ; CALL getOneWord (06ca)
-10ae: 0b 15 04 00 00             ; CALL >IN (0415)
-10b3: 03                         ; STORE
-10b4: 06                         ; DUP
-10b5: 0f                         ; CFETCH
-10b6: 09 d6 10 00 00             ; JMPZ 10d6
-10bb: 0b 28 10 00 00             ; CALL Define-Word (1028)
-10c0: 0e 18                      ; CLITERAL 24
-10c2: 0b ab 00 00 00             ; CALL C, (00ab)
+0f50: 18 67 f1 00 00             ; DICTP Pad (f167)
+0f55: 0b 9f 00 00 00             ; CALL LAST (009f)
+0f5a: 0e c8                      ; CLITERAL 200
+0f5c: 12                         ; SUB
+0f5d: 06                         ; DUP
+0f5e: 0b 93 00 00 00             ; CALL HERE (0093)
+0f63: 15                         ; LT
+0f64: 09 7b 0f 00 00             ; JMPZ 0f7b
+0f69: 07 0e 4f 75 74 20 6f 66 20 4d 65 6d 6f 72 79 21 00 ; SLITERAL (0f6a) [Out of Memory!]
+0f7a: fe                         ; RESET
+0f7b: 0c                         ; RET
+;
+0f7c: 18 54 f1 00 00             ; DICTP INPUT-FP (f154)
+0f81: 01 87 0f 00 00             ; LITERAL 3975 (f87)
+0f86: 0c                         ; RET
+0f87: 00                         ; RESET
+0f88: 00                         ; RESET
+0f89: 00                         ; RESET
+0f8a: 00                         ; RESET
+0f8b: 18 39 f1 00 00             ; DICTP LoadingFromFile? (f139)
+0f90: 0b 7c 0f 00 00             ; CALL INPUT-FP (0f7c)
+0f95: 02                         ; FETCH
+0f96: 0c                         ; RET
+;
+0f97: 18 1f f1 00 00             ; DICTP getLineFromFile (f11f)
+0f9c: 0e c8                      ; CLITERAL 200
+0f9e: 0b 7c 0f 00 00             ; CALL INPUT-FP (0f7c)
+0fa3: 02                         ; FETCH
+0fa4: 1e                         ; FREADLINE
+0fa5: 0e 00                      ; CLITERAL 0
+0fa7: 16                         ; EQ
+0fa8: 09 b7 0f 00 00             ; JMPZ 0fb7
+0fad: 0b 7c 0f 00 00             ; CALL INPUT-FP (0f7c)
+0fb2: 0b 26 03 00 00             ; CALL OFF (0326)
+0fb7: 0c                         ; RET
+;
+0fb8: 18 0d f1 00 00             ; DICTP getLine (f10d)
+0fbd: 0e 00                      ; CLITERAL 0
+0fbf: 0b 50 0f 00 00             ; CALL Pad (0f50)
+0fc4: 06                         ; DUP
+0fc5: 2c                         ; INC
+0fc6: 0b 15 04 00 00             ; CALL >IN (0415)
+0fcb: 03                         ; STORE
+0fcc: 10                         ; CSTORE
+0fcd: 0b 8b 0f 00 00             ; CALL LoadingFromFile? (0f8b)
+0fd2: 09 e2 0f 00 00             ; JMPZ 0fe2
+0fd7: 0b 50 0f 00 00             ; CALL Pad (0f50)
+0fdc: 0b 97 0f 00 00             ; CALL getLineFromFile (0f97)
+0fe1: 0c                         ; RET
+0fe2: 0e 00                      ; CLITERAL 0
+0fe4: 0b 15 04 00 00             ; CALL >IN (0415)
+0fe9: 02                         ; FETCH
+0fea: 10                         ; CSTORE
+0feb: 27                         ; GETCH
+0fec: 06                         ; DUP
+0fed: 0e 0d                      ; CLITERAL 13
+0fef: 16                         ; EQ
+0ff0: 09 ff 0f 00 00             ; JMPZ 0fff
+0ff5: 05                         ; DROP
+0ff6: 0b 50 0f 00 00             ; CALL Pad (0f50)
+0ffb: 0e 20                      ; CLITERAL 32
+0ffd: 19                         ; EMIT
+0ffe: 0c                         ; RET
+0fff: 06                         ; DUP
+1000: 0e 09                      ; CLITERAL 9
+1002: 16                         ; EQ
+1003: 09 0b 10 00 00             ; JMPZ 100b
+1008: 05                         ; DROP
+1009: 0e 20                      ; CLITERAL 32
+100b: 06                         ; DUP
+100c: 0e 03                      ; CLITERAL 3
+100e: 16                         ; EQ
+100f: 09 15 10 00 00             ; JMPZ 1015
+1014: ff                         ; BYE
+1015: 06                         ; DUP
+1016: 0e 08                      ; CLITERAL 8
+1018: 16                         ; EQ
+1019: 09 51 10 00 00             ; JMPZ 1051
+101e: 0b 50 0f 00 00             ; CALL Pad (0f50)
+1023: 0f                         ; CFETCH
+1024: 0e 00                      ; CLITERAL 0
+1026: 17                         ; GT
+1027: 09 4b 10 00 00             ; JMPZ 104b
+102c: 0b 50 0f 00 00             ; CALL Pad (0f50)
+1031: 0b 06 05 00 00             ; CALL C-- (0506)
+1036: 0b 15 04 00 00             ; CALL >IN (0415)
+103b: 0b ee 04 00 00             ; CALL -- (04ee)
+1040: 06                         ; DUP
+1041: 19                         ; EMIT
+1042: 0e 20                      ; CLITERAL 32
+1044: 19                         ; EMIT
+1045: 19                         ; EMIT
+1046: 08 4c 10 00 00             ; JMP 104c
+104b: 05                         ; DROP
+104c: 08 83 10 00 00             ; JMP 1083
+1051: 06                         ; DUP
+1052: 0e 20                      ; CLITERAL 32
+1054: 0e 7f                      ; CLITERAL 127
+1056: 0b 1d 06 00 00             ; CALL BETWEEN (061d)
+105b: 09 82 10 00 00             ; JMPZ 1082
+1060: 06                         ; DUP
+1061: 19                         ; EMIT
+1062: 0b 15 04 00 00             ; CALL >IN (0415)
+1067: 02                         ; FETCH
+1068: 10                         ; CSTORE
+1069: 0b 15 04 00 00             ; CALL >IN (0415)
+106e: 0b e1 04 00 00             ; CALL ++ (04e1)
+1073: 0b 50 0f 00 00             ; CALL Pad (0f50)
+1078: 0b fb 04 00 00             ; CALL C++ (04fb)
+107d: 08 83 10 00 00             ; JMP 1083
+1082: 05                         ; DROP
+1083: 08 e2 0f 00 00             ; JMP 0fe2
+1088: 0c                         ; RET
+;
+1089: 18 fa f0 00 00             ; DICTP strcpy2c (f0fa)
+108e: 06                         ; DUP
+108f: 21                         ; DTOR
+1090: 0e 00                      ; CLITERAL 0
+1092: 1a                         ; OVER
+1093: 10                         ; CSTORE
+1094: 2c                         ; INC
+1095: 04                         ; SWAP
+1096: 06                         ; DUP
+1097: 0f                         ; CFETCH
+1098: 06                         ; DUP
+1099: 09 b3 10 00 00             ; JMPZ 10b3
+109e: 0e 02                      ; CLITERAL 2
+10a0: 25                         ; PICK
+10a1: 10                         ; CSTORE
+10a2: 04                         ; SWAP
+10a3: 2c                         ; INC
+10a4: 04                         ; SWAP
+10a5: 2c                         ; INC
+10a6: 22                         ; RTOD
+10a7: 06                         ; DUP
+10a8: 21                         ; DTOR
+10a9: 0b fb 04 00 00             ; CALL C++ (04fb)
+10ae: 08 bc 10 00 00             ; JMP 10bc
+10b3: 21                         ; DTOR
+10b4: 04                         ; SWAP
+10b5: 22                         ; RTOD
+10b6: 04                         ; SWAP
+10b7: 10                         ; CSTORE
+10b8: 05                         ; DROP
+10b9: 22                         ; RTOD
+10ba: 05                         ; DROP
+10bb: 0c                         ; RET
+10bc: 08 96 10 00 00             ; JMP 1096
+10c1: 0c                         ; RET
+;
+10c2: 18 e4 f0 00 00             ; DICTP Define-Word (f0e4)
 10c7: 0b 9f 00 00 00             ; CALL LAST (009f)
-10cc: 0b c5 00 00 00             ; CALL , (00c5)
-10d1: 08 d8 10 00 00             ; JMP 10d8
-10d6: 05                         ; DROP
-10d7: fe                         ; RESET
-10d8: 0c                         ; RET
-;
-10d9: 18 09 f1 00 00             ; DICTP : (f109)
-10de: 0b 81 10 00 00             ; CALL CREATE-NAME (1081)
-10e3: 0b 6d 00 00 00             ; CALL STATE (006d)
-10e8: 0b 1c 03 00 00             ; CALL ON (031c)
-10ed: 0c                         ; RET
-;
-10ee: 18 f7 f0 00 00             ; DICTP :NONAME (f0f7)
+10cc: 1a                         ; OVER
+10cd: 0b 17 0e 00 00             ; CALL strlen (0e17)
+10d2: 0e 02                      ; CLITERAL 2
+10d4: 0b 8b 00 00 00             ; CALL CELL (008b)
+10d9: 13                         ; MUL
+10da: 0e 03                      ; CLITERAL 3
+10dc: 11                         ; ADD
+10dd: 11                         ; ADD
+10de: 12                         ; SUB
+10df: 06                         ; DUP
+10e0: 21                         ; DTOR
+10e1: 21                         ; DTOR
+10e2: 0b 9f 00 00 00             ; CALL LAST (009f)
+10e7: 22                         ; RTOD
+10e8: 06                         ; DUP
+10e9: 21                         ; DTOR
+10ea: 03                         ; STORE
+10eb: 22                         ; RTOD
+10ec: 0b 8b 00 00 00             ; CALL CELL (008b)
+10f1: 11                         ; ADD
+10f2: 21                         ; DTOR
 10f3: 0b 93 00 00 00             ; CALL HERE (0093)
-10f8: 0b 6d 00 00 00             ; CALL STATE (006d)
-10fd: 0b 1c 03 00 00             ; CALL ON (031c)
-1102: 0c                         ; RET
+10f8: 22                         ; RTOD
+10f9: 06                         ; DUP
+10fa: 21                         ; DTOR
+10fb: 03                         ; STORE
+10fc: 22                         ; RTOD
+10fd: 0b 8b 00 00 00             ; CALL CELL (008b)
+1102: 11                         ; ADD
+1103: 21                         ; DTOR
+1104: 0e 00                      ; CLITERAL 0
+1106: 22                         ; RTOD
+1107: 06                         ; DUP
+1108: 21                         ; DTOR
+1109: 10                         ; CSTORE
+110a: 22                         ; RTOD
+110b: 2c                         ; INC
+110c: 21                         ; DTOR
+110d: 22                         ; RTOD
+110e: 0b 89 10 00 00             ; CALL strcpy2c (1089)
+1113: 22                         ; RTOD
+1114: 0b 4f 00 00 00             ; CALL (LAST) (004f)
+1119: 03                         ; STORE
+111a: 0c                         ; RET
 ;
-1103: 18 eb f0 00 00             ; DICTP ; (f0eb)
-1108: 0b 6f 01 00 00             ; CALL RET (016f)
-110d: 0b 6d 00 00 00             ; CALL STATE (006d)
-1112: 0b 26 03 00 00             ; CALL OFF (0326)
-1117: 0c                         ; RET
+111b: 18 ce f0 00 00             ; DICTP CREATE-NAME (f0ce)
+1120: 0b 15 04 00 00             ; CALL >IN (0415)
+1125: 02                         ; FETCH
+1126: 0b a1 06 00 00             ; CALL skipWS (06a1)
+112b: 0b 15 04 00 00             ; CALL >IN (0415)
+1130: 03                         ; STORE
+1131: 0b 15 04 00 00             ; CALL >IN (0415)
+1136: 02                         ; FETCH
+1137: 0f                         ; CFETCH
+1138: 09 72 11 00 00             ; JMPZ 1172
+113d: 0b 15 04 00 00             ; CALL >IN (0415)
+1142: 02                         ; FETCH
+1143: 0b ca 06 00 00             ; CALL getOneWord (06ca)
+1148: 0b 15 04 00 00             ; CALL >IN (0415)
+114d: 03                         ; STORE
+114e: 06                         ; DUP
+114f: 0f                         ; CFETCH
+1150: 09 70 11 00 00             ; JMPZ 1170
+1155: 0b c2 10 00 00             ; CALL Define-Word (10c2)
+115a: 0e 18                      ; CLITERAL 24
+115c: 0b ab 00 00 00             ; CALL C, (00ab)
+1161: 0b 9f 00 00 00             ; CALL LAST (009f)
+1166: 0b c5 00 00 00             ; CALL , (00c5)
+116b: 08 72 11 00 00             ; JMP 1172
+1170: 05                         ; DROP
+1171: fe                         ; RESET
+1172: 0c                         ; RET
 ;
-1118: 18 d6 f0 00 00             ; DICTP ForgetLast (f0d6)
-111d: 0b 9f 00 00 00             ; CALL LAST (009f)
-1122: 0b 8b 00 00 00             ; CALL CELL (008b)
-1127: 11                         ; ADD
-1128: 02                         ; FETCH
-1129: 0b 40 00 00 00             ; CALL (HERE) (0040)
-112e: 03                         ; STORE
-112f: 0b 9f 00 00 00             ; CALL LAST (009f)
-1134: 02                         ; FETCH
-1135: 0b 4f 00 00 00             ; CALL (LAST) (004f)
-113a: 03                         ; STORE
-113b: 0c                         ; RET
+1173: 18 c2 f0 00 00             ; DICTP : (f0c2)
+1178: 0b 1b 11 00 00             ; CALL CREATE-NAME (111b)
+117d: 0b 6d 00 00 00             ; CALL STATE (006d)
+1182: 0b 1c 03 00 00             ; CALL ON (031c)
+1187: 0c                         ; RET
 ;
-113c: 18 c1 f0 00 00             ; DICTP resetState (f0c1)
-1141: 0b 30 03 00 00             ; CALL ?COMPILING (0330)
-1146: 09 50 11 00 00             ; JMPZ 1150
-114b: 0b 18 11 00 00             ; CALL ForgetLast (1118)
-1150: 0b 6d 00 00 00             ; CALL STATE (006d)
-1155: 0b 26 03 00 00             ; CALL OFF (0326)
-115a: 0b f2 02 00 00             ; CALL DECIMAL (02f2)
-115f: 0c                         ; RET
+1188: 18 b0 f0 00 00             ; DICTP :NONAME (f0b0)
+118d: 0b 93 00 00 00             ; CALL HERE (0093)
+1192: 0b 6d 00 00 00             ; CALL STATE (006d)
+1197: 0b 1c 03 00 00             ; CALL ON (031c)
+119c: 0c                         ; RET
 ;
-1160: 18 b1 f0 00 00             ; DICTP ALLOT (f0b1)
-1165: 0b 93 00 00 00             ; CALL HERE (0093)
-116a: 11                         ; ADD
-116b: 0b 40 00 00 00             ; CALL (HERE) (0040)
-1170: 03                         ; STORE
-1171: 0c                         ; RET
+119d: 18 a4 f0 00 00             ; DICTP ; (f0a4)
+11a2: 0b 6f 01 00 00             ; CALL RET (016f)
+11a7: 0b 6d 00 00 00             ; CALL STATE (006d)
+11ac: 0b 26 03 00 00             ; CALL OFF (0326)
+11b1: 0c                         ; RET
 ;
-1172: 18 a5 f0 00 00             ; DICTP ? (f0a5)
-1177: 02                         ; FETCH
-1178: 0b f9 09 00 00             ; CALL . (09f9)
-117d: 0c                         ; RET
+11b2: 18 8f f0 00 00             ; DICTP ForgetLast (f08f)
+11b7: 0b 9f 00 00 00             ; CALL LAST (009f)
+11bc: 0b 8b 00 00 00             ; CALL CELL (008b)
+11c1: 11                         ; ADD
+11c2: 02                         ; FETCH
+11c3: 0b 40 00 00 00             ; CALL (HERE) (0040)
+11c8: 03                         ; STORE
+11c9: 0b 9f 00 00 00             ; CALL LAST (009f)
+11ce: 02                         ; FETCH
+11cf: 0b 4f 00 00 00             ; CALL (LAST) (004f)
+11d4: 03                         ; STORE
+11d5: 0c                         ; RET
 ;
-117e: 18 98 f0 00 00             ; DICTP C? (f098)
-1183: 0f                         ; CFETCH
-1184: 0b f9 09 00 00             ; CALL . (09f9)
-1189: 0c                         ; RET
+11d6: 18 7a f0 00 00             ; DICTP resetState (f07a)
+11db: 0b 30 03 00 00             ; CALL ?COMPILING (0330)
+11e0: 09 ea 11 00 00             ; JMPZ 11ea
+11e5: 0b b2 11 00 00             ; CALL ForgetLast (11b2)
+11ea: 0b 6d 00 00 00             ; CALL STATE (006d)
+11ef: 0b 26 03 00 00             ; CALL OFF (0326)
+11f4: 0b f2 02 00 00             ; CALL DECIMAL (02f2)
+11f9: 0c                         ; RET
 ;
-118a: 18 89 f0 00 00             ; DICTP FREE (f089)
-118f: 0b 9f 00 00 00             ; CALL LAST (009f)
-1194: 0b 93 00 00 00             ; CALL HERE (0093)
-1199: 12                         ; SUB
-119a: 0c                         ; RET
+11fa: 18 6a f0 00 00             ; DICTP ALLOT (f06a)
+11ff: 0b 93 00 00 00             ; CALL HERE (0093)
+1204: 11                         ; ADD
+1205: 0b 40 00 00 00             ; CALL (HERE) (0040)
+120a: 03                         ; STORE
+120b: 0c                         ; RET
 ;
-119b: 18 79 f0 00 00             ; DICTP .FREE (f079)
-11a0: 0b 8a 11 00 00             ; CALL FREE (118a)
-11a5: 0b df 09 00 00             ; CALL (.) (09df)
-11aa: 07 0c 20 62 79 74 65 73 20 66 72 65 65 2e 00 ; SLITERAL (11ab) [ bytes free.]
-11b9: 0b 93 05 00 00             ; CALL CT (0593)
-11be: 0c                         ; RET
+120c: 18 5e f0 00 00             ; DICTP ? (f05e)
+1211: 02                         ; FETCH
+1212: 0b f9 09 00 00             ; CALL . (09f9)
+1217: 0c                         ; RET
 ;
-11bf: 18 66 f0 00 00             ; DICTP mainLoop (f066)
-11c4: 0b 3c 11 00 00             ; CALL resetState (113c)
-11c9: 0b 45 06 00 00             ; CALL tmp-init (0645)
-11ce: 0b 30 03 00 00             ; CALL ?COMPILING (0330)
-11d3: 0e 00                      ; CLITERAL 0
-11d5: 16                         ; EQ
-11d6: 09 eb 11 00 00             ; JMPZ 11eb
-11db: 07 03 20 4f 4b 00          ; SLITERAL (11dc) [ OK]
-11e1: 0b 93 05 00 00             ; CALL CT (0593)
-11e6: 0b 8c 0a 00 00             ; CALL .S (0a8c)
-11eb: 0e 0d                      ; CLITERAL 13
-11ed: 19                         ; EMIT
-11ee: 0e 0a                      ; CLITERAL 10
-11f0: 19                         ; EMIT
-11f1: 0b 1e 0f 00 00             ; CALL getLine (0f1e)
-11f6: 2c                         ; INC
-11f7: 0b 15 04 00 00             ; CALL >IN (0415)
-11fc: 03                         ; STORE
-11fd: 0b 72 0e 00 00             ; CALL executeInput (0e72)
-1202: 0e 20                      ; CLITERAL 32
-1204: 19                         ; EMIT
-1205: 08 c9 11 00 00             ; JMP 11c9
-120a: 0c                         ; RET
+1218: 18 51 f0 00 00             ; DICTP C? (f051)
+121d: 0f                         ; CFETCH
+121e: 0b f9 09 00 00             ; CALL . (09f9)
+1223: 0c                         ; RET
 ;
-120b: 18 57 f0 00 00             ; DICTP main (f057)
-1210: 0b 6d 00 00 00             ; CALL STATE (006d)
-1215: 02                         ; FETCH
-1216: 0e 63                      ; CLITERAL 99
-1218: 16                         ; EQ
-1219: 09 36 12 00 00             ; JMPZ 1236
-121e: 0b 6d 00 00 00             ; CALL STATE (006d)
-1223: 0b 26 03 00 00             ; CALL OFF (0326)
-1228: 07 06 48 65 6c 6c 6f 2e 00 ; SLITERAL (1229) [Hello.]
-1231: 0b 93 05 00 00             ; CALL CT (0593)
-1236: 0b bf 11 00 00             ; CALL mainLoop (11bf)
-123b: 0c                         ; RET
+1224: 18 42 f0 00 00             ; DICTP FREE (f042)
+1229: 0b 9f 00 00 00             ; CALL LAST (009f)
+122e: 0b 93 00 00 00             ; CALL HERE (0093)
+1233: 12                         ; SUB
+1234: 0c                         ; RET
 ;
-123c: 18 40 f0 00 00             ; DICTP file-getLine (f040)
-1241: 0b b6 0e 00 00             ; CALL Pad (0eb6)
-1246: 04                         ; SWAP
-1247: 0e c8                      ; CLITERAL 200
-1249: 04                         ; SWAP
-124a: 1e                         ; FREADLINE
-124b: 0b b6 0e 00 00             ; CALL Pad (0eb6)
-1250: 04                         ; SWAP
-1251: 0c                         ; RET
+1235: 18 32 f0 00 00             ; DICTP .FREE (f032)
+123a: 0b 24 12 00 00             ; CALL FREE (1224)
+123f: 0b df 09 00 00             ; CALL (.) (09df)
+1244: 07 0c 20 62 79 74 65 73 20 66 72 65 65 2e 00 ; SLITERAL (1245) [ bytes free.]
+1253: 0b 93 05 00 00             ; CALL CT (0593)
+1258: 0c                         ; RET
 ;
-1252: 18 31 f0 00 00             ; DICTP load (f031)
-1257: 0e 00                      ; CLITERAL 0
-1259: 0e 00                      ; CLITERAL 0
-125b: 1c                         ; FOPEN
-125c: 0e 00                      ; CLITERAL 0
-125e: 16                         ; EQ
-125f: 09 7e 12 00 00             ; JMPZ 127e
-1264: 07 11 43 61 6e 6e 6f 74 20 6f 70 65 6e 20 66 69 6c 65 2e 00 ; SLITERAL (1265) [Cannot open file.]
-1278: 0b 93 05 00 00             ; CALL CT (0593)
-127d: 0c                         ; RET
-127e: 0b e2 0e 00 00             ; CALL INPUT-FP (0ee2)
-1283: 03                         ; STORE
-1284: 0b e2 0e 00 00             ; CALL INPUT-FP (0ee2)
-1289: 02                         ; FETCH
-128a: 0b 3c 12 00 00             ; CALL file-getLine (123c)
-128f: 09 a5 12 00 00             ; JMPZ 12a5
-1294: 2c                         ; INC
-1295: 0b 15 04 00 00             ; CALL >IN (0415)
-129a: 03                         ; STORE
-129b: 0b 72 0e 00 00             ; CALL executeInput (0e72)
-12a0: 08 b8 12 00 00             ; JMP 12b8
-12a5: 05                         ; DROP
-12a6: 0b e2 0e 00 00             ; CALL INPUT-FP (0ee2)
-12ab: 02                         ; FETCH
-12ac: 20                         ; FCLOSE
-12ad: 0b e2 0e 00 00             ; CALL INPUT-FP (0ee2)
-12b2: 0b 26 03 00 00             ; CALL OFF (0326)
-12b7: 0c                         ; RET
-12b8: 08 84 12 00 00             ; JMP 1284
-12bd: 0c                         ; RET
+1259: 18 1f f0 00 00             ; DICTP mainLoop (f01f)
+125e: 0b d6 11 00 00             ; CALL resetState (11d6)
+1263: 0b 45 06 00 00             ; CALL tmp-init (0645)
+1268: 0b 30 03 00 00             ; CALL ?COMPILING (0330)
+126d: 0e 00                      ; CLITERAL 0
+126f: 16                         ; EQ
+1270: 09 85 12 00 00             ; JMPZ 1285
+1275: 07 03 20 4f 4b 00          ; SLITERAL (1276) [ OK]
+127b: 0b 93 05 00 00             ; CALL CT (0593)
+1280: 0b 26 0b 00 00             ; CALL .S (0b26)
+1285: 0e 0d                      ; CLITERAL 13
+1287: 19                         ; EMIT
+1288: 0e 0a                      ; CLITERAL 10
+128a: 19                         ; EMIT
+128b: 0b b8 0f 00 00             ; CALL getLine (0fb8)
+1290: 2c                         ; INC
+1291: 0b 15 04 00 00             ; CALL >IN (0415)
+1296: 03                         ; STORE
+1297: 0b 0c 0f 00 00             ; CALL executeInput (0f0c)
+129c: 0e 20                      ; CLITERAL 32
+129e: 19                         ; EMIT
+129f: 08 63 12 00 00             ; JMP 1263
+12a4: 0c                         ; RET
 ;
-12be: 18 1d f0 00 00             ; DICTP STR.EMPTY (f01d)
-12c3: 0e 00                      ; CLITERAL 0
-12c5: 1a                         ; OVER
-12c6: 03                         ; STORE
-12c7: 0c                         ; RET
+12a5: 18 10 f0 00 00             ; DICTP main (f010)
+12aa: 0b 6d 00 00 00             ; CALL STATE (006d)
+12af: 02                         ; FETCH
+12b0: 0e 63                      ; CLITERAL 99
+12b2: 16                         ; EQ
+12b3: 09 d0 12 00 00             ; JMPZ 12d0
+12b8: 0b 6d 00 00 00             ; CALL STATE (006d)
+12bd: 0b 26 03 00 00             ; CALL OFF (0326)
+12c2: 07 06 48 65 6c 6c 6f 2e 00 ; SLITERAL (12c3) [Hello.]
+12cb: 0b 93 05 00 00             ; CALL CT (0593)
+12d0: 0b 59 12 00 00             ; CALL mainLoop (1259)
+12d5: 0c                         ; RET
 ;
-12c8: 18 0b f0 00 00             ; DICTP STR.LEN (f00b)
-12cd: 06                         ; DUP
-12ce: 0f                         ; CFETCH
-12cf: 0c                         ; RET
+12d6: 18 f9 ef 00 00             ; DICTP file-getLine (eff9)
+12db: 0b 50 0f 00 00             ; CALL Pad (0f50)
+12e0: 04                         ; SWAP
+12e1: 0e c8                      ; CLITERAL 200
+12e3: 04                         ; SWAP
+12e4: 1e                         ; FREADLINE
+12e5: 0b 50 0f 00 00             ; CALL Pad (0f50)
+12ea: 04                         ; SWAP
+12eb: 0c                         ; RET
 ;
-12d0: 18 f8 ef 00 00             ; DICTP STR.CATC (eff8)
-12d5: 1a                         ; OVER
-12d6: 06                         ; DUP
-12d7: 0b fb 04 00 00             ; CALL C++ (04fb)
-12dc: 06                         ; DUP
-12dd: 0f                         ; CFETCH
-12de: 11                         ; ADD
-12df: 0e 00                      ; CLITERAL 0
-12e1: 1a                         ; OVER
-12e2: 2c                         ; INC
-12e3: 10                         ; CSTORE
-12e4: 10                         ; CSTORE
-12e5: 0c                         ; RET
-;
-12e6: 18 e1 ef 00 00             ; DICTP STR.NULLTERM (efe1)
-12eb: 06                         ; DUP
-12ec: 06                         ; DUP
-12ed: 0f                         ; CFETCH
-12ee: 11                         ; ADD
-12ef: 2c                         ; INC
-12f0: 0e 00                      ; CLITERAL 0
-12f2: 04                         ; SWAP
-12f3: 10                         ; CSTORE
-12f4: 0c                         ; RET
-;
-12f5: 18 d4 ef 00 00             ; DICTP I" (efd4)
-12fa: 0b 93 00 00 00             ; CALL HERE (0093)
-12ff: 0e 64                      ; CLITERAL 100
-1301: 11                         ; ADD
-1302: 0e 00                      ; CLITERAL 0
-1304: 1a                         ; OVER
-1305: 03                         ; STORE
-1306: 0b 15 04 00 00             ; CALL >IN (0415)
-130b: 02                         ; FETCH
-130c: 0f                         ; CFETCH
-130d: 06                         ; DUP
-130e: 0e 00                      ; CLITERAL 0
-1310: 16                         ; EQ
-1311: 09 32 13 00 00             ; JMPZ 1332
-1316: 07 10 6d 69 73 73 69 6e 67 20 63 6c 6f 73 69 6e 67 20 00 ; SLITERAL (1317) [missing closing ]
-1329: 0b 93 05 00 00             ; CALL CT (0593)
-132e: 0e 22                      ; CLITERAL 34
-1330: 19                         ; EMIT
-1331: fe                         ; RESET
-1332: 0b 15 04 00 00             ; CALL >IN (0415)
-1337: 0b e1 04 00 00             ; CALL ++ (04e1)
-133c: 06                         ; DUP
-133d: 0e 22                      ; CLITERAL 34
-133f: 16                         ; EQ
-1340: 09 47 13 00 00             ; JMPZ 1347
-1345: 05                         ; DROP
-1346: 0c                         ; RET
-1347: 0b d0 12 00 00             ; CALL STR.CATC (12d0)
-134c: 08 06 13 00 00             ; JMP 1306
+12ec: 18 ea ef 00 00             ; DICTP load (efea)
+12f1: 0e 00                      ; CLITERAL 0
+12f3: 0e 00                      ; CLITERAL 0
+12f5: 1c                         ; FOPEN
+12f6: 0e 00                      ; CLITERAL 0
+12f8: 16                         ; EQ
+12f9: 09 18 13 00 00             ; JMPZ 1318
+12fe: 07 11 43 61 6e 6e 6f 74 20 6f 70 65 6e 20 66 69 6c 65 2e 00 ; SLITERAL (12ff) [Cannot open file.]
+1312: 0b 93 05 00 00             ; CALL CT (0593)
+1317: 0c                         ; RET
+1318: 0b 7c 0f 00 00             ; CALL INPUT-FP (0f7c)
+131d: 03                         ; STORE
+131e: 0b 7c 0f 00 00             ; CALL INPUT-FP (0f7c)
+1323: 02                         ; FETCH
+1324: 0b d6 12 00 00             ; CALL file-getLine (12d6)
+1329: 09 3f 13 00 00             ; JMPZ 133f
+132e: 2c                         ; INC
+132f: 0b 15 04 00 00             ; CALL >IN (0415)
+1334: 03                         ; STORE
+1335: 0b 0c 0f 00 00             ; CALL executeInput (0f0c)
+133a: 08 52 13 00 00             ; JMP 1352
+133f: 05                         ; DROP
+1340: 0b 7c 0f 00 00             ; CALL INPUT-FP (0f7c)
+1345: 02                         ; FETCH
+1346: 20                         ; FCLOSE
+1347: 0b 7c 0f 00 00             ; CALL INPUT-FP (0f7c)
+134c: 0b 26 03 00 00             ; CALL OFF (0326)
 1351: 0c                         ; RET
+1352: 08 1e 13 00 00             ; JMP 131e
+1357: 0c                         ; RET
 ;
-1352: 18 c8 ef 00 00             ; DICTP " (efc8)
-1357: 0b 30 03 00 00             ; CALL ?COMPILING (0330)
-135c: 0e 00                      ; CLITERAL 0
-135e: 16                         ; EQ
-135f: 09 6a 13 00 00             ; JMPZ 136a
-1364: 0b f5 12 00 00             ; CALL I" (12f5)
+1358: 18 d6 ef 00 00             ; DICTP STR.EMPTY (efd6)
+135d: 0e 00                      ; CLITERAL 0
+135f: 1a                         ; OVER
+1360: 03                         ; STORE
+1361: 0c                         ; RET
+;
+1362: 18 c4 ef 00 00             ; DICTP STR.LEN (efc4)
+1367: 06                         ; DUP
+1368: 0f                         ; CFETCH
 1369: 0c                         ; RET
-136a: 0b 2e 01 00 00             ; CALL SLITERAL (012e)
-136f: 0b 93 00 00 00             ; CALL HERE (0093)
-1374: 0e 00                      ; CLITERAL 0
-1376: 0b ab 00 00 00             ; CALL C, (00ab)
-137b: 0b 15 04 00 00             ; CALL >IN (0415)
-1380: 02                         ; FETCH
-1381: 0f                         ; CFETCH
-1382: 06                         ; DUP
-1383: 0e 00                      ; CLITERAL 0
-1385: 16                         ; EQ
-1386: 09 b3 13 00 00             ; JMPZ 13b3
-138b: 05                         ; DROP
-138c: 2e                         ; DEC
-138d: 0b 40 00 00 00             ; CALL (HERE) (0040)
-1392: 03                         ; STORE
-1393: 07 11 6d 69 73 73 69 6e 67 20 63 6c 6f 73 69 6e 67 20 27 00 ; SLITERAL (1394) [missing closing ']
-13a7: 0b 93 05 00 00             ; CALL CT (0593)
-13ac: 0e 22                      ; CLITERAL 34
-13ae: 19                         ; EMIT
-13af: 0e 27                      ; CLITERAL 39
-13b1: 19                         ; EMIT
-13b2: fe                         ; RESET
-13b3: 0b 15 04 00 00             ; CALL >IN (0415)
-13b8: 0b e1 04 00 00             ; CALL ++ (04e1)
-13bd: 06                         ; DUP
-13be: 0e 22                      ; CLITERAL 34
-13c0: 16                         ; EQ
-13c1: 09 d9 13 00 00             ; JMPZ 13d9
-13c6: 05                         ; DROP
-13c7: 0b 93 00 00 00             ; CALL HERE (0093)
-13cc: 0e 00                      ; CLITERAL 0
-13ce: 0b ab 00 00 00             ; CALL C, (00ab)
-13d3: 1a                         ; OVER
-13d4: 12                         ; SUB
-13d5: 2e                         ; DEC
-13d6: 04                         ; SWAP
-13d7: 10                         ; CSTORE
-13d8: 0c                         ; RET
-13d9: 0b ab 00 00 00             ; CALL C, (00ab)
-13de: 08 7b 13 00 00             ; JMP 137b
-13e3: 0c                         ; RET
 ;
-13e4: 18 bb ef 00 00             ; DICTP ll (efbb)
-13e9: 07 09 6c 6f 61 64 73 2e 34 74 68 00 ; SLITERAL (13ea) [loads.4th]
-13f5: 0b 52 12 00 00             ; CALL load (1252)
-13fa: 0c                         ; RET
+136a: 18 b1 ef 00 00             ; DICTP STR.CATC (efb1)
+136f: 1a                         ; OVER
+1370: 06                         ; DUP
+1371: 0b fb 04 00 00             ; CALL C++ (04fb)
+1376: 06                         ; DUP
+1377: 0f                         ; CFETCH
+1378: 11                         ; ADD
+1379: 0e 00                      ; CLITERAL 0
+137b: 1a                         ; OVER
+137c: 2c                         ; INC
+137d: 10                         ; CSTORE
+137e: 10                         ; CSTORE
+137f: 0c                         ; RET
 ;
-13fb: 18 a8 ef 00 00             ; DICTP sys-info (efa8)
-1400: 0b fe 0a 00 00             ; CALL .(MEM_SZ) (0afe)
-1405: 0e 2c                      ; CLITERAL 44
-1407: 19                         ; EMIT
-1408: 0e 20                      ; CLITERAL 32
-140a: 19                         ; EMIT
-140b: 0b 37 0b 00 00             ; CALL .(HERE) (0b37)
-1410: 0e 2c                      ; CLITERAL 44
-1412: 19                         ; EMIT
-1413: 0e 20                      ; CLITERAL 32
-1415: 19                         ; EMIT
-1416: 0b 6e 0b 00 00             ; CALL .(LAST) (0b6e)
-141b: 0e 2c                      ; CLITERAL 44
-141d: 19                         ; EMIT
-141e: 0e 20                      ; CLITERAL 32
-1420: 19                         ; EMIT
-1421: 0b 9b 11 00 00             ; CALL .FREE (119b)
-1426: 0e 0d                      ; CLITERAL 13
-1428: 19                         ; EMIT
-1429: 0e 0a                      ; CLITERAL 10
-142b: 19                         ; EMIT
-142c: 0c                         ; RET
+1380: 18 9a ef 00 00             ; DICTP STR.NULLTERM (ef9a)
+1385: 06                         ; DUP
+1386: 06                         ; DUP
+1387: 0f                         ; CFETCH
+1388: 11                         ; ADD
+1389: 2c                         ; INC
+138a: 0e 00                      ; CLITERAL 0
+138c: 04                         ; SWAP
+138d: 10                         ; CSTORE
+138e: 0c                         ; RET
 ;
-142d: 18 96 ef 00 00             ; DICTP countTo (ef96)
-1432: 07 0c 63 6f 75 6e 74 69 6e 67 20 74 6f 20 00 ; SLITERAL (1433) [counting to ]
+138f: 18 8d ef 00 00             ; DICTP I" (ef8d)
+1394: 0b 93 00 00 00             ; CALL HERE (0093)
+1399: 0e 64                      ; CLITERAL 100
+139b: 11                         ; ADD
+139c: 0e 00                      ; CLITERAL 0
+139e: 1a                         ; OVER
+139f: 03                         ; STORE
+13a0: 0b 15 04 00 00             ; CALL >IN (0415)
+13a5: 02                         ; FETCH
+13a6: 0f                         ; CFETCH
+13a7: 06                         ; DUP
+13a8: 0e 00                      ; CLITERAL 0
+13aa: 16                         ; EQ
+13ab: 09 cc 13 00 00             ; JMPZ 13cc
+13b0: 07 10 6d 69 73 73 69 6e 67 20 63 6c 6f 73 69 6e 67 20 00 ; SLITERAL (13b1) [missing closing ]
+13c3: 0b 93 05 00 00             ; CALL CT (0593)
+13c8: 0e 22                      ; CLITERAL 34
+13ca: 19                         ; EMIT
+13cb: fe                         ; RESET
+13cc: 0b 15 04 00 00             ; CALL >IN (0415)
+13d1: 0b e1 04 00 00             ; CALL ++ (04e1)
+13d6: 06                         ; DUP
+13d7: 0e 22                      ; CLITERAL 34
+13d9: 16                         ; EQ
+13da: 09 e1 13 00 00             ; JMPZ 13e1
+13df: 05                         ; DROP
+13e0: 0c                         ; RET
+13e1: 0b 6a 13 00 00             ; CALL STR.CATC (136a)
+13e6: 08 a0 13 00 00             ; JMP 13a0
+13eb: 0c                         ; RET
+;
+13ec: 18 81 ef 00 00             ; DICTP " (ef81)
+13f1: 0b 30 03 00 00             ; CALL ?COMPILING (0330)
+13f6: 0e 00                      ; CLITERAL 0
+13f8: 16                         ; EQ
+13f9: 09 04 14 00 00             ; JMPZ 1404
+13fe: 0b 8f 13 00 00             ; CALL I" (138f)
+1403: 0c                         ; RET
+1404: 0b 2e 01 00 00             ; CALL SLITERAL (012e)
+1409: 0b 93 00 00 00             ; CALL HERE (0093)
+140e: 0e 00                      ; CLITERAL 0
+1410: 0b ab 00 00 00             ; CALL C, (00ab)
+1415: 0b 15 04 00 00             ; CALL >IN (0415)
+141a: 02                         ; FETCH
+141b: 0f                         ; CFETCH
+141c: 06                         ; DUP
+141d: 0e 00                      ; CLITERAL 0
+141f: 16                         ; EQ
+1420: 09 4d 14 00 00             ; JMPZ 144d
+1425: 05                         ; DROP
+1426: 2e                         ; DEC
+1427: 0b 40 00 00 00             ; CALL (HERE) (0040)
+142c: 03                         ; STORE
+142d: 07 11 6d 69 73 73 69 6e 67 20 63 6c 6f 73 69 6e 67 20 27 00 ; SLITERAL (142e) [missing closing ']
 1441: 0b 93 05 00 00             ; CALL CT (0593)
-1446: 06                         ; DUP
-1447: 0b f9 09 00 00             ; CALL . (09f9)
-144c: 07 04 2e 2e 2e 20 00       ; SLITERAL (144d) [... ]
-1453: 0b 93 05 00 00             ; CALL CT (0593)
-1458: 0e 01                      ; CLITERAL 1
-145a: 1a                         ; OVER
-145b: 1a                         ; OVER
-145c: 15                         ; LT
-145d: 09 65 14 00 00             ; JMPZ 1465
-1462: 05                         ; DROP
-1463: 05                         ; DROP
-1464: 0c                         ; RET
-1465: 2c                         ; INC
-1466: 08 5a 14 00 00             ; JMP 145a
-146b: 0c                         ; RET
+1446: 0e 22                      ; CLITERAL 34
+1448: 19                         ; EMIT
+1449: 0e 27                      ; CLITERAL 39
+144b: 19                         ; EMIT
+144c: fe                         ; RESET
+144d: 0b 15 04 00 00             ; CALL >IN (0415)
+1452: 0b e1 04 00 00             ; CALL ++ (04e1)
+1457: 06                         ; DUP
+1458: 0e 22                      ; CLITERAL 34
+145a: 16                         ; EQ
+145b: 09 73 14 00 00             ; JMPZ 1473
+1460: 05                         ; DROP
+1461: 0b 93 00 00 00             ; CALL HERE (0093)
+1466: 0e 00                      ; CLITERAL 0
+1468: 0b ab 00 00 00             ; CALL C, (00ab)
+146d: 1a                         ; OVER
+146e: 12                         ; SUB
+146f: 2e                         ; DEC
+1470: 04                         ; SWAP
+1471: 10                         ; CSTORE
+1472: 0c                         ; RET
+1473: 0b ab 00 00 00             ; CALL C, (00ab)
+1478: 08 15 14 00 00             ; JMP 1415
+147d: 0c                         ; RET
 ;
-146c: 18 7f ef 00 00             ; DICTP countTo-FAST (ef7f)
-1471: 07 0c 63 6f 75 6e 74 69 6e 67 20 74 6f 20 00 ; SLITERAL (1472) [counting to ]
-1480: 0b 93 05 00 00             ; CALL CT (0593)
-1485: 06                         ; DUP
-1486: 0b f9 09 00 00             ; CALL . (09f9)
-148b: 07 04 2e 2e 2e 20 00       ; SLITERAL (148c) [... ]
-1492: 0b 93 05 00 00             ; CALL CT (0593)
-1497: 2e                         ; DEC
-1498: 06                         ; DUP
-1499: 0a 97 14 00 00             ; JMPNZ 1497
-149e: 05                         ; DROP
-149f: 0c                         ; RET
+147e: 18 74 ef 00 00             ; DICTP ll (ef74)
+1483: 07 09 6c 6f 61 64 73 2e 34 74 68 00 ; SLITERAL (1484) [loads.4th]
+148f: 0b ec 12 00 00             ; CALL load (12ec)
+1494: 0c                         ; RET
+;
+1495: 18 61 ef 00 00             ; DICTP sys-info (ef61)
+149a: 0b 98 0b 00 00             ; CALL .(MEM_SZ) (0b98)
+149f: 0e 2c                      ; CLITERAL 44
+14a1: 19                         ; EMIT
+14a2: 0e 20                      ; CLITERAL 32
+14a4: 19                         ; EMIT
+14a5: 0b d1 0b 00 00             ; CALL .(HERE) (0bd1)
+14aa: 0e 2c                      ; CLITERAL 44
+14ac: 19                         ; EMIT
+14ad: 0e 20                      ; CLITERAL 32
+14af: 19                         ; EMIT
+14b0: 0b 08 0c 00 00             ; CALL .(LAST) (0c08)
+14b5: 0e 2c                      ; CLITERAL 44
+14b7: 19                         ; EMIT
+14b8: 0e 20                      ; CLITERAL 32
+14ba: 19                         ; EMIT
+14bb: 0b 35 12 00 00             ; CALL .FREE (1235)
+14c0: 0e 0d                      ; CLITERAL 13
+14c2: 19                         ; EMIT
+14c3: 0e 0a                      ; CLITERAL 10
+14c5: 19                         ; EMIT
+14c6: 0c                         ; RET
+;
+14c7: 18 4f ef 00 00             ; DICTP countTo (ef4f)
+14cc: 07 0c 63 6f 75 6e 74 69 6e 67 20 74 6f 20 00 ; SLITERAL (14cd) [counting to ]
+14db: 0b 93 05 00 00             ; CALL CT (0593)
+14e0: 06                         ; DUP
+14e1: 0b f9 09 00 00             ; CALL . (09f9)
+14e6: 07 04 2e 2e 2e 20 00       ; SLITERAL (14e7) [... ]
+14ed: 0b 93 05 00 00             ; CALL CT (0593)
+14f2: 0e 01                      ; CLITERAL 1
+14f4: 1a                         ; OVER
+14f5: 1a                         ; OVER
+14f6: 15                         ; LT
+14f7: 09 ff 14 00 00             ; JMPZ 14ff
+14fc: 05                         ; DROP
+14fd: 05                         ; DROP
+14fe: 0c                         ; RET
+14ff: 2c                         ; INC
+1500: 08 f4 14 00 00             ; JMP 14f4
+1505: 0c                         ; RET
+;
+1506: 18 38 ef 00 00             ; DICTP countTo-FAST (ef38)
+150b: 07 0c 63 6f 75 6e 74 69 6e 67 20 74 6f 20 00 ; SLITERAL (150c) [counting to ]
+151a: 0b 93 05 00 00             ; CALL CT (0593)
+151f: 06                         ; DUP
+1520: 0b f9 09 00 00             ; CALL . (09f9)
+1525: 07 04 2e 2e 2e 20 00       ; SLITERAL (1526) [... ]
+152c: 0b 93 05 00 00             ; CALL CT (0593)
+1531: 2e                         ; DEC
+1532: 06                         ; DUP
+1533: 0a 31 15 00 00             ; JMPNZ 1531
+1538: 05                         ; DROP
+1539: 0c                         ; RET
 ;
 ; End of code, Dictionary:
 ;
-ef7f: 96 ef 00 00                ; countTo-FAST - (next: ef96 countTo)
-ef83: 6c 14 00 00 00             ; XT=146c, flags=00
-ef88: 0c 63 6f 75 6e 74 54 6f 2d 46 41 53 54 00 ; 12, countTo-FAST
+ef38: 4f ef 00 00                ; countTo-FAST - (next: ef4f countTo)
+ef3c: 06 15 00 00 00             ; XT=1506, flags=00
+ef41: 0c 63 6f 75 6e 74 54 6f 2d 46 41 53 54 00 ; 12, countTo-FAST
 ;
-ef96: a8 ef 00 00                ; countTo - (next: efa8 sys-info)
-ef9a: 2d 14 00 00 00             ; XT=142d, flags=00
-ef9f: 07 63 6f 75 6e 74 54 6f 00 ; 7, countTo
+ef4f: 61 ef 00 00                ; countTo - (next: ef61 sys-info)
+ef53: c7 14 00 00 00             ; XT=14c7, flags=00
+ef58: 07 63 6f 75 6e 74 54 6f 00 ; 7, countTo
 ;
-efa8: bb ef 00 00                ; sys-info - (next: efbb ll)
-efac: fb 13 00 00 00             ; XT=13fb, flags=00
-efb1: 08 73 79 73 2d 69 6e 66 6f 00 ; 8, sys-info
+ef61: 74 ef 00 00                ; sys-info - (next: ef74 ll)
+ef65: 95 14 00 00 00             ; XT=1495, flags=00
+ef6a: 08 73 79 73 2d 69 6e 66 6f 00 ; 8, sys-info
 ;
-efbb: c8 ef 00 00                ; ll - (next: efc8 ")
-efbf: e4 13 00 00 00             ; XT=13e4, flags=00
-efc4: 02 6c 6c 00                ; 2, ll
+ef74: 81 ef 00 00                ; ll - (next: ef81 ")
+ef78: 7e 14 00 00 00             ; XT=147e, flags=00
+ef7d: 02 6c 6c 00                ; 2, ll
 ;
-efc8: d4 ef 00 00                ; " - (next: efd4 I")
-efcc: 52 13 00 00 01             ; XT=1352, flags=01
-efd1: 01 22 00                   ; 1, "
+ef81: 8d ef 00 00                ; " - (next: ef8d I")
+ef85: ec 13 00 00 01             ; XT=13ec, flags=01
+ef8a: 01 22 00                   ; 1, "
 ;
-efd4: e1 ef 00 00                ; I" - (next: efe1 STR.NULLTERM)
-efd8: f5 12 00 00 00             ; XT=12f5, flags=00
-efdd: 02 49 22 00                ; 2, I"
+ef8d: 9a ef 00 00                ; I" - (next: ef9a STR.NULLTERM)
+ef91: 8f 13 00 00 00             ; XT=138f, flags=00
+ef96: 02 49 22 00                ; 2, I"
 ;
-efe1: f8 ef 00 00                ; STR.NULLTERM - (next: eff8 STR.CATC)
-efe5: e6 12 00 00 00             ; XT=12e6, flags=00
-efea: 0c 53 54 52 2e 4e 55 4c 4c 54 45 52 4d 00 ; 12, STR.NULLTERM
+ef9a: b1 ef 00 00                ; STR.NULLTERM - (next: efb1 STR.CATC)
+ef9e: 80 13 00 00 00             ; XT=1380, flags=00
+efa3: 0c 53 54 52 2e 4e 55 4c 4c 54 45 52 4d 00 ; 12, STR.NULLTERM
 ;
-eff8: 0b f0 00 00                ; STR.CATC - (next: f00b STR.LEN)
-effc: d0 12 00 00 00             ; XT=12d0, flags=00
-f001: 08 53 54 52 2e 43 41 54 43 00 ; 8, STR.CATC
+efb1: c4 ef 00 00                ; STR.CATC - (next: efc4 STR.LEN)
+efb5: 6a 13 00 00 00             ; XT=136a, flags=00
+efba: 08 53 54 52 2e 43 41 54 43 00 ; 8, STR.CATC
 ;
-f00b: 1d f0 00 00                ; STR.LEN - (next: f01d STR.EMPTY)
-f00f: c8 12 00 00 02             ; XT=12c8, flags=02
-f014: 07 53 54 52 2e 4c 45 4e 00 ; 7, STR.LEN
+efc4: d6 ef 00 00                ; STR.LEN - (next: efd6 STR.EMPTY)
+efc8: 62 13 00 00 02             ; XT=1362, flags=02
+efcd: 07 53 54 52 2e 4c 45 4e 00 ; 7, STR.LEN
 ;
-f01d: 31 f0 00 00                ; STR.EMPTY - (next: f031 load)
-f021: be 12 00 00 02             ; XT=12be, flags=02
-f026: 09 53 54 52 2e 45 4d 50 54 59 00 ; 9, STR.EMPTY
+efd6: ea ef 00 00                ; STR.EMPTY - (next: efea load)
+efda: 58 13 00 00 02             ; XT=1358, flags=02
+efdf: 09 53 54 52 2e 45 4d 50 54 59 00 ; 9, STR.EMPTY
 ;
-f031: 40 f0 00 00                ; load - (next: f040 file-getLine)
-f035: 52 12 00 00 00             ; XT=1252, flags=00
-f03a: 04 6c 6f 61 64 00          ; 4, load
+efea: f9 ef 00 00                ; load - (next: eff9 file-getLine)
+efee: ec 12 00 00 00             ; XT=12ec, flags=00
+eff3: 04 6c 6f 61 64 00          ; 4, load
 ;
-f040: 57 f0 00 00                ; file-getLine - (next: f057 main)
-f044: 3c 12 00 00 00             ; XT=123c, flags=00
-f049: 0c 66 69 6c 65 2d 67 65 74 4c 69 6e 65 00 ; 12, file-getLine
+eff9: 10 f0 00 00                ; file-getLine - (next: f010 main)
+effd: d6 12 00 00 00             ; XT=12d6, flags=00
+f002: 0c 66 69 6c 65 2d 67 65 74 4c 69 6e 65 00 ; 12, file-getLine
 ;
-f057: 66 f0 00 00                ; main - (next: f066 mainLoop)
-f05b: 0b 12 00 00 00             ; XT=120b, flags=00
-f060: 04 6d 61 69 6e 00          ; 4, main
+f010: 1f f0 00 00                ; main - (next: f01f mainLoop)
+f014: a5 12 00 00 00             ; XT=12a5, flags=00
+f019: 04 6d 61 69 6e 00          ; 4, main
 ;
-f066: 79 f0 00 00                ; mainLoop - (next: f079 .FREE)
-f06a: bf 11 00 00 00             ; XT=11bf, flags=00
-f06f: 08 6d 61 69 6e 4c 6f 6f 70 00 ; 8, mainLoop
+f01f: 32 f0 00 00                ; mainLoop - (next: f032 .FREE)
+f023: 59 12 00 00 00             ; XT=1259, flags=00
+f028: 08 6d 61 69 6e 4c 6f 6f 70 00 ; 8, mainLoop
 ;
-f079: 89 f0 00 00                ; .FREE - (next: f089 FREE)
-f07d: 9b 11 00 00 00             ; XT=119b, flags=00
-f082: 05 2e 46 52 45 45 00       ; 5, .FREE
+f032: 42 f0 00 00                ; .FREE - (next: f042 FREE)
+f036: 35 12 00 00 00             ; XT=1235, flags=00
+f03b: 05 2e 46 52 45 45 00       ; 5, .FREE
 ;
-f089: 98 f0 00 00                ; FREE - (next: f098 C?)
-f08d: 8a 11 00 00 00             ; XT=118a, flags=00
-f092: 04 46 52 45 45 00          ; 4, FREE
+f042: 51 f0 00 00                ; FREE - (next: f051 C?)
+f046: 24 12 00 00 00             ; XT=1224, flags=00
+f04b: 04 46 52 45 45 00          ; 4, FREE
 ;
-f098: a5 f0 00 00                ; C? - (next: f0a5 ?)
-f09c: 7e 11 00 00 00             ; XT=117e, flags=00
-f0a1: 02 43 3f 00                ; 2, C?
+f051: 5e f0 00 00                ; C? - (next: f05e ?)
+f055: 18 12 00 00 00             ; XT=1218, flags=00
+f05a: 02 43 3f 00                ; 2, C?
 ;
-f0a5: b1 f0 00 00                ; ? - (next: f0b1 ALLOT)
-f0a9: 72 11 00 00 00             ; XT=1172, flags=00
-f0ae: 01 3f 00                   ; 1, ?
+f05e: 6a f0 00 00                ; ? - (next: f06a ALLOT)
+f062: 0c 12 00 00 00             ; XT=120c, flags=00
+f067: 01 3f 00                   ; 1, ?
 ;
-f0b1: c1 f0 00 00                ; ALLOT - (next: f0c1 resetState)
-f0b5: 60 11 00 00 00             ; XT=1160, flags=00
-f0ba: 05 41 4c 4c 4f 54 00       ; 5, ALLOT
+f06a: 7a f0 00 00                ; ALLOT - (next: f07a resetState)
+f06e: fa 11 00 00 00             ; XT=11fa, flags=00
+f073: 05 41 4c 4c 4f 54 00       ; 5, ALLOT
 ;
-f0c1: d6 f0 00 00                ; resetState - (next: f0d6 ForgetLast)
-f0c5: 3c 11 00 00 00             ; XT=113c, flags=00
-f0ca: 0a 72 65 73 65 74 53 74 61 74 65 00 ; 10, resetState
+f07a: 8f f0 00 00                ; resetState - (next: f08f ForgetLast)
+f07e: d6 11 00 00 00             ; XT=11d6, flags=00
+f083: 0a 72 65 73 65 74 53 74 61 74 65 00 ; 10, resetState
 ;
-f0d6: eb f0 00 00                ; ForgetLast - (next: f0eb ;)
-f0da: 18 11 00 00 00             ; XT=1118, flags=00
-f0df: 0a 46 6f 72 67 65 74 4c 61 73 74 00 ; 10, ForgetLast
+f08f: a4 f0 00 00                ; ForgetLast - (next: f0a4 ;)
+f093: b2 11 00 00 00             ; XT=11b2, flags=00
+f098: 0a 46 6f 72 67 65 74 4c 61 73 74 00 ; 10, ForgetLast
 ;
-f0eb: f7 f0 00 00                ; ; - (next: f0f7 :NONAME)
-f0ef: 03 11 00 00 01             ; XT=1103, flags=01
-f0f4: 01 3b 00                   ; 1, ;
+f0a4: b0 f0 00 00                ; ; - (next: f0b0 :NONAME)
+f0a8: 9d 11 00 00 01             ; XT=119d, flags=01
+f0ad: 01 3b 00                   ; 1, ;
 ;
-f0f7: 09 f1 00 00                ; :NONAME - (next: f109 :)
-f0fb: ee 10 00 00 00             ; XT=10ee, flags=00
-f100: 07 3a 4e 4f 4e 41 4d 45 00 ; 7, :NONAME
+f0b0: c2 f0 00 00                ; :NONAME - (next: f0c2 :)
+f0b4: 88 11 00 00 00             ; XT=1188, flags=00
+f0b9: 07 3a 4e 4f 4e 41 4d 45 00 ; 7, :NONAME
 ;
-f109: 15 f1 00 00                ; : - (next: f115 CREATE-NAME)
-f10d: d9 10 00 00 00             ; XT=10d9, flags=00
-f112: 01 3a 00                   ; 1, :
+f0c2: ce f0 00 00                ; : - (next: f0ce CREATE-NAME)
+f0c6: 73 11 00 00 00             ; XT=1173, flags=00
+f0cb: 01 3a 00                   ; 1, :
 ;
-f115: 2b f1 00 00                ; CREATE-NAME - (next: f12b Define-Word)
-f119: 81 10 00 00 00             ; XT=1081, flags=00
-f11e: 0b 43 52 45 41 54 45 2d 4e 41 4d 45 00 ; 11, CREATE-NAME
+f0ce: e4 f0 00 00                ; CREATE-NAME - (next: f0e4 Define-Word)
+f0d2: 1b 11 00 00 00             ; XT=111b, flags=00
+f0d7: 0b 43 52 45 41 54 45 2d 4e 41 4d 45 00 ; 11, CREATE-NAME
 ;
-f12b: 41 f1 00 00                ; Define-Word - (next: f141 strcpy2c)
-f12f: 28 10 00 00 00             ; XT=1028, flags=00
-f134: 0b 44 65 66 69 6e 65 2d 57 6f 72 64 00 ; 11, Define-Word
+f0e4: fa f0 00 00                ; Define-Word - (next: f0fa strcpy2c)
+f0e8: c2 10 00 00 00             ; XT=10c2, flags=00
+f0ed: 0b 44 65 66 69 6e 65 2d 57 6f 72 64 00 ; 11, Define-Word
 ;
-f141: 54 f1 00 00                ; strcpy2c - (next: f154 getLine)
-f145: ef 0f 00 00 00             ; XT=0fef, flags=00
-f14a: 08 73 74 72 63 70 79 32 63 00 ; 8, strcpy2c
+f0fa: 0d f1 00 00                ; strcpy2c - (next: f10d getLine)
+f0fe: 89 10 00 00 00             ; XT=1089, flags=00
+f103: 08 73 74 72 63 70 79 32 63 00 ; 8, strcpy2c
 ;
-f154: 66 f1 00 00                ; getLine - (next: f166 getLineFromFile)
-f158: 1e 0f 00 00 00             ; XT=0f1e, flags=00
-f15d: 07 67 65 74 4c 69 6e 65 00 ; 7, getLine
+f10d: 1f f1 00 00                ; getLine - (next: f11f getLineFromFile)
+f111: b8 0f 00 00 00             ; XT=0fb8, flags=00
+f116: 07 67 65 74 4c 69 6e 65 00 ; 7, getLine
 ;
-f166: 80 f1 00 00                ; getLineFromFile - (next: f180 LoadingFromFile?)
-f16a: fd 0e 00 00 00             ; XT=0efd, flags=00
-f16f: 0f 67 65 74 4c 69 6e 65 46 72 6f 6d 46 69 6c 65 00 ; 15, getLineFromFile
+f11f: 39 f1 00 00                ; getLineFromFile - (next: f139 LoadingFromFile?)
+f123: 97 0f 00 00 00             ; XT=0f97, flags=00
+f128: 0f 67 65 74 4c 69 6e 65 46 72 6f 6d 46 69 6c 65 00 ; 15, getLineFromFile
 ;
-f180: 9b f1 00 00                ; LoadingFromFile? - (next: f19b INPUT-FP)
-f184: f1 0e 00 00 00             ; XT=0ef1, flags=00
-f189: 10 4c 6f 61 64 69 6e 67 46 72 6f 6d 46 69 6c 65 3f 00 ; 16, LoadingFromFile?
+f139: 54 f1 00 00                ; LoadingFromFile? - (next: f154 INPUT-FP)
+f13d: 8b 0f 00 00 00             ; XT=0f8b, flags=00
+f142: 10 4c 6f 61 64 69 6e 67 46 72 6f 6d 46 69 6c 65 3f 00 ; 16, LoadingFromFile?
 ;
-f19b: ae f1 00 00                ; INPUT-FP - (next: f1ae Pad)
-f19f: e2 0e 00 00 00             ; XT=0ee2, flags=00
-f1a4: 08 49 4e 50 55 54 2d 46 50 00 ; 8, INPUT-FP
+f154: 67 f1 00 00                ; INPUT-FP - (next: f167 Pad)
+f158: 7c 0f 00 00 00             ; XT=0f7c, flags=00
+f15d: 08 49 4e 50 55 54 2d 46 50 00 ; 8, INPUT-FP
 ;
-f1ae: bc f1 00 00                ; Pad - (next: f1bc executeInput)
-f1b2: b6 0e 00 00 00             ; XT=0eb6, flags=00
-f1b7: 03 50 61 64 00             ; 3, Pad
+f167: 75 f1 00 00                ; Pad - (next: f175 executeInput)
+f16b: 50 0f 00 00 00             ; XT=0f50, flags=00
+f170: 03 50 61 64 00             ; 3, Pad
 ;
-f1bc: d3 f1 00 00                ; executeInput - (next: f1d3 executeWord)
-f1c0: 72 0e 00 00 00             ; XT=0e72, flags=00
-f1c5: 0c 65 78 65 63 75 74 65 49 6e 70 75 74 00 ; 12, executeInput
+f175: 8c f1 00 00                ; executeInput - (next: f18c executeWord)
+f179: 0c 0f 00 00 00             ; XT=0f0c, flags=00
+f17e: 0c 65 78 65 63 75 74 65 49 6e 70 75 74 00 ; 12, executeInput
 ;
-f1d3: e9 f1 00 00                ; executeWord - (next: f1e9 [COMPILE])
-f1d7: d1 0d 00 00 00             ; XT=0dd1, flags=00
-f1dc: 0b 65 78 65 63 75 74 65 57 6f 72 64 00 ; 11, executeWord
+f18c: a2 f1 00 00                ; executeWord - (next: f1a2 [COMPILE])
+f190: 6b 0e 00 00 00             ; XT=0e6b, flags=00
+f195: 0b 65 78 65 63 75 74 65 57 6f 72 64 00 ; 11, executeWord
 ;
-f1e9: fd f1 00 00                ; [COMPILE] - (next: f1fd cstr,)
-f1ed: ad 0d 00 00 00             ; XT=0dad, flags=00
-f1f2: 09 5b 43 4f 4d 50 49 4c 45 5d 00 ; 9, [COMPILE]
+f1a2: b6 f1 00 00                ; [COMPILE] - (next: f1b6 cstr,)
+f1a6: 47 0e 00 00 00             ; XT=0e47, flags=00
+f1ab: 09 5b 43 4f 4d 50 49 4c 45 5d 00 ; 9, [COMPILE]
 ;
-f1fd: 0d f2 00 00                ; cstr, - (next: f20d strlen)
-f201: 9c 0d 00 00 00             ; XT=0d9c, flags=00
-f206: 05 63 73 74 72 2c 00       ; 5, cstr,
+f1b6: c6 f1 00 00                ; cstr, - (next: f1c6 strlen)
+f1ba: 36 0e 00 00 00             ; XT=0e36, flags=00
+f1bf: 05 63 73 74 72 2c 00       ; 5, cstr,
 ;
-f20d: 1e f2 00 00                ; strlen - (next: f21e Copy.INLINE)
-f211: 7d 0d 00 00 00             ; XT=0d7d, flags=00
-f216: 06 73 74 72 6c 65 6e 00    ; 6, strlen
+f1c6: d7 f1 00 00                ; strlen - (next: f1d7 Copy.INLINE)
+f1ca: 17 0e 00 00 00             ; XT=0e17, flags=00
+f1cf: 06 73 74 72 6c 65 6e 00    ; 6, strlen
 ;
-f21e: 34 f2 00 00                ; Copy.INLINE - (next: f234 DOES>)
-f222: 5b 0d 00 00 00             ; XT=0d5b, flags=00
-f227: 0b 43 6f 70 79 2e 49 4e 4c 49 4e 45 00 ; 11, Copy.INLINE
+f1d7: ed f1 00 00                ; Copy.INLINE - (next: f1ed DOES>)
+f1db: f5 0d 00 00 00             ; XT=0df5, flags=00
+f1e0: 0b 43 6f 70 79 2e 49 4e 4c 49 4e 45 00 ; 11, Copy.INLINE
 ;
-f234: 44 f2 00 00                ; DOES> - (next: f244 (inline))
-f238: 46 0d 00 00 00             ; XT=0d46, flags=00
-f23d: 05 44 4f 45 53 3e 00       ; 5, DOES>
+f1ed: fd f1 00 00                ; DOES> - (next: f1fd (inline))
+f1f1: e0 0d 00 00 00             ; XT=0de0, flags=00
+f1f6: 05 44 4f 45 53 3e 00       ; 5, DOES>
 ;
-f244: 57 f2 00 00                ; (inline) - (next: f257 find.ret)
-f248: 25 0d 00 00 00             ; XT=0d25, flags=00
-f24d: 08 28 69 6e 6c 69 6e 65 29 00 ; 8, (inline)
+f1fd: 10 f2 00 00                ; (inline) - (next: f210 find.ret)
+f201: bf 0d 00 00 00             ; XT=0dbf, flags=00
+f206: 08 28 69 6e 6c 69 6e 65 29 00 ; 8, (inline)
 ;
-f257: 6a f2 00 00                ; find.ret - (next: f26a EXECUTE)
-f25b: 0e 0d 00 00 00             ; XT=0d0e, flags=00
-f260: 08 66 69 6e 64 2e 72 65 74 00 ; 8, find.ret
+f210: 23 f2 00 00                ; find.ret - (next: f223 EXECUTE)
+f214: a8 0d 00 00 00             ; XT=0da8, flags=00
+f219: 08 66 69 6e 64 2e 72 65 74 00 ; 8, find.ret
 ;
-f26a: 7c f2 00 00                ; EXECUTE - (next: f27c .lastx)
-f26e: 05 0d 00 00 00             ; XT=0d05, flags=00
-f273: 07 45 58 45 43 55 54 45 00 ; 7, EXECUTE
+f223: 35 f2 00 00                ; EXECUTE - (next: f235 .lastx)
+f227: 9f 0d 00 00 00             ; XT=0d9f, flags=00
+f22c: 07 45 58 45 43 55 54 45 00 ; 7, EXECUTE
 ;
-f27c: 8d f2 00 00                ; .lastx - (next: f28d NUM-WORDS)
-f280: cd 0c 00 00 00             ; XT=0ccd, flags=00
-f285: 06 2e 6c 61 73 74 78 00    ; 6, .lastx
+f235: 46 f2 00 00                ; .lastx - (next: f246 NUM-WORDS)
+f239: 67 0d 00 00 00             ; XT=0d67, flags=00
+f23e: 06 2e 6c 61 73 74 78 00    ; 6, .lastx
 ;
-f28d: a1 f2 00 00                ; NUM-WORDS - (next: f2a1 WORDSV)
-f291: a3 0c 00 00 00             ; XT=0ca3, flags=00
-f296: 09 4e 55 4d 2d 57 4f 52 44 53 00 ; 9, NUM-WORDS
+f246: 5a f2 00 00                ; NUM-WORDS - (next: f25a WORDSV)
+f24a: 3d 0d 00 00 00             ; XT=0d3d, flags=00
+f24f: 09 4e 55 4d 2d 57 4f 52 44 53 00 ; 9, NUM-WORDS
 ;
-f2a1: b2 f2 00 00                ; WORDSV - (next: f2b2 .WORD-LONG)
-f2a5: 71 0c 00 00 00             ; XT=0c71, flags=00
-f2aa: 06 57 4f 52 44 53 56 00    ; 6, WORDSV
+f25a: 6b f2 00 00                ; WORDSV - (next: f26b .WORD-LONG)
+f25e: 0b 0d 00 00 00             ; XT=0d0b, flags=00
+f263: 06 57 4f 52 44 53 56 00    ; 6, WORDSV
 ;
-f2b2: c7 f2 00 00                ; .WORD-LONG - (next: f2c7 WORDS)
-f2b6: e1 0b 00 00 00             ; XT=0be1, flags=00
-f2bb: 0a 2e 57 4f 52 44 2d 4c 4f 4e 47 00 ; 10, .WORD-LONG
+f26b: 80 f2 00 00                ; .WORD-LONG - (next: f280 WORDS)
+f26f: 7b 0c 00 00 00             ; XT=0c7b, flags=00
+f274: 0a 2e 57 4f 52 44 2d 4c 4f 4e 47 00 ; 10, .WORD-LONG
 ;
-f2c7: d7 f2 00 00                ; WORDS - (next: f2d7 .WORD-SHORT)
-f2cb: ba 0b 00 00 00             ; XT=0bba, flags=00
-f2d0: 05 57 4f 52 44 53 00       ; 5, WORDS
+f280: 90 f2 00 00                ; WORDS - (next: f290 .WORD-SHORT)
+f284: 54 0c 00 00 00             ; XT=0c54, flags=00
+f289: 05 57 4f 52 44 53 00       ; 5, WORDS
 ;
-f2d7: ed f2 00 00                ; .WORD-SHORT - (next: f2ed .(LAST))
-f2db: a5 0b 00 00 00             ; XT=0ba5, flags=00
-f2e0: 0b 2e 57 4f 52 44 2d 53 48 4f 52 54 00 ; 11, .WORD-SHORT
+f290: a6 f2 00 00                ; .WORD-SHORT - (next: f2a6 .(LAST))
+f294: 3f 0c 00 00 00             ; XT=0c3f, flags=00
+f299: 0b 2e 57 4f 52 44 2d 53 48 4f 52 54 00 ; 11, .WORD-SHORT
 ;
-f2ed: ff f2 00 00                ; .(LAST) - (next: f2ff .(HERE))
-f2f1: 6e 0b 00 00 00             ; XT=0b6e, flags=00
-f2f6: 07 2e 28 4c 41 53 54 29 00 ; 7, .(LAST)
+f2a6: b8 f2 00 00                ; .(LAST) - (next: f2b8 .(HERE))
+f2aa: 08 0c 00 00 00             ; XT=0c08, flags=00
+f2af: 07 2e 28 4c 41 53 54 29 00 ; 7, .(LAST)
 ;
-f2ff: 11 f3 00 00                ; .(HERE) - (next: f311 .(MEM_SZ))
-f303: 37 0b 00 00 00             ; XT=0b37, flags=00
-f308: 07 2e 28 48 45 52 45 29 00 ; 7, .(HERE)
+f2b8: ca f2 00 00                ; .(HERE) - (next: f2ca .(MEM_SZ))
+f2bc: d1 0b 00 00 00             ; XT=0bd1, flags=00
+f2c1: 07 2e 28 48 45 52 45 29 00 ; 7, .(HERE)
 ;
-f311: 25 f3 00 00                ; .(MEM_SZ) - (next: f325 .S)
-f315: fe 0a 00 00 00             ; XT=0afe, flags=00
-f31a: 09 2e 28 4d 45 4d 5f 53 5a 29 00 ; 9, .(MEM_SZ)
+f2ca: de f2 00 00                ; .(MEM_SZ) - (next: f2de .S)
+f2ce: 98 0b 00 00 00             ; XT=0b98, flags=00
+f2d3: 09 2e 28 4d 45 4d 5f 53 5a 29 00 ; 9, .(MEM_SZ)
 ;
-f325: 32 f3 00 00                ; .S - (next: f332 MAX)
-f329: 8c 0a 00 00 00             ; XT=0a8c, flags=00
-f32e: 02 2e 53 00                ; 2, .S
+f2de: eb f2 00 00                ; .S - (next: f2eb MAX)
+f2e2: 26 0b 00 00 00             ; XT=0b26, flags=00
+f2e7: 02 2e 53 00                ; 2, .S
 ;
-f332: 40 f3 00 00                ; MAX - (next: f340 MIN)
-f336: 7c 0a 00 00 00             ; XT=0a7c, flags=00
-f33b: 03 4d 41 58 00             ; 3, MAX
+f2eb: f9 f2 00 00                ; MAX - (next: f2f9 MIN)
+f2ef: 16 0b 00 00 00             ; XT=0b16, flags=00
+f2f4: 03 4d 41 58 00             ; 3, MAX
 ;
-f340: 4e f3 00 00                ; MIN - (next: f34e BINARY.)
-f344: 6c 0a 00 00 00             ; XT=0a6c, flags=00
-f349: 03 4d 49 4e 00             ; 3, MIN
+f2f9: 07 f3 00 00                ; MIN - (next: f307 BINARY.)
+f2fd: 06 0b 00 00 00             ; XT=0b06, flags=00
+f302: 03 4d 49 4e 00             ; 3, MIN
 ;
-f34e: 60 f3 00 00                ; BINARY. - (next: f360 DECIMAL.)
-f352: 4f 0a 00 00 00             ; XT=0a4f, flags=00
-f357: 07 42 49 4e 41 52 59 2e 00 ; 7, BINARY.
+f307: 19 f3 00 00                ; BINARY. - (next: f319 DECIMAL.)
+f30b: e9 0a 00 00 00             ; XT=0ae9, flags=00
+f310: 07 42 49 4e 41 52 59 2e 00 ; 7, BINARY.
 ;
-f360: 73 f3 00 00                ; DECIMAL. - (next: f373 HEX.)
-f364: 32 0a 00 00 00             ; XT=0a32, flags=00
-f369: 08 44 45 43 49 4d 41 4c 2e 00 ; 8, DECIMAL.
+f319: 2c f3 00 00                ; DECIMAL. - (next: f32c HEX.4)
+f31d: cc 0a 00 00 00             ; XT=0acc, flags=00
+f322: 08 44 45 43 49 4d 41 4c 2e 00 ; 8, DECIMAL.
 ;
-f373: 82 f3 00 00                ; HEX. - (next: f382 .)
-f377: 09 0a 00 00 00             ; XT=0a09, flags=00
-f37c: 04 48 45 58 2e 00          ; 4, HEX.
+f32c: 3c f3 00 00                ; HEX.4 - (next: f33c HEX.2)
+f330: af 0a 00 00 00             ; XT=0aaf, flags=00
+f335: 05 48 45 58 2e 34 00       ; 5, HEX.4
+;
+f33c: 4c f3 00 00                ; HEX.2 - (next: f34c HEX.)
+f340: 92 0a 00 00 00             ; XT=0a92, flags=00
+f345: 05 48 45 58 2e 32 00       ; 5, HEX.2
+;
+f34c: 5b f3 00 00                ; HEX. - (next: f35b .4)
+f350: 75 0a 00 00 00             ; XT=0a75, flags=00
+f355: 04 48 45 58 2e 00          ; 4, HEX.
+;
+f35b: 68 f3 00 00                ; .4 - (next: f368 .3)
+f35f: 4c 0a 00 00 00             ; XT=0a4c, flags=00
+f364: 02 2e 34 00                ; 2, .4
+;
+f368: 75 f3 00 00                ; .3 - (next: f375 .2)
+f36c: 28 0a 00 00 00             ; XT=0a28, flags=00
+f371: 02 2e 33 00                ; 2, .3
+;
+f375: 82 f3 00 00                ; .2 - (next: f382 .)
+f379: 09 0a 00 00 00             ; XT=0a09, flags=00
+f37e: 02 2e 32 00                ; 2, .2
 ;
 f382: 8e f3 00 00                ; . - (next: f38e (.))
 f386: f9 09 00 00 00             ; XT=09f9, flags=00

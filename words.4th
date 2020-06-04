@@ -8,9 +8,6 @@
 : ?DUP DUP IF DUP THEN ;
 : 2DUP  OVER OVER ; INLINE
 : 2DROP DROP DROP ; INLINE
-: 1+ 1 + ; INLINE
-: 1- 1 - ; INLINE
-: 0= 0 = ; INLINE
 
 : (const) LITERAL , RET ;
 : CONSTANT  CREATE-NAME (const) ;
@@ -33,41 +30,20 @@
 : dump                          \ ( start end -- ) 
     CR 2DUP < IF SWAP THEN 
     BEGIN 
-        2DUP < IF 
-            2DROP LEAVE 
-        THEN 
-        DUP BL C@ HEX. 1+ 
+        2DUP < IF 2DROP LEAVE THEN 
+        DUP BL C@ HEX.2 1+ 
     AGAIN ;
 
-: dump-n OVER + 1 - dump ;      \ ( start num -- ) 
+: dump-n 1- OVER + dump ;      \ ( start num -- ) 
 
 : dump-w                \ ( start end -- ) 
-    CR 2DUP < 
-    IF 
-        SWAP 
-    THEN 
+    CR 2DUP < IF SWAP THEN 
     BEGIN 
-        2DUP < 
-        IF 2DROP LEAVE 
-        THEN 
-        DUP BL @ HEX. CELL + 
+        2DUP < IF 2DROP LEAVE THEN 
+        DUP BL @ HEX.4 CELL + 
     AGAIN ;
 
-: dump-nw               \ ( start num -- ) 
-    CELLS OVER +
-    CR 2DUP < 
-    IF 
-        SWAP 
-    THEN 
-    BEGIN 
-        2DUP < 
-        IF 2DROP LEAVE 
-        THEN 
-        DUP BL @ HEX. CELL + 
-    AGAIN ;
-
-: dump.num              \ ( start num -- ) 
-    OVER + dump ;
+: dump-nw  1- CELLS OVER + dump-w ;             \ ( start num -- ) 
 
 : img-save              \ ( file-name -- )
     1 1 FOPEN IF
@@ -113,45 +89,30 @@
 \ --------------------------------------------------------------------------------
 variable ps
 decimal 64 ps stk-init
-: >p ps >stk ; 
-: p> ps stk> ; 
+: >p ps >stk ;              \ (n -- ) Move the main stack TOS to ps
+: p> ps stk> ;              \ ( -- n) Move ps TOS to the main stack
 : pdepth ps stk-depth ;
 : pdrop ps stk> DROP ;
 : pclear ps stk-reset ;
-: (p) ps @ swap cells - ;
+: (p) ps @ swap cells - ;   \ ( n1 -- n2 ) translate pos to address
 : ppick (p) @ ;
-: (p1) 1 (p) ;
-: (p2) 2 (p) ;
-: (p3) 3 (p) ;
-: (p4) 4 (p) ;
-: (p5) 5 (p) ;
-: (p6) 6 (p) ;
-: p1 (p1) @ ;
-: p2 (p2) @ ;
-: p3 (p3) @ ;
-: p4 (p4) @ ;
-: p5 (p5) @ ;
-: p6 (p6) @ ;
-: p1! (p1) ! ;
-: p2! (p2) ! ;
-: p3! (p3) ! ;
-: p4! (p4) ! ;
-: p5! (p5) ! ;
-: p6! (p6) ! ;
+: p1  1 ppick ;             \ ( -- n ) retrieve the value in position 1 from ps
+: p2  2 ppick ;             \ ( -- n ) retrieve the value in position 2 from ps
+: p3  3 ppick ;             \ ( -- n ) retrieve the value in position 3 from ps
+: p4  4 ppick ;             \ ( -- n ) retrieve the value in position 4 from ps
+: p1! 1 (p) ! ;             \ ( n -- ) set the value in position 1 of the ps
+: p2! 2 (p) ! ;             \ ( n -- ) set the value in position 2 of the ps
+: p3! 3 (p) ! ;             \ ( n -- ) set the value in position 3 of the ps
+: p4! 4 (p) ! ;             \ ( n -- ) set the value in position 4 of the ps
 : >>p
-    1 begin 
-        2dup < if 2drop leave then 
-        >R >R 
-            >p
-        R> R> 1+ 
-    again ;
+    BEGIN 
+        SWAP >p 1- DUP
+    WHILE DROP ;
+
 : p>>
-    1 begin 
-        2dup < if 2drop leave then 
-        >R >R 
-            pdrop
-        R> R> 1+ 
-    again ;
+    BEGIN 
+        pdrop 1- DUP
+    WHILE DROP ;
 
 \ --------------------------------------------------------------------------------
 \ returns 2 raised to the n-th power
@@ -160,6 +121,14 @@ decimal 64 ps stk-init
 	2dup = if 2drop leave then
 	>R >R
 	2 *
+	R> R> 1+ again ;
+
+\ returns 10 raised to the n-th power
+: pow-10   \ ( n1 -- n2 )
+	1 swap 0 begin
+	2dup = if 2drop leave then
+	>R >R
+	10 *
 	R> R> 1+ again ;
 
 
@@ -172,9 +141,6 @@ decimal 64 ps stk-init
 \ 100 d.base !
 \ 12345 >d.b 54321 >d.b d.b+ d.b
 
-: .2 <# # # #> #P ;
-: .3 <# # # # #> #P ;
-: .4 <# # # # # #> #P ;
 : period 46 emit ;
 
 variable d.base 

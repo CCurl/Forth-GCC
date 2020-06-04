@@ -142,21 +142,22 @@ next-test:  5 pow-2   32 p= \ 52
 next-test:  8 pow-2  256 p= \ 53
 next-test: 10 pow-2 1024 p= \ 54
 
-\ ***************************************************
+: MIL 1000 dup * * ;
 
+next-test: 0 pow-10    1     p= \ 55
+next-test: 3 pow-10 1000     p= \ 56
+next-test: 8 pow-10  100 mil p= \ 57
+
+\ ***************************************************
 \ wordsv
 
-: countTo1 1 begin 2dup < if 2drop leave then 1+ again ;
-: countTo2 begin 1- dup while drop ;
-
-: MIL 1000 dup * * ;
 : bench1 start-timer swap countTo      elapsed ;
 : bench2 start-timer swap countTo-FAST elapsed ;
 : do-benches 
         cr " bench #1 " ct dup bench1 
         cr " bench #2 " ct     bench2 ;
 
-cr " Running benchmarks ... " ct 200 MIL do-benches cr
+cr " Running benchmarks ... " ct 100 MIL do-benches cr
 
 \ 20 .lastx
 CR test-results

@@ -321,11 +321,17 @@ VARIABLE (MEM_SZ)
 : #> ;
 : #P- DROP #NEG @ IF 45 EMIT THEN ;
 : #P #P- BEGIN EMIT DUP 0= UNTIL DROP ;      \ ( 0 ... n 0 -- )
+
 : (.) <# #S #> #P ;
 : . (.) SPACE ;
+: .2 <# # # #> #P ;
+: .3 <# # # # #> #P ;
+: .4 <# # # # # #> #P ;
 
 HEX 
-: HEX.     BASE @ SWAP HEX DUP 10 < IF 30 EMIT THEN (.) BASE ! ; 
+: HEX.     BASE @ SWAP HEX (.) BASE ! ; 
+: HEX.2    BASE @ SWAP HEX .2 BASE ! ; 
+: HEX.4    BASE @ SWAP HEX .4 BASE ! ; 
 : DECIMAL. BASE @ SWAP DECIMAL (.) BASE ! ;
 : BINARY.  BASE @ SWAP BINARY  (.) BASE ! ;
 DECIMAL
@@ -360,9 +366,9 @@ DECIMAL
 : .WORD-LONG  
 		DUP HEX. 58 EMIT BL
 		DUP DICT>NAME CT BL
-		DUP DICT.GetXT 40 EMIT HEX. 41 EMIT \ DEBUG
+		DUP DICT.GetXT 40 EMIT HEX.4 41 EMIT \ DEBUG
 		DUP DICT>FLAGS C@ \ DEBUG
-		DUP S" , Flags: " CT HEX. \ DEBUG
+		DUP S" , Flags: " CT HEX.2 \ DEBUG
 		DUP FLAGS.ISINLINE? IF S"  (INLINE)" CT THEN \ DEBUG
 		FLAGS.ISIMMEDIATE? IF S"  (IMMEDIATE)" CT THEN \ DEBUG
 		CRLF @ ;
