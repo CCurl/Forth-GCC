@@ -446,10 +446,6 @@ CELL dis_one(char *bytes, char *desc)
 		sprintf(desc, "OR");
 		return 0;
 
-	case USINIT:
-		sprintf(desc, "USTACKINIT");
-		return 0;
-
 	case USPUSH:
 		sprintf(desc, "UPUSH");
 		return 0;

@@ -59,26 +59,24 @@
 \ A stack is comprised of 3 parts, [stack-pointer] [stack-top-pointer] [stack-data]
 \ The stack "bottom" is the first CELL after the (stack-top) pointer
 \
-: (stk-ptr) ;                                   \ ( stk -- stk-ptr-addr )
-: (stk-top) CELL + ;		        	        \ ( stk -- last-cell-addr )
-: stk-bottom 2 CELLS + ;                        \ ( stk -- bottom )
-: stk-top (stk-top) @ ;			                \ ( stk -- last-cell-addr )
-: stk-ptr (stk-ptr) @ ;                         \ ( stk -- stk-ptr )
-: stk-depth DUP stk-ptr                         \ ( stk -- depth )
+: (stk-ptr) ;                               \ ( stk -- stk-ptr-addr )
+: (stk-top) CELL + ;		        	    \ ( stk -- last-cell-addr )
+: stk-bottom 2 CELLS + ;                    \ ( stk -- bottom )
+: stk-top (stk-top) @ ;			            \ ( stk -- last-cell-addr )
+: stk-ptr (stk-ptr) @ ;                     \ ( stk -- stk-ptr )
+: stk-depth DUP stk-ptr                     \ ( stk -- depth )
     SWAP stk-bottom - CELL / ;
-: stk-pick @ swap cells - @ ;                   \ ( n1 stk -- n2 )
+: stk-pick @ swap cells - @ ;               \ ( n1 stk -- n2 )
 
-: stk-init   USINIT                             \ ( sz stk -- top )
-    here over <
-    if 
-        (here) !
-    else 
-        drop
-    then
- ;
+: stk-init >R 1+ CELLS ALLOT                \ ( sz stk -- )
+    HERE CELL - R@ (stk-top) !
+    R@ stk-bottom R> (stk-ptr) ! ;
 
-: stk-sz >R R@ cell + @ R> 2 cells + - cell / 1+ ;
-: stk-reset >R R@ stk-sz R> stk-init ;   \ ( stk -- )
+: stk-sz DUP stk-top                        \ ( stk -- n ) - in CELLS
+   SWAP stk-bottom - CELL / 1+ ;
+
+: stk-reset DUP stk-bottom                  \ ( stk -- )
+   SWAP (stk-ptr) ! ;
 
 : >stk USPUSH ; INLINE
 : stk> USPOP  ; INLINE

@@ -44,7 +44,7 @@
 #define DEPTH      38	// 26
 #define GETCH      39	// 27
 #define COMPAREI   40	// 28 ( addr1 addr2 -- bool )
-#define USINIT     41	// 29 ( size addr -- )
+#define UNUSED1    41	// 29
 #define USPUSH     42	// 2A ( val addr -- )
 #define USPOP      43	// 2B ( addr -- val )
 #define INC        44	// 2C 

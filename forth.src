@@ -63,7 +63,7 @@ VARIABLE (MEM_SZ)
 : DEPTH		[ 38 C, ] ; .INLINE
 : GETCH		[ 39 C, ] ; .INLINE
 : COMPAREI	[ 40 C, ] ; .INLINE
-: USINIT	[ 41 C, ] ; .INLINE
+\ : USINIT	[ 41 C, ] ; .INLINE
 : USPUSH	[ 42 C, ] ; .INLINE
 : USPOP		[ 43 C, ] ; .INLINE
 : INC		[ 44 C, ] ; .INLINE
@@ -378,14 +378,13 @@ DECIMAL
 : NUM-WORDS 0 >R LAST BEGIN DUP @ 0= IF DROP R> CRLF LEAVE THEN R> 1+ >R @ AGAIN ;
 
 \ Prints the last <x> words
-: .lastx CR LAST SWAP 0
+: .lastx CR LAST SWAP
     BEGIN
-        2DUP > IF
-            ROT .WORD-LONG -ROT 1+ 
-        ELSE
-            DROP DROP DROP LEAVE
-        THEN
-    AGAIN ;
+            SWAP .WORD-LONG SWAP
+			1- 
+			DUP 
+	WHILE
+    DROP DROP ;
 
 : EXECUTE RDROP >R ;		\ ( addr -- )
 

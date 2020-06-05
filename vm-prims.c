@@ -572,23 +572,11 @@ void prim_COMPAREI()
 
 // User stacks look like this:
 // [SP][last-valid-SP][data]
-void prim_USINIT()
-{
-	arg1 = pop();		// User Stack start address
-	arg2 = pop();		// size
-	trace("USTACKINIT stack [0x%04lx], size=%ld\n", arg1, arg2);
-	CELL firstOK = arg1 + (2*CELL_SZ);
-	CELL lastOK = firstOK + ((arg2-1)*CELL_SZ);
-	SETAT(arg1, firstOK);
-	SETAT(arg1 + CELL_SZ, lastOK);
-	push(lastOK + CELL_SZ);
-}
-
 void prim_USPUSH()
 {
 	arg1 = pop();		// User Stack start address
 	arg2 = pop();		// Val
-	trace("USPUSH %d to stack [0x%04lx]\n", arg2, arg1);
+	// trace("USPUSH %d to stack [0x%04lx]\n", arg2, arg1);
 	stk_push(arg1, arg2);
 }
 
@@ -598,7 +586,7 @@ void prim_USPOP()
 	CELL sp = GETAT(arg1);
 	CELL firstOK = arg1 + (2 * CELL_SZ);
 	CELL lastOK = GETAT(arg1 + CELL_SZ);
-	trace("USPOP from stack [0x%04lx]\n", arg1);
+	// trace("USPOP from stack [0x%04lx]\n", arg1);
 	arg2 = stk_pop(arg1);
 	push(arg2);
 }
@@ -650,15 +638,15 @@ void init_vm_vectors()
 {
     memset(vm_prims, 0, sizeof(vm_prims));
     // vm_prims[0] = prim_BYE;
-	vm_prims[1] = prim_LITERAL;
-	vm_prims[2] = prim_FETCH;
-	vm_prims[3] = prim_STORE;
-	vm_prims[4] = prim_SWAP;
-	vm_prims[5] = prim_DROP;
-	vm_prims[6] = prim_DUP;
-	vm_prims[7] = prim_SLITERAL;
-	vm_prims[8] = prim_JMP;
-	vm_prims[9] = prim_JMPZ;
+	vm_prims[ 1] = prim_LITERAL;
+	vm_prims[ 2] = prim_FETCH;
+	vm_prims[ 3] = prim_STORE;
+	vm_prims[ 4] = prim_SWAP;
+	vm_prims[ 5] = prim_DROP;
+	vm_prims[ 6] = prim_DUP;
+	vm_prims[ 7] = prim_SLITERAL;
+	vm_prims[ 8] = prim_JMP;
+	vm_prims[ 9] = prim_JMPZ;
 	vm_prims[10] = prim_JMPNZ;
 	vm_prims[11] = prim_CALL;
 	vm_prims[12] = prim_RET;
@@ -690,7 +678,7 @@ void init_vm_vectors()
 	vm_prims[38] = prim_DEPTH;
 	vm_prims[39] = prim_GETCH;
 	vm_prims[40] = prim_COMPAREI;
-	vm_prims[41] = prim_USINIT;
+	vm_prims[41] = NULL;
 	vm_prims[42] = prim_USPUSH;
 	vm_prims[43] = prim_USPOP;
 	vm_prims[44] = prim_INC;
