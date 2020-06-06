@@ -31,6 +31,41 @@ int tgt_lang = TGT_FASM;
 void gen_opcodes();
 void dis_opcode(CELL);
 
+CELL ADDR_CELL     = 0x08;
+CELL ADDR_HERE     = 0x10;
+CELL ADDR_LAST     = 0x14;
+CELL ADDR_BASE     = 0x18;
+CELL ADDR_INPUTFP  = 0x1C;
+CELL ADDR_STATE    = 0x20;
+CELL ADDR_MEM_SZ   = 0x24;
+
+// ------------------------------------------------------------------------------------------
+CELL GetSysVarAddr(char *name)
+{
+	// printf("Looking for [%s] ...\n", name);
+	CELL addr = ORG;
+	CELL def_sz = 0x0f;
+	while ( addr < 0x1000 )
+	{
+		if ( the_memory[addr] != DICTP )
+		{
+			printf("[%s] NOT FOUND!\n", name);
+			return 0;
+		}
+		CELL tmp = GETAT(addr+1);
+		DICT_T *dp = (DICT_T *)&the_memory[tmp];
+		// printf("0x%04lX, 0x%04lX, [%s] = [%s]?\n", addr, dp, name, dp->name);
+		if (strcmp(dp->name, name) == 0)
+		{
+			tmp = addr + 11;
+			// printf("[%s] FOUND at 0x%04lx\n", name, tmp);
+			return tmp;
+		}
+		addr += def_sz;
+	}
+	return 0;
+}
+
 // ------------------------------------------------------------------------------------------
 LINE_T *new_line(int addr)
 {
@@ -721,10 +756,6 @@ void dis_one_FASM()
 		make_code(NULL, "prim_OR");
 		return;
 
-	case USINIT:
-		make_comment(NULL, "USINIT (TODO)");
-		return;
-
 	case USPUSH:
 		make_comment(NULL, "USPUSH (TODO)");
 		return;
@@ -934,6 +965,13 @@ void load_vm()
     debug("%ld bytes read\n", num_read);
 	fclose(input_fp);
 	input_fp = NULL;
+
+	ADDR_HERE = GetSysVarAddr("(HERE)");
+	ADDR_LAST = GetSysVarAddr("(LAST)");
+	ADDR_BASE = GetSysVarAddr("BASE");
+	ADDR_STATE = GetSysVarAddr("STATE");
+	ADDR_MEM_SZ = GetSysVarAddr("(MEM_SZ)");
+
 	printf(" done.\n");
 }
 

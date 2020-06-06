@@ -5,349 +5,345 @@
                                                 ; -------------------------------------------------------------------------
                                                 ; -------------------------------------------------------------------------
                 
-                dict_ENTRY L0040, L0000, 0, 4, "CELL"
+                dict_ENTRY L0040, L0000, 0, 6, "(HERE)"
 L00000040:      
-                m_push 4
+                m_push 75
+                ret
+                call prim_FREAD
+                call prim_LT
+                
+                dict_ENTRY L004F, L0040, 0, 6, "(LAST)"
+L0000004F:      
+                m_push 90
                 ret
                 
-                dict_ENTRY L004B, L0040, 0, 4, "BASE"
-L0000004B:      
-                m_push 24
+                dict_ENTRY L005E, L004F, 0, 4, "BASE"
+L0000005E:      
+                m_push 105
+                ret
+                m_pop eax
+                cmp eax, 0
+                jne L18000000                   ; JMPNZ
+                call prim_BREAK
+                m_push 120
                 ret
                 
-                dict_ENTRY L0056, L004B, 0, 6, "(HERE)"
-L00000056:      
-                m_push 16
+                dict_ENTRY L007C, L006D, 0, 8, "(MEM_SZ)"
+L0000007C:      
+                m_push 135
+                ret
+                m_push -40298496
+                m_push 4                        ; CLITERAL (0004)
                 ret
                 
-                dict_ENTRY L0061, L0056, 0, 6, "(LAST)"
-L00000061:      
-                m_push 20
-                ret
-                
-                dict_ENTRY L006C, L0061, 0, 8, "INPUT-FP"
-L0000006C:      
-                m_push 28
-                ret
-                
-                dict_ENTRY L0077, L006C, 0, 5, "STATE"
-L00000077:      
-                m_push 32
-                ret
-                
-                dict_ENTRY L0082, L0077, 0, 4, "HERE"
-L00000082:      
-                call L00000056                  ; CALL 0056, (HERE)
+                dict_ENTRY L0093, L008B, 0, 4, "HERE"
+L00000093:      
+                call L00000040                  ; CALL 0040, (HERE)
                 mov ebx, [ebx]                  ; FETCH
                 ret
                 
-                dict_ENTRY L008E, L0082, 0, 4, "LAST"
-L0000008E:      
-                call L00000061                  ; CALL 0061, (LAST)
+                dict_ENTRY L009F, L0093, 0, 4, "LAST"
+L0000009F:      
+                call L0000004F                  ; CALL 004F, (LAST)
                 mov ebx, [ebx]                  ; FETCH
                 ret
                 
-                dict_ENTRY L009A, L008E, 0, 2, "C,"
-L0000009A:      
-                call L00000082                  ; CALL 0082, HERE
+                dict_ENTRY L00AB, L009F, 0, 2, "C,"
+L000000AB:      
+                call L00000093                  ; CALL 0093, HERE
                 call prim_CSTORE
-                call L00000082                  ; CALL 0082, HERE
-                m_onePlus
-                call L00000056                  ; CALL 0056, (HERE)
-                call prim_STORE
-                ret
-                
-                dict_ENTRY L00B2, L009A, 0, 1, ","
-L000000B2:      
-                call L00000082                  ; CALL 0082, HERE
-                call prim_STORE
-                call L00000082                  ; CALL 0082, HERE
-                call L00000040                  ; CALL 0040, CELL
+                call L00000093                  ; CALL 0093, HERE
+                m_push 1                        ; CLITERAL (0001)
                 call prim_ADD
-                call L00000056                  ; CALL 0056, (HERE)
+                call L00000040                  ; CALL 0040, (HERE)
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L00CF, L00B2, 1, 1, "["
-L000000CF:      
+                dict_ENTRY L00C5, L00AB, 0, 1, ","
+L000000C5:      
+                call L00000093                  ; CALL 0093, HERE
+                call prim_STORE
+                call L00000093                  ; CALL 0093, HERE
+                call L0000008B                  ; CALL 008B, CELL
+                call prim_ADD
+                call L00000040                  ; CALL 0040, (HERE)
+                call prim_STORE
+                ret
+                
+                dict_ENTRY L00E2, L00C5, 1, 1, "["
+L000000E2:      
                 m_push 0                        ; CLITERAL (0000)
-                call L00000077                  ; CALL 0077, STATE
+                call L0000006D                  ; CALL 006D, STATE
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L00DD, L00CF, 1, 1, "]"
-L000000DD:      
+                dict_ENTRY L00F0, L00E2, 1, 1, "]"
+L000000F0:      
                 m_push 1                        ; CLITERAL (0001)
-                call L00000077                  ; CALL 0077, STATE
+                call L0000006D                  ; CALL 006D, STATE
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L00EB, L00DD, 0, 7, "LITERAL"
-L000000EB:      
+                dict_ENTRY L00FE, L00F0, 0, 7, "LITERAL"
+L000000FE:      
                 m_push 1                        ; CLITERAL (0001)
-                call L0000009A                  ; CALL 009A, C,
+                call L000000AB                  ; CALL 00AB, C,
                 ret
                 
-                dict_ENTRY L00F8, L00EB, 2, 1, "@"
-L000000F8:      
+                dict_ENTRY L010B, L00FE, 2, 1, "@"
+L0000010B:      
                 mov ebx, [ebx]                  ; FETCH
                 ret
                 
-                dict_ENTRY L00FF, L00F8, 2, 1, "!"
-L000000FF:      
+                dict_ENTRY L0112, L010B, 2, 1, "!"
+L00000112:      
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L0106, L00FF, 2, 4, "SWAP"
-L00000106:      
+                dict_ENTRY L0119, L0112, 2, 4, "SWAP"
+L00000119:      
                 call prim_SWAP
                 ret
                 
-                dict_ENTRY L010D, L0106, 2, 4, "DROP"
-L0000010D:      
+                dict_ENTRY L0120, L0119, 2, 4, "DROP"
+L00000120:      
                 m_pop eax                       ; DROP
                 ret
                 
-                dict_ENTRY L0114, L010D, 2, 3, "DUP"
-L00000114:      
+                dict_ENTRY L0127, L0120, 2, 3, "DUP"
+L00000127:      
                 m_push ebx                      ; DUP
                 ret
                 
-                dict_ENTRY L011B, L0114, 0, 8, "SLITERAL"
-L0000011B:      
+                dict_ENTRY L012E, L0127, 0, 8, "SLITERAL"
+L0000012E:      
                 m_push 7                        ; CLITERAL (0007)
-                call L0000009A                  ; CALL 009A, C,
+                call L000000AB                  ; CALL 00AB, C,
                 ret
                 
-                dict_ENTRY L0128, L011B, 0, 3, "JMP"
-L00000128:      
+                dict_ENTRY L013B, L012E, 0, 3, "JMP"
+L0000013B:      
                 m_push 8                        ; CLITERAL (0008)
-                call L0000009A                  ; CALL 009A, C,
+                call L000000AB                  ; CALL 00AB, C,
                 ret
                 
-                dict_ENTRY L0135, L0128, 0, 4, "JMPZ"
-L00000135:      
+                dict_ENTRY L0148, L013B, 0, 4, "JMPZ"
+L00000148:      
                 m_push 9                        ; CLITERAL (0009)
-                call L0000009A                  ; CALL 009A, C,
+                call L000000AB                  ; CALL 00AB, C,
                 ret
                 
-                dict_ENTRY L0142, L0135, 0, 5, "JMPNZ"
-L00000142:      
+                dict_ENTRY L0155, L0148, 0, 5, "JMPNZ"
+L00000155:      
                 m_push 10                       ; CLITERAL (000A)
-                call L0000009A                  ; CALL 009A, C,
+                call L000000AB                  ; CALL 00AB, C,
                 ret
                 
-                dict_ENTRY L014F, L0142, 0, 4, "CALL"
-L0000014F:      
+                dict_ENTRY L0162, L0155, 0, 4, "CALL"
+L00000162:      
                 m_push 11                       ; CLITERAL (000B)
-                call L0000009A                  ; CALL 009A, C,
+                call L000000AB                  ; CALL 00AB, C,
                 ret
                 
-                dict_ENTRY L015C, L014F, 0, 3, "RET"
-L0000015C:      
+                dict_ENTRY L016F, L0162, 0, 3, "RET"
+L0000016F:      
                 m_push 12                       ; CLITERAL (000C)
-                call L0000009A                  ; CALL 009A, C,
+                call L000000AB                  ; CALL 00AB, C,
                 ret
                 
-                dict_ENTRY L0169, L015C, 2, 2, "OR"
-L00000169:      
+                dict_ENTRY L017C, L016F, 2, 2, "OR"
+L0000017C:      
                 call prim_OR
                 ret
                 
-                dict_ENTRY L0170, L0169, 2, 8, "CLITERAL"
-L00000170:      
+                dict_ENTRY L0183, L017C, 2, 8, "CLITERAL"
+L00000183:      
                 m_push 14                       ; CLITERAL (000E)
-                call L0000009A                  ; CALL 009A, C,
+                call L000000AB                  ; CALL 00AB, C,
                 ret
                 
-                dict_ENTRY L017D, L0170, 2, 2, "C@"
-L0000017D:      
+                dict_ENTRY L0190, L0183, 2, 2, "C@"
+L00000190:      
                 call prim_CFETCH
                 ret
                 
-                dict_ENTRY L0184, L017D, 2, 2, "C!"
-L00000184:      
+                dict_ENTRY L0197, L0190, 2, 2, "C!"
+L00000197:      
                 call prim_CSTORE
                 ret
                 
-                dict_ENTRY L018B, L0184, 2, 1, "+"
-L0000018B:      
+                dict_ENTRY L019E, L0197, 2, 1, "+"
+L0000019E:      
                 call prim_ADD
                 ret
                 
-                dict_ENTRY L0192, L018B, 2, 1, "-"
-L00000192:      
+                dict_ENTRY L01A5, L019E, 2, 1, "-"
+L000001A5:      
                 call prim_SUB
                 ret
                 
-                dict_ENTRY L0199, L0192, 2, 1, "*"
-L00000199:      
+                dict_ENTRY L01AC, L01A5, 2, 1, "*"
+L000001AC:      
                 call prim_MUL
                 ret
                 
-                dict_ENTRY L01A0, L0199, 2, 1, "/"
-L000001A0:      
+                dict_ENTRY L01B3, L01AC, 2, 1, "/"
+L000001B3:      
                 call prim_DIV
                 ret
                 
-                dict_ENTRY L01A7, L01A0, 2, 1, "<"
-L000001A7:      
+                dict_ENTRY L01BA, L01B3, 2, 1, "<"
+L000001BA:      
                 call prim_LT
                 ret
                 
-                dict_ENTRY L01AE, L01A7, 2, 1, "="
-L000001AE:      
+                dict_ENTRY L01C1, L01BA, 2, 1, "="
+L000001C1:      
                 call prim_EQ
                 ret
                 
-                dict_ENTRY L01B5, L01AE, 2, 1, ">"
-L000001B5:      
+                dict_ENTRY L01C8, L01C1, 2, 1, ">"
+L000001C8:      
                 call prim_GT
                 ret
                 
-                dict_ENTRY L01BC, L01B5, 2, 5, "DICTP"
-L000001BC:      
+                dict_ENTRY L01CF, L01C8, 2, 5, "DICTP"
+L000001CF:      
                 m_push 24                       ; CLITERAL (0018)
-                call L0000009A                  ; CALL 009A, C,
+                call L000000AB                  ; CALL 00AB, C,
                 ret
                 
-                dict_ENTRY L01C9, L01BC, 2, 4, "EMIT"
-L000001C9:      
+                dict_ENTRY L01DC, L01CF, 2, 4, "EMIT"
+L000001DC:      
                 call prim_EMIT
                 ret
                 
-                dict_ENTRY L01D0, L01C9, 2, 4, "OVER"
-L000001D0:      
+                dict_ENTRY L01E3, L01DC, 2, 4, "OVER"
+L000001E3:      
                 call prim_OVER
                 ret
                 
-                dict_ENTRY L01D7, L01D0, 2, 7, "COMPARE"
-L000001D7:      
+                dict_ENTRY L01EA, L01E3, 2, 7, "COMPARE"
+L000001EA:      
                 call prim_COMPARE
                 ret
                 
-                dict_ENTRY L01DE, L01D7, 2, 5, "FOPEN"
-L000001DE:      
+                dict_ENTRY L01F1, L01EA, 2, 5, "FOPEN"
+L000001F1:      
                 call prim_FOPEN
                 ret
                 
-                dict_ENTRY L01E5, L01DE, 2, 5, "FREAD"
-L000001E5:      
+                dict_ENTRY L01F8, L01F1, 2, 5, "FREAD"
+L000001F8:      
                 call prim_FREAD
                 ret
                 
-                dict_ENTRY L01EC, L01E5, 2, 9, "FREADLINE"
-L000001EC:      
+                dict_ENTRY L01FF, L01F8, 2, 9, "FREADLINE"
+L000001FF:      
                 call prim_FREADLINE
                 ret
                 
-                dict_ENTRY L01F3, L01EC, 2, 6, "FWRITE"
-L000001F3:      
+                dict_ENTRY L0206, L01FF, 2, 6, "FWRITE"
+L00000206:      
                 call prim_FWRITE
                 ret
                 
-                dict_ENTRY L01FA, L01F3, 2, 6, "FCLOSE"
-L000001FA:      
+                dict_ENTRY L020D, L0206, 2, 6, "FCLOSE"
+L0000020D:      
                 call prim_FCLOSE
                 ret
                 
-                dict_ENTRY L0201, L01FA, 2, 2, ">R"
-L00000201:      
+                dict_ENTRY L0214, L020D, 2, 2, ">R"
+L00000214:      
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
                 ret
                 
-                dict_ENTRY L0208, L0201, 2, 2, "R>"
-L00000208:      
+                dict_ENTRY L021B, L0214, 2, 2, "R>"
+L0000021B:      
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 ret
                 
-                dict_ENTRY L020F, L0208, 2, 8, "LOGLEVEL"
-L0000020F:      
+                dict_ENTRY L0222, L021B, 2, 8, "LOGLEVEL"
+L00000222:      
                 call prim_LOGLEVEL
                 ret
                 
-                dict_ENTRY L0216, L020F, 2, 3, "AND"
-L00000216:      
+                dict_ENTRY L0229, L0222, 2, 3, "AND"
+L00000229:      
                 call prim_AND
                 ret
                 
-                dict_ENTRY L021D, L0216, 2, 4, "PICK"
-L0000021D:      
+                dict_ENTRY L0230, L0229, 2, 4, "PICK"
+L00000230:      
                 call prim_PICK
                 ret
                 
-                dict_ENTRY L0224, L021D, 2, 5, "DEPTH"
-L00000224:      
+                dict_ENTRY L0237, L0230, 2, 5, "DEPTH"
+L00000237:      
                 call prim_DEPTH
                 ret
                 
-                dict_ENTRY L022B, L0224, 2, 5, "GETCH"
-L0000022B:      
+                dict_ENTRY L023E, L0237, 2, 5, "GETCH"
+L0000023E:      
                 call prim_GETCH
                 ret
                 
-                dict_ENTRY L0232, L022B, 2, 8, "COMPAREI"
-L00000232:      
+                dict_ENTRY L0245, L023E, 2, 8, "COMPAREI"
+L00000245:      
                 call prim_COMPAREI
                 ret
                 
-                dict_ENTRY L0239, L0232, 2, 6, "USINIT"
-L00000239:      
-                call prim_USINIT
-                ret
-                
-                dict_ENTRY L0240, L0239, 2, 6, "USPUSH"
-L00000240:      
+                dict_ENTRY L024C, L0245, 2, 6, "USPUSH"
+L0000024C:      
                 call prim_USPUSH
                 ret
                 
-                dict_ENTRY L0247, L0240, 2, 5, "USPOP"
-L00000247:      
+                dict_ENTRY L0253, L024C, 2, 5, "USPOP"
+L00000253:      
                 call prim_USPOP
                 ret
                 
-                dict_ENTRY L024E, L0247, 2, 3, "INC"
-L0000024E:      
+                dict_ENTRY L025A, L0253, 2, 3, "INC"
+L0000025A:      
                 m_onePlus
                 ret
                 
-                dict_ENTRY L0255, L024E, 2, 6, "RDEPTH"
-L00000255:      
+                dict_ENTRY L0261, L025A, 2, 6, "RDEPTH"
+L00000261:      
                 ret
                 
-                dict_ENTRY L025C, L0255, 2, 3, "DEC"
-L0000025C:      
+                dict_ENTRY L0268, L0261, 2, 3, "DEC"
+L00000268:      
                 m_oneMinus
                 ret
                 
-                dict_ENTRY L0263, L025C, 2, 7, "GETTICK"
-L00000263:      
+                dict_ENTRY L026F, L0268, 2, 7, "GETTICK"
+L0000026F:      
                 call prim_GETTICK
                 ret
                 
-                dict_ENTRY L026A, L0263, 2, 5, "BREAK"
-L0000026A:      
+                dict_ENTRY L0276, L026F, 2, 5, "BREAK"
+L00000276:      
                 call prim_BREAK
                 ret
                 
-                dict_ENTRY L0271, L026A, 2, 5, "RESET"
-L00000271:      
+                dict_ENTRY L027D, L0276, 2, 5, "RESET"
+L0000027D:      
                 call prim_RESET
                 ret
                 
-                dict_ENTRY L0278, L0271, 2, 3, "BYE"
-L00000278:      
+                dict_ENTRY L0284, L027D, 2, 3, "BYE"
+L00000284:      
                 call prim_BYE
                 ret
                 
-                dict_ENTRY L027F, L0278, 0, 6, "INLINE"
-L0000027F:      
-                call L00000061                  ; CALL 0061, (LAST)
-                mov ebx, [ebx]                  ; FETCH
+                dict_ENTRY L028B, L0284, 0, 6, "INLINE"
+L0000028B:      
+                call L0000009F                  ; CALL 009F, LAST
                 m_push 2                        ; CLITERAL (0002)
-                call L00000040                  ; CALL 0040, CELL
+                call L0000008B                  ; CALL 008B, CELL
                 call prim_MUL
                 call prim_ADD
                 m_push ebx                      ; DUP
@@ -358,12 +354,11 @@ L0000027F:
                 call prim_CSTORE
                 ret
                 
-                dict_ENTRY L029B, L027F, 0, 9, "IMMEDIATE"
-L0000029B:      
-                call L00000061                  ; CALL 0061, (LAST)
-                mov ebx, [ebx]                  ; FETCH
+                dict_ENTRY L02A6, L028B, 0, 9, "IMMEDIATE"
+L000002A6:      
+                call L0000009F                  ; CALL 009F, LAST
                 m_push 2                        ; CLITERAL (0002)
-                call L00000040                  ; CALL 0040, CELL
+                call L0000008B                  ; CALL 008B, CELL
                 call prim_MUL
                 call prim_ADD
                 m_push ebx                      ; DUP
@@ -374,201 +369,201 @@ L0000029B:
                 call prim_CSTORE
                 ret
                 
-                dict_ENTRY L02B7, L029B, 2, 5, "CELLS"
-L000002B7:      
-                call L00000040                  ; CALL 0040, CELL
+                dict_ENTRY L02C1, L02A6, 2, 5, "CELLS"
+L000002C1:      
+                call L0000008B                  ; CALL 008B, CELL
                 call prim_MUL
                 ret
                 
-                dict_ENTRY L02C3, L02B7, 2, 14, "FLAG_IMMEDIATE"
-L000002C3:      
+                dict_ENTRY L02CD, L02C1, 2, 14, "FLAG_IMMEDIATE"
+L000002CD:      
                 m_push 1                        ; CLITERAL (0001)
                 ret
                 
-                dict_ENTRY L02CB, L02C3, 2, 11, "FLAG_INLINE"
-L000002CB:      
+                dict_ENTRY L02D5, L02CD, 2, 11, "FLAG_INLINE"
+L000002D5:      
                 m_push 2                        ; CLITERAL (0002)
                 ret
                 
-                dict_ENTRY L02D3, L02CB, 0, 3, "HEX"
-L000002D3:      
+                dict_ENTRY L02DD, L02D5, 0, 3, "HEX"
+L000002DD:      
                 m_push 16                       ; CLITERAL (0010)
-                call L0000004B                  ; CALL 004B, BASE
+                call L0000005E                  ; CALL 005E, BASE
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L02E1, L02D3, 0, 7, "DECIMAL"
-L000002E1:      
+                dict_ENTRY L02EB, L02DD, 0, 7, "DECIMAL"
+L000002EB:      
                 m_push 10                       ; CLITERAL (000A)
-                call L0000004B                  ; CALL 004B, BASE
+                call L0000005E                  ; CALL 005E, BASE
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L02EF, L02E1, 0, 5, "OCTAL"
-L000002EF:      
+                dict_ENTRY L02F9, L02EB, 0, 5, "OCTAL"
+L000002F9:      
                 m_push 8                        ; CLITERAL (0008)
-                call L0000004B                  ; CALL 004B, BASE
+                call L0000005E                  ; CALL 005E, BASE
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L02FD, L02EF, 0, 6, "BINARY"
-L000002FD:      
+                dict_ENTRY L0307, L02F9, 0, 6, "BINARY"
+L00000307:      
                 m_push 2                        ; CLITERAL (0002)
-                call L0000004B                  ; CALL 004B, BASE
+                call L0000005E                  ; CALL 005E, BASE
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L030B, L02FD, 0, 2, "ON"
-L0000030B:      
-                m_push 1                        ; CLITERAL (0001)
-                call prim_SWAP
-                call prim_STORE
-                ret
-                
-                dict_ENTRY L0315, L030B, 0, 3, "OFF"
+                dict_ENTRY L0315, L0307, 0, 2, "ON"
 L00000315:      
-                m_push 0                        ; CLITERAL (0000)
+                m_push 1                        ; CLITERAL (0001)
                 call prim_SWAP
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L031F, L0315, 0, 10, "?COMPILING"
+                dict_ENTRY L031F, L0315, 0, 3, "OFF"
 L0000031F:      
-                call L00000077                  ; CALL 0077, STATE
+                m_push 0                        ; CLITERAL (0000)
+                call prim_SWAP
+                call prim_STORE
+                ret
+                
+                dict_ENTRY L0329, L031F, 0, 10, "?COMPILING"
+L00000329:      
+                call L0000006D                  ; CALL 006D, STATE
                 mov ebx, [ebx]                  ; FETCH
                 ret
                 
-                dict_ENTRY L032B, L031F, 1, 2, "IF"
-L0000032B:      
-                call L0000031F                  ; CALL 031F, ?COMPILING
+                dict_ENTRY L0335, L0329, 1, 2, "IF"
+L00000335:      
+                call L00000329                  ; CALL 0329, ?COMPILING
                 m_pop eax
                 cmp eax, 0
-                je L0000034B                    ; JMPZ
-                call L00000135                  ; CALL 0135, JMPZ
-                call L00000082                  ; CALL 0082, HERE
+                je L00000355                    ; JMPZ
+                call L00000148                  ; CALL 0148, JMPZ
+                call L00000093                  ; CALL 0093, HERE
                 m_push 0                        ; CLITERAL (0000)
-                call L000000B2                  ; CALL 00B2, ,
-L0000034B:      ret
+                call L000000C5                  ; CALL 00C5, ,
+L00000355:      ret
                 
-                dict_ENTRY L034C, L032B, 1, 4, "ELSE"
-L0000034C:      
-                call L0000031F                  ; CALL 031F, ?COMPILING
+                dict_ENTRY L0356, L0335, 1, 4, "ELSE"
+L00000356:      
+                call L00000329                  ; CALL 0329, ?COMPILING
                 m_pop eax
                 cmp eax, 0
-                je L00000374                    ; JMPZ
-                call L00000128                  ; CALL 0128, JMP
-                call L00000082                  ; CALL 0082, HERE
+                je L0000037E                    ; JMPZ
+                call L0000013B                  ; CALL 013B, JMP
+                call L00000093                  ; CALL 0093, HERE
                 call prim_SWAP
                 m_push 0                        ; CLITERAL (0000)
-                call L000000B2                  ; CALL 00B2, ,
-                call L00000082                  ; CALL 0082, HERE
+                call L000000C5                  ; CALL 00C5, ,
+                call L00000093                  ; CALL 0093, HERE
                 call prim_SWAP
                 call prim_STORE
-L00000374:      ret
+L0000037E:      ret
                 
-                dict_ENTRY L0375, L034C, 1, 4, "THEN"
-L00000375:      
-                call L0000031F                  ; CALL 031F, ?COMPILING
+                dict_ENTRY L037F, L0356, 1, 4, "THEN"
+L0000037F:      
+                call L00000329                  ; CALL 0329, ?COMPILING
                 m_pop eax
                 cmp eax, 0
-                je L0000038B                    ; JMPZ
-                call L00000082                  ; CALL 0082, HERE
+                je L00000395                    ; JMPZ
+                call L00000093                  ; CALL 0093, HERE
                 call prim_SWAP
                 call prim_STORE
-L0000038B:      ret
+L00000395:      ret
                 
-                dict_ENTRY L038C, L0375, 1, 5, "BEGIN"
-L0000038C:      
-                call L0000031F                  ; CALL 031F, ?COMPILING
+                dict_ENTRY L0396, L037F, 1, 5, "BEGIN"
+L00000396:      
+                call L00000329                  ; CALL 0329, ?COMPILING
                 m_pop eax
                 cmp eax, 0
-                je L000003A0                    ; JMPZ
-                call L00000082                  ; CALL 0082, HERE
-L000003A0:      ret
+                je L000003AA                    ; JMPZ
+                call L00000093                  ; CALL 0093, HERE
+L000003AA:      ret
                 
-                dict_ENTRY L03A1, L038C, 1, 5, "AGAIN"
-L000003A1:      
-                call L0000031F                  ; CALL 031F, ?COMPILING
+                dict_ENTRY L03AB, L0396, 1, 5, "AGAIN"
+L000003AB:      
+                call L00000329                  ; CALL 0329, ?COMPILING
                 m_pop eax
                 cmp eax, 0
-                je L000003BA                    ; JMPZ
-                call L00000128                  ; CALL 0128, JMP
-                call L000000B2                  ; CALL 00B2, ,
-L000003BA:      ret
+                je L000003C4                    ; JMPZ
+                call L0000013B                  ; CALL 013B, JMP
+                call L000000C5                  ; CALL 00C5, ,
+L000003C4:      ret
                 
-                dict_ENTRY L03BB, L03A1, 1, 5, "WHILE"
-L000003BB:      
-                call L0000031F                  ; CALL 031F, ?COMPILING
+                dict_ENTRY L03C5, L03AB, 1, 5, "WHILE"
+L000003C5:      
+                call L00000329                  ; CALL 0329, ?COMPILING
                 m_pop eax
                 cmp eax, 0
-                je L000003D4                    ; JMPZ
-                call L00000142                  ; CALL 0142, JMPNZ
-                call L000000B2                  ; CALL 00B2, ,
-L000003D4:      ret
+                je L000003DE                    ; JMPZ
+                call L00000155                  ; CALL 0155, JMPNZ
+                call L000000C5                  ; CALL 00C5, ,
+L000003DE:      ret
                 
-                dict_ENTRY L03D5, L03BB, 1, 5, "UNTIL"
-L000003D5:      
-                call L0000031F                  ; CALL 031F, ?COMPILING
+                dict_ENTRY L03DF, L03C5, 1, 5, "UNTIL"
+L000003DF:      
+                call L00000329                  ; CALL 0329, ?COMPILING
                 m_pop eax
                 cmp eax, 0
-                je L000003EE                    ; JMPZ
-                call L00000135                  ; CALL 0135, JMPZ
-                call L000000B2                  ; CALL 00B2, ,
-L000003EE:      ret
+                je L000003F8                    ; JMPZ
+                call L00000148                  ; CALL 0148, JMPZ
+                call L000000C5                  ; CALL 00C5, ,
+L000003F8:      ret
                 
-                dict_ENTRY L03EF, L03D5, 1, 5, "LEAVE"
-L000003EF:      
-                call L0000031F                  ; CALL 031F, ?COMPILING
+                dict_ENTRY L03F9, L03DF, 1, 5, "LEAVE"
+L000003F9:      
+                call L00000329                  ; CALL 0329, ?COMPILING
                 m_pop eax
                 cmp eax, 0
-                je L00000403                    ; JMPZ
-                call L0000015C                  ; CALL 015C, RET
-L00000403:      ret
+                je L0000040D                    ; JMPZ
+                call L0000016F                  ; CALL 016F, RET
+L0000040D:      ret
                 
-                dict_ENTRY L0404, L03EF, 0, 3, ">IN"
-L00000404:      
-                m_push 1039
+                dict_ENTRY L040E, L03F9, 0, 3, ">IN"
+L0000040E:      
+                m_push 1049
                 ret
                 ret
                 
-                dict_ENTRY L0414, L0404, 0, 5, "isNeg"
-L00000414:      
-                m_push 1055
+                dict_ENTRY L041E, L040E, 0, 5, "isNeg"
+L0000041E:      
+                m_push 1065
                 ret
                 ret
                 
-                dict_ENTRY L0424, L0414, 0, 6, "MEM_SZ"
-L00000424:      
-                m_push 36                       ; CLITERAL (0024)
+                dict_ENTRY L042E, L041E, 0, 6, "MEM_SZ"
+L0000042E:      
+                call L0000007C                  ; CALL 007C, (MEM_SZ)
                 mov ebx, [ebx]                  ; FETCH
                 ret
                 
-                dict_ENTRY L042D, L0424, 2, 8, "TRACE-ON"
-L0000042D:      
+                dict_ENTRY L043A, L042E, 2, 8, "TRACE-ON"
+L0000043A:      
                 m_push 2                        ; CLITERAL (0002)
                 call prim_LOGLEVEL
                 ret
                 
-                dict_ENTRY L0436, L042D, 2, 9, "TRACE-OFF"
-L00000436:      
+                dict_ENTRY L0443, L043A, 2, 9, "TRACE-OFF"
+L00000443:      
                 m_push 0                        ; CLITERAL (0000)
                 call prim_LOGLEVEL
                 ret
                 
-                dict_ENTRY L043F, L0436, 2, 8, "DEBUG-ON"
-L0000043F:      
+                dict_ENTRY L044C, L0443, 2, 8, "DEBUG-ON"
+L0000044C:      
                 m_push 1                        ; CLITERAL (0001)
                 call prim_LOGLEVEL
                 ret
                 
-                dict_ENTRY L0448, L043F, 2, 9, "DEBUG-OFF"
-L00000448:      
+                dict_ENTRY L0455, L044C, 2, 9, "DEBUG-OFF"
+L00000455:      
                 m_push 0                        ; CLITERAL (0000)
                 call prim_LOGLEVEL
                 ret
                 
-                dict_ENTRY L0451, L0448, 2, 2, "R@"
-L00000451:      
+                dict_ENTRY L045E, L0455, 2, 2, "R@"
+L0000045E:      
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_push ebx                      ; DUP
@@ -576,39 +571,39 @@ L00000451:
                 m_rpush eax
                 ret
                 
-                dict_ENTRY L045A, L0451, 2, 5, "RDROP"
-L0000045A:      
+                dict_ENTRY L0467, L045E, 2, 5, "RDROP"
+L00000467:      
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_pop eax                       ; DROP
                 ret
                 
-                dict_ENTRY L0462, L045A, 2, 4, "2DUP"
-L00000462:      
+                dict_ENTRY L046F, L0467, 2, 4, "2DUP"
+L0000046F:      
                 call prim_OVER
                 call prim_OVER
                 ret
                 
-                dict_ENTRY L046A, L0462, 2, 5, "2DROP"
-L0000046A:      
+                dict_ENTRY L0477, L046F, 2, 5, "2DROP"
+L00000477:      
                 m_pop eax                       ; DROP
                 m_pop eax                       ; DROP
                 ret
                 
-                dict_ENTRY L0472, L046A, 2, 4, "TUCK"
-L00000472:      
+                dict_ENTRY L047F, L0477, 2, 4, "TUCK"
+L0000047F:      
                 call prim_SWAP
                 call prim_OVER
                 ret
                 
-                dict_ENTRY L047A, L0472, 2, 3, "NIP"
-L0000047A:      
+                dict_ENTRY L0487, L047F, 2, 3, "NIP"
+L00000487:      
                 call prim_SWAP
                 m_pop eax                       ; DROP
                 ret
                 
-                dict_ENTRY L0482, L047A, 2, 3, "ROT"
-L00000482:      
+                dict_ENTRY L048F, L0487, 2, 3, "ROT"
+L0000048F:      
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
                 call prim_SWAP
@@ -617,8 +612,8 @@ L00000482:
                 call prim_SWAP
                 ret
                 
-                dict_ENTRY L048C, L0482, 2, 4, "-ROT"
-L0000048C:      
+                dict_ENTRY L0499, L048F, 2, 4, "-ROT"
+L00000499:      
                 call prim_SWAP
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
@@ -627,30 +622,30 @@ L0000048C:
                 m_push eax
                 ret
                 
-                dict_ENTRY L0496, L048C, 2, 2, "1+"
-L00000496:      
+                dict_ENTRY L04A3, L0499, 2, 2, "1+"
+L000004A3:      
                 m_onePlus
                 ret
                 
-                dict_ENTRY L049D, L0496, 2, 2, "1-"
-L0000049D:      
+                dict_ENTRY L04AA, L04A3, 2, 2, "1-"
+L000004AA:      
                 m_oneMinus
                 ret
                 
-                dict_ENTRY L04A4, L049D, 2, 2, "2*"
-L000004A4:      
+                dict_ENTRY L04B1, L04AA, 2, 2, "2*"
+L000004B1:      
                 m_push 2                        ; CLITERAL (0002)
                 call prim_MUL
                 ret
                 
-                dict_ENTRY L04AD, L04A4, 2, 2, "2/"
-L000004AD:      
+                dict_ENTRY L04BA, L04B1, 2, 2, "2/"
+L000004BA:      
                 m_push 2                        ; CLITERAL (0002)
                 call prim_DIV
                 ret
                 
-                dict_ENTRY L04B6, L04AD, 0, 2, "+="
-L000004B6:      
+                dict_ENTRY L04C3, L04BA, 0, 2, "+="
+L000004C3:      
                 call prim_OVER
                 mov ebx, [ebx]                  ; FETCH
                 call prim_ADD
@@ -658,8 +653,8 @@ L000004B6:
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L04C1, L04B6, 0, 2, "-="
-L000004C1:      
+                dict_ENTRY L04CE, L04C3, 0, 2, "-="
+L000004CE:      
                 call prim_OVER
                 mov ebx, [ebx]                  ; FETCH
                 call prim_SWAP
@@ -668,20 +663,20 @@ L000004C1:
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L04CD, L04C1, 0, 2, "++"
-L000004CD:      
-                m_push 1                        ; CLITERAL (0001)
-                call L000004B6                  ; CALL 04B6, +=
-                ret
-                
-                dict_ENTRY L04DA, L04CD, 0, 2, "--"
+                dict_ENTRY L04DA, L04CE, 0, 2, "++"
 L000004DA:      
                 m_push 1                        ; CLITERAL (0001)
-                call L000004C1                  ; CALL 04C1, -=
+                call L000004C3                  ; CALL 04C3, +=
                 ret
                 
-                dict_ENTRY L04E7, L04DA, 0, 3, "C++"
+                dict_ENTRY L04E7, L04DA, 0, 2, "--"
 L000004E7:      
+                m_push 1                        ; CLITERAL (0001)
+                call L000004CE                  ; CALL 04CE, -=
+                ret
+                
+                dict_ENTRY L04F4, L04E7, 0, 3, "C++"
+L000004F4:      
                 m_push ebx                      ; DUP
                 call prim_CFETCH
                 m_onePlus
@@ -689,8 +684,8 @@ L000004E7:
                 call prim_CSTORE
                 ret
                 
-                dict_ENTRY L04F2, L04E7, 0, 3, "C--"
-L000004F2:      
+                dict_ENTRY L04FF, L04F4, 0, 3, "C--"
+L000004FF:      
                 m_push ebx                      ; DUP
                 call prim_CFETCH
                 m_oneMinus
@@ -698,8 +693,8 @@ L000004F2:
                 call prim_CSTORE
                 ret
                 
-                dict_ENTRY L04FD, L04F2, 0, 2, "+!"
-L000004FD:      
+                dict_ENTRY L050A, L04FF, 0, 2, "+!"
+L0000050A:      
                 call prim_SWAP
                 call prim_OVER
                 mov ebx, [ebx]                  ; FETCH
@@ -708,8 +703,8 @@ L000004FD:
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L0509, L04FD, 0, 3, "C+!"
-L00000509:      
+                dict_ENTRY L0516, L050A, 0, 3, "C+!"
+L00000516:      
                 call prim_SWAP
                 call prim_OVER
                 call prim_CFETCH
@@ -718,97 +713,97 @@ L00000509:
                 call prim_CSTORE
                 ret
                 
-                dict_ENTRY L0515, L0509, 2, 2, "0="
-L00000515:      
+                dict_ENTRY L0522, L0516, 2, 2, "0="
+L00000522:      
                 m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 ret
                 
-                dict_ENTRY L051E, L0515, 2, 2, "<>"
-L0000051E:      
+                dict_ENTRY L052B, L0522, 2, 2, "<>"
+L0000052B:      
                 call prim_EQ
                 m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 ret
                 
-                dict_ENTRY L0528, L051E, 2, 2, "<="
-L00000528:      
+                dict_ENTRY L0535, L052B, 2, 2, "<="
+L00000535:      
                 call prim_GT
                 m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 ret
                 
-                dict_ENTRY L0532, L0528, 2, 2, ">="
-L00000532:      
+                dict_ENTRY L053F, L0535, 2, 2, ">="
+L0000053F:      
                 call prim_LT
                 m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 ret
                 
-                dict_ENTRY L053C, L0532, 2, 4, "TRUE"
-L0000053C:      
+                dict_ENTRY L0549, L053F, 2, 4, "TRUE"
+L00000549:      
                 m_push 1                        ; CLITERAL (0001)
                 ret
                 
-                dict_ENTRY L0544, L053C, 2, 5, "FALSE"
-L00000544:      
+                dict_ENTRY L0551, L0549, 2, 5, "FALSE"
+L00000551:      
                 m_push 0                        ; CLITERAL (0000)
                 ret
                 
-                dict_ENTRY L054C, L0544, 2, 3, "NOT"
-L0000054C:      
+                dict_ENTRY L0559, L0551, 2, 3, "NOT"
+L00000559:      
                 m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 ret
                 
-                dict_ENTRY L0555, L054C, 0, 5, "COUNT"
-L00000555:      
+                dict_ENTRY L0562, L0559, 0, 5, "COUNT"
+L00000562:      
                 m_push ebx                      ; DUP
                 m_onePlus
                 call prim_SWAP
                 call prim_CFETCH
                 ret
                 
-                dict_ENTRY L055F, L0555, 0, 4, "TYPE"
-L0000055F:      
+                dict_ENTRY L056C, L0562, 0, 4, "TYPE"
+L0000056C:      
                 call prim_OVER
                 call prim_ADD
                 call prim_SWAP
-L00000567:      call prim_OVER
+L00000574:      call prim_OVER
                 call prim_OVER
                 call prim_GT
                 m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L00000575                    ; JMPZ
+                je L00000582                    ; JMPZ
                 m_pop eax                       ; DROP
                 m_pop eax                       ; DROP
                 ret
-L00000575:      m_push ebx                      ; DUP
+L00000582:      m_push ebx                      ; DUP
                 call prim_CFETCH
                 call prim_EMIT
                 m_onePlus
-                jmp L00000567                   ; JMP
+                jmp L00000574                   ; JMP
                 ret
                 
-                dict_ENTRY L057F, L055F, 0, 2, "CT"
-L0000057F:      
-                call L00000555                  ; CALL 0555, COUNT
-                call L0000055F                  ; CALL 055F, TYPE
+                dict_ENTRY L058C, L056C, 0, 2, "CT"
+L0000058C:      
+                call L00000562                  ; CALL 0562, COUNT
+                call L0000056C                  ; CALL 056C, TYPE
                 ret
                 
-                dict_ENTRY L058F, L057F, 1, 1, "\"
-L0000058F:      
+                dict_ENTRY L059C, L058C, 1, 1, "\"
+L0000059C:      
                 m_push 0                        ; CLITERAL (0000)
-                call L00000404                  ; CALL 0404, >IN
+                call L0000040E                  ; CALL 040E, >IN
                 mov ebx, [ebx]                  ; FETCH
                 call prim_CSTORE
                 ret
                 
-                dict_ENTRY L059E, L058F, 1, 1, "("
-L0000059E:      
-L000005A3:      call L00000404                  ; CALL 0404, >IN
+                dict_ENTRY L05AB, L059C, 1, 1, "("
+L000005AB:      
+L000005B0:      call L0000040E                  ; CALL 040E, >IN
                 mov ebx, [ebx]                  ; FETCH
                 call prim_CFETCH
                 m_push ebx                      ; DUP
@@ -816,82 +811,82 @@ L000005A3:      call L00000404                  ; CALL 0404, >IN
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L000005CF                    ; JMPZ
+                je L000005DC                    ; JMPZ
                 call prim_SLITERAL              ; (19), 'missing closing ')'', (0)
-                call L0000057F                  ; CALL 057F, CT
+                call L0000058C                  ; CALL 058C, CT
                 call prim_RESET
-L000005CF:      call L00000404                  ; CALL 0404, >IN
-                call L000004CD                  ; CALL 04CD, ++
+L000005DC:      call L0000040E                  ; CALL 040E, >IN
+                call L000004DA                  ; CALL 04DA, ++
                 m_push 41                       ; CLITERAL (0029)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L000005E2                    ; JMPZ
+                je L000005EF                    ; JMPZ
                 ret
-L000005E2:      jmp L000005A3                   ; JMP
+L000005EF:      jmp L000005B0                   ; JMP
                 ret
                 
-                dict_ENTRY L05E8, L059E, 2, 2, "BL"
-L000005E8:      
+                dict_ENTRY L05F5, L05AB, 2, 2, "BL"
+L000005F5:      
                 m_push 32                       ; CLITERAL (0020)
                 call prim_EMIT
                 ret
                 
-                dict_ENTRY L05F1, L05E8, 2, 4, "CRLF"
-L000005F1:      
+                dict_ENTRY L05FE, L05F5, 2, 4, "CRLF"
+L000005FE:      
                 m_push 13                       ; CLITERAL (000D)
                 call prim_EMIT
                 m_push 10                       ; CLITERAL (000A)
                 call prim_EMIT
                 ret
                 
-                dict_ENTRY L05FD, L05F1, 2, 2, "CR"
-L000005FD:      
+                dict_ENTRY L060A, L05FE, 2, 2, "CR"
+L0000060A:      
                 m_push 13                       ; CLITERAL (000D)
                 call prim_EMIT
                 m_push 10                       ; CLITERAL (000A)
                 call prim_EMIT
                 ret
                 
-                dict_ENTRY L0609, L05FD, 0, 7, "BETWEEN"
-L00000609:      
+                dict_ENTRY L0616, L060A, 0, 7, "BETWEEN"
+L00000616:      
                 m_push 2                        ; CLITERAL (0002)
                 call prim_PICK
                 call prim_LT
                 m_pop eax
                 cmp eax, 0
-                je L0000061C                    ; JMPZ
+                je L00000629                    ; JMPZ
                 m_pop eax                       ; DROP
                 m_pop eax                       ; DROP
                 m_push 0                        ; CLITERAL (0000)
                 ret
-L0000061C:      call prim_LT
+L00000629:      call prim_LT
                 m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 ret
                 
-                dict_ENTRY L0621, L0609, 0, 5, "(tmp)"
-L00000621:      
-                m_push 1580
+                dict_ENTRY L062E, L0616, 0, 5, "(tmp)"
+L0000062E:      
+                m_push 1593
                 ret
                 ret
                 
-                dict_ENTRY L0631, L0621, 0, 8, "tmp-init"
-L00000631:      
-                call L0000008E                  ; CALL 008E, LAST
-                call L00000621                  ; CALL 0621, (tmp)
+                dict_ENTRY L063E, L062E, 0, 8, "tmp-init"
+L0000063E:      
+                call L0000009F                  ; CALL 009F, LAST
+                call L0000062E                  ; CALL 062E, (tmp)
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L0642, L0631, 0, 7, "tmp-cur"
-L00000642:      
-                call L00000621                  ; CALL 0621, (tmp)
+                dict_ENTRY L064F, L063E, 0, 7, "tmp-cur"
+L0000064F:      
+                call L0000062E                  ; CALL 062E, (tmp)
                 mov ebx, [ebx]                  ; FETCH
                 ret
                 
-                dict_ENTRY L064E, L0642, 0, 9, "tmp-alloc"
-L0000064E:      
-                call L00000621                  ; CALL 0621, (tmp)
+                dict_ENTRY L065B, L064F, 0, 9, "tmp-alloc"
+L0000065B:      
+                call L0000062E                  ; CALL 062E, (tmp)
                 call prim_SWAP
                 call prim_OVER
                 mov ebx, [ebx]                  ; FETCH
@@ -899,56 +894,56 @@ L0000064E:
                 call prim_SUB
                 call prim_SWAP
                 call prim_STORE
-                call L00000642                  ; CALL 0642, tmp-cur
+                call L0000064F                  ; CALL 064F, tmp-cur
                 ret
                 
-                dict_ENTRY L0665, L064E, 0, 3, "PAD"
-L00000665:      
-                call L00000631                  ; CALL 0631, tmp-init
+                dict_ENTRY L0672, L065B, 0, 3, "PAD"
+L00000672:      
+                call L0000063E                  ; CALL 063E, tmp-init
                 m_push 200                      ; CLITERAL (00C8)
-                call L0000064E                  ; CALL 064E, tmp-alloc
+                call L0000065B                  ; CALL 065B, tmp-alloc
                 ret
                 
-                dict_ENTRY L0677, L0665, 0, 8, "getInput"
-L00000677:      
-                call L00000665                  ; CALL 0665, PAD
+                dict_ENTRY L0684, L0672, 0, 8, "getInput"
+L00000684:      
+                call L00000672                  ; CALL 0672, PAD
                 m_push 128                      ; CLITERAL (0080)
                 m_push 0                        ; CLITERAL (0000)
                 call prim_FREADLINE
                 m_pop eax                       ; DROP
-                call L00000665                  ; CALL 0665, PAD
+                call L00000672                  ; CALL 0672, PAD
                 ret
                 
-                dict_ENTRY L068D, L0677, 0, 6, "skipWS"
-L0000068D:      
-L00000692:      m_push ebx                      ; DUP
+                dict_ENTRY L069A, L0684, 0, 6, "skipWS"
+L0000069A:      
+L0000069F:      m_push ebx                      ; DUP
                 call prim_CFETCH
                 m_push ebx                      ; DUP
                 m_pop eax
                 cmp eax, 0
-                je L000006AE                    ; JMPZ
+                je L000006BB                    ; JMPZ
                 m_push 32                       ; CLITERAL (0020)
                 call prim_GT
                 m_pop eax
                 cmp eax, 0
-                je L000006A8                    ; JMPZ
+                je L000006B5                    ; JMPZ
                 ret
-                jmp L000006A9                   ; JMP
-L000006A8:      m_onePlus
-L000006A9:      jmp L000006B0                   ; JMP
-L000006AE:      m_pop eax                       ; DROP
+                jmp L000006B6                   ; JMP
+L000006B5:      m_onePlus
+L000006B6:      jmp L000006BD                   ; JMP
+L000006BB:      m_pop eax                       ; DROP
                 ret
-L000006B0:      jmp L00000692                   ; JMP
+L000006BD:      jmp L0000069F                   ; JMP
                 ret
                 
-                dict_ENTRY L06B6, L068D, 0, 10, "getOneWord"
-L000006B6:      
+                dict_ENTRY L06C3, L069A, 0, 10, "getOneWord"
+L000006C3:      
                 m_push ebx                      ; DUP
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
-L000006BE:      m_rpop eax                      ; RTOD (R>)
+L000006CB:      m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_push ebx                      ; DUP
                 m_pop eax                       ; DTOR (>R)
@@ -958,14 +953,14 @@ L000006BE:      m_rpop eax                      ; RTOD (R>)
                 call prim_GT
                 m_pop eax
                 cmp eax, 0
-                je L000006D2                    ; JMPZ
+                je L000006DF                    ; JMPZ
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_onePlus
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
-                jmp L000006E8                   ; JMP
-L000006D2:      m_rpop eax                      ; RTOD (R>)
+                jmp L000006F5                   ; JMP
+L000006DF:      m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_push ebx                      ; DUP
                 m_pop eax                       ; DTOR (>R)
@@ -973,7 +968,7 @@ L000006D2:      m_rpop eax                      ; RTOD (R>)
                 call prim_CFETCH
                 m_pop eax
                 cmp eax, 0
-                je L000006E4                    ; JMPZ
+                je L000006F1                    ; JMPZ
                 m_push 0                        ; CLITERAL (0000)
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
@@ -986,131 +981,131 @@ L000006D2:      m_rpop eax                      ; RTOD (R>)
                 m_onePlus
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
-L000006E4:      m_rpop eax                      ; RTOD (R>)
+L000006F1:      m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 call prim_SWAP
                 ret
-L000006E8:      jmp L000006BE                   ; JMP
+L000006F5:      jmp L000006CB                   ; JMP
                 ret
                 
-                dict_ENTRY L06EE, L06B6, 0, 9, "DICT>NEXT"
-L000006EE:      
+                dict_ENTRY L06FB, L06C3, 0, 9, "DICT>NEXT"
+L000006FB:      
                 ret
                 
-                dict_ENTRY L06F4, L06EE, 0, 7, "DICT>XT"
-L000006F4:      
-                call L00000040                  ; CALL 0040, CELL
+                dict_ENTRY L0701, L06FB, 0, 7, "DICT>XT"
+L00000701:      
+                call L0000008B                  ; CALL 008B, CELL
                 call prim_ADD
                 ret
                 
-                dict_ENTRY L0700, L06F4, 0, 10, "DICT>FLAGS"
-L00000700:      
+                dict_ENTRY L070D, L0701, 0, 10, "DICT>FLAGS"
+L0000070D:      
                 m_push 2                        ; CLITERAL (0002)
-                call L00000040                  ; CALL 0040, CELL
+                call L0000008B                  ; CALL 008B, CELL
                 call prim_MUL
                 call prim_ADD
                 ret
                 
-                dict_ENTRY L070F, L0700, 0, 9, "DICT>NAME"
-L0000070F:      
-                call L00000700                  ; CALL 0700, DICT>FLAGS
+                dict_ENTRY L071C, L070D, 0, 9, "DICT>NAME"
+L0000071C:      
+                call L0000070D                  ; CALL 070D, DICT>FLAGS
                 m_onePlus
                 ret
                 
-                dict_ENTRY L071B, L070F, 0, 9, "NEXT>DICT"
-L0000071B:      
+                dict_ENTRY L0728, L071C, 0, 9, "NEXT>DICT"
+L00000728:      
                 ret
                 
-                dict_ENTRY L0721, L071B, 0, 7, "XT>DICT"
-L00000721:      
-                call L00000040                  ; CALL 0040, CELL
+                dict_ENTRY L072E, L0728, 0, 7, "XT>DICT"
+L0000072E:      
+                call L0000008B                  ; CALL 008B, CELL
                 call prim_SUB
                 ret
                 
-                dict_ENTRY L072D, L0721, 0, 10, "FLAGS>DICT"
-L0000072D:      
+                dict_ENTRY L073A, L072E, 0, 10, "FLAGS>DICT"
+L0000073A:      
                 m_push 2                        ; CLITERAL (0002)
-                call L00000040                  ; CALL 0040, CELL
+                call L0000008B                  ; CALL 008B, CELL
                 call prim_MUL
                 call prim_SUB
                 ret
                 
-                dict_ENTRY L073C, L072D, 0, 9, "NAME>DICT"
-L0000073C:      
+                dict_ENTRY L0749, L073A, 0, 9, "NAME>DICT"
+L00000749:      
                 m_oneMinus
                 m_push 2                        ; CLITERAL (0002)
-                call L00000040                  ; CALL 0040, CELL
+                call L0000008B                  ; CALL 008B, CELL
                 call prim_MUL
                 call prim_SUB
                 ret
                 
-                dict_ENTRY L074C, L073C, 0, 10, "DICT.GetXT"
-L0000074C:      
-                call L000006F4                  ; CALL 06F4, DICT>XT
+                dict_ENTRY L0759, L0749, 0, 10, "DICT.GetXT"
+L00000759:      
+                call L00000701                  ; CALL 0701, DICT>XT
                 mov ebx, [ebx]                  ; FETCH
                 ret
                 
-                dict_ENTRY L0758, L074C, 0, 13, "DICT.GetFLAGS"
-L00000758:      
-                call L00000700                  ; CALL 0700, DICT>FLAGS
+                dict_ENTRY L0765, L0759, 0, 13, "DICT.GetFLAGS"
+L00000765:      
+                call L0000070D                  ; CALL 070D, DICT>FLAGS
                 call prim_CFETCH
                 ret
                 
-                dict_ENTRY L0764, L0758, 0, 10, "DICTP>NAME"
-L00000764:      
+                dict_ENTRY L0771, L0765, 0, 10, "DICTP>NAME"
+L00000771:      
                 m_onePlus
                 mov ebx, [ebx]                  ; FETCH
-                call L0000070F                  ; CALL 070F, DICT>NAME
+                call L0000071C                  ; CALL 071C, DICT>NAME
                 ret
                 
-                dict_ENTRY L0771, L0764, 0, 11, "XT.GetDICTP"
-L00000771:      
+                dict_ENTRY L077E, L0771, 0, 11, "XT.GetDICTP"
+L0000077E:      
                 m_push ebx                      ; DUP
                 call prim_CFETCH
                 m_push 24                       ; CLITERAL (0018)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L00000787                    ; JMPZ
+                je L00000794                    ; JMPZ
                 m_onePlus
                 mov ebx, [ebx]                  ; FETCH
-                jmp L00000789                   ; JMP
-L00000787:      m_pop eax                       ; DROP
+                jmp L00000796                   ; JMP
+L00000794:      m_pop eax                       ; DROP
                 call prim_RESET
-L00000789:      ret
+L00000796:      ret
                 
-                dict_ENTRY L078A, L0771, 0, 18, "FLAGS.ISIMMEDIATE?"
-L0000078A:      
+                dict_ENTRY L0797, L077E, 0, 18, "FLAGS.ISIMMEDIATE?"
+L00000797:      
                 m_push 1                        ; CLITERAL (0001)
                 call prim_AND
                 ret
                 
-                dict_ENTRY L0793, L078A, 0, 15, "FLAGS.ISINLINE?"
-L00000793:      
+                dict_ENTRY L07A0, L0797, 0, 15, "FLAGS.ISINLINE?"
+L000007A0:      
                 m_push 2                        ; CLITERAL (0002)
                 call prim_AND
                 ret
                 
-                dict_ENTRY L079C, L0793, 0, 17, "DICT.GetIMMEDIATE"
-L0000079C:      
-                call L00000758                  ; CALL 0758, DICT.GetFLAGS
-                call L0000078A                  ; CALL 078A, FLAGS.ISIMMEDIATE?
+                dict_ENTRY L07A9, L07A0, 0, 17, "DICT.GetIMMEDIATE"
+L000007A9:      
+                call L00000765                  ; CALL 0765, DICT.GetFLAGS
+                call L00000797                  ; CALL 0797, FLAGS.ISIMMEDIATE?
                 ret
                 
-                dict_ENTRY L07AC, L079C, 0, 14, "DICT.GetINLINE"
-L000007AC:      
-                call L00000758                  ; CALL 0758, DICT.GetFLAGS
-                call L00000793                  ; CALL 0793, FLAGS.ISINLINE?
+                dict_ENTRY L07B9, L07A9, 0, 14, "DICT.GetINLINE"
+L000007B9:      
+                call L00000765                  ; CALL 0765, DICT.GetFLAGS
+                call L000007A0                  ; CALL 07A0, FLAGS.ISINLINE?
                 ret
                 
-                dict_ENTRY L07BC, L07AC, 0, 10, "findInDict"
-L000007BC:      
-                call L0000008E                  ; CALL 008E, LAST
+                dict_ENTRY L07C9, L07B9, 0, 10, "findInDict"
+L000007C9:      
+                call L0000009F                  ; CALL 009F, LAST
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
-L000007C7:      m_rpop eax                      ; RTOD (R>)
+L000007D4:      m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_push ebx                      ; DUP
                 m_pop eax                       ; DTOR (>R)
@@ -1118,170 +1113,170 @@ L000007C7:      m_rpop eax                      ; RTOD (R>)
                 m_push ebx                      ; DUP
                 m_pop eax
                 cmp eax, 0
-                je L000007F4                    ; JMPZ
-                call L0000070F                  ; CALL 070F, DICT>NAME
+                je L00000801                    ; JMPZ
+                call L0000071C                  ; CALL 071C, DICT>NAME
                 m_onePlus
                 call prim_OVER
                 call prim_COMPAREI
                 m_pop eax
                 cmp eax, 0
-                je L000007EF                    ; JMPZ
+                je L000007FC                    ; JMPZ
                 m_pop eax                       ; DROP
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_push ebx                      ; DUP
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
-                call L0000074C                  ; CALL 074C, DICT.GetXT
+                call L00000759                  ; CALL 0759, DICT.GetXT
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
-                call L00000758                  ; CALL 0758, DICT.GetFLAGS
+                call L00000765                  ; CALL 0765, DICT.GetFLAGS
                 m_push 1                        ; CLITERAL (0001)
                 ret
-L000007EF:      jmp L000007FC                   ; JMP
-L000007F4:      m_pop eax                       ; DROP
+L000007FC:      jmp L00000809                   ; JMP
+L00000801:      m_pop eax                       ; DROP
                 m_pop eax                       ; DROP
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_push 0                        ; CLITERAL (0000)
                 m_push 0                        ; CLITERAL (0000)
                 ret
-L000007FC:      m_rpop eax                      ; RTOD (R>)
+L00000809:      m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 mov ebx, [ebx]                  ; FETCH
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
-                jmp L000007C7                   ; JMP
+                jmp L000007D4                   ; JMP
                 ret
                 
-                dict_ENTRY L0805, L07BC, 0, 6, "isHEX?"
-L00000805:      
-                call L0000004B                  ; CALL 004B, BASE
+                dict_ENTRY L0812, L07C9, 0, 6, "isHEX?"
+L00000812:      
+                call L0000005E                  ; CALL 005E, BASE
                 mov ebx, [ebx]                  ; FETCH
                 m_push 16                       ; CLITERAL (0010)
                 call prim_EQ
                 ret
                 
-                dict_ENTRY L0814, L0805, 0, 10, "isNumChar?"
-L00000814:      
+                dict_ENTRY L0821, L0812, 0, 10, "isNumChar?"
+L00000821:      
                 m_push ebx                      ; DUP
                 m_push 48                       ; CLITERAL (0030)
                 m_push 57                       ; CLITERAL (0039)
-                call L00000609                  ; CALL 0609, BETWEEN
+                call L00000616                  ; CALL 0616, BETWEEN
                 m_pop eax
                 cmp eax, 0
-                je L0000082E                    ; JMPZ
+                je L0000083B                    ; JMPZ
                 m_push 48                       ; CLITERAL (0030)
                 call prim_SUB
                 m_push 1                        ; CLITERAL (0001)
                 ret
-L0000082E:      call L00000805                  ; CALL 0805, isHEX?
+L0000083B:      call L00000812                  ; CALL 0812, isHEX?
                 m_pop eax
                 cmp eax, 0
-                je L00000862                    ; JMPZ
+                je L0000086F                    ; JMPZ
                 m_push ebx                      ; DUP
                 m_push 65                       ; CLITERAL (0041)
                 m_push 70                       ; CLITERAL (0046)
-                call L00000609                  ; CALL 0609, BETWEEN
+                call L00000616                  ; CALL 0616, BETWEEN
                 m_pop eax
                 cmp eax, 0
-                je L0000084D                    ; JMPZ
+                je L0000085A                    ; JMPZ
                 m_push 55                       ; CLITERAL (0037)
                 call prim_SUB
                 m_push 1                        ; CLITERAL (0001)
                 ret
-L0000084D:      m_push ebx                      ; DUP
+L0000085A:      m_push ebx                      ; DUP
                 m_push 97                       ; CLITERAL (0061)
                 m_push 102                      ; CLITERAL (0066)
-                call L00000609                  ; CALL 0609, BETWEEN
+                call L00000616                  ; CALL 0616, BETWEEN
                 m_pop eax
                 cmp eax, 0
-                je L00000862                    ; JMPZ
+                je L0000086F                    ; JMPZ
                 m_push 87                       ; CLITERAL (0057)
                 call prim_SUB
                 m_push 1                        ; CLITERAL (0001)
                 ret
-L00000862:      m_push 0                        ; CLITERAL (0000)
+L0000086F:      m_push 0                        ; CLITERAL (0000)
                 ret
                 
-                dict_ENTRY L0865, L0814, 0, 6, "NEGATE"
-L00000865:      
+                dict_ENTRY L0872, L0821, 0, 6, "NEGATE"
+L00000872:      
                 m_push 0                        ; CLITERAL (0000)
                 call prim_SWAP
                 call prim_SUB
                 ret
                 
-                dict_ENTRY L086F, L0865, 0, 3, "ABS"
-L0000086F:      
+                dict_ENTRY L087C, L0872, 0, 3, "ABS"
+L0000087C:      
                 m_push ebx                      ; DUP
                 m_push 0                        ; CLITERAL (0000)
                 call prim_LT
                 m_pop eax
                 cmp eax, 0
-                je L00000882                    ; JMPZ
-                call L00000865                  ; CALL 0865, NEGATE
-L00000882:      ret
+                je L0000088F                    ; JMPZ
+                call L00000872                  ; CALL 0872, NEGATE
+L0000088F:      ret
                 
-                dict_ENTRY L0883, L086F, 0, 9, "isNumber?"
-L00000883:      
+                dict_ENTRY L0890, L087C, 0, 9, "isNumber?"
+L00000890:      
                 m_push ebx                      ; DUP
                 call prim_CFETCH
                 m_push 45                       ; CLITERAL (002D)
                 call prim_EQ
                 m_push ebx                      ; DUP
-                call L00000414                  ; CALL 0414, isNeg
+                call L0000041E                  ; CALL 041E, isNeg
                 call prim_CSTORE
                 m_pop eax
                 cmp eax, 0
-                je L0000089A                    ; JMPZ
+                je L000008A7                    ; JMPZ
                 m_onePlus
-L0000089A:      m_push 0                        ; CLITERAL (0000)
+L000008A7:      m_push 0                        ; CLITERAL (0000)
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
-L0000089D:      m_push ebx                      ; DUP
+L000008AA:      m_push ebx                      ; DUP
                 call prim_CFETCH
                 m_push ebx                      ; DUP
                 m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L000008BE                    ; JMPZ
+                je L000008CB                    ; JMPZ
                 m_pop eax                       ; DROP
                 m_pop eax                       ; DROP
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
-                call L00000414                  ; CALL 0414, isNeg
+                call L0000041E                  ; CALL 041E, isNeg
                 call prim_CFETCH
                 m_pop eax
                 cmp eax, 0
-                je L000008BB                    ; JMPZ
-                call L00000865                  ; CALL 0865, NEGATE
-L000008BB:      m_push 1                        ; CLITERAL (0001)
+                je L000008C8                    ; JMPZ
+                call L00000872                  ; CALL 0872, NEGATE
+L000008C8:      m_push 1                        ; CLITERAL (0001)
                 ret
-L000008BE:      call L00000814                  ; CALL 0814, isNumChar?
+L000008CB:      call L00000821                  ; CALL 0821, isNumChar?
                 m_pop eax
                 cmp eax, 0
-                je L000008D8                    ; JMPZ
+                je L000008E5                    ; JMPZ
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
-                call L0000004B                  ; CALL 004B, BASE
+                call L0000005E                  ; CALL 005E, BASE
                 mov ebx, [ebx]                  ; FETCH
                 call prim_MUL
                 call prim_ADD
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
                 m_onePlus
-                jmp L000008DD                   ; JMP
-L000008D8:      m_pop eax                       ; DROP
+                jmp L000008EA                   ; JMP
+L000008E5:      m_pop eax                       ; DROP
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_push 0                        ; CLITERAL (0000)
                 ret
-L000008DD:      jmp L0000089D                   ; JMP
+L000008EA:      jmp L000008AA                   ; JMP
                 ret
                 
-                dict_ENTRY L08E3, L0883, 0, 3, "MOD"
-L000008E3:      
+                dict_ENTRY L08F0, L0890, 0, 3, "MOD"
+L000008F0:      
                 call prim_OVER
                 call prim_OVER
                 call prim_DIV
@@ -1289,8 +1284,8 @@ L000008E3:
                 call prim_SUB
                 ret
                 
-                dict_ENTRY L08EE, L08E3, 0, 4, "/MOD"
-L000008EE:      
+                dict_ENTRY L08FB, L08F0, 0, 4, "/MOD"
+L000008FB:      
                 call prim_OVER
                 call prim_OVER
                 call prim_DIV
@@ -1303,49 +1298,49 @@ L000008EE:
                 m_push eax
                 ret
                 
-                dict_ENTRY L08FC, L08EE, 0, 5, "SPACE"
-L000008FC:      
+                dict_ENTRY L0909, L08FB, 0, 5, "SPACE"
+L00000909:      
                 m_push 32                       ; CLITERAL (0020)
                 call prim_EMIT
                 ret
                 
-                dict_ENTRY L0905, L08FC, 0, 4, "#NEG"
-L00000905:      
-                m_push 2320
+                dict_ENTRY L0912, L0909, 0, 4, "#NEG"
+L00000912:      
+                m_push 2333
                 ret
                 ret
                 
-                dict_ENTRY L0915, L0905, 0, 4, "#LEN"
-L00000915:      
-                m_push 2336
+                dict_ENTRY L0922, L0912, 0, 4, "#LEN"
+L00000922:      
+                m_push 2349
                 ret
                 m_pop eax                       ; DROP
                 ret
                 
-                dict_ENTRY L0925, L0915, 0, 2, "<#"
-L00000925:      
-                call L00000905                  ; CALL 0905, #NEG
-                call L00000315                  ; CALL 0315, OFF
-                call L00000915                  ; CALL 0915, #LEN
-                call L00000315                  ; CALL 0315, OFF
+                dict_ENTRY L0932, L0922, 0, 2, "<#"
+L00000932:      
+                call L00000912                  ; CALL 0912, #NEG
+                call L0000031F                  ; CALL 031F, OFF
+                call L00000922                  ; CALL 0922, #LEN
+                call L0000031F                  ; CALL 031F, OFF
                 m_push ebx                      ; DUP
                 m_push 0                        ; CLITERAL (0000)
                 call prim_LT
                 m_pop eax
                 cmp eax, 0
-                je L00000956                    ; JMPZ
-                call L00000865                  ; CALL 0865, NEGATE
-                call L00000905                  ; CALL 0905, #NEG
-                call L0000030B                  ; CALL 030B, ON
-L00000956:      m_push 0                        ; CLITERAL (0000)
+                je L00000963                    ; JMPZ
+                call L00000872                  ; CALL 0872, NEGATE
+                call L00000912                  ; CALL 0912, #NEG
+                call L00000315                  ; CALL 0315, ON
+L00000963:      m_push 0                        ; CLITERAL (0000)
                 call prim_SWAP
                 ret
                 
-                dict_ENTRY L095A, L0925, 0, 1, "#"
-L0000095A:      
-                call L0000004B                  ; CALL 004B, BASE
+                dict_ENTRY L0967, L0932, 0, 1, "#"
+L00000967:      
+                call L0000005E                  ; CALL 005E, BASE
                 mov ebx, [ebx]                  ; FETCH
-                call L000008EE                  ; CALL 08EE, /MOD
+                call L000008FB                  ; CALL 08FB, /MOD
                 call prim_SWAP
                 m_push 48                       ; CLITERAL (0030)
                 call prim_ADD
@@ -1354,135 +1349,179 @@ L0000095A:
                 call prim_GT
                 m_pop eax
                 cmp eax, 0
-                je L0000097A                    ; JMPZ
+                je L00000987                    ; JMPZ
                 m_push 7                        ; CLITERAL (0007)
                 call prim_ADD
-L0000097A:      call L00000915                  ; CALL 0915, #LEN
-                call L000004CD                  ; CALL 04CD, ++
+L00000987:      call L00000922                  ; CALL 0922, #LEN
+                call L000004DA                  ; CALL 04DA, ++
                 call prim_SWAP
                 ret
                 
-                dict_ENTRY L0986, L095A, 0, 2, "#S"
-L00000986:      
-L0000098B:      call L0000095A                  ; CALL 095A, #
+                dict_ENTRY L0993, L0967, 0, 2, "#S"
+L00000993:      
+L00000998:      call L00000967                  ; CALL 0967, #
                 m_push ebx                      ; DUP
                 m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L0000098B                    ; JMPZ
+                je L00000998                    ; JMPZ
                 ret
                 
-                dict_ENTRY L099A, L0986, 0, 2, "#>"
-L0000099A:      
+                dict_ENTRY L09A7, L0993, 0, 2, "#>"
+L000009A7:      
                 ret
                 
-                dict_ENTRY L09A0, L099A, 0, 3, "#P-"
-L000009A0:      
+                dict_ENTRY L09AD, L09A7, 0, 3, "#P-"
+L000009AD:      
                 m_pop eax                       ; DROP
-                call L00000905                  ; CALL 0905, #NEG
+                call L00000912                  ; CALL 0912, #NEG
                 mov ebx, [ebx]                  ; FETCH
                 m_pop eax
                 cmp eax, 0
-                je L000009B4                    ; JMPZ
+                je L000009C1                    ; JMPZ
                 m_push 45                       ; CLITERAL (002D)
                 call prim_EMIT
-L000009B4:      ret
+L000009C1:      ret
                 
-                dict_ENTRY L09B5, L09A0, 0, 2, "#P"
-L000009B5:      
-                call L000009A0                  ; CALL 09A0, #P-
-L000009BF:      call prim_EMIT
+                dict_ENTRY L09C2, L09AD, 0, 2, "#P"
+L000009C2:      
+                call L000009AD                  ; CALL 09AD, #P-
+L000009CC:      call prim_EMIT
                 m_push ebx                      ; DUP
                 m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L000009BF                    ; JMPZ
+                je L000009CC                    ; JMPZ
                 m_pop eax                       ; DROP
                 ret
                 
-                dict_ENTRY L09CB, L09B5, 0, 3, "(.)"
-L000009CB:      
-                call L00000925                  ; CALL 0925, <#
-                call L00000986                  ; CALL 0986, #S
-                call L0000099A                  ; CALL 099A, #>
-                call L000009B5                  ; CALL 09B5, #P
+                dict_ENTRY L09D8, L09C2, 0, 3, "(.)"
+L000009D8:      
+                call L00000932                  ; CALL 0932, <#
+                call L00000993                  ; CALL 0993, #S
+                call L000009A7                  ; CALL 09A7, #>
+                call L000009C2                  ; CALL 09C2, #P
                 ret
                 
-                dict_ENTRY L09E5, L09CB, 0, 1, "."
-L000009E5:      
-                call L000009CB                  ; CALL 09CB, (.)
-                call L000008FC                  ; CALL 08FC, SPACE
+                dict_ENTRY L09F2, L09D8, 0, 1, "."
+L000009F2:      
+                call L000009D8                  ; CALL 09D8, (.)
+                call L00000909                  ; CALL 0909, SPACE
                 ret
                 
-                dict_ENTRY L09F5, L09E5, 0, 4, "HEX."
-L000009F5:      
-                call L0000004B                  ; CALL 004B, BASE
+                dict_ENTRY L0A02, L09F2, 0, 2, ".2"
+L00000A02:      
+                call L00000932                  ; CALL 0932, <#
+                call L00000967                  ; CALL 0967, #
+                call L00000967                  ; CALL 0967, #
+                call L000009A7                  ; CALL 09A7, #>
+                call L000009C2                  ; CALL 09C2, #P
+                ret
+                
+                dict_ENTRY L0A21, L0A02, 0, 2, ".3"
+L00000A21:      
+                call L00000932                  ; CALL 0932, <#
+                call L00000967                  ; CALL 0967, #
+                call L00000967                  ; CALL 0967, #
+                call L00000967                  ; CALL 0967, #
+                call L000009A7                  ; CALL 09A7, #>
+                call L000009C2                  ; CALL 09C2, #P
+                ret
+                
+                dict_ENTRY L0A45, L0A21, 0, 2, ".4"
+L00000A45:      
+                call L00000932                  ; CALL 0932, <#
+                call L00000967                  ; CALL 0967, #
+                call L00000967                  ; CALL 0967, #
+                call L00000967                  ; CALL 0967, #
+                call L00000967                  ; CALL 0967, #
+                call L000009A7                  ; CALL 09A7, #>
+                call L000009C2                  ; CALL 09C2, #P
+                ret
+                
+                dict_ENTRY L0A6E, L0A45, 0, 4, "HEX."
+L00000A6E:      
+                call L0000005E                  ; CALL 005E, BASE
                 mov ebx, [ebx]                  ; FETCH
                 call prim_SWAP
-                call L000002D3                  ; CALL 02D3, HEX
-                m_push ebx                      ; DUP
-                m_push 16                       ; CLITERAL (0010)
-                call prim_LT
-                m_pop eax
-                cmp eax, 0
-                je L00000A12                    ; JMPZ
-                m_push 48                       ; CLITERAL (0030)
-                call prim_EMIT
-L00000A12:      call L000009CB                  ; CALL 09CB, (.)
-                call L0000004B                  ; CALL 004B, BASE
+                call L000002DD                  ; CALL 02DD, HEX
+                call L000009D8                  ; CALL 09D8, (.)
+                call L0000005E                  ; CALL 005E, BASE
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L0A1E, L09F5, 0, 8, "DECIMAL."
-L00000A1E:      
-                call L0000004B                  ; CALL 004B, BASE
+                dict_ENTRY L0A8B, L0A6E, 0, 5, "HEX.2"
+L00000A8B:      
+                call L0000005E                  ; CALL 005E, BASE
                 mov ebx, [ebx]                  ; FETCH
                 call prim_SWAP
-                call L000002E1                  ; CALL 02E1, DECIMAL
-                call L000009CB                  ; CALL 09CB, (.)
-                call L0000004B                  ; CALL 004B, BASE
+                call L000002DD                  ; CALL 02DD, HEX
+                call L00000A02                  ; CALL 0A02, .2
+                call L0000005E                  ; CALL 005E, BASE
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L0A3B, L0A1E, 0, 7, "BINARY."
-L00000A3B:      
-                call L0000004B                  ; CALL 004B, BASE
+                dict_ENTRY L0AA8, L0A8B, 0, 5, "HEX.4"
+L00000AA8:      
+                call L0000005E                  ; CALL 005E, BASE
                 mov ebx, [ebx]                  ; FETCH
                 call prim_SWAP
-                call L000002FD                  ; CALL 02FD, BINARY
-                call L000009CB                  ; CALL 09CB, (.)
-                call L0000004B                  ; CALL 004B, BASE
+                call L000002DD                  ; CALL 02DD, HEX
+                call L00000A45                  ; CALL 0A45, .4
+                call L0000005E                  ; CALL 005E, BASE
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L0A58, L0A3B, 0, 3, "MIN"
-L00000A58:      
+                dict_ENTRY L0AC5, L0AA8, 0, 8, "DECIMAL."
+L00000AC5:      
+                call L0000005E                  ; CALL 005E, BASE
+                mov ebx, [ebx]                  ; FETCH
+                call prim_SWAP
+                call L000002EB                  ; CALL 02EB, DECIMAL
+                call L000009D8                  ; CALL 09D8, (.)
+                call L0000005E                  ; CALL 005E, BASE
+                call prim_STORE
+                ret
+                
+                dict_ENTRY L0AE2, L0AC5, 0, 7, "BINARY."
+L00000AE2:      
+                call L0000005E                  ; CALL 005E, BASE
+                mov ebx, [ebx]                  ; FETCH
+                call prim_SWAP
+                call L00000307                  ; CALL 0307, BINARY
+                call L000009D8                  ; CALL 09D8, (.)
+                call L0000005E                  ; CALL 005E, BASE
+                call prim_STORE
+                ret
+                
+                dict_ENTRY L0AFF, L0AE2, 0, 3, "MIN"
+L00000AFF:      
                 call prim_OVER
                 call prim_OVER
                 call prim_GT
                 m_pop eax
                 cmp eax, 0
-                je L00000A66                    ; JMPZ
+                je L00000B0D                    ; JMPZ
                 call prim_SWAP
-L00000A66:      m_pop eax                       ; DROP
+L00000B0D:      m_pop eax                       ; DROP
                 ret
                 
-                dict_ENTRY L0A68, L0A58, 0, 3, "MAX"
-L00000A68:      
+                dict_ENTRY L0B0F, L0AFF, 0, 3, "MAX"
+L00000B0F:      
                 call prim_OVER
                 call prim_OVER
                 call prim_LT
                 m_pop eax
                 cmp eax, 0
-                je L00000A76                    ; JMPZ
+                je L00000B1D                    ; JMPZ
                 call prim_SWAP
-L00000A76:      m_pop eax                       ; DROP
+L00000B1D:      m_pop eax                       ; DROP
                 ret
                 
-                dict_ENTRY L0A78, L0A68, 0, 2, ".S"
-L00000A78:      
+                dict_ENTRY L0B1F, L0B0F, 0, 2, ".S"
+L00000B1F:      
                 m_push 32                       ; CLITERAL (0020)
                 call prim_EMIT
                 call prim_DEPTH
@@ -1490,17 +1529,17 @@ L00000A78:
                 call prim_LT
                 m_pop eax
                 cmp eax, 0
-                je L00000AA7                    ; JMPZ
+                je L00000B4E                    ; JMPZ
                 call prim_SLITERAL              ; (16), 'Stack underflow!', (0)
-                call L00000555                  ; CALL 0555, COUNT
-                call L0000055F                  ; CALL 055F, TYPE
+                call L00000562                  ; CALL 0562, COUNT
+                call L0000056C                  ; CALL 056C, TYPE
                 call prim_RESET
-L00000AA7:      call prim_DEPTH
+L00000B4E:      call prim_DEPTH
                 m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L00000ABA                    ; JMPZ
+                je L00000B61                    ; JMPZ
                 m_push 40                       ; CLITERAL (0028)
                 call prim_EMIT
                 m_push 237                      ; CLITERAL (00ED)
@@ -1508,20 +1547,20 @@ L00000AA7:      call prim_DEPTH
                 m_push 41                       ; CLITERAL (0029)
                 call prim_EMIT
                 ret
-L00000ABA:      m_push 40                       ; CLITERAL (0028)
+L00000B61:      m_push 40                       ; CLITERAL (0028)
                 call prim_EMIT
-                call L000008FC                  ; CALL 08FC, SPACE
+                call L00000909                  ; CALL 0909, SPACE
                 call prim_DEPTH
                 m_oneMinus
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
-L00000AC5:      m_rpop eax                      ; RTOD (R>)
+L00000B6C:      m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_push ebx                      ; DUP
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
                 call prim_PICK
-                call L000009E5                  ; CALL 09E5, .
+                call L000009F2                  ; CALL 09F2, .
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_push ebx                      ; DUP
@@ -1529,179 +1568,179 @@ L00000AC5:      m_rpop eax                      ; RTOD (R>)
                 m_rpush eax
                 m_pop eax
                 cmp eax, 0
-                je L00000ADE                    ; JMPZ
+                je L00000B85                    ; JMPZ
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_oneMinus
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
-                jmp L00000AE4                   ; JMP
-L00000ADE:      m_rpop eax                      ; RTOD (R>)
+                jmp L00000B8B                   ; JMP
+L00000B85:      m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_pop eax                       ; DROP
                 m_push 41                       ; CLITERAL (0029)
                 call prim_EMIT
                 ret
-L00000AE4:      jmp L00000AC5                   ; JMP
+L00000B8B:      jmp L00000B6C                   ; JMP
                 ret
                 
-                dict_ENTRY L0AEA, L0A78, 0, 9, ".(MEM_SZ)"
-L00000AEA:      
-                call prim_SLITERAL              ; (8), 'Memory: ', (0)
-                call L0000057F                  ; CALL 057F, CT
-                call L00000424                  ; CALL 0424, MEM_SZ
-                m_push ebx                      ; DUP
-                call L000009F5                  ; CALL 09F5, HEX.
-                call prim_SLITERAL              ; (2), ' (', (0)
-                call L0000057F                  ; CALL 057F, CT
-                call L000009CB                  ; CALL 09CB, (.)
-                call prim_SLITERAL              ; (1), ')', (0)
-                call L0000057F                  ; CALL 057F, CT
-                ret
-                
-                dict_ENTRY L0B23, L0AEA, 0, 7, ".(HERE)"
-L00000B23:      
-                call prim_SLITERAL              ; (6), 'HERE: ', (0)
-                call L0000057F                  ; CALL 057F, CT
-                call L00000082                  ; CALL 0082, HERE
-                m_push ebx                      ; DUP
-                call L000009F5                  ; CALL 09F5, HEX.
-                call prim_SLITERAL              ; (2), ' (', (0)
-                call L0000057F                  ; CALL 057F, CT
-                call L000009CB                  ; CALL 09CB, (.)
-                call prim_SLITERAL              ; (1), ')', (0)
-                call L0000057F                  ; CALL 057F, CT
-                ret
-                
-                dict_ENTRY L0B5A, L0B23, 0, 7, ".(LAST)"
-L00000B5A:      
-                call prim_SLITERAL              ; (6), 'LAST: ', (0)
-                call L0000057F                  ; CALL 057F, CT
-                call L0000008E                  ; CALL 008E, LAST
-                m_push ebx                      ; DUP
-                call L000009F5                  ; CALL 09F5, HEX.
-                call prim_SLITERAL              ; (2), ' (', (0)
-                call L0000057F                  ; CALL 057F, CT
-                call L000009CB                  ; CALL 09CB, (.)
-                call prim_SLITERAL              ; (1), ')', (0)
-                call L0000057F                  ; CALL 057F, CT
-                ret
-                
-                dict_ENTRY L0B91, L0B5A, 0, 11, ".WORD-SHORT"
+                dict_ENTRY L0B91, L0B1F, 0, 9, ".(MEM_SZ)"
 L00000B91:      
+                call prim_SLITERAL              ; (8), 'Memory: ', (0)
+                call L0000058C                  ; CALL 058C, CT
+                call L0000042E                  ; CALL 042E, MEM_SZ
                 m_push ebx                      ; DUP
-                call L0000070F                  ; CALL 070F, DICT>NAME
-                call L0000057F                  ; CALL 057F, CT
+                call L00000A6E                  ; CALL 0A6E, HEX.
+                call prim_SLITERAL              ; (2), ' (', (0)
+                call L0000058C                  ; CALL 058C, CT
+                call L000009D8                  ; CALL 09D8, (.)
+                call prim_SLITERAL              ; (1), ')', (0)
+                call L0000058C                  ; CALL 058C, CT
+                ret
+                
+                dict_ENTRY L0BCA, L0B91, 0, 7, ".(HERE)"
+L00000BCA:      
+                call prim_SLITERAL              ; (6), 'HERE: ', (0)
+                call L0000058C                  ; CALL 058C, CT
+                call L00000093                  ; CALL 0093, HERE
+                m_push ebx                      ; DUP
+                call L00000A6E                  ; CALL 0A6E, HEX.
+                call prim_SLITERAL              ; (2), ' (', (0)
+                call L0000058C                  ; CALL 058C, CT
+                call L000009D8                  ; CALL 09D8, (.)
+                call prim_SLITERAL              ; (1), ')', (0)
+                call L0000058C                  ; CALL 058C, CT
+                ret
+                
+                dict_ENTRY L0C01, L0BCA, 0, 7, ".(LAST)"
+L00000C01:      
+                call prim_SLITERAL              ; (6), 'LAST: ', (0)
+                call L0000058C                  ; CALL 058C, CT
+                call L0000009F                  ; CALL 009F, LAST
+                m_push ebx                      ; DUP
+                call L00000A6E                  ; CALL 0A6E, HEX.
+                call prim_SLITERAL              ; (2), ' (', (0)
+                call L0000058C                  ; CALL 058C, CT
+                call L000009D8                  ; CALL 09D8, (.)
+                call prim_SLITERAL              ; (1), ')', (0)
+                call L0000058C                  ; CALL 058C, CT
+                ret
+                
+                dict_ENTRY L0C38, L0C01, 0, 11, ".WORD-SHORT"
+L00000C38:      
+                m_push ebx                      ; DUP
+                call L0000071C                  ; CALL 071C, DICT>NAME
+                call L0000058C                  ; CALL 058C, CT
                 m_push 32                       ; CLITERAL (0020)
                 call prim_EMIT
                 mov ebx, [ebx]                  ; FETCH
                 ret
                 
-                dict_ENTRY L0BA6, L0B91, 0, 5, "WORDS"
-L00000BA6:      
-                call L0000008E                  ; CALL 008E, LAST
-L00000BB0:      m_push ebx                      ; DUP
+                dict_ENTRY L0C4D, L0C38, 0, 5, "WORDS"
+L00000C4D:      
+                call L0000009F                  ; CALL 009F, LAST
+L00000C57:      m_push ebx                      ; DUP
                 mov ebx, [ebx]                  ; FETCH
                 m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L00000BC2                    ; JMPZ
+                je L00000C69                    ; JMPZ
                 m_pop eax                       ; DROP
                 m_push 13                       ; CLITERAL (000D)
                 call prim_EMIT
                 m_push 10                       ; CLITERAL (000A)
                 call prim_EMIT
                 ret
-L00000BC2:      call L00000B91                  ; CALL 0B91, .WORD-SHORT
-                jmp L00000BB0                   ; JMP
+L00000C69:      call L00000C38                  ; CALL 0C38, .WORD-SHORT
+                jmp L00000C57                   ; JMP
                 ret
                 
-                dict_ENTRY L0BCD, L0BA6, 0, 10, ".WORD-LONG"
-L00000BCD:      
+                dict_ENTRY L0C74, L0C4D, 0, 10, ".WORD-LONG"
+L00000C74:      
                 m_push ebx                      ; DUP
-                call L000009F5                  ; CALL 09F5, HEX.
+                call L00000A6E                  ; CALL 0A6E, HEX.
                 m_push 58                       ; CLITERAL (003A)
                 call prim_EMIT
                 m_push 32                       ; CLITERAL (0020)
                 call prim_EMIT
                 m_push ebx                      ; DUP
-                call L0000070F                  ; CALL 070F, DICT>NAME
-                call L0000057F                  ; CALL 057F, CT
+                call L0000071C                  ; CALL 071C, DICT>NAME
+                call L0000058C                  ; CALL 058C, CT
                 m_push 32                       ; CLITERAL (0020)
                 call prim_EMIT
                 m_push ebx                      ; DUP
-                call L0000074C                  ; CALL 074C, DICT.GetXT
+                call L00000759                  ; CALL 0759, DICT.GetXT
                 m_push 40                       ; CLITERAL (0028)
                 call prim_EMIT
-                call L000009F5                  ; CALL 09F5, HEX.
+                call L00000AA8                  ; CALL 0AA8, HEX.4
                 m_push 41                       ; CLITERAL (0029)
                 call prim_EMIT
                 m_push ebx                      ; DUP
-                call L00000700                  ; CALL 0700, DICT>FLAGS
+                call L0000070D                  ; CALL 070D, DICT>FLAGS
                 call prim_CFETCH
                 m_push ebx                      ; DUP
                 call prim_SLITERAL              ; (9), ', Flags: ', (0)
-                call L0000057F                  ; CALL 057F, CT
-                call L000009F5                  ; CALL 09F5, HEX.
+                call L0000058C                  ; CALL 058C, CT
+                call L00000A8B                  ; CALL 0A8B, HEX.2
                 m_push ebx                      ; DUP
-                call L00000793                  ; CALL 0793, FLAGS.ISINLINE?
+                call L000007A0                  ; CALL 07A0, FLAGS.ISINLINE?
                 m_pop eax
                 cmp eax, 0
-                je L00000C37                    ; JMPZ
+                je L00000CDE                    ; JMPZ
                 call prim_SLITERAL              ; (9), ' (INLINE)', (0)
-                call L0000057F                  ; CALL 057F, CT
-L00000C37:      call L0000078A                  ; CALL 078A, FLAGS.ISIMMEDIATE?
+                call L0000058C                  ; CALL 058C, CT
+L00000CDE:      call L00000797                  ; CALL 0797, FLAGS.ISIMMEDIATE?
                 m_pop eax
                 cmp eax, 0
-                je L00000C55                    ; JMPZ
+                je L00000CFC                    ; JMPZ
                 call prim_SLITERAL              ; (12), ' (IMMEDIATE)', (0)
-                call L0000057F                  ; CALL 057F, CT
-L00000C55:      m_push 13                       ; CLITERAL (000D)
+                call L0000058C                  ; CALL 058C, CT
+L00000CFC:      m_push 13                       ; CLITERAL (000D)
                 call prim_EMIT
                 m_push 10                       ; CLITERAL (000A)
                 call prim_EMIT
                 mov ebx, [ebx]                  ; FETCH
                 ret
                 
-                dict_ENTRY L0C5D, L0BCD, 0, 6, "WORDSV"
-L00000C5D:      
-                call L00000B5A                  ; CALL 0B5A, .(LAST)
+                dict_ENTRY L0D04, L0C74, 0, 6, "WORDSV"
+L00000D04:      
+                call L00000C01                  ; CALL 0C01, .(LAST)
                 m_push 13                       ; CLITERAL (000D)
                 call prim_EMIT
                 m_push 10                       ; CLITERAL (000A)
                 call prim_EMIT
-                call L0000008E                  ; CALL 008E, LAST
-L00000C72:      m_push ebx                      ; DUP
-                mov ebx, [ebx]                  ; FETCH
-                m_push 0                        ; CLITERAL (0000)
-                call prim_EQ
-                m_pop eax
-                cmp eax, 0
-                je L00000C84                    ; JMPZ
-                m_pop eax                       ; DROP
-                m_push 13                       ; CLITERAL (000D)
-                call prim_EMIT
-                m_push 10                       ; CLITERAL (000A)
-                call prim_EMIT
-                ret
-L00000C84:      call L00000BCD                  ; CALL 0BCD, .WORD-LONG
-                jmp L00000C72                   ; JMP
-                ret
-                
-                dict_ENTRY L0C8F, L0C5D, 0, 9, "NUM-WORDS"
-L00000C8F:      
-                m_push 0                        ; CLITERAL (0000)
-                m_pop eax                       ; DTOR (>R)
-                m_rpush eax
-                call L0000008E                  ; CALL 008E, LAST
-L00000C9C:      m_push ebx                      ; DUP
+                call L0000009F                  ; CALL 009F, LAST
+L00000D19:      m_push ebx                      ; DUP
                 mov ebx, [ebx]                  ; FETCH
                 m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L00000CAF                    ; JMPZ
+                je L00000D2B                    ; JMPZ
+                m_pop eax                       ; DROP
+                m_push 13                       ; CLITERAL (000D)
+                call prim_EMIT
+                m_push 10                       ; CLITERAL (000A)
+                call prim_EMIT
+                ret
+L00000D2B:      call L00000C74                  ; CALL 0C74, .WORD-LONG
+                jmp L00000D19                   ; JMP
+                ret
+                
+                dict_ENTRY L0D36, L0D04, 0, 9, "NUM-WORDS"
+L00000D36:      
+                m_push 0                        ; CLITERAL (0000)
+                m_pop eax                       ; DTOR (>R)
+                m_rpush eax
+                call L0000009F                  ; CALL 009F, LAST
+L00000D43:      m_push ebx                      ; DUP
+                mov ebx, [ebx]                  ; FETCH
+                m_push 0                        ; CLITERAL (0000)
+                call prim_EQ
+                m_pop eax
+                cmp eax, 0
+                je L00000D56                    ; JMPZ
                 m_pop eax                       ; DROP
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
@@ -1710,54 +1749,37 @@ L00000C9C:      m_push ebx                      ; DUP
                 m_push 10                       ; CLITERAL (000A)
                 call prim_EMIT
                 ret
-L00000CAF:      m_rpop eax                      ; RTOD (R>)
+L00000D56:      m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_onePlus
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
                 mov ebx, [ebx]                  ; FETCH
-                jmp L00000C9C                   ; JMP
+                jmp L00000D43                   ; JMP
                 ret
                 
-                dict_ENTRY L0CB9, L0C8F, 0, 6, ".lastx"
-L00000CB9:      
+                dict_ENTRY L0D60, L0D36, 0, 6, ".lastx"
+L00000D60:      
                 m_push 13                       ; CLITERAL (000D)
                 call prim_EMIT
                 m_push 10                       ; CLITERAL (000A)
                 call prim_EMIT
-                call L0000008E                  ; CALL 008E, LAST
+                call L0000009F                  ; CALL 009F, LAST
                 call prim_SWAP
-                m_push 0                        ; CLITERAL (0000)
-L00000CCC:      call prim_OVER
-                call prim_OVER
-                call prim_GT
+L00000D71:      call prim_SWAP
+                call L00000C74                  ; CALL 0C74, .WORD-LONG
+                call prim_SWAP
+                m_oneMinus
+                m_push ebx                      ; DUP
                 m_pop eax
                 cmp eax, 0
-                je L00000CE7                    ; JMPZ
-                m_pop eax                       ; DTOR (>R)
-                m_rpush eax
-                call prim_SWAP
-                m_rpop eax                      ; RTOD (R>)
-                m_push eax
-                call prim_SWAP
-                call L00000BCD                  ; CALL 0BCD, .WORD-LONG
-                call prim_SWAP
-                m_pop eax                       ; DTOR (>R)
-                m_rpush eax
-                call prim_SWAP
-                m_rpop eax                      ; RTOD (R>)
-                m_push eax
-                m_onePlus
-                jmp L00000CEB                   ; JMP
-L00000CE7:      m_pop eax                       ; DROP
+                jne L00000D71                   ; JMPNZ
                 m_pop eax                       ; DROP
                 m_pop eax                       ; DROP
-                ret
-L00000CEB:      jmp L00000CCC                   ; JMP
                 ret
                 
-                dict_ENTRY L0CF1, L0CB9, 0, 7, "EXECUTE"
-L00000CF1:      
+                dict_ENTRY L0D82, L0D60, 0, 7, "EXECUTE"
+L00000D82:      
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_pop eax                       ; DROP
@@ -1765,121 +1787,121 @@ L00000CF1:
                 m_rpush eax
                 ret
                 
-                dict_ENTRY L0CFA, L0CF1, 0, 8, "find.ret"
-L00000CFA:      
-L00000CFF:      m_push ebx                      ; DUP
+                dict_ENTRY L0D8B, L0D82, 0, 8, "find.ret"
+L00000D8B:      
+L00000D90:      m_push ebx                      ; DUP
                 call prim_CFETCH
                 m_push 12                       ; CLITERAL (000C)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L00000D0A                    ; JMPZ
+                je L00000D9B                    ; JMPZ
                 ret
-L00000D0A:      m_onePlus
-                jmp L00000CFF                   ; JMP
+L00000D9B:      m_onePlus
+                jmp L00000D90                   ; JMP
                 ret
                 
-                dict_ENTRY L0D11, L0CFA, 0, 8, "(inline)"
-L00000D11:      
+                dict_ENTRY L0DA2, L0D8B, 0, 8, "(inline)"
+L00000DA2:      
                 call prim_OVER
                 call prim_OVER
                 call prim_LT
                 m_pop eax
                 cmp eax, 0
-                je L00000D1F                    ; JMPZ
+                je L00000DB0                    ; JMPZ
                 call prim_SWAP
-L00000D1F:      m_push ebx                      ; DUP
+L00000DB0:      m_push ebx                      ; DUP
                 call prim_CFETCH
-                call L0000009A                  ; CALL 009A, C,
+                call L000000AB                  ; CALL 00AB, C,
                 m_onePlus
                 call prim_OVER
                 call prim_OVER
                 call prim_GT
                 m_pop eax
                 cmp eax, 0
-                jne L00000D1F                   ; JMPNZ
+                jne L00000DB0                   ; JMPNZ
                 m_pop eax                       ; DROP
                 m_pop eax                       ; DROP
                 ret
                 
-                dict_ENTRY L0D32, L0D11, 0, 5, "DOES>"
-L00000D32:      
+                dict_ENTRY L0DC3, L0DA2, 0, 5, "DOES>"
+L00000DC3:      
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_push ebx                      ; DUP
-                call L00000CFA                  ; CALL 0CFA, find.ret
+                call L00000D8B                  ; CALL 0D8B, find.ret
                 m_push ebx                      ; DUP
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
                 m_onePlus
-                call L00000D11                  ; CALL 0D11, (inline)
+                call L00000DA2                  ; CALL 0DA2, (inline)
                 ret
                 
-                dict_ENTRY L0D47, L0D32, 0, 11, "Copy.INLINE"
-L00000D47:      
+                dict_ENTRY L0DD8, L0DC3, 0, 11, "Copy.INLINE"
+L00000DD8:      
                 m_push ebx                      ; DUP
                 call prim_CFETCH
                 m_push 24                       ; CLITERAL (0018)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L00000D5D                    ; JMPZ
+                je L00000DEE                    ; JMPZ
                 m_onePlus
-                call L00000040                  ; CALL 0040, CELL
+                call L0000008B                  ; CALL 008B, CELL
                 call prim_ADD
-L00000D5D:      m_push ebx                      ; DUP
-                call L00000CFA                  ; CALL 0CFA, find.ret
-                call L00000D11                  ; CALL 0D11, (inline)
+L00000DEE:      m_push ebx                      ; DUP
+                call L00000D8B                  ; CALL 0D8B, find.ret
+                call L00000DA2                  ; CALL 0DA2, (inline)
                 ret
                 
-                dict_ENTRY L0D69, L0D47, 0, 6, "strlen"
-L00000D69:      
+                dict_ENTRY L0DFA, L0DD8, 0, 6, "strlen"
+L00000DFA:      
                 m_push 0                        ; CLITERAL (0000)
                 call prim_SWAP
-L00000D71:      call prim_SWAP
+L00000E02:      call prim_SWAP
                 call prim_OVER
                 call prim_CFETCH
                 m_push ebx                      ; DUP
                 m_pop eax
                 cmp eax, 0
-                je L00000D80                    ; JMPZ
+                je L00000E11                    ; JMPZ
                 m_pop eax                       ; DROP
                 m_onePlus
                 call prim_SWAP
                 m_onePlus
                 m_push 1                        ; CLITERAL (0001)
-L00000D80:      m_pop eax
+L00000E11:      m_pop eax
                 cmp eax, 0
-                jne L00000D71                   ; JMPNZ
+                jne L00000E02                   ; JMPNZ
                 call prim_SWAP
                 m_pop eax                       ; DROP
                 ret
                 
-                dict_ENTRY L0D88, L0D69, 0, 5, "cstr,"
-L00000D88:      
+                dict_ENTRY L0E19, L0DFA, 0, 5, "cstr,"
+L00000E19:      
                 m_push ebx                      ; DUP
                 call prim_CFETCH
                 call prim_OVER
                 call prim_ADD
                 m_onePlus
                 m_onePlus
-                call L00000D11                  ; CALL 0D11, (inline)
+                call L00000DA2                  ; CALL 0DA2, (inline)
                 ret
                 
-                dict_ENTRY L0D99, L0D88, 0, 9, "[COMPILE]"
-L00000D99:      
-                call L00000793                  ; CALL 0793, FLAGS.ISINLINE?
+                dict_ENTRY L0E2A, L0E19, 0, 9, "[COMPILE]"
+L00000E2A:      
+                call L000007A0                  ; CALL 07A0, FLAGS.ISINLINE?
                 m_pop eax
                 cmp eax, 0
-                je L00000DB2                    ; JMPZ
-                call L00000D47                  ; CALL 0D47, Copy.INLINE
-                jmp L00000DBC                   ; JMP
-L00000DB2:      call L0000014F                  ; CALL 014F, CALL
-                call L000000B2                  ; CALL 00B2, ,
-L00000DBC:      ret
+                je L00000E43                    ; JMPZ
+                call L00000DD8                  ; CALL 0DD8, Copy.INLINE
+                jmp L00000E4D                   ; JMP
+L00000E43:      call L00000162                  ; CALL 0162, CALL
+                call L000000C5                  ; CALL 00C5, ,
+L00000E4D:      ret
                 
-                dict_ENTRY L0DBD, L0D99, 0, 11, "executeWord"
-L00000DBD:      
+                dict_ENTRY L0E4E, L0E2A, 0, 11, "executeWord"
+L00000E4E:      
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
                 m_rpop eax                      ; RTOD (R>)
@@ -1887,146 +1909,151 @@ L00000DBD:
                 m_push ebx                      ; DUP
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
-                call L000007BC                  ; CALL 07BC, findInDict
+                call L000007C9                  ; CALL 07C9, findInDict
                 m_pop eax
                 cmp eax, 0
-                je L00000E07                    ; JMPZ
+                je L00000E98                    ; JMPZ
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_pop eax                       ; DROP
-                call L0000031F                  ; CALL 031F, ?COMPILING
+                call L00000329                  ; CALL 0329, ?COMPILING
                 m_pop eax
                 cmp eax, 0
-                je L00000DFC                    ; JMPZ
+                je L00000E8D                    ; JMPZ
                 m_push ebx                      ; DUP
-                call L0000078A                  ; CALL 078A, FLAGS.ISIMMEDIATE?
+                call L00000797                  ; CALL 0797, FLAGS.ISIMMEDIATE?
                 m_pop eax
                 cmp eax, 0
-                je L00000DF2                    ; JMPZ
+                je L00000E83                    ; JMPZ
                 m_pop eax                       ; DROP
-                call L00000CF1                  ; CALL 0CF1, EXECUTE
-                jmp L00000DF7                   ; JMP
-L00000DF2:      call L00000D99                  ; CALL 0D99, [COMPILE]
-L00000DF7:      jmp L00000E02                   ; JMP
-L00000DFC:      m_pop eax                       ; DROP
-                call L00000CF1                  ; CALL 0CF1, EXECUTE
-L00000E02:      jmp L00000E5D                   ; JMP
-L00000E07:      m_pop eax                       ; DROP
+                call L00000D82                  ; CALL 0D82, EXECUTE
+                jmp L00000E88                   ; JMP
+L00000E83:      call L00000E2A                  ; CALL 0E2A, [COMPILE]
+L00000E88:      jmp L00000E93                   ; JMP
+L00000E8D:      m_pop eax                       ; DROP
+                call L00000D82                  ; CALL 0D82, EXECUTE
+L00000E93:      jmp L00000EEE                   ; JMP
+L00000E98:      m_pop eax                       ; DROP
                 m_pop eax                       ; DROP
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_push ebx                      ; DUP
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
-                call L00000883                  ; CALL 0883, isNumber?
+                call L00000890                  ; CALL 0890, isNumber?
                 m_pop eax
                 cmp eax, 0
-                je L00000E4F                    ; JMPZ
-                call L0000031F                  ; CALL 031F, ?COMPILING
+                je L00000EE0                    ; JMPZ
+                call L00000329                  ; CALL 0329, ?COMPILING
                 m_pop eax
                 cmp eax, 0
-                je L00000E4A                    ; JMPZ
+                je L00000EDB                    ; JMPZ
                 m_push ebx                      ; DUP
                 m_push 0                        ; CLITERAL (0000)
                 m_push 255                      ; CLITERAL (00FF)
-                call L00000609                  ; CALL 0609, BETWEEN
+                call L00000616                  ; CALL 0616, BETWEEN
                 m_pop eax
                 cmp eax, 0
-                je L00000E40                    ; JMPZ
+                je L00000ED1                    ; JMPZ
                 m_push 14                       ; CLITERAL (000E)
-                call L0000009A                  ; CALL 009A, C,
-                call L0000009A                  ; CALL 009A, C,
-                jmp L00000E4A                   ; JMP
-L00000E40:      call L000000EB                  ; CALL 00EB, LITERAL
-                call L000000B2                  ; CALL 00B2, ,
-L00000E4A:      jmp L00000E5B                   ; JMP
-L00000E4F:      m_pop eax                       ; DROP
+                call L000000AB                  ; CALL 00AB, C,
+                call L000000AB                  ; CALL 00AB, C,
+                jmp L00000EDB                   ; JMP
+L00000ED1:      call L000000FE                  ; CALL 00FE, LITERAL
+                call L000000C5                  ; CALL 00C5, ,
+L00000EDB:      jmp L00000EEC                   ; JMP
+L00000EE0:      m_pop eax                       ; DROP
                 call prim_SLITERAL              ; (2), '??', (0)
-                call L0000057F                  ; CALL 057F, CT
+                call L0000058C                  ; CALL 058C, CT
                 call prim_RESET
-L00000E5B:      m_rpop eax                      ; RTOD (R>)
+L00000EEC:      m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_pop eax                       ; DROP
-L00000E5D:      ret
+L00000EEE:      ret
                 
-                dict_ENTRY L0E5E, L0DBD, 0, 12, "executeInput"
-L00000E5E:      
-L00000E63:      call L00000404                  ; CALL 0404, >IN
+                dict_ENTRY L0EEF, L0E4E, 0, 12, "executeInput"
+L00000EEF:      
+L00000EF4:      call L0000040E                  ; CALL 040E, >IN
                 mov ebx, [ebx]                  ; FETCH
-                call L0000068D                  ; CALL 068D, skipWS
-                call L00000404                  ; CALL 0404, >IN
+                call L0000069A                  ; CALL 069A, skipWS
+                call L0000040E                  ; CALL 040E, >IN
                 call prim_STORE
-                call L00000404                  ; CALL 0404, >IN
+                call L0000040E                  ; CALL 040E, >IN
                 mov ebx, [ebx]                  ; FETCH
                 call prim_CFETCH
                 m_pop eax
                 cmp eax, 0
-                je L00000E9B                    ; JMPZ
-                call L00000404                  ; CALL 0404, >IN
+                je L00000F2C                    ; JMPZ
+                call L0000040E                  ; CALL 040E, >IN
                 mov ebx, [ebx]                  ; FETCH
-                call L000006B6                  ; CALL 06B6, getOneWord
-                call L00000404                  ; CALL 0404, >IN
+                call L000006C3                  ; CALL 06C3, getOneWord
+                call L0000040E                  ; CALL 040E, >IN
                 call prim_STORE
-                call L00000DBD                  ; CALL 0DBD, executeWord
-                jmp L00000E9C                   ; JMP
-L00000E9B:      ret
-L00000E9C:      jmp L00000E63                   ; JMP
+                call L00000E4E                  ; CALL 0E4E, executeWord
+                jmp L00000F2D                   ; JMP
+L00000F2C:      ret
+L00000F2D:      jmp L00000EF4                   ; JMP
                 ret
                 
-                dict_ENTRY L0EA2, L0E5E, 0, 3, "Pad"
-L00000EA2:      
-                call L0000008E                  ; CALL 008E, LAST
+                dict_ENTRY L0F33, L0EEF, 0, 3, "Pad"
+L00000F33:      
+                call L0000009F                  ; CALL 009F, LAST
                 m_push 200                      ; CLITERAL (00C8)
                 call prim_SUB
                 m_push ebx                      ; DUP
-                call L00000082                  ; CALL 0082, HERE
+                call L00000093                  ; CALL 0093, HERE
                 call prim_LT
                 m_pop eax
                 cmp eax, 0
-                je L00000ECD                    ; JMPZ
+                je L00000F5E                    ; JMPZ
                 call prim_SLITERAL              ; (14), 'Out of Memory!', (0)
                 call prim_RESET
-L00000ECD:      ret
+L00000F5E:      ret
                 
-                dict_ENTRY L0ECE, L0EA2, 0, 16, "LoadingFromFile?"
-L00000ECE:      
-                call L0000006C                  ; CALL 006C, INPUT-FP
+                dict_ENTRY L0F5F, L0F33, 0, 8, "INPUT-FP"
+L00000F5F:      
+                m_push 3946
+                ret
+                
+                dict_ENTRY L0F6E, L0F5F, 0, 16, "LoadingFromFile?"
+L00000F6E:      
+                call L00000F5F                  ; CALL 0F5F, INPUT-FP
                 mov ebx, [ebx]                  ; FETCH
                 ret
                 
-                dict_ENTRY L0EDA, L0ECE, 0, 15, "getLineFromFile"
-L00000EDA:      
+                dict_ENTRY L0F7A, L0F6E, 0, 15, "getLineFromFile"
+L00000F7A:      
                 m_push 200                      ; CLITERAL (00C8)
-                call L0000006C                  ; CALL 006C, INPUT-FP
+                call L00000F5F                  ; CALL 0F5F, INPUT-FP
                 mov ebx, [ebx]                  ; FETCH
                 call prim_FREADLINE
                 m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L00000EFA                    ; JMPZ
-                call L0000006C                  ; CALL 006C, INPUT-FP
-                call L00000315                  ; CALL 0315, OFF
-L00000EFA:      ret
+                je L00000F9A                    ; JMPZ
+                call L00000F5F                  ; CALL 0F5F, INPUT-FP
+                call L0000031F                  ; CALL 031F, OFF
+L00000F9A:      ret
                 
-                dict_ENTRY L0EFB, L0EDA, 0, 7, "getLine"
-L00000EFB:      
+                dict_ENTRY L0F9B, L0F7A, 0, 7, "getLine"
+L00000F9B:      
                 m_push 0                        ; CLITERAL (0000)
-                call L00000EA2                  ; CALL 0EA2, Pad
+                call L00000F33                  ; CALL 0F33, Pad
                 m_push ebx                      ; DUP
                 m_onePlus
-                call L00000404                  ; CALL 0404, >IN
+                call L0000040E                  ; CALL 040E, >IN
                 call prim_STORE
                 call prim_CSTORE
-                call L00000ECE                  ; CALL 0ECE, LoadingFromFile?
+                call L00000F6E                  ; CALL 0F6E, LoadingFromFile?
                 m_pop eax
                 cmp eax, 0
-                je L00000F25                    ; JMPZ
-                call L00000EA2                  ; CALL 0EA2, Pad
-                call L00000EDA                  ; CALL 0EDA, getLineFromFile
+                je L00000FC5                    ; JMPZ
+                call L00000F33                  ; CALL 0F33, Pad
+                call L00000F7A                  ; CALL 0F7A, getLineFromFile
                 ret
-L00000F25:      m_push 0                        ; CLITERAL (0000)
-                call L00000404                  ; CALL 0404, >IN
+L00000FC5:      m_push 0                        ; CLITERAL (0000)
+                call L0000040E                  ; CALL 040E, >IN
                 mov ebx, [ebx]                  ; FETCH
                 call prim_CSTORE
                 call prim_GETCH
@@ -2035,75 +2062,75 @@ L00000F25:      m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L00000F42                    ; JMPZ
+                je L00000FE2                    ; JMPZ
                 m_pop eax                       ; DROP
-                call L00000EA2                  ; CALL 0EA2, Pad
+                call L00000F33                  ; CALL 0F33, Pad
                 m_push 32                       ; CLITERAL (0020)
                 call prim_EMIT
                 ret
-L00000F42:      m_push ebx                      ; DUP
+L00000FE2:      m_push ebx                      ; DUP
                 m_push 9                        ; CLITERAL (0009)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L00000F4E                    ; JMPZ
+                je L00000FEE                    ; JMPZ
                 m_pop eax                       ; DROP
                 m_push 32                       ; CLITERAL (0020)
-L00000F4E:      m_push ebx                      ; DUP
+L00000FEE:      m_push ebx                      ; DUP
                 m_push 3                        ; CLITERAL (0003)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L00000F58                    ; JMPZ
+                je L00000FF8                    ; JMPZ
                 call prim_BYE
-L00000F58:      m_push ebx                      ; DUP
+L00000FF8:      m_push ebx                      ; DUP
                 m_push 8                        ; CLITERAL (0008)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L00000F94                    ; JMPZ
-                call L00000EA2                  ; CALL 0EA2, Pad
+                je L00001034                    ; JMPZ
+                call L00000F33                  ; CALL 0F33, Pad
                 call prim_CFETCH
                 m_push 0                        ; CLITERAL (0000)
                 call prim_GT
                 m_pop eax
                 cmp eax, 0
-                je L00000F8E                    ; JMPZ
-                call L00000EA2                  ; CALL 0EA2, Pad
-                call L000004F2                  ; CALL 04F2, C--
-                call L00000404                  ; CALL 0404, >IN
-                call L000004DA                  ; CALL 04DA, --
+                je L0000102E                    ; JMPZ
+                call L00000F33                  ; CALL 0F33, Pad
+                call L000004FF                  ; CALL 04FF, C--
+                call L0000040E                  ; CALL 040E, >IN
+                call L000004E7                  ; CALL 04E7, --
                 m_push ebx                      ; DUP
                 call prim_EMIT
                 m_push 32                       ; CLITERAL (0020)
                 call prim_EMIT
                 call prim_EMIT
-                jmp L00000F8F                   ; JMP
-L00000F8E:      m_pop eax                       ; DROP
-L00000F8F:      jmp L00000FC6                   ; JMP
-L00000F94:      m_push ebx                      ; DUP
+                jmp L0000102F                   ; JMP
+L0000102E:      m_pop eax                       ; DROP
+L0000102F:      jmp L00001066                   ; JMP
+L00001034:      m_push ebx                      ; DUP
                 m_push 32                       ; CLITERAL (0020)
                 m_push 127                      ; CLITERAL (007F)
-                call L00000609                  ; CALL 0609, BETWEEN
+                call L00000616                  ; CALL 0616, BETWEEN
                 m_pop eax
                 cmp eax, 0
-                je L00000FC5                    ; JMPZ
+                je L00001065                    ; JMPZ
                 m_push ebx                      ; DUP
                 call prim_EMIT
-                call L00000404                  ; CALL 0404, >IN
+                call L0000040E                  ; CALL 040E, >IN
                 mov ebx, [ebx]                  ; FETCH
                 call prim_CSTORE
-                call L00000404                  ; CALL 0404, >IN
-                call L000004CD                  ; CALL 04CD, ++
-                call L00000EA2                  ; CALL 0EA2, Pad
-                call L000004E7                  ; CALL 04E7, C++
-                jmp L00000FC6                   ; JMP
-L00000FC5:      m_pop eax                       ; DROP
-L00000FC6:      jmp L00000F25                   ; JMP
+                call L0000040E                  ; CALL 040E, >IN
+                call L000004DA                  ; CALL 04DA, ++
+                call L00000F33                  ; CALL 0F33, Pad
+                call L000004F4                  ; CALL 04F4, C++
+                jmp L00001066                   ; JMP
+L00001065:      m_pop eax                       ; DROP
+L00001066:      jmp L00000FC5                   ; JMP
                 ret
                 
-                dict_ENTRY L0FCC, L0EFB, 0, 8, "strcpy2c"
-L00000FCC:      
+                dict_ENTRY L106C, L0F9B, 0, 8, "strcpy2c"
+L0000106C:      
                 m_push ebx                      ; DUP
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
@@ -2112,12 +2139,12 @@ L00000FCC:
                 call prim_CSTORE
                 m_onePlus
                 call prim_SWAP
-L00000FD9:      m_push ebx                      ; DUP
+L00001079:      m_push ebx                      ; DUP
                 call prim_CFETCH
                 m_push ebx                      ; DUP
                 m_pop eax
                 cmp eax, 0
-                je L00000FF6                    ; JMPZ
+                je L00001096                    ; JMPZ
                 m_push 2                        ; CLITERAL (0002)
                 call prim_PICK
                 call prim_CSTORE
@@ -2130,9 +2157,9 @@ L00000FD9:      m_push ebx                      ; DUP
                 m_push ebx                      ; DUP
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
-                call L000004E7                  ; CALL 04E7, C++
-                jmp L00000FFF                   ; JMP
-L00000FF6:      m_pop eax                       ; DTOR (>R)
+                call L000004F4                  ; CALL 04F4, C++
+                jmp L0000109F                   ; JMP
+L00001096:      m_pop eax                       ; DTOR (>R)
                 m_rpush eax
                 call prim_SWAP
                 m_rpop eax                      ; RTOD (R>)
@@ -2144,16 +2171,16 @@ L00000FF6:      m_pop eax                       ; DTOR (>R)
                 m_push eax
                 m_pop eax                       ; DROP
                 ret
-L00000FFF:      jmp L00000FD9                   ; JMP
+L0000109F:      jmp L00001079                   ; JMP
                 ret
                 
-                dict_ENTRY L1005, L0FCC, 0, 11, "Define-Word"
-L00001005:      
-                call L0000008E                  ; CALL 008E, LAST
+                dict_ENTRY L10A5, L106C, 0, 11, "Define-Word"
+L000010A5:      
+                call L0000009F                  ; CALL 009F, LAST
                 call prim_OVER
-                call L00000D69                  ; CALL 0D69, strlen
+                call L00000DFA                  ; CALL 0DFA, strlen
                 m_push 2                        ; CLITERAL (0002)
-                call L00000040                  ; CALL 0040, CELL
+                call L0000008B                  ; CALL 008B, CELL
                 call prim_MUL
                 m_push 3                        ; CLITERAL (0003)
                 call prim_ADD
@@ -2164,7 +2191,7 @@ L00001005:
                 m_rpush eax
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
-                call L0000008E                  ; CALL 008E, LAST
+                call L0000009F                  ; CALL 009F, LAST
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_push ebx                      ; DUP
@@ -2173,11 +2200,11 @@ L00001005:
                 call prim_STORE
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
-                call L00000040                  ; CALL 0040, CELL
+                call L0000008B                  ; CALL 008B, CELL
                 call prim_ADD
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
-                call L00000082                  ; CALL 0082, HERE
+                call L00000093                  ; CALL 0093, HERE
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
                 m_push ebx                      ; DUP
@@ -2186,7 +2213,7 @@ L00001005:
                 call prim_STORE
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
-                call L00000040                  ; CALL 0040, CELL
+                call L0000008B                  ; CALL 008B, CELL
                 call prim_ADD
                 m_pop eax                       ; DTOR (>R)
                 m_rpush eax
@@ -2204,184 +2231,184 @@ L00001005:
                 m_rpush eax
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
-                call L00000FCC                  ; CALL 0FCC, strcpy2c
+                call L0000106C                  ; CALL 106C, strcpy2c
                 m_rpop eax                      ; RTOD (R>)
                 m_push eax
-                call L00000061                  ; CALL 0061, (LAST)
+                call L0000004F                  ; CALL 004F, (LAST)
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L105E, L1005, 0, 11, "CREATE-NAME"
-L0000105E:      
-                call L00000404                  ; CALL 0404, >IN
+                dict_ENTRY L10FE, L10A5, 0, 11, "CREATE-NAME"
+L000010FE:      
+                call L0000040E                  ; CALL 040E, >IN
                 mov ebx, [ebx]                  ; FETCH
-                call L0000068D                  ; CALL 068D, skipWS
-                call L00000404                  ; CALL 0404, >IN
+                call L0000069A                  ; CALL 069A, skipWS
+                call L0000040E                  ; CALL 040E, >IN
                 call prim_STORE
-                call L00000404                  ; CALL 0404, >IN
+                call L0000040E                  ; CALL 040E, >IN
                 mov ebx, [ebx]                  ; FETCH
                 call prim_CFETCH
                 m_pop eax
                 cmp eax, 0
-                je L000010B5                    ; JMPZ
-                call L00000404                  ; CALL 0404, >IN
+                je L00001155                    ; JMPZ
+                call L0000040E                  ; CALL 040E, >IN
                 mov ebx, [ebx]                  ; FETCH
-                call L000006B6                  ; CALL 06B6, getOneWord
-                call L00000404                  ; CALL 0404, >IN
+                call L000006C3                  ; CALL 06C3, getOneWord
+                call L0000040E                  ; CALL 040E, >IN
                 call prim_STORE
                 m_push ebx                      ; DUP
                 call prim_CFETCH
                 m_pop eax
                 cmp eax, 0
-                je L000010B3                    ; JMPZ
-                call L00001005                  ; CALL 1005, Define-Word
+                je L00001153                    ; JMPZ
+                call L000010A5                  ; CALL 10A5, Define-Word
                 m_push 24                       ; CLITERAL (0018)
-                call L0000009A                  ; CALL 009A, C,
-                call L0000008E                  ; CALL 008E, LAST
-                call L000000B2                  ; CALL 00B2, ,
-                jmp L000010B5                   ; JMP
-L000010B3:      m_pop eax                       ; DROP
+                call L000000AB                  ; CALL 00AB, C,
+                call L0000009F                  ; CALL 009F, LAST
+                call L000000C5                  ; CALL 00C5, ,
+                jmp L00001155                   ; JMP
+L00001153:      m_pop eax                       ; DROP
                 call prim_RESET
-L000010B5:      ret
+L00001155:      ret
                 
-                dict_ENTRY L10B6, L105E, 0, 1, ":"
-L000010B6:      
-                call L0000105E                  ; CALL 105E, CREATE-NAME
-                call L00000077                  ; CALL 0077, STATE
-                call L0000030B                  ; CALL 030B, ON
+                dict_ENTRY L1156, L10FE, 0, 1, ":"
+L00001156:      
+                call L000010FE                  ; CALL 10FE, CREATE-NAME
+                call L0000006D                  ; CALL 006D, STATE
+                call L00000315                  ; CALL 0315, ON
                 ret
                 
-                dict_ENTRY L10CB, L10B6, 0, 7, ":NONAME"
-L000010CB:      
-                call L00000082                  ; CALL 0082, HERE
-                call L00000077                  ; CALL 0077, STATE
-                call L0000030B                  ; CALL 030B, ON
+                dict_ENTRY L116B, L1156, 0, 7, ":NONAME"
+L0000116B:      
+                call L00000093                  ; CALL 0093, HERE
+                call L0000006D                  ; CALL 006D, STATE
+                call L00000315                  ; CALL 0315, ON
                 ret
                 
-                dict_ENTRY L10E0, L10CB, 1, 1, ";"
-L000010E0:      
-                call L0000015C                  ; CALL 015C, RET
-                call L00000077                  ; CALL 0077, STATE
-                call L00000315                  ; CALL 0315, OFF
+                dict_ENTRY L1180, L116B, 1, 1, ";"
+L00001180:      
+                call L0000016F                  ; CALL 016F, RET
+                call L0000006D                  ; CALL 006D, STATE
+                call L0000031F                  ; CALL 031F, OFF
                 ret
                 
-                dict_ENTRY L10F5, L10E0, 0, 10, "ForgetLast"
-L000010F5:      
-                call L0000008E                  ; CALL 008E, LAST
-                call L00000040                  ; CALL 0040, CELL
+                dict_ENTRY L1195, L1180, 0, 10, "ForgetLast"
+L00001195:      
+                call L0000009F                  ; CALL 009F, LAST
+                call L0000008B                  ; CALL 008B, CELL
                 call prim_ADD
                 mov ebx, [ebx]                  ; FETCH
-                call L00000056                  ; CALL 0056, (HERE)
+                call L00000040                  ; CALL 0040, (HERE)
                 call prim_STORE
-                call L0000008E                  ; CALL 008E, LAST
+                call L0000009F                  ; CALL 009F, LAST
                 mov ebx, [ebx]                  ; FETCH
-                call L00000061                  ; CALL 0061, (LAST)
+                call L0000004F                  ; CALL 004F, (LAST)
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L1119, L10F5, 0, 10, "resetState"
-L00001119:      
-                call L0000031F                  ; CALL 031F, ?COMPILING
+                dict_ENTRY L11B9, L1195, 0, 10, "resetState"
+L000011B9:      
+                call L00000329                  ; CALL 0329, ?COMPILING
                 m_pop eax
                 cmp eax, 0
-                je L0000112D                    ; JMPZ
-                call L000010F5                  ; CALL 10F5, ForgetLast
-L0000112D:      call L00000077                  ; CALL 0077, STATE
-                call L00000315                  ; CALL 0315, OFF
-                call L000002E1                  ; CALL 02E1, DECIMAL
+                je L000011CD                    ; JMPZ
+                call L00001195                  ; CALL 1195, ForgetLast
+L000011CD:      call L0000006D                  ; CALL 006D, STATE
+                call L0000031F                  ; CALL 031F, OFF
+                call L000002EB                  ; CALL 02EB, DECIMAL
                 ret
                 
-                dict_ENTRY L113D, L1119, 0, 5, "ALLOT"
-L0000113D:      
-                call L00000082                  ; CALL 0082, HERE
+                dict_ENTRY L11DD, L11B9, 0, 5, "ALLOT"
+L000011DD:      
+                call L00000093                  ; CALL 0093, HERE
                 call prim_ADD
-                call L00000056                  ; CALL 0056, (HERE)
+                call L00000040                  ; CALL 0040, (HERE)
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L114F, L113D, 0, 1, "?"
-L0000114F:      
+                dict_ENTRY L11EF, L11DD, 0, 1, "?"
+L000011EF:      
                 mov ebx, [ebx]                  ; FETCH
-                call L000009E5                  ; CALL 09E5, .
+                call L000009F2                  ; CALL 09F2, .
                 ret
                 
-                dict_ENTRY L115B, L114F, 0, 2, "C?"
-L0000115B:      
+                dict_ENTRY L11FB, L11EF, 0, 2, "C?"
+L000011FB:      
                 call prim_CFETCH
-                call L000009E5                  ; CALL 09E5, .
+                call L000009F2                  ; CALL 09F2, .
                 ret
                 
-                dict_ENTRY L1167, L115B, 0, 4, "FREE"
-L00001167:      
-                call L0000008E                  ; CALL 008E, LAST
-                call L00000082                  ; CALL 0082, HERE
+                dict_ENTRY L1207, L11FB, 0, 4, "FREE"
+L00001207:      
+                call L0000009F                  ; CALL 009F, LAST
+                call L00000093                  ; CALL 0093, HERE
                 call prim_SUB
                 ret
                 
-                dict_ENTRY L1178, L1167, 0, 5, ".FREE"
-L00001178:      
-                call L00001167                  ; CALL 1167, FREE
-                call L000009CB                  ; CALL 09CB, (.)
+                dict_ENTRY L1218, L1207, 0, 5, ".FREE"
+L00001218:      
+                call L00001207                  ; CALL 1207, FREE
+                call L000009D8                  ; CALL 09D8, (.)
                 call prim_SLITERAL              ; (12), ' bytes free.', (0)
-                call L0000057F                  ; CALL 057F, CT
+                call L0000058C                  ; CALL 058C, CT
                 ret
                 
-                dict_ENTRY L119C, L1178, 0, 8, "mainLoop"
-L0000119C:      
-                call L00001119                  ; CALL 1119, resetState
-L000011A6:      call L00000631                  ; CALL 0631, tmp-init
-                call L0000031F                  ; CALL 031F, ?COMPILING
+                dict_ENTRY L123C, L1218, 0, 8, "mainLoop"
+L0000123C:      
+                call L000011B9                  ; CALL 11B9, resetState
+L00001246:      call L0000063E                  ; CALL 063E, tmp-init
+                call L00000329                  ; CALL 0329, ?COMPILING
                 m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L000011C8                    ; JMPZ
+                je L00001268                    ; JMPZ
                 call prim_SLITERAL              ; (3), ' OK', (0)
-                call L0000057F                  ; CALL 057F, CT
-                call L00000A78                  ; CALL 0A78, .S
-L000011C8:      m_push 13                       ; CLITERAL (000D)
+                call L0000058C                  ; CALL 058C, CT
+                call L00000B1F                  ; CALL 0B1F, .S
+L00001268:      m_push 13                       ; CLITERAL (000D)
                 call prim_EMIT
                 m_push 10                       ; CLITERAL (000A)
                 call prim_EMIT
-                call L00000EFB                  ; CALL 0EFB, getLine
+                call L00000F9B                  ; CALL 0F9B, getLine
                 m_onePlus
-                call L00000404                  ; CALL 0404, >IN
+                call L0000040E                  ; CALL 040E, >IN
                 call prim_STORE
-                call L00000E5E                  ; CALL 0E5E, executeInput
+                call L00000EEF                  ; CALL 0EEF, executeInput
                 m_push 32                       ; CLITERAL (0020)
                 call prim_EMIT
-                jmp L000011A6                   ; JMP
+                jmp L00001246                   ; JMP
                 ret
                 
-                dict_ENTRY L11E8, L119C, 0, 4, "main"
-L000011E8:      
-                call L00000077                  ; CALL 0077, STATE
+                dict_ENTRY L1288, L123C, 0, 4, "main"
+L00001288:      
+                call L0000006D                  ; CALL 006D, STATE
                 mov ebx, [ebx]                  ; FETCH
                 m_push 99                       ; CLITERAL (0063)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L00001213                    ; JMPZ
-                call L00000077                  ; CALL 0077, STATE
-                call L00000315                  ; CALL 0315, OFF
+                je L000012B3                    ; JMPZ
+                call L0000006D                  ; CALL 006D, STATE
+                call L0000031F                  ; CALL 031F, OFF
                 call prim_SLITERAL              ; (6), 'Hello.', (0)
-                call L0000057F                  ; CALL 057F, CT
-L00001213:      call L0000119C                  ; CALL 119C, mainLoop
+                call L0000058C                  ; CALL 058C, CT
+L000012B3:      call L0000123C                  ; CALL 123C, mainLoop
                 ret
                 
-                dict_ENTRY L1219, L11E8, 0, 12, "file-getLine"
-L00001219:      
-                call L00000EA2                  ; CALL 0EA2, Pad
+                dict_ENTRY L12B9, L1288, 0, 12, "file-getLine"
+L000012B9:      
+                call L00000F33                  ; CALL 0F33, Pad
                 call prim_SWAP
                 m_push 200                      ; CLITERAL (00C8)
                 call prim_SWAP
                 call prim_FREADLINE
-                call L00000EA2                  ; CALL 0EA2, Pad
+                call L00000F33                  ; CALL 0F33, Pad
                 call prim_SWAP
                 ret
                 
-                dict_ENTRY L122F, L1219, 0, 4, "load"
-L0000122F:      
+                dict_ENTRY L12CF, L12B9, 0, 4, "load"
+L000012CF:      
                 m_push 0                        ; CLITERAL (0000)
                 m_push 0                        ; CLITERAL (0000)
                 call prim_FOPEN
@@ -2389,51 +2416,51 @@ L0000122F:
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L0000125B                    ; JMPZ
+                je L000012FB                    ; JMPZ
                 call prim_SLITERAL              ; (17), 'Cannot open file.', (0)
-                call L0000057F                  ; CALL 057F, CT
+                call L0000058C                  ; CALL 058C, CT
                 ret
-L0000125B:      call L0000006C                  ; CALL 006C, INPUT-FP
+L000012FB:      call L00000F5F                  ; CALL 0F5F, INPUT-FP
                 call prim_STORE
-L00001261:      call L0000006C                  ; CALL 006C, INPUT-FP
+L00001301:      call L00000F5F                  ; CALL 0F5F, INPUT-FP
                 mov ebx, [ebx]                  ; FETCH
-                call L00001219                  ; CALL 1219, file-getLine
+                call L000012B9                  ; CALL 12B9, file-getLine
                 m_pop eax
                 cmp eax, 0
-                je L00001282                    ; JMPZ
+                je L00001322                    ; JMPZ
                 m_onePlus
-                call L00000404                  ; CALL 0404, >IN
+                call L0000040E                  ; CALL 040E, >IN
                 call prim_STORE
-                call L00000E5E                  ; CALL 0E5E, executeInput
-                jmp L00001295                   ; JMP
-L00001282:      m_pop eax                       ; DROP
-                call L0000006C                  ; CALL 006C, INPUT-FP
+                call L00000EEF                  ; CALL 0EEF, executeInput
+                jmp L00001335                   ; JMP
+L00001322:      m_pop eax                       ; DROP
+                call L00000F5F                  ; CALL 0F5F, INPUT-FP
                 mov ebx, [ebx]                  ; FETCH
                 call prim_FCLOSE
-                call L0000006C                  ; CALL 006C, INPUT-FP
-                call L00000315                  ; CALL 0315, OFF
+                call L00000F5F                  ; CALL 0F5F, INPUT-FP
+                call L0000031F                  ; CALL 031F, OFF
                 ret
-L00001295:      jmp L00001261                   ; JMP
+L00001335:      jmp L00001301                   ; JMP
                 ret
                 
-                dict_ENTRY L129B, L122F, 2, 9, "STR.EMPTY"
-L0000129B:      
+                dict_ENTRY L133B, L12CF, 2, 9, "STR.EMPTY"
+L0000133B:      
                 m_push 0                        ; CLITERAL (0000)
                 call prim_OVER
                 call prim_STORE
                 ret
                 
-                dict_ENTRY L12A5, L129B, 2, 7, "STR.LEN"
-L000012A5:      
+                dict_ENTRY L1345, L133B, 2, 7, "STR.LEN"
+L00001345:      
                 m_push ebx                      ; DUP
                 call prim_CFETCH
                 ret
                 
-                dict_ENTRY L12AD, L12A5, 0, 8, "STR.CATC"
-L000012AD:      
+                dict_ENTRY L134D, L1345, 0, 8, "STR.CATC"
+L0000134D:      
                 call prim_OVER
                 m_push ebx                      ; DUP
-                call L000004E7                  ; CALL 04E7, C++
+                call L000004F4                  ; CALL 04F4, C++
                 m_push ebx                      ; DUP
                 call prim_CFETCH
                 call prim_ADD
@@ -2444,8 +2471,8 @@ L000012AD:
                 call prim_CSTORE
                 ret
                 
-                dict_ENTRY L12C3, L12AD, 0, 12, "STR.NULLTERM"
-L000012C3:      
+                dict_ENTRY L1363, L134D, 0, 12, "STR.NULLTERM"
+L00001363:      
                 m_push ebx                      ; DUP
                 m_push ebx                      ; DUP
                 call prim_CFETCH
@@ -2456,15 +2483,15 @@ L000012C3:
                 call prim_CSTORE
                 ret
                 
-                dict_ENTRY L12D2, L12C3, 0, 2, "I""
-L000012D2:      
-                call L00000082                  ; CALL 0082, HERE
+                dict_ENTRY L1372, L1363, 0, 2, "I""
+L00001372:      
+                call L00000093                  ; CALL 0093, HERE
                 m_push 100                      ; CLITERAL (0064)
                 call prim_ADD
                 m_push 0                        ; CLITERAL (0000)
                 call prim_OVER
                 call prim_STORE
-L000012E3:      call L00000404                  ; CALL 0404, >IN
+L00001383:      call L0000040E                  ; CALL 040E, >IN
                 mov ebx, [ebx]                  ; FETCH
                 call prim_CFETCH
                 m_push ebx                      ; DUP
@@ -2472,41 +2499,41 @@ L000012E3:      call L00000404                  ; CALL 0404, >IN
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L0000130F                    ; JMPZ
+                je L000013AF                    ; JMPZ
                 call prim_SLITERAL              ; (16), 'missing closing ', (0)
-                call L0000057F                  ; CALL 057F, CT
+                call L0000058C                  ; CALL 058C, CT
                 m_push 34                       ; CLITERAL (0022)
                 call prim_EMIT
                 call prim_RESET
-L0000130F:      call L00000404                  ; CALL 0404, >IN
-                call L000004CD                  ; CALL 04CD, ++
+L000013AF:      call L0000040E                  ; CALL 040E, >IN
+                call L000004DA                  ; CALL 04DA, ++
                 m_push ebx                      ; DUP
                 m_push 34                       ; CLITERAL (0022)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L00001324                    ; JMPZ
+                je L000013C4                    ; JMPZ
                 m_pop eax                       ; DROP
                 ret
-L00001324:      call L000012AD                  ; CALL 12AD, STR.CATC
-                jmp L000012E3                   ; JMP
+L000013C4:      call L0000134D                  ; CALL 134D, STR.CATC
+                jmp L00001383                   ; JMP
                 ret
                 
-                dict_ENTRY L132F, L12D2, 1, 1, """
-L0000132F:      
-                call L0000031F                  ; CALL 031F, ?COMPILING
+                dict_ENTRY L13CF, L1372, 1, 1, """
+L000013CF:      
+                call L00000329                  ; CALL 0329, ?COMPILING
                 m_push 0                        ; CLITERAL (0000)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L00001347                    ; JMPZ
-                call L000012D2                  ; CALL 12D2, I"
+                je L000013E7                    ; JMPZ
+                call L00001372                  ; CALL 1372, I"
                 ret
-L00001347:      call L0000011B                  ; CALL 011B, SLITERAL
-                call L00000082                  ; CALL 0082, HERE
+L000013E7:      call L0000012E                  ; CALL 012E, SLITERAL
+                call L00000093                  ; CALL 0093, HERE
                 m_push 0                        ; CLITERAL (0000)
-                call L0000009A                  ; CALL 009A, C,
-L00001358:      call L00000404                  ; CALL 0404, >IN
+                call L000000AB                  ; CALL 00AB, C,
+L000013F8:      call L0000040E                  ; CALL 040E, >IN
                 mov ebx, [ebx]                  ; FETCH
                 call prim_CFETCH
                 m_push ebx                      ; DUP
@@ -2514,104 +2541,107 @@ L00001358:      call L00000404                  ; CALL 0404, >IN
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L00001390                    ; JMPZ
+                je L00001430                    ; JMPZ
                 m_pop eax                       ; DROP
                 m_oneMinus
-                call L00000056                  ; CALL 0056, (HERE)
+                call L00000040                  ; CALL 0040, (HERE)
                 call prim_STORE
                 call prim_SLITERAL              ; (17), 'missing closing '', (0)
-                call L0000057F                  ; CALL 057F, CT
+                call L0000058C                  ; CALL 058C, CT
                 m_push 34                       ; CLITERAL (0022)
                 call prim_EMIT
                 m_push 39                       ; CLITERAL (0027)
                 call prim_EMIT
                 call prim_RESET
-L00001390:      call L00000404                  ; CALL 0404, >IN
-                call L000004CD                  ; CALL 04CD, ++
+L00001430:      call L0000040E                  ; CALL 040E, >IN
+                call L000004DA                  ; CALL 04DA, ++
                 m_push ebx                      ; DUP
                 m_push 34                       ; CLITERAL (0022)
                 call prim_EQ
                 m_pop eax
                 cmp eax, 0
-                je L000013B6                    ; JMPZ
+                je L00001456                    ; JMPZ
                 m_pop eax                       ; DROP
-                call L00000082                  ; CALL 0082, HERE
+                call L00000093                  ; CALL 0093, HERE
                 m_push 0                        ; CLITERAL (0000)
-                call L0000009A                  ; CALL 009A, C,
+                call L000000AB                  ; CALL 00AB, C,
                 call prim_OVER
                 call prim_SUB
                 m_oneMinus
                 call prim_SWAP
                 call prim_CSTORE
                 ret
-L000013B6:      call L0000009A                  ; CALL 009A, C,
-                jmp L00001358                   ; JMP
+L00001456:      call L000000AB                  ; CALL 00AB, C,
+                jmp L000013F8                   ; JMP
                 ret
                 
-                dict_ENTRY L13C1, L132F, 0, 2, "ll"
-L000013C1:      
+                dict_ENTRY L1461, L13CF, 0, 2, "ll"
+L00001461:      
                 call prim_SLITERAL              ; (9), 'loads.4th', (0)
-                call L0000122F                  ; CALL 122F, load
+                call L000012CF                  ; CALL 12CF, load
                 ret
                 
-                dict_ENTRY L13D8, L13C1, 0, 8, "sys-info"
-L000013D8:      
-                call L00000AEA                  ; CALL 0AEA, .(MEM_SZ)
+                dict_ENTRY L1478, L1461, 0, 8, "sys-info"
+L00001478:      
+                call L00000B91                  ; CALL 0B91, .(MEM_SZ)
                 m_push 44                       ; CLITERAL (002C)
                 call prim_EMIT
                 m_push 32                       ; CLITERAL (0020)
                 call prim_EMIT
-                call L00000B23                  ; CALL 0B23, .(HERE)
+                call L00000BCA                  ; CALL 0BCA, .(HERE)
                 m_push 44                       ; CLITERAL (002C)
                 call prim_EMIT
                 m_push 32                       ; CLITERAL (0020)
                 call prim_EMIT
-                call L00000B5A                  ; CALL 0B5A, .(LAST)
+                call L00000C01                  ; CALL 0C01, .(LAST)
                 m_push 44                       ; CLITERAL (002C)
                 call prim_EMIT
                 m_push 32                       ; CLITERAL (0020)
                 call prim_EMIT
-                call L00001178                  ; CALL 1178, .FREE
+                call L00001218                  ; CALL 1218, .FREE
                 m_push 13                       ; CLITERAL (000D)
                 call prim_EMIT
                 m_push 10                       ; CLITERAL (000A)
                 call prim_EMIT
                 ret
                 
-                dict_ENTRY L140A, L13D8, 0, 7, "countTo"
-L0000140A:      
+                dict_ENTRY L14AA, L1478, 0, 7, "countTo"
+L000014AA:      
                 call prim_SLITERAL              ; (12), 'counting to ', (0)
-                call L0000057F                  ; CALL 057F, CT
+                call L0000058C                  ; CALL 058C, CT
                 m_push ebx                      ; DUP
-                call L000009E5                  ; CALL 09E5, .
+                call L000009F2                  ; CALL 09F2, .
                 call prim_SLITERAL              ; (4), '... ', (0)
-                call L0000057F                  ; CALL 057F, CT
+                call L0000058C                  ; CALL 058C, CT
                 m_push 1                        ; CLITERAL (0001)
-L00001437:      call prim_OVER
+L000014D7:      call prim_OVER
                 call prim_OVER
                 call prim_LT
                 m_pop eax
                 cmp eax, 0
-                je L00001442                    ; JMPZ
+                je L000014E2                    ; JMPZ
                 m_pop eax                       ; DROP
                 m_pop eax                       ; DROP
                 ret
-L00001442:      m_onePlus
-                jmp L00001437                   ; JMP
+L000014E2:      m_onePlus
+                jmp L000014D7                   ; JMP
                 ret
                 
-                dict_ENTRY L1449, L140A, 0, 12, "countTo-FAST"
-L00001449:      
+                dict_ENTRY L14E9, L14AA, 0, 12, "countTo-FAST"
+L000014E9:      
                 call prim_SLITERAL              ; (12), 'counting to ', (0)
-                call L0000057F                  ; CALL 057F, CT
+                call L0000058C                  ; CALL 058C, CT
                 m_push ebx                      ; DUP
-                call L000009E5                  ; CALL 09E5, .
+                call L000009F2                  ; CALL 09F2, .
                 call prim_SLITERAL              ; (4), '... ', (0)
-                call L0000057F                  ; CALL 057F, CT
-L00001474:      m_oneMinus
+                call L0000058C                  ; CALL 058C, CT
+L00001514:      m_oneMinus
                 m_push ebx                      ; DUP
                 m_pop eax
                 cmp eax, 0
-                jne L00001474                   ; JMPNZ
+                jne L00001514                   ; JMPNZ
                 m_pop eax                       ; DROP
                 ret
+L18000000:      dd 0,0,0,0                      ; Label for 
+L0000008B:      dd 0,0,0,0                      ; Label for 
+L0000006D:      dd 0,0,0,0                      ; Label for 

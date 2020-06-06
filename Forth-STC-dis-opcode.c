@@ -244,10 +244,6 @@ void dis_opcode(int opcode)
             line = make_codeU(NULL, "call prim_COMPAREI");
             return;
 
-        case USINIT:
-            line = make_codeU(NULL, "call prim_USINIT");
-            return;
-
         case USPUSH:
             line = make_codeU(NULL, "call prim_USPUSH");
             return;

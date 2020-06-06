@@ -6,11 +6,22 @@
 \
 \ NB: don't inline anything with a 12 (0x0C) in it ... that is RET
 \ -----------------------------------------------------------------------------------------------
+
+\ Variables mess up the disassembler, put them first
+
 VARIABLE (HERE)
 VARIABLE (LAST)
 VARIABLE BASE
 VARIABLE STATE
 VARIABLE (MEM_SZ)
+
+VARIABLE >IN
+VARIABLE (tmp)
+VARIABLE #NEG
+VARIABLE #LEN
+VARIABLE INPUT-FP
+
+.NOP. \ marks the end of the variables
 
 : CELL 4 ;
 
@@ -100,9 +111,6 @@ VARIABLE (MEM_SZ)
 : UNTIL ?COMPILING IF JMPZ  , THEN ;    IMMEDIATE
 : LEAVE ?COMPILING IF RET     THEN ;    IMMEDIATE
 
-: >IN      [ LITERAL HERE CELL + INC , ] ; 0 , RET
-: isNeg    [ LITERAL HERE CELL + INC , ] ; 0 , RET
-
 : MEM_SZ (MEM_SZ) @ ;
 
 : TRACE-ON  2 LOGLEVEL ; INLINE
@@ -181,7 +189,6 @@ VARIABLE (MEM_SZ)
 	< 0=
 ;
 
-: (tmp) [ LITERAL HERE CELL + 1+ , ] ; 0 , RET
 : tmp-init LAST (tmp) ! ;							\ ( -- )
 : tmp-cur (tmp) @ ;
 : tmp-alloc (tmp) TUCK @ SWAP - SWAP ! tmp-cur ;	\ ( size -- addr )
@@ -285,7 +292,7 @@ VARIABLE (MEM_SZ)
 
 : isNumber?							\ ( addr -- num bool )
 	\ find out if it is negative
-	DUP C@ 45 = DUP isNeg C! IF 1+ THEN
+	DUP C@ 45 = DUP #NEG ! IF 1+ THEN
 	
 	\ accumulate the result on the return stack
 	0 >R
@@ -294,7 +301,7 @@ VARIABLE (MEM_SZ)
 		DUP 0 = \ end of word?
 		IF 
 			2DROP R> 
-			isNeg C@ IF NEGATE THEN
+			#NEG @ IF NEGATE THEN
 			1 LEAVE
 		THEN
 
@@ -312,9 +319,6 @@ VARIABLE (MEM_SZ)
 : /MOD 2DUP / DUP >R * - R> ;     \ ( n1 n2 -- r q )
 : SPACE 32 EMIT ;
 
-\ variable isNeg
-: #NEG [ LITERAL HERE CELL + 1+ , ] ; 0 , RET
-: #LEN [ LITERAL HERE CELL + 1+ , ] ; 0 , RET
 : <# #NEG OFF #LEN OFF DUP 0 < IF NEGATE #NEG ON THEN 0 SWAP ; \ ( u1 -- 0 u2 )
 : # BASE @ /MOD SWAP 48 + DUP 57 > IF 7 + THEN #LEN ++ SWAP ; \  ( u1 -- c u2 )
 : #S BEGIN # DUP 0= UNTIL ;                  \  ( u1 -- u2 )
@@ -506,7 +510,6 @@ DECIMAL
 	THEN
 ; 
 
-VARIABLE INPUT-FP
 : LoadingFromFile? INPUT-FP @ ;		\ ( -- bool ) 
 
 : getLineFromFile		\ ( addr sz fp -- )

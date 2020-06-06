@@ -65,6 +65,80 @@ void dis_PC2(int num, char *bytes)
 }
 
 // ------------------------------------------------------------------------------------------
+CELL GetSysVarAddr(char *name)
+{
+	// printf("Looking for [%s] ...\n", name);
+	CELL addr = ORG;
+	CELL def_sz = 0x0f;
+	while ( addr < 0x1000 )
+	{
+		if ( the_memory[addr] != DICTP )
+		{
+			printf("[%s] NOT FOUND!\n", name);
+			return 0;
+		}
+		CELL tmp = GETAT(addr+1);
+		DICT_T *dp = (DICT_T *)&the_memory[tmp];
+		// printf("0x%04lX, 0x%04lX, [%s] = [%s]?\n", addr, dp, name, dp->name);
+		if (strcmp(dp->name, name) == 0)
+		{
+			tmp = addr + 11;
+			// printf("[%s] FOUND at 0x%04lx\n", name, tmp);
+			return tmp;
+		}
+		addr += def_sz;
+	}
+	return 0;
+}
+
+// ------------------------------------------------------------------------------------------
+CELL dis_vars(FILE *write_to)
+{
+	CELL addr = ORG;
+	char bytes[256];
+	char desc[256];
+	CELL def_sz = 0x0f;
+	while ( true )
+	{
+		if ( the_memory[addr] != DICTP )
+		{
+			return addr;
+		}
+		CELL tmp = GETAT(addr+1);
+		CELL tmp2;
+		DICT_T *dp = (DICT_T *)&the_memory[tmp];
+
+		sprintf(bytes, "%04lx:", addr);
+		dis_start(addr, 5, bytes);
+		sprintf(desc, "DICTP %s (%04lx)", dp->name, tmp);
+		fprintf(write_to, "%-32s ; %s\n", bytes, desc);
+
+		tmp = addr+5;
+		tmp2 = GETAT(tmp+1);
+		sprintf(bytes, "%04lx:", tmp);
+		dis_start(tmp, 5, bytes);
+		sprintf(desc, "LITERAL %d (0x%04lx)", tmp2, tmp2);
+		fprintf(write_to, "%-32s ; %s\n", bytes, desc);
+
+		tmp = tmp+5;
+		sprintf(bytes, "%04lx:", tmp);
+		dis_start(tmp, 1, bytes);
+		sprintf(desc, "RET");
+		fprintf(write_to, "%-32s ; %s\n", bytes, desc);
+
+		tmp = tmp+1;
+		tmp2 = GETAT(tmp);
+		sprintf(bytes, "%04lx:", tmp);
+		dis_start(tmp, 4, bytes);
+		sprintf(desc, "dw 0x%04lx", tmp2);
+		fprintf(write_to, "%-32s ; %s\n;\n", bytes, desc);
+
+		addr += def_sz;
+	}
+	return 0;
+}
+
+// ------------------------------------------------------------------------------------------
 // Where all the work is done
 // ------------------------------------------------------------------------------------------
 CELL dis_one(char *bytes, char *desc)
@@ -565,7 +639,8 @@ void dis_vm(FILE *write_to)
 	fflush(write_to);
 
 	// Code
-	PC = ORG;
+	PC = dis_vars(write_to);
+
 	while (PC < here)
 	{
 		dis_one(bytes, desc);
@@ -608,6 +683,13 @@ void load_vm()
     debug("%ld bytes read\n", num_read);
 	fclose(input_fp);
 	input_fp = NULL;
+
+	ADDR_HERE = GetSysVarAddr("(HERE)");
+	ADDR_LAST = GetSysVarAddr("(LAST)");
+	ADDR_BASE = GetSysVarAddr("BASE");
+	ADDR_STATE = GetSysVarAddr("STATE");
+	ADDR_MEM_SZ = GetSysVarAddr("(MEM_SZ)");
+
 	printf(" done.\n");
 }
 

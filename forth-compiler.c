@@ -296,6 +296,12 @@ char *ParseWord(char *word, char *line)
 		return line;
 	}
 
+	if (strcmp(word, ".NOP.") == 0)
+	{
+		CComma(0);
+		return line;
+	}
+
 	if (strcmp(word, ".INLINE") == 0)
 	{
 		DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
