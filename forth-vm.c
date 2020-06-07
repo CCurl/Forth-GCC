@@ -74,53 +74,16 @@ void init_vm(int vm_size)
 // ------------------------------------------------------------------------------------------
 // Where all the work is done
 // ------------------------------------------------------------------------------------------
-CELL cpu_step()
-{
-	IR = the_memory[PC++];
-	// trace("PC=%04lx, IR=%d - ", PC-1, (int)IR);
-	void (*f)() = vm_prims[IR];
-	if (f)
-	{
-		f();
-		return 0;
-	}
-
-	switch (IR)
-	{
-	case BREAK:
-		{
-			// arg1 = the_memory[ADDR_HERE];
-			// arg2 = the_memory[ADDR_LAST];
-			// arg3 = arg2 - arg1;
-		}
-		trace("BREAK\n");
-		isBYE = true;
-		return 0;
-
-	case BYE:
-		isBYE = true;
-		trace("BYE\n");
-		return 0;
-
-	case RESET:
-	default:
-		isBYE = isEmbedded;
-		reset_vm();
-		isEmbedded = isBYE;
-		trace("RESET\n");
-		return 0;
-	}
-	return 0;
-}
-
-// ------------------------------------------------------------------------------------------
 CELL cpu_loop()
 {
 	isBYE = false;
 	debug("Running (PC=%04lx) ... ", PC);
 	while (true)
 	{
-		cpu_step();
+        // trace("PC=%04lx, IR=%d - ", PC, (int)the_memory[PC]);
+        IR = the_memory[PC++];
+        vm_prims[IR]();
+
 		if (isBYE)
 		{
 			debug("done. PC=%04lx\n", PC);

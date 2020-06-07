@@ -428,7 +428,7 @@ char *ParseWord(char *word, char *line)
 				Comma(num);
 			}
 		}
-		else 
+		else
 		{
 			push(num);
 			return line;
@@ -570,32 +570,32 @@ void write_output_file()
 // *********************************************************************
 void process_arg(char *arg)
 {
-    if (*arg == 'i') 
+    if (*arg == 'i')
     {
         arg = arg+2;
         strcpy(input_fn, arg);
     }
-    else if (*arg == 'o') 
+    else if (*arg == 'o')
     {
         arg = arg+2;
         strcpy(output_fn, arg);
     }
-    else if (*arg == 'm') 
+    else if (*arg == 'm')
     {
         arg = arg+2;
         mem_size_KB = atoi(arg);
     }
-    else if (*arg == 't') 
+    else if (*arg == 't')
     {
 		trace_on();
 		printf("log level set to trace.\n");
     }
-    else if (*arg == 'd') 
+    else if (*arg == 'd')
     {
 		debug_on();
 		printf("log level set to debug.\n");
     }
-    else if (*arg == '?') 
+    else if (*arg == '?')
     {
         printf("usage: forth-compiler [args]\n");
         printf("  -i:inputFile (full or relative path)\n");

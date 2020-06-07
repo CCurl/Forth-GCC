@@ -95,7 +95,7 @@ void push(CELL val)
 	}
 }
 
-CELL pop() 
+CELL pop()
 {
 	CELL ret = TOS;
 	if (depth == 0)
@@ -110,7 +110,7 @@ CELL pop()
 	return ret;
 }
 
-CELL drop() 
+void drop()
 {
 	if (depth > 0)
 	{
@@ -121,7 +121,6 @@ CELL drop()
 	{
 		underflow();
 	}
-	
 }
 
 // The return stack starts at (MEM_SZ) and grows downwards towards the data stack
@@ -625,7 +624,7 @@ void prim_BREAK()
 // RESET - Doeswhat
 void prim_RESET()
 {
-	// code goes here
+	PC = 0;
 }
 
 // BYE - Doeswhat
@@ -634,10 +633,21 @@ void prim_BYE()
 	isBYE = true;
 }
 
+// Unknown - Doeswhat
+void prim_Unknown()
+{
+    printf("Unknown instruction at addr: 0x%04lx, (0x%02x)", PC-1, IR);
+    PC = 0;
+	// isBYE = true;
+}
+
 void init_vm_vectors()
 {
     memset(vm_prims, 0, sizeof(vm_prims));
-    // vm_prims[0] = prim_BYE;
+    for (int i = 0; i < 256; i++)
+    {
+        vm_prims[i] = prim_Unknown;
+    }
 	vm_prims[ 1] = prim_LITERAL;
 	vm_prims[ 2] = prim_FETCH;
 	vm_prims[ 3] = prim_STORE;
@@ -678,14 +688,14 @@ void init_vm_vectors()
 	vm_prims[38] = prim_DEPTH;
 	vm_prims[39] = prim_GETCH;
 	vm_prims[40] = prim_COMPAREI;
-	vm_prims[41] = NULL;
+	// vm_prims[41] = NULL;
 	vm_prims[42] = prim_USPUSH;
 	vm_prims[43] = prim_USPOP;
 	vm_prims[44] = prim_INC;
 	vm_prims[45] = prim_RDEPTH;
 	vm_prims[46] = prim_DEC;
 	vm_prims[47] = prim_GETTICK;
-	// vm_prims[253] = prim_BREAK;
-	// vm_prims[254] = prim_RESET;
-	// vm_prims[255] = prim_BYE;
+	vm_prims[253] = prim_BREAK;
+ 	vm_prims[254] = prim_RESET;
+	vm_prims[255] = prim_BYE;
 }
