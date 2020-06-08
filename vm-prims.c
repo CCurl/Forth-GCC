@@ -624,7 +624,7 @@ void prim_BREAK()
 // RESET - Doeswhat
 void prim_RESET()
 {
-	PC = 0;
+	reset_vm();
 }
 
 // BYE - Doeswhat
