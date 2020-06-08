@@ -637,7 +637,7 @@ void prim_BYE()
 void prim_Unknown()
 {
     printf("Unknown instruction at addr: 0x%04lx, (0x%02x)", PC-1, IR);
-    PC = 0;
+    reset_vm();
 	// isBYE = true;
 }
 
