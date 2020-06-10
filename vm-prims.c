@@ -83,31 +83,27 @@ void underflow()
 void push(CELL val)
 {
 	// trace(" push(%ld, DSP=0x%08lx) ", val, DSP);
-	if (depth > 63)
-	{
-		overflow();
-	}
-	else
+	if (depth < 64)
 	{
 		++depth;
 		*(++DSP) = TOS;
 		TOS = val;
+		return;
 	}
+	overflow();
 }
 
 CELL pop()
 {
-	CELL ret = TOS;
-	if (depth == 0)
+	if (depth > 0)
 	{
-		underflow();
-	}
-	else
-	{
+		CELL ret = TOS;
 		--depth;
 		TOS = *(DSP--);
+		return ret;
 	}
-	return ret;
+	underflow();
+	return 0;
 }
 
 void drop()
@@ -126,40 +122,38 @@ void drop()
 // The return stack starts at (MEM_SZ) and grows downwards towards the data stack
 void rpush(CELL val)
 {
-	if (rdepth  > 63)
+	if (rdepth  < 64)
 	{
-		printf(" return stack overflow!");
-		reset_vm();
-		// _QUIT_HIT = 1;
-		// isBYE = 1;
+		++rdepth;
+		*(--RSP) = (CELL)(val);
 		return;
 	}
 
-	// printf(" rpush(%ld) ", val);
-	++rdepth;
-	*(--RSP) = (CELL)(val);
+	printf(" return stack overflow!");
+	reset_vm();
+	// _QUIT_HIT = 1;
+	// isBYE = 1;
 }
 
 CELL rpop()
 {
-	if (rdepth == 0)
+	if (rdepth > 0)
 	{
-		printf(" return stack underflow! (at PC=0x%04lx)", PC-1);
-		reset_vm();
-		// _QUIT_HIT = 1;
-		// isBYE = 1;
-		return PC;
+		--rdepth;
+		return *(RSP++);
 	}
-	// printf(" rpop(%ld) ", *(RSP));
-	--rdepth;
-	return *(RSP++);
+	printf(" return stack underflow! (at PC=0x%04lx)", PC-1);
+	reset_vm();
+	// _QUIT_HIT = 1;
+	// isBYE = 1;
+	return PC;
 }
 
 // LITERAL - Doeswhat
 void prim_LITERAL()
 {
 	arg1 = GETAT(PC);
-	trace("LITERAL (%d, 0x%04lx)\n", arg1, arg1);
+	// trace("LITERAL (%d, 0x%04lx)\n", arg1, arg1);
 	PC += CELL_SZ;
 	push(arg1);
 }
@@ -303,7 +297,7 @@ void prim_OR()
 void prim_CLITERAL()
 {
 	arg1 = the_memory[PC++];
-	trace("CLITERAL (%ld)\n", arg1);
+	// trace("CLITERAL (%ld)\n", arg1);
 	push(arg1);
 }
 

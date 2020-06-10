@@ -6,19 +6,19 @@
 ;
 0005: 00 00 00
 0008: 00000004 00000000
-0010: 0000150a 0000ef59 0000000a 00000000
+0010: 00001539 0000ef46 0000000a 00000000
 0020: 00000000 00010000 00000000 00000000
 0030: 00000000 00000000 00000000 00000000
 ;
 0040: 18 eb fd 00 00             ; DICTP (HERE) (fdeb)
 0045: 01 4b 00 00 00             ; LITERAL 75 (0x004b)
 004a: 0c                         ; RET
-004b: 0a 15 00 00                ; dw 0x150a
+004b: 39 15 00 00                ; dw 0x1539
 ;
 004f: 18 da fd 00 00             ; DICTP (LAST) (fdda)
 0054: 01 5a 00 00 00             ; LITERAL 90 (0x005a)
 0059: 0c                         ; RET
-005a: 59 ef 00 00                ; dw 0xef59
+005a: 46 ef 00 00                ; dw 0xef46
 ;
 005e: 18 cb fd 00 00             ; DICTP BASE (fdcb)
 0063: 01 69 00 00 00             ; LITERAL 105 (0x0069)
@@ -2140,47 +2140,65 @@
 1495: 19                         ; EMIT
 1496: 0c                         ; RET
 ;
-1497: 18 70 ef 00 00             ; DICTP countTo (ef70)
-149c: 07 0c 63 6f 75 6e 74 69 6e 67 20 74 6f 20 00 ; SLITERAL (149d) [counting to ]
-14ab: 0b b8 05 00 00             ; CALL CT (05b8)
-14b0: 06                         ; DUP
-14b1: 0b ee 09 00 00             ; CALL . (09ee)
-14b6: 07 04 2e 2e 2e 20 00       ; SLITERAL (14b7) [... ]
-14bd: 0b b8 05 00 00             ; CALL CT (05b8)
-14c2: 0e 01                      ; CLITERAL 1
-14c4: 1a                         ; OVER
-14c5: 1a                         ; OVER
-14c6: 15                         ; LT
-14c7: 09 cf 14 00 00             ; JMPZ 14cf
-14cc: 05                         ; DROP
-14cd: 05                         ; DROP
-14ce: 0c                         ; RET
-14cf: 2c                         ; INC
-14d0: 08 c4 14 00 00             ; JMP 14c4
-14d5: 0c                         ; RET
+1497: 18 6f ef 00 00             ; DICTP VARIABLE (ef6f)
+149c: 0b eb 10 00 00             ; CALL CREATE-NAME (10eb)
+14a1: 0b df 00 00 00             ; CALL HERE (00df)
+14a6: 0e 02                      ; CLITERAL 2
+14a8: 11                         ; ADD
+14a9: 0b d7 00 00 00             ; CALL CELL (00d7)
+14ae: 11                         ; ADD
+14af: 0b 4a 01 00 00             ; CALL LITERAL (014a)
+14b4: 0b 11 01 00 00             ; CALL , (0111)
+14b9: 0b bb 01 00 00             ; CALL RET (01bb)
+14be: 0e 00                      ; CLITERAL 0
+14c0: 0b 11 01 00 00             ; CALL , (0111)
+14c5: 0c                         ; RET
 ;
-14d6: 18 59 ef 00 00             ; DICTP countTo-FAST (ef59)
-14db: 07 0c 63 6f 75 6e 74 69 6e 67 20 74 6f 20 00 ; SLITERAL (14dc) [counting to ]
-14ea: 0b b8 05 00 00             ; CALL CT (05b8)
-14ef: 06                         ; DUP
-14f0: 0b ee 09 00 00             ; CALL . (09ee)
-14f5: 07 04 2e 2e 2e 20 00       ; SLITERAL (14f6) [... ]
-14fc: 0b b8 05 00 00             ; CALL CT (05b8)
-1501: 2e                         ; DEC
-1502: 06                         ; DUP
-1503: 0a 01 15 00 00             ; JMPNZ 1501
-1508: 05                         ; DROP
-1509: 0c                         ; RET
+14c6: 18 5d ef 00 00             ; DICTP countTo (ef5d)
+14cb: 07 0c 63 6f 75 6e 74 69 6e 67 20 74 6f 20 00 ; SLITERAL (14cc) [counting to ]
+14da: 0b b8 05 00 00             ; CALL CT (05b8)
+14df: 06                         ; DUP
+14e0: 0b ee 09 00 00             ; CALL . (09ee)
+14e5: 07 04 2e 2e 2e 20 00       ; SLITERAL (14e6) [... ]
+14ec: 0b b8 05 00 00             ; CALL CT (05b8)
+14f1: 0e 01                      ; CLITERAL 1
+14f3: 1a                         ; OVER
+14f4: 1a                         ; OVER
+14f5: 15                         ; LT
+14f6: 09 fe 14 00 00             ; JMPZ 14fe
+14fb: 05                         ; DROP
+14fc: 05                         ; DROP
+14fd: 0c                         ; RET
+14fe: 2c                         ; INC
+14ff: 08 f3 14 00 00             ; JMP 14f3
+1504: 0c                         ; RET
+;
+1505: 18 46 ef 00 00             ; DICTP countTo-FAST (ef46)
+150a: 07 0c 63 6f 75 6e 74 69 6e 67 20 74 6f 20 00 ; SLITERAL (150b) [counting to ]
+1519: 0b b8 05 00 00             ; CALL CT (05b8)
+151e: 06                         ; DUP
+151f: 0b ee 09 00 00             ; CALL . (09ee)
+1524: 07 04 2e 2e 2e 20 00       ; SLITERAL (1525) [... ]
+152b: 0b b8 05 00 00             ; CALL CT (05b8)
+1530: 2e                         ; DEC
+1531: 06                         ; DUP
+1532: 0a 30 15 00 00             ; JMPNZ 1530
+1537: 05                         ; DROP
+1538: 0c                         ; RET
 ;
 ; End of code, Dictionary:
 ;
-ef59: 70 ef 00 00                ; countTo-FAST - (next: ef70 countTo)
-ef5d: d6 14 00 00 00             ; XT=14d6, flags=00
-ef62: 0c 63 6f 75 6e 74 54 6f 2d 46 41 53 54 00 ; 12, countTo-FAST
+ef46: 5d ef 00 00                ; countTo-FAST - (next: ef5d countTo)
+ef4a: 05 15 00 00 00             ; XT=1505, flags=00
+ef4f: 0c 63 6f 75 6e 74 54 6f 2d 46 41 53 54 00 ; 12, countTo-FAST
 ;
-ef70: 82 ef 00 00                ; countTo - (next: ef82 sys-info)
-ef74: 97 14 00 00 00             ; XT=1497, flags=00
-ef79: 07 63 6f 75 6e 74 54 6f 00 ; 7, countTo
+ef5d: 6f ef 00 00                ; countTo - (next: ef6f VARIABLE)
+ef61: c6 14 00 00 00             ; XT=14c6, flags=00
+ef66: 07 63 6f 75 6e 74 54 6f 00 ; 7, countTo
+;
+ef6f: 82 ef 00 00                ; VARIABLE - (next: ef82 sys-info)
+ef73: 97 14 00 00 00             ; XT=1497, flags=00
+ef78: 08 56 41 52 49 41 42 4c 45 00 ; 8, VARIABLE
 ;
 ef82: 95 ef 00 00                ; sys-info - (next: ef95 ll)
 ef86: 65 14 00 00 00             ; XT=1465, flags=00

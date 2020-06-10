@@ -1,3 +1,8 @@
+last here
+variable th th !
+variable tl tl !
+: forget-words tl @ (last) ! th @ (here) ! ;
+
 : \ 0 >IN @ ! ; IMMEDIATE
 
 5 5 + BASE C!
@@ -9,10 +14,15 @@
 : 2DUP  OVER OVER ; INLINE
 : 2DROP DROP DROP ; INLINE
 
-: (const) LITERAL , RET ;
-: CONSTANT  CREATE-NAME (const) ;
-: VARIABLE  CREATE-NAME HERE 2 + CELL + (const) 0 , ;
-: CVARIABLE CREATE-NAME HERE 2 + CELL + (const) 0 C, ;
+
+: get-next-word                 \ ( -- addr|0 ) - NB addr is null-terminated and NOT counted
+    >IN @ skipWS     >IN !
+    >IN @ getoneword >IN ! ;
+
+: ' get-next-word dup c@ if
+        findindict drop drop 
+    else 0
+    then ;
 
 : BL   32 EMIT         ; INLINE
 : CRLF 13 EMIT 10 EMIT ; INLINE

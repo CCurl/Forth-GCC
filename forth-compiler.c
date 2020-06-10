@@ -241,7 +241,7 @@ char *ParseWord(char *word, char *line)
 	}
 
 
-	if (string_equals(word, "VARIABLE"))
+	if (string_equals(word, ".VARIABLE."))
 	{
 		trace("\n");
 		line = GetWord(line, word);
