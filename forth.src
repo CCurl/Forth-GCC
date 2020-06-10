@@ -333,11 +333,12 @@
 : .4 <# # # # # #> #P ;
 
 HEX 
-: HEX.     BASE @ SWAP HEX (.) BASE ! ; 
-: HEX.2    BASE @ SWAP HEX .2 BASE ! ; 
-: HEX.4    BASE @ SWAP HEX .4 BASE ! ; 
-: DECIMAL. BASE @ SWAP DECIMAL (.) BASE ! ;
-: BINARY.  BASE @ SWAP BINARY  (.) BASE ! ;
+: HEX.      BASE @ SWAP HEX (.) BASE ! ; 
+: HEX.2     BASE @ SWAP HEX .2 BASE ! ; 
+: HEX.4     BASE @ SWAP HEX .4 BASE ! ; 
+: DECIMAL.  BASE @ SWAP DECIMAL (.) BASE ! ;
+: DECIMAL.3 BASE @ SWAP DECIMAL .3  BASE ! ;
+: BINARY.   BASE @ SWAP BINARY  (.) BASE ! ;
 DECIMAL
 
 : MIN 2DUP > IF SWAP THEN DROP ; 

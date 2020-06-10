@@ -5,15 +5,9 @@ variable tl tl !
 
 : \ 0 >IN @ ! ; IMMEDIATE
 
-5 5 + BASE C!
-\ : DECIMAL 10 BASE C! ;
-\ : HEX 16 BASE C! ;
-\ : BINARY 2 BASE C! ;
-
 : ?DUP DUP IF DUP THEN ;
 : 2DUP  OVER OVER ; INLINE
 : 2DROP DROP DROP ; INLINE
-
 
 : get-next-word                 \ ( -- addr|0 ) - NB addr is null-terminated and NOT counted
     >IN @ skipWS     >IN !
@@ -27,7 +21,7 @@ variable tl tl !
 : BL   32 EMIT         ; INLINE
 : CRLF 13 EMIT 10 EMIT ; INLINE
 
-: ascii. DUP HEX. BL DUP DECIMAL. BL EMIT ;
+: ascii. DUP HEX.2 BL DUP DECIMAL.3 BL EMIT ;
 
 : ascii                         \ ( from to -- )
     2DUP < IF SWAP THEN 
