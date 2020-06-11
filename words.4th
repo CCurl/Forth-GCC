@@ -15,7 +15,7 @@ variable tl tl !
 
 : ' get-next-word dup c@ if
         findindict drop drop 
-    else 0
+    else drop 0
     then ;
 
 : BL   32 EMIT         ; INLINE
