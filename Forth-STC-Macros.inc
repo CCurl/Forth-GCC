@@ -1,29 +1,40 @@
 ; ------------------------------------------------------------------------------
 ; macros for forth 
 ; ------------------------------------------------------------------------------
-macro m_setTOS val
-{
-       mov ebx, val
-}
-
-macro m_push val
-{
-       add ebp, 4
-       mov [ebp], ebx
-       mov ebx, val
-}
-
-; ------------------------------------------------------------------------------
 macro m_getTOS val
 {
        mov val, ebx
 }
 
+macro m_setTOS val
+{
+       mov ebx, val
+}
+
+; ------------------------------------------------------------------------------
+macro m_push val
+{
+       add ebp, 4
+       m_set2ND ebx
+       m_setTOS val
+}
+
 macro m_pop val
 {
-       mov val, ebx
-       mov ebx, [ebp]
+       m_getTOS val
+       m_get2ND ebx
        sub ebp, 4
+}
+
+; ------------------------------------------------------------------------------
+macro m_get2ND val
+{
+       mov val, [ebp]
+}
+
+macro m_set2ND val
+{
+       mov [ebp], val
 }
 
 ; ------------------------------------------------------------------------------
@@ -53,14 +64,6 @@ macro m_RTOD
 }
 
 ; ------------------------------------------------------------------------------
-macro m_RPEEK
-{
-       m_rpop eax
-       m_rpush eax
-       m_rpush eax
-}
-
-; ------------------------------------------------------------------------------
 macro m_onePlus 
 { 
        inc ebx 
@@ -76,4 +79,32 @@ macro m_oneMinus
 macro m_drop
 { 
        m_pop eax
+}
+
+; ---------------------------------------------------------------------------------------------------------
+macro m_execO	opCode
+{
+       mov  edx, opCode
+       call executeOpCode
+}
+
+; ---------------------------------------------------------------------------------------------------------
+macro m_execXT codeAddr
+{
+       mov  edx, codeAddr
+       call executeWord_SAFE
+}
+
+; ---------------------------------------------------------------------------------------------------------
+macro m_pushExecO theVal, opCode
+{
+       m_push	theVal
+       m_execO opCode
+}
+
+; ---------------------------------------------------------------------------------------------------------
+macro val2mem addrTo, theVal
+{
+       push theVal
+       pop addrTo
 }
