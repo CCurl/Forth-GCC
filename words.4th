@@ -18,6 +18,8 @@ variable tl tl !
     else drop 0
     then ;
 
+: char get-next-word C@ ;
+
 : BL   32 EMIT         ; INLINE
 : CRLF 13 EMIT 10 EMIT ; INLINE
 

@@ -12,6 +12,7 @@ if "--%1%--" == "--nd--" goto make-nd
 if "--%1%--" == "--aa--" goto make-aa
 if "--%1%--" == "--st--" goto make-st
 if "--%1%--" == "--br--" goto make-br
+if "--%1%--" == "--f2--" goto make-f2
 goto unknown
 
 :make-fc
@@ -133,6 +134,13 @@ if "--%2%--" == "----" goto done
 forth-dis2
 rem gcc -c forth.s
 rem ld -e main forth.o -lkernel32
+goto done
+
+:make-f2
+echo fasm forth2.as
+fasm forth2.as
+if "--%2%--" == "----" goto done
+forth2 forth.bin
 goto done
 
 :make-fi
