@@ -6,19 +6,19 @@
 ;
 0005: 00 00 00
 0008: 00000004 00000000
-0010: 00001578 0000ef0b 0000000a 00000000
+0010: 000015c7 0000eec1 0000000a 00000000
 0020: 00000000 00010000 00000000 00000000
 0030: 00000000 00000000 00000000 00000000
 ;
 0040: 18 eb fd 00 00             ; DICTP (HERE) (fdeb)
 0045: 01 4b 00 00 00             ; LITERAL 75 (0x004b)
 004a: 0c                         ; RET
-004b: 78 15 00 00                ; dw 0x1578
+004b: c7 15 00 00                ; dw 0x15c7
 ;
 004f: 18 da fd 00 00             ; DICTP (LAST) (fdda)
 0054: 01 5a 00 00 00             ; LITERAL 90 (0x005a)
 0059: 0c                         ; RET
-005a: 0b ef 00 00                ; dw 0xef0b
+005a: c1 ee 00 00                ; dw 0xeec1
 ;
 005e: 18 cb fd 00 00             ; DICTP BASE (fdcb)
 0063: 01 69 00 00 00             ; LITERAL 105 (0x0069)
@@ -2191,31 +2191,75 @@
 1552: 05                         ; DROP
 1553: 0c                         ; RET
 ;
-1554: 18 18 ef 00 00             ; DICTP mil (ef18)
-1559: 01 e8 03 00 00             ; LITERAL 1000 (3e8)
-155e: 06                         ; DUP
-155f: 13                         ; MUL
-1560: 13                         ; MUL
-1561: 0c                         ; RET
+1554: 18 15 ef 00 00             ; DICTP period (ef15)
+1559: 0e 2e                      ; CLITERAL 46
+155b: 19                         ; EMIT
+155c: 0c                         ; RET
 ;
-1562: 18 0b ef 00 00             ; DICTP bb (ef0b)
-1567: 0e 0d                      ; CLITERAL 13
-1569: 19                         ; EMIT
-156a: 0e 0a                      ; CLITERAL 10
-156c: 19                         ; EMIT
-156d: 0b 54 15 00 00             ; CALL mil (1554)
-1572: 0b 20 15 00 00             ; CALL countTo-FAST (1520)
-1577: 0c                         ; RET
+155d: 18 ff ee 00 00             ; DICTP start-timer (eeff)
+1562: 2f                         ; GETTICK
+1563: 0c                         ; RET
+;
+1564: 18 f1 ee 00 00             ; DICTP .ms (eef1)
+1569: 01 e8 03 00 00             ; LITERAL 1000 (3e8)
+156e: 29                         ; RESET
+156f: 0b d2 09 00 00             ; CALL (.) (09d2)
+1574: 0b 54 15 00 00             ; CALL period (1554)
+1579: 0b 1b 0a 00 00             ; CALL .3 (0a1b)
+157e: 07 08 20 73 65 63 6f 6e 64 73 00 ; SLITERAL (157f) [ seconds]
+1589: 0b d3 05 00 00             ; CALL CT (05d3)
+158e: 0c                         ; RET
+;
+158f: 18 df ee 00 00             ; DICTP elapsed (eedf)
+1594: 2f                         ; GETTICK
+1595: 04                         ; SWAP
+1596: 12                         ; SUB
+1597: 0b 64 15 00 00             ; CALL .ms (1564)
+159c: 0c                         ; RET
+;
+159d: 18 d1 ee 00 00             ; DICTP mil (eed1)
+15a2: 01 e8 03 00 00             ; LITERAL 1000 (3e8)
+15a7: 06                         ; DUP
+15a8: 13                         ; MUL
+15a9: 13                         ; MUL
+15aa: 0c                         ; RET
+;
+15ab: 18 c1 ee 00 00             ; DICTP bench (eec1)
+15b0: 0e 0d                      ; CLITERAL 13
+15b2: 19                         ; EMIT
+15b3: 0e 0a                      ; CLITERAL 10
+15b5: 19                         ; EMIT
+15b6: 0b 5d 15 00 00             ; CALL start-timer (155d)
+15bb: 04                         ; SWAP
+15bc: 0b 20 15 00 00             ; CALL countTo-FAST (1520)
+15c1: 0b 8f 15 00 00             ; CALL elapsed (158f)
+15c6: 0c                         ; RET
 ;
 ; End of code, Dictionary:
 ;
-ef0b: 18 ef 00 00                ; bb - (next: ef18 mil)
-ef0f: 62 15 00 00 00             ; XT=1562, flags=00
-ef14: 02 62 62 00                ; 2, bb
+eec1: d1 ee 00 00                ; bench - (next: eed1 mil)
+eec5: ab 15 00 00 00             ; XT=15ab, flags=00
+eeca: 05 62 65 6e 63 68 00       ; 5, bench
 ;
-ef18: 26 ef 00 00                ; mil - (next: ef26 countTo-FAST)
-ef1c: 54 15 00 00 00             ; XT=1554, flags=00
-ef21: 03 6d 69 6c 00             ; 3, mil
+eed1: df ee 00 00                ; mil - (next: eedf elapsed)
+eed5: 9d 15 00 00 00             ; XT=159d, flags=00
+eeda: 03 6d 69 6c 00             ; 3, mil
+;
+eedf: f1 ee 00 00                ; elapsed - (next: eef1 .ms)
+eee3: 8f 15 00 00 00             ; XT=158f, flags=00
+eee8: 07 65 6c 61 70 73 65 64 00 ; 7, elapsed
+;
+eef1: ff ee 00 00                ; .ms - (next: eeff start-timer)
+eef5: 64 15 00 00 00             ; XT=1564, flags=00
+eefa: 03 2e 6d 73 00             ; 3, .ms
+;
+eeff: 15 ef 00 00                ; start-timer - (next: ef15 period)
+ef03: 5d 15 00 00 00             ; XT=155d, flags=00
+ef08: 0b 73 74 61 72 74 2d 74 69 6d 65 72 00 ; 11, start-timer
+;
+ef15: 26 ef 00 00                ; period - (next: ef26 countTo-FAST)
+ef19: 54 15 00 00 00             ; XT=1554, flags=00
+ef1e: 06 70 65 72 69 6f 64 00    ; 6, period
 ;
 ef26: 3d ef 00 00                ; countTo-FAST - (next: ef3d countTo)
 ef2a: 20 15 00 00 00             ; XT=1520, flags=00

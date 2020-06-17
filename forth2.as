@@ -809,12 +809,11 @@ f_DEC:
 ; -------------------------------------------------------------------------------------
 ; GETTICK
 f_GETTICK:
-            ; TODO: fill this in
-            m_pop eax
-            m_push eax
-            m_getTOS eax
-            m_setTOS eax
-            ret
+                push edx
+                call [GetTickCount]
+                m_push eax
+                pop edx
+                ret
 
 ; -------------------------------------------------------------------------------------
 ; BREAK
@@ -1161,7 +1160,8 @@ section '.idata' data readable import
 library kernel32, 'kernel32.dll', msvcrt, 'msvcrt.dll', conio, 'conio.dll'
 
 import kernel32, ExitProcess,'ExitProcess', GetFileAttributes, 'GetFileAttributesA' \
-    , GetConsoleMode, 'GetConsoleMode', SetConsoleMode, 'SetConsoleMode', GetStdHandle, 'GetStdHandle'
+    , GetConsoleMode, 'GetConsoleMode', SetConsoleMode, 'SetConsoleMode', GetStdHandle, 'GetStdHandle' \
+    , GetTickCount, 'GetTickCount'
 
 import msvcrt, printf, 'printf', __getmainargs, '__getmainargs' \
     , fopen,'fopen', fclose, 'fclose', fseek, 'fseek', ftell, 'ftell' \

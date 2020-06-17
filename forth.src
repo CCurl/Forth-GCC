@@ -759,8 +759,15 @@ DECIMAL
 	WHILE 
     DROP ;
 
+
+\ --------------------------------------------------------------------------------
+: period 46 EMIT ;
+: start-timer GETTICK ;
+: .ms 1000 /MOD (.) period .3 S"  seconds" CT ;
+: elapsed GETTICK SWAP - .ms ;
+
 : mil 1000 DUP * * ;
-: bb CR mil countTo-FAST ;
+: bench CR start-timer SWAP countTo-FAST elapsed ;
 
 sys-info
 
