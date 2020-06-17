@@ -74,7 +74,7 @@
 : DEPTH		[ 38 C, ] ; .INLINE
 : GETCH		[ 39 C, ] ; .INLINE
 : COMPAREI	[ 40 C, ] ; .INLINE
-\ : USINIT	[ 41 C, ] ; .INLINE
+: /MOD		[ 41 C, ] ; .INLINE		\ SLASHMOD ( n1 n2 -- r q )
 : USPUSH	[ 42 C, ] ; .INLINE
 : USPOP		[ 43 C, ] ; .INLINE
 : INC		[ 44 C, ] ; .INLINE
@@ -127,6 +127,8 @@
 : NIP   SWAP DROP ; INLINE
 : ROT   >R SWAP R> SWAP ; INLINE
 : -ROT  SWAP >R SWAP R> ; INLINE
+: / /MOD NIP ;      INLINE    \ ( n1 n2 -- q )
+: MOD /MOD DROP ;   INLINE    \ ( n1 n2 -- r )
 
 : 1+ INC ; INLINE
 : 1- DEC ; INLINE
@@ -134,7 +136,10 @@
 : 2* 2 * ; INLINE 
 : 2/ 2 / ; INLINE
 
-: += OVER @ + SWAP ! ;   \ ( addr n -- )
+: +!  TUCK @  + SWAP !  ;   \ ( n addr -- )
+: C+! TUCK C@ + SWAP C! ;   \ ( n addr -- )
+
+: += SWAP +! ;                  \ ( addr n -- )
 : -= OVER @   SWAP - SWAP ! ;   \ ( addr n -- )
 
 : ++ 1 += ;   \ ( addr -- )
@@ -143,15 +148,12 @@
 : C++ DUP C@ 1+ SWAP C! ;   \ ( addr -- )
 : C-- DUP C@ 1- SWAP C! ;   \ ( addr -- )
 
-: +!  TUCK @  + SWAP !  ;
-: C+! TUCK C@ + SWAP C! ;
-
 : 0= 0 =  ; INLINE
 : <> = 0= ; INLINE
 : <= > 0= ; INLINE
 : >= < 0= ; INLINE
 
-: TRUE 1 ; INLINE
+: TRUE 1  ; INLINE
 : FALSE 0 ; INLINE
 : NOT 0 = ; INLINE
 
@@ -315,8 +317,6 @@
 	AGAIN
 ;
 
-: MOD 2DUP / * - ;                \ ( n1 n2 -- r )
-: /MOD 2DUP / DUP >R * - R> ;     \ ( n1 n2 -- r q )
 : SPACE 32 EMIT ;
 
 : <# #NEG OFF #LEN OFF DUP 0 < IF NEGATE #NEG ON THEN 0 SWAP ; \ ( u1 -- 0 u2 )
@@ -758,6 +758,9 @@ DECIMAL
 		DUP 
 	WHILE 
     DROP ;
+
+: mil 1000 DUP * * ;
+: bb CR mil countTo-FAST ;
 
 sys-info
 

@@ -1,3 +1,21 @@
+; This is a program that implements a forth CPU/VM.
+; The CPU's opcodes are identified by their order in the [jmpTable].
+; The VM's memory space is the allocated memory pointed to by [theMemory].
+; When the "VM" starts up, the IP is set to point to memory address 0.
+; This should be a JMP to the program's entry point.
+; 
+; **************************************************
+;                 x86 Register usage
+; **************************************************
+; eax: Free to use
+; ebx: the VM's TOS (top-of-stack)
+; ecx: Free to use
+; edx: the start of the VM's address space
+; esi: the VM's IP (instruction-pointer)
+; edi: the start of the opcode jump table
+; ebp: the VM's stack pointer
+; **************************************************
+
 format PE console 
 
 include 'win32ax.inc'
@@ -901,7 +919,7 @@ dd f_PICK               ; Hex: 25
 dd f_DEPTH              ; Hex: 26
 dd f_GETCH              ; Hex: 27
 dd f_COMPAREI           ; Hex: 28
-dd f_UNUSED1            ; Hex: 29
+dd f_SLASHMOD           ; Hex: 29
 dd f_USPUSH             ; Hex: 2A
 dd f_USPOP              ; Hex: 2B
 dd f_INC                ; Hex: 2C

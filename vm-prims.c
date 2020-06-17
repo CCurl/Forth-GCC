@@ -563,6 +563,15 @@ void prim_COMPAREI()
 	}
 }
 
+// SLASHMOD ( n1 n2 -- r q ) - q = n2/n1, r = n1 mod n2
+void prim_SLASHMOD()
+{
+	arg1 = GET2ND();
+	arg2 = GETTOS();
+	SET2ND(arg1%arg2);		// remainder
+	SETTOS(arg1/arg2);		// quotient
+}
+
 // User stacks look like this:
 // [SP][last-valid-SP][data]
 void prim_USPUSH()
@@ -682,7 +691,7 @@ void init_vm_vectors()
 	vm_prims[38] = prim_DEPTH;
 	vm_prims[39] = prim_GETCH;
 	vm_prims[40] = prim_COMPAREI;
-	// vm_prims[41] = NULL;
+	vm_prims[41] = prim_SLASHMOD;
 	vm_prims[42] = prim_USPUSH;
 	vm_prims[43] = prim_USPOP;
 	vm_prims[44] = prim_INC;
