@@ -41,6 +41,9 @@ entry $
         mov esp, ebp
         mov [stream], eax
 
+        ; Read in the file ...
+        ; Get the file size, allocate memory, read file into memory ...
+
         ; Get the file size ...
         ; fseek() to the end and then use ftell() to get the size
         ; fseek(fp, offset, from): - from: 0 => SEEK_SET, 1 => SEEK_CUR, 2 => SEEK_END
@@ -69,7 +72,7 @@ entry $
         mov [theMemory], eax
         mov esp, ebp
 
-        ; Read the entire file into memory
+        ; Read the file into memory
         push [stream]
         push [fileSize]
         push 1
@@ -82,9 +85,10 @@ entry $
         call f_FCLOSE
         mov esp, ebp
 
-        ; RESET the VM
+        ; Initialize the VM
         call f_SYS_INIT
 
+        ; A little test
         ;m_push 1234
         ;m_push 100
         ;call f_SLASHMOD
@@ -122,7 +126,7 @@ f_RESET:
         mov esp, [InitialESP]
         jmp cpuLoop
 ; -------------------------------------------------------------------------------------
-; RESET
+; f_SYS_INIT: Initialize the VM
 f_SYS_INIT:
             ; Return stack
             mov eax, rStack
@@ -181,19 +185,28 @@ f_DOT:
 
 ; -------------------------------------------------------------------------------------
 f_TYPE: ; ( addr count -- )
-        cmp ebx, 0
-        je f_tpD
-        call f_SWAP
-        call f_DUP
-        call f_CFETCH
-        call f_EMIT
-        call f_INC
-        call f_SWAP
-        call f_DEC
-        jmp f_TYPE
+        push edi
+        m_pop ecx
+        m_pop edi
+        add edi, edx
 
-f_tpD:  call f_DROP
-        call f_DROP
+ty1:    test ecx, ecx
+        jz tyX
+        xor eax, eax
+        mov al, [edi]
+        m_push eax
+
+        push edi
+        push ecx
+        call f_EMIT
+        pop ecx
+        pop edi
+
+        inc edi
+        dec ecx
+        jmp ty1
+
+tyX:    pop edi
         ret
 
 ; -------------------------------------------------------------------------------------
@@ -427,7 +440,9 @@ f_SLASHMOD:
            ret
 
 smDivBy0:
-           ; TODO: print an error msg
+           push divByZero
+           call [printf]
+           pop eax
            jmp f_RESET
 ; -------------------------------------------------------------------------------------
 ; DIV
@@ -787,10 +802,9 @@ f_GETTICK:
 ; BREAK
 f_BREAK:
             ; TODO: fill this in
-            m_pop eax
-            m_push eax
-            m_getTOS eax
-            m_setTOS eax
+            mov ecx, edi
+            sub ecx, edx
+            int3
             ret
 
 ; -------------------------------------------------------------------------------------
@@ -1114,11 +1128,12 @@ printFileSize db 'File [%s], size: %ld', 13, 10, 0
 dbgEsiEcx db ' (ESI: 0x%04lx, ECX: %02x, TOS: %d) ', 0
 printTheMemory db 'Memory: %08lX', 13, 10, 0
 unknownOpcode db 'unknown opcode! 0x%02X', 13, 10, 0
+divByZero db 'cannot divide by 0.', 0
 printOneCharH db '%02x ', 0
 printOneCharD db '%d ', 0
 jmpCalled db ' JMP called!', 0
 printOneChar db '%c', 0
-printBye db ' bye', 0
+printBye db 'Bye', 0
 prtHere db '(here %d)', 0
 openModeRB db 'rb', 0
 
