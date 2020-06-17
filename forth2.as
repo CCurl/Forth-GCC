@@ -9,6 +9,17 @@ entry $
         mov [InitialESP], esp
         mov ebp, esp
 
+        ; -10 = SDTIN, -11 = STDOUT, -12 = STDERR
+        push STD_INPUT_HANDLE
+        call [GetStdHandle]
+        mov [STDIN], eax
+        mov esp, ebp
+
+        push STD_OUTPUT_HANDLE
+        call [GetStdHandle]
+        mov [STDOUT], eax
+        mov esp, ebp
+
         invoke __getmainargs, argc, argv, env, 0, stup
         mov esp, ebp
         cmp [argc], 2
@@ -72,7 +83,14 @@ entry $
         mov esp, ebp
 
         ; RESET the VM
-        call f_RESET
+        call f_SYS_INIT
+
+        ;m_push 1234
+        ;m_push 100
+        ;call f_SLASHMOD
+        ;call f_DOT
+        ;call f_DOT
+        
 
         ; **************************************************
         ;                 Register usage
@@ -89,15 +107,23 @@ entry $
 cpuLoop:
         xor ecx, ecx
         mov cl, [esi]
-        ; call dbgEsi
-        inc esi
+                ;call dbgEsi ; debug
         mov eax, [edi+ecx*4]
+                ;mov ecx, esi ; debug
+                ;sub ecx, edx ; debug
+        inc esi
         call eax
         jmp cpuLoop
 
 ; -------------------------------------------------------------------------------------
 ; RESET
 f_RESET:
+        call f_SYS_INIT
+        mov esp, [InitialESP]
+        jmp cpuLoop
+; -------------------------------------------------------------------------------------
+; RESET
+f_SYS_INIT:
             ; Return stack
             mov eax, rStack
             add eax, CELL_SIZE
@@ -116,12 +142,12 @@ f_RESET:
 
             ; esi = IP/PC
             mov esi, edx
-
-            mov esp, [InitialESP]
-            jmp cpuLoop
+            ret
 
 ; -------------------------------------------------------------------------------------
 dbgEsi:
+        ret ; replace with nop (0x90) ... AKA xchg eax, eax
+
         push ecx
         push esi
         push edi
@@ -140,6 +166,17 @@ dbgEsi:
         pop edi
         pop esi
         pop ecx
+        ret
+; -------------------------------------------------------------------------------------
+f_DOT:
+        push edx
+        m_pop eax
+                push eax
+                push printOneCharD
+                call [printf]
+                pop eax
+                pop eax
+        pop edx
         ret
 
 ; -------------------------------------------------------------------------------------
@@ -259,6 +296,7 @@ f_JMPNZ:
 f_CALL:
             push dword [esi]
             add esi, CELL_SIZE
+            sub esi, edx
             push esi
             call u_rPush
             pop esi
@@ -305,6 +343,7 @@ f_RET:
 
             call u_rPop
             mov esi, eax
+            add esi, edx
             ret
 
 ; -------------------------------------------------------------------------------------
@@ -367,14 +406,41 @@ f_MUL:
             ret
 
 ; -------------------------------------------------------------------------------------
+f_SLASHMOD:
+        ;push edx
+        ;  push 1
+        ;  push prtHere
+        ;  call [printf]
+        ;  pop eax
+        ;  pop eax
+        ;pop edx
+           push edx
+           m_pop ecx
+           m_pop eax
+           cmp ecx, 0
+           je smDivBy0
+           xor edx, edx
+           div ecx
+           m_push edx          ; Remainder
+           m_push eax          ; Quotient
+           pop edx
+           ret
+
+smDivBy0:
+           ; TODO: print an error msg
+           jmp f_RESET
+; -------------------------------------------------------------------------------------
 ; DIV
 f_DIV:
-            ; TODO: fill this in
-            m_pop eax
-            m_push eax
-            m_getTOS eax
-            m_setTOS eax
-            ret
+            call f_SLASHMOD
+            call f_SWAP
+            jmp f_DROP
+
+; -------------------------------------------------------------------------------------
+; MOD
+f_MOD:
+            call f_SLASHMOD
+            jmp f_DROP
 
 ; -------------------------------------------------------------------------------------
 ; LT
@@ -428,14 +494,89 @@ f_OVER:
             ret
 
 ; -------------------------------------------------------------------------------------
+; Makes al lowerCase if upperCase
+u_ToLower:
+                cmp al, 'A'
+                jl u2lR
+                cmp al, 'Z'
+                jg u2lR
+                add al, 32
+u2lR:           ret
+
+; -------------------------------------------------------------------------------------
+; do_STRCMP
+; Compare strings pointed to by esi and edi
+; case sensitive: dl = 0
+; case insensitive: dl != 0
+; return in eax: -1 => eax<ecx, 0 => same, 1 eax>ecx
+do_STRCMP:
+                mov al, [esi]
+                mov ah, [edi]
+
+                test edx, edx
+                jz cmp2
+                call u_ToLower
+                xchg al, ah
+                call u_ToLower
+                ;xchg al, ah
+cmp2:           cmp ah, al
+                jl cmpLT
+                jg cmpGT
+                test ax, ax
+                jz cmpEQ
+                inc esi
+                inc edi
+                jmp do_STRCMP
+
+cmpLT:          mov eax, -1
+                ret
+cmpGT:          mov eax, 1
+                ret
+cmpEQ:          mov eax, 0
+                ret
+
+; -------------------------------------------------------------------------------------
+; do_COMPARE
+; Compare strings pointed to by esi and edi
+; case sensitive: dl = 0
+; case insensitive: dl != 0
+; return in eax: -1 => strings are equal, 0 => strings are NOT equal
+do_COMPARE:
+                call do_STRCMP
+                test eax, eax
+                jz cmpF
+                mov eax, 0
+                ret
+                        push edx
+                        push 2
+                        push prtHere
+                        call [printf]
+                        pop eax
+                        pop eax
+                        pop edx
+cmpF:           mov eax, -1
+                ret
+
+; -------------------------------------------------------------------------------------
 ; COMPARE
 f_COMPARE:
-            ; TODO: fill this in
-            m_pop eax
-            m_push eax
-            m_getTOS eax
-            m_setTOS eax
-            ret
+                push esi
+                push edi
+                push edx
+
+                m_pop edi
+                add edi, edx
+                m_pop esi
+                add esi, edx
+                xor edx, edx
+                call do_COMPARE
+                m_push eax
+
+                pop edx
+                pop edi
+                pop esi
+
+                ret
 
 ; -------------------------------------------------------------------------------------
 ; FOPEN
@@ -531,19 +672,12 @@ f_AND:
 ; -------------------------------------------------------------------------------------
 ; PICK
 f_PICK:
-        ;push edx
-        ;push 1
-        ;push prtHere
-        ;call [printf]
-        ;pop eax
-        ;pop eax
-        ;pop edx
-            m_pop eax
+            m_getTOS eax
             shl eax, CELL_SHIFT
             mov ecx, ebp
             sub ecx, eax
             mov eax, [ecx]
-            m_push eax
+            m_setTOS eax
             ret
 
 ; -------------------------------------------------------------------------------------
@@ -556,13 +690,6 @@ f_DEPTH:
 ; -------------------------------------------------------------------------------------
 ; GETCH
 f_GETCH:
-        ;push edx
-        ;push 2
-        ;push prtHere
-        ;call [printf]
-        ;pop eax
-        ;pop eax
-        ;pop edx
             push edx
             call [getch]
             pop edx
@@ -574,12 +701,29 @@ f_GETCH:
 ; -------------------------------------------------------------------------------------
 ; COMPAREI
 f_COMPAREI:
-            ; TODO: fill this in
-            m_pop eax
-            m_push eax
-            m_getTOS eax
-            m_setTOS eax
-            ret
+        ;push edx
+        ;       push 2
+        ;       push prtHere
+        ;       call [printf]
+        ;       pop eax
+        ;       pop eax
+        ;pop edx
+                push esi
+                push edi
+                push edx
+
+                m_pop edi
+                m_pop esi
+                add edi, edx
+                add esi, edx
+                mov edx, 1
+                call do_COMPARE
+                m_push eax
+
+                pop edx
+                pop edi
+                pop esi
+                ret
 
 ; -------------------------------------------------------------------------------------
 ; UNUSED1
@@ -670,15 +814,25 @@ f_UnknownOpcode:
             jmp f_RESET
 
 ; -------------------------------------------------------------------------------------
+; -------------------------------------------------------------------------------------
+; -------------------------------------------------------------------------------------
 
 section '.bss' data readable writable
+
+CELL_SIZE = 4
+CELL_SHIFT = 2
+STD_INPUT_HANDLE = -10
+STD_OUTPUT_HANDLE = -11
+STD_ERROR_HANDLE = -12
+
 argc dd ?
 argv dd ?
 env dd ?
 stup dd ?
 
+STDIN dd ?
+STDOUT dd ?
 stream dd ?
-one_char dd 0
 InitialESP dd 0
 
 fileName dd ?
@@ -688,57 +842,58 @@ dDepth dd 0
 dStack dd 64 dup (0)
 rDepth dd 0
 rStack dd 64 dup (0)
+
 ; -------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------
 jmpTable dd f_UnknownOpcode ; 0
-dd f_LITERAL ; 1
-dd f_FETCH ; 2
-dd f_STORE ; 3
-dd f_SWAP ; 4
-dd f_DROP ; 5
-dd f_DUP ; 6
-dd f_SLITERAL ; 7
-dd f_JMP ; 8
-dd f_JMPZ ; 9
-dd f_JMPNZ ; 10
-dd f_CALL ; 11
-dd f_RET ; 12
-dd f_OR ; 13
-dd f_CLITERAL ; 14
-dd f_CFETCH ; 15
-dd f_CSTORE ; 16
-dd f_ADD ; 17
-dd f_SUB ; 18
-dd f_MUL ; 19
-dd f_DIV ; 20
-dd f_LT ; 21
-dd f_EQ ; 22
-dd f_GT ; 23
-dd f_DICTP ; 24
-dd f_EMIT ; 25
-dd f_OVER ; 26
-dd f_COMPARE ; 27
-dd f_FOPEN ; 28
-dd f_FREAD ; 29
-dd f_FREADLINE ; 30
-dd f_FWRITE ; 31
-dd f_FCLOSE ; 32
-dd f_DTOR ; 33
-dd f_RTOD ; 34
-dd f_LOGLEVEL ; 35
-dd f_AND ; 36
-dd f_PICK ; 37
-dd f_DEPTH ; 38
-dd f_GETCH ; 39
-dd f_COMPAREI ; 40
-dd f_UnknownOpcode ; 41
-dd f_USPUSH ; 42
-dd f_USPOP ; 43
-dd f_INC ; 44
-dd f_RDEPTH ; 45
-dd f_DEC ; 46
-dd f_GETTICK ; 47
+dd f_LITERAL            ; Hex: 01
+dd f_FETCH              ; Hex: 02
+dd f_STORE              ; Hex: 03
+dd f_SWAP               ; Hex: 04
+dd f_DROP               ; Hex: 05
+dd f_DUP                ; Hex: 06
+dd f_SLITERAL           ; Hex: 07
+dd f_JMP                ; Hex: 08
+dd f_JMPZ               ; Hex: 09
+dd f_JMPNZ              ; Hex: 0A
+dd f_CALL               ; Hex: 0B
+dd f_RET                ; Hex: 0C
+dd f_OR                 ; Hex: 0D
+dd f_CLITERAL           ; Hex: 0E
+dd f_CFETCH             ; Hex: 0F
+dd f_CSTORE             ; Hex: 10
+dd f_ADD                ; Hex: 11
+dd f_SUB                ; Hex: 12
+dd f_MUL                ; Hex: 13
+dd f_DIV                ; Hex: 14
+dd f_LT                 ; Hex: 15
+dd f_EQ                 ; Hex: 16
+dd f_GT                 ; Hex: 17
+dd f_DICTP              ; Hex: 18
+dd f_EMIT               ; Hex: 19
+dd f_OVER               ; Hex: 1A
+dd f_COMPARE            ; Hex: 1B
+dd f_FOPEN              ; Hex: 1C
+dd f_FREAD              ; Hex: 1D
+dd f_FREADLINE          ; Hex: 1E
+dd f_FWRITE             ; Hex: 1F
+dd f_FCLOSE             ; Hex: 20
+dd f_DTOR               ; Hex: 21
+dd f_RTOD               ; Hex: 22
+dd f_LOGLEVEL           ; Hex: 23
+dd f_AND                ; Hex: 24
+dd f_PICK               ; Hex: 25
+dd f_DEPTH              ; Hex: 26
+dd f_GETCH              ; Hex: 27
+dd f_COMPAREI           ; Hex: 28
+dd f_UNUSED1            ; Hex: 29
+dd f_USPUSH             ; Hex: 2A
+dd f_USPOP              ; Hex: 2B
+dd f_INC                ; Hex: 2C
+dd f_RDEPTH             ; Hex: 2D
+dd f_DEC                ; Hex: 2E
+dd f_GETTICK            ; Hex: 2F
 dd f_UnknownOpcode ; 48
 dd f_UnknownOpcode ; 49
 dd f_UnknownOpcode ; 50
@@ -944,12 +1099,9 @@ dd f_UnknownOpcode ; 249
 dd f_UnknownOpcode ; 250
 dd f_UnknownOpcode ; 251
 dd f_UnknownOpcode ; 252
-dd f_UnknownOpcode ; 253
-dd f_UnknownOpcode ; 254
-dd f_UnknownOpcode ; 255
-dd f_BREAK ; 253
-dd f_RESET ; 254
-dd f_BYE ; 255
+dd f_BREAK              ; Hex: FD
+dd f_RESET              ; Hex: FE
+dd f_BYE                ; Hex: FF
 
 ; -------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------
@@ -970,16 +1122,13 @@ printBye db ' bye', 0
 prtHere db '(here %d)', 0
 openModeRB db 'rb', 0
 
-CELL_SIZE = 4
-CELL_SHIFT = 2
-
 ; -------------------------------------------------------------------------------------
 section '.idata' data readable import
 
 library kernel32, 'kernel32.dll', msvcrt, 'msvcrt.dll', conio, 'conio.dll'
 
 import kernel32, ExitProcess,'ExitProcess', GetFileAttributes, 'GetFileAttributesA' \
-    , VirtualAlloc, 'VirtualAllocA'
+    , GetConsoleMode, 'GetConsoleMode', SetConsoleMode, 'SetConsoleMode', GetStdHandle, 'GetStdHandle'
 
 import msvcrt, printf, 'printf', __getmainargs, '__getmainargs' \
     , fopen,'fopen', fclose, 'fclose', fseek, 'fseek', ftell, 'ftell' \
