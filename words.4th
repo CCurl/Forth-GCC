@@ -64,29 +64,61 @@ variable tl tl !
 \ ------------------------------------------------------------------------------------
 \ A stack is comprised of 3 parts, [stack-pointer] [stack-top-pointer] [stack-data]
 \ The stack "bottom" is the first CELL after the (stack-top) pointer
+\ The stack "top" points to the last valid cell address for the stack.
+\ NB: The stack-pointer points to the top element on the stack (TOS).
+\     If stk-ptr < stk-bottom, then the stack is empty.
+\     If stk-ptr = stk-top, then the stack is full.
 \
-: (stk-ptr) ;                               \ ( stk -- stk-ptr-addr )
-: (stk-top) CELL + ;		        	    \ ( stk -- last-cell-addr )
+: (stk-ptr) NOP ;           INLINE          \ ( stk -- stk-ptr-addr )
+: (stk-top) CELL + ;		INLINE    	    \ ( stk -- last-cell-addr )
 : stk-bottom 2 CELLS + ;                    \ ( stk -- bottom )
-: stk-top (stk-top) @ ;			            \ ( stk -- last-cell-addr )
-: stk-ptr (stk-ptr) @ ;                     \ ( stk -- stk-ptr )
-: stk-depth DUP stk-ptr                     \ ( stk -- depth )
+: stk-top (stk-top) @ ;		INLINE          \ ( stk -- last-cell-addr )
+: stk-ptr (stk-ptr) @ ;     INLINE          \ ( stk -- stk-ptr )
+: stk-depth DUP stk-ptr CELL +                     \ ( stk -- depth )
     SWAP stk-bottom - CELL / ;
 : stk-pick @ swap cells - @ ;               \ ( n1 stk -- n2 )
 
 : stk-init >R 1+ CELLS ALLOT                \ ( sz stk -- )
     HERE CELL - R@ (stk-top) !
-    R@ stk-bottom R> (stk-ptr) ! ;
+    R@ stk-bottom CELL - R> (stk-ptr) ! ;
 
 : stk-sz DUP stk-top                        \ ( stk -- n ) - in CELLS
    SWAP stk-bottom - CELL / 1+ ;
 
 : stk-reset DUP stk-bottom                  \ ( stk -- )
-   SWAP (stk-ptr) ! ;
+   CELL - SWAP (stk-ptr) ! ;
 
-: >stk USPUSH ; INLINE
-: stk> USPOP  ; INLINE
-: stk@ dup >R stk> dup R> >stk ;
+: >stk \ ( n stk -- )
+    DUP DUP
+    stk-top 1- SWAP stk-ptr <
+    IF
+        " UStack full." CT
+        DROP LEAVE
+    THEN
+    >R
+    R@ CELL +=
+    R> @ !
+    ;
+
+: stk> \ ( stk -- n )
+    DUP DUP
+    stk-bottom SWAP stk-ptr >
+    IF
+        " UStack empty." CT
+        DROP LEAVE
+    THEN
+    >R
+    R@ @ @
+    R> CELL -=
+    ;
+
+: stk@ @ @ ; INLINE
+
+\ : >stk US-PUSH ;
+\ : stk> US-POP  ;
+\ : >stk USPUSH ; INLINE
+\ : stk> USPOP  ; INLINE
+\ : stk@ dup >R stk> dup R> >stk ;
 
 \ --------------------------------------------------------------------------------
 \ -- Parameter stack words
@@ -100,23 +132,34 @@ decimal 64 ps stk-init
 : pclear ps stk-reset ;
 : (p) ps @ swap cells - ;   \ ( n1 -- n2 ) translate pos to address
 : ppick (p) @ ;
-: p1  1 ppick ;             \ ( -- n ) retrieve the value in position 1 from ps
-: p2  2 ppick ;             \ ( -- n ) retrieve the value in position 2 from ps
-: p3  3 ppick ;             \ ( -- n ) retrieve the value in position 3 from ps
-: p4  4 ppick ;             \ ( -- n ) retrieve the value in position 4 from ps
-: p1! 1 (p) ! ;             \ ( n -- ) set the value in position 1 of the ps
-: p2! 2 (p) ! ;             \ ( n -- ) set the value in position 2 of the ps
-: p3! 3 (p) ! ;             \ ( n -- ) set the value in position 3 of the ps
-: p4! 4 (p) ! ;             \ ( n -- ) set the value in position 4 of the ps
-: >>p
+: p1 ps  stk@ ;             \ ( -- n ) retrieve the value in position 1 from ps
+: p2  1 ppick ;             \ ( -- n ) retrieve the value in position 2 from ps
+: p3  2 ppick ;             \ ( -- n ) retrieve the value in position 3 from ps
+: p4  3 ppick ;             \ ( -- n ) retrieve the value in position 4 from ps
+: p1! 0 (p) ! ;             \ ( n -- ) set the value in position 1 of the ps
+: p2! 1 (p) ! ;             \ ( n -- ) set the value in position 2 of the ps
+: p3! 2 (p) ! ;             \ ( n -- ) set the value in position 3 of the ps
+: p4! 3 (p) ! ;             \ ( n -- ) set the value in position 4 of the ps
+: >>p                       \ ( n1..nx c -- )
     BEGIN 
         SWAP >p 1- DUP
     WHILE DROP ;
 
-: p>>
+: p>>                       \ ( n -- )
     BEGIN 
         pdrop 1- DUP
     WHILE DROP ;
+
+: p.S 40 EMIT
+    pdepth DUP IF
+        BL
+        BEGIN
+            1- DUP ppick . DUP
+        WHILE
+    ELSE
+        237 EMIT
+    THEN 
+    DROP 41 EMIT ;
 
 \ --------------------------------------------------------------------------------
 \ returns 2 raised to the n-th power
@@ -165,3 +208,5 @@ variable d.base
 : d.b- d.b>-2 - >d.b ;
 : d.b* d.b>-2 * d.base @ / >d.b ;
 : d.b/ d.b> -rot d.b> d.base @ * swap / >d.b ;
+
+: fw forget-words ;

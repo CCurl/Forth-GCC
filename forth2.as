@@ -168,7 +168,7 @@ f_SYS_INIT:
 
 ; -------------------------------------------------------------------------------------
 dbgEsi:
-        ret ; replace with nop (0x90) ... AKA xchg eax, eax
+        ; ret ; replace with nop (0x90) ... AKA xchg eax, eax
 
         push ecx
         push esi
@@ -209,7 +209,7 @@ f_TYPE: ; ( addr count -- )
         add edi, edx
 
 ty1:    test ecx, ecx
-        jz tyX
+        jz @f
         xor eax, eax
         mov al, [edi]
         m_push eax
@@ -224,7 +224,7 @@ ty1:    test ecx, ecx
         dec ecx
         jmp ty1
 
-tyX:    pop edi
+@@:    pop edi
         ret
 
 ; -------------------------------------------------------------------------------------
@@ -337,7 +337,7 @@ f_CALL:
 
 u_rPush:
         cmp [rDepth], 63
-        jg rpO
+        jg @f
         inc [rDepth]
 
         mov eax, [esp + 4]              ; the val to rpush
@@ -349,11 +349,11 @@ u_rPush:
         pop ebp
         ret
 
-rpO:    ret ; RStack overflow
+@@:    ret ; RStack overflow
 
 u_rPop:                                 ; returns the val in eax
        cmp [rDepth], 1
-       jl rpU
+       jl @f
        dec [rDepth]
 
        push ebp
@@ -364,7 +364,7 @@ u_rPop:                                 ; returns the val in eax
        pop ebp
        ret
 
-rpU:   ret ; RStack underflow
+@@:   ret ; RStack underflow
 
 ; -------------------------------------------------------------------------------------
 ; RET
@@ -612,51 +612,165 @@ f_COMPARE:
                 ret
 
 ; -------------------------------------------------------------------------------------
-; FOPEN
-f_FOPEN: ; ( name mode -- fp )
-            m_pop eax
-            m_pop ecx
-            add eax, edx
-            add ecx, edx
-            push edx
-            push eax
-            push ecx
-            call [fopen]
-            m_push eax
-            pop eax
-            pop eax
-            pop edx
-            ret
+; FOPEN: ( name mode type -- fp success )
+f_FOPEN:
+                ; mode has to go first in the openMode
+                ; put that on the top of the stack
+                call f_SWAP
+
+                ; save these
+                push edx
+                push edi
+
+                mov edi, tmpBuf
+
+                m_pop ecx                       ; mode: 0 => read, 1 => write
+                mov al, 'r'
+                cmp ecx, 0
+                je fopen1
+                mov al, 'w'
+fopen1:         mov [edi], al
+
+                m_pop ecx                       ; type: 0 => text, 1 => binary
+                mov al, 't'
+                cmp ecx, 0
+                je fopen2
+                mov al, 'b'
+fopen2:         inc edi
+                mov [edi], al
+
+                inc edi
+                mov [edi], byte 0
+                ; now [tmpBuf] has the openMode for fopen()
+
+                ; now for the filename
+                m_pop eax
+                inc eax                         ; skip the count byte
+                add eax, edx
+
+                ; function signature is fp = fopen(name, openMode);
+                push tmpBuf
+                push eax
+                call [fopen]                    ; returns the FP in eax
+                pop ecx                         ; clean up the stack
+                pop ecx
+
+                m_push eax
+                m_push eax
+
+                ; restore these
+                pop edi
+                pop edx
+                ret
 
 ; -------------------------------------------------------------------------------------
-; FREAD
+; FREAD ( addr count fp -- num-read )
 f_FREAD:
-            ; TODO: fill this in
-            m_pop eax
-            m_push eax
-            m_getTOS eax
-            m_setTOS eax
-            ret
+                ; save these
+                push edx
+
+                ; signature is: num-read = fread(addr, size, count, fp);
+                ; args for [fread]
+                m_pop eax       ; Stream
+                push eax
+                m_pop eax       ; count
+                push eax
+                push 1          ; size
+                m_pop eax       ; addr
+                add eax, edx
+                push eax
+                call [fread]
+                m_push eax       ; EAX = return val (num-read)
+                ; clean up from call
+                pop eax
+                pop eax
+                pop eax
+                pop eax
+
+                ; get these back
+                pop edx
+                ret
 
 ; -------------------------------------------------------------------------------------
-; FREADLINE
+; FREADLINE ( addr max-sz fp -- num-read )
 f_FREADLINE:
-            ; TODO: fill this in
-            m_pop eax
-            m_push eax
-            m_getTOS eax
-            m_setTOS eax
-            ret
+                ; signature is: ret = fgets(addr, size, fp);
+                ; Returns addr if successful, NULL if EOF or Error
+                ; NB: the strring returned at addr should be counted
+                ;     and null-terminated
+
+                ; Save EDX
+                push edx
+
+                m_pop eax       ; FP
+                push eax
+                m_pop eax       ; max
+                push eax
+                m_pop eax       ; addr
+                add eax, edx
+                inc eax
+                push eax
+                call [fgets]    ; returns addr if OK, else NULL
+                m_push eax
+                pop ecx         ; addr (+1)
+                pop eax         ; max
+                pop eax         ; FP
+
+                m_getTOS eax    ; NULL => done
+                test eax, eax
+                jz rdlEOF
+
+                push ecx        ; remember the original addr (+1)
+                xor eax, eax
+rdlC:           mov ah, [ecx]
+                cmp ah, 0
+                jz rdlCX
+                inc al          ; this is the length
+                inc ecx
+                jmp rdlC
+                
+rdlCX:          pop ecx         ; Make it a counted string
+                dec ecx
+                mov [ecx], al
+
+rdlX:           m_setTOS eax
+                ; Restore EDX
+                pop edx
+                ret
+
+rdlEOF:         dec ecx
+                mov [ecx], word 0
+                m_setTOS 0
+                pop edx
+                ret
 
 ; -------------------------------------------------------------------------------------
-; FWRITE
+; FWRITE: ( addr count fp -- num-written ) 
 f_FWRITE:
-            ; TODO: fill this in
-            m_pop eax
-            m_push eax
-            m_getTOS eax
-            m_setTOS eax
-            ret
+                ; save these
+                push edx
+
+                ; signature is: num-written = fwrite(addr, size, count, fp);
+                ; args for [fread]
+                m_pop eax       ; Stream
+                push eax
+                m_pop eax       ; count
+                push eax
+                push 1          ; size
+                m_pop eax       ; addr
+                add eax, edx
+                push eax
+                call [fwrite]
+                m_push eax       ; EAX = return val (num-written)
+                ; clean up from call
+                pop eax
+                pop eax
+                pop eax
+                pop eax
+
+                ; get these back
+                pop edx
+                ret
 
 ; -------------------------------------------------------------------------------------
 ; FCLOSE
@@ -688,7 +802,7 @@ f_RTOD:
 ; -------------------------------------------------------------------------------------
 ; LOGLEVEL
 f_LOGLEVEL:
-            ; TODO: fill this in
+            mov eax, todo ; TODO!
             m_pop eax
             m_push eax
             m_getTOS eax
@@ -759,36 +873,6 @@ f_COMPAREI:
                 ret
 
 ; -------------------------------------------------------------------------------------
-; UNUSED1
-f_UNUSED1:
-            ; TODO: fill this in
-            m_pop eax
-            m_push eax
-            m_getTOS eax
-            m_setTOS eax
-            ret
-
-; -------------------------------------------------------------------------------------
-; USPUSH
-f_USPUSH:
-            ; TODO: fill this in
-            m_pop eax
-            m_push eax
-            m_getTOS eax
-            m_setTOS eax
-            ret
-
-; -------------------------------------------------------------------------------------
-; USPOP
-f_USPOP:
-            ; TODO: fill this in
-            m_pop eax
-            m_push eax
-            m_getTOS eax
-            m_setTOS eax
-            ret
-
-; -------------------------------------------------------------------------------------
 ; INC
 f_INC:
             inc ebx
@@ -814,6 +898,11 @@ f_GETTICK:
                 m_push eax
                 pop edx
                 ret
+
+; -------------------------------------------------------------------------------------
+; NOP
+f_NOP:
+            ret
 
 ; -------------------------------------------------------------------------------------
 ; BREAK
@@ -873,6 +962,7 @@ dDepth dd 0
 dStack dd 64 dup (0)
 rDepth dd 0
 rStack dd 64 dup (0)
+tmpBuf db 64 dup ('A')
 
 ; -------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------
@@ -919,8 +1009,8 @@ dd f_DEPTH              ; Hex: 26
 dd f_GETCH              ; Hex: 27
 dd f_COMPAREI           ; Hex: 28
 dd f_SLASHMOD           ; Hex: 29
-dd f_USPUSH             ; Hex: 2A
-dd f_USPOP              ; Hex: 2B
+dd f_UnknownOpcode      ; Hex: 2A
+dd f_UnknownOpcode      ; Hex: 2B
 dd f_INC                ; Hex: 2C
 dd f_RDEPTH             ; Hex: 2D
 dd f_DEC                ; Hex: 2E
@@ -1129,7 +1219,7 @@ dd f_UnknownOpcode ; 248
 dd f_UnknownOpcode ; 249
 dd f_UnknownOpcode ; 250
 dd f_UnknownOpcode ; 251
-dd f_UnknownOpcode ; 252
+dd f_NOP                ; Hex: FC
 dd f_BREAK              ; Hex: FD
 dd f_RESET              ; Hex: FE
 dd f_BYE                ; Hex: FF
@@ -1153,6 +1243,7 @@ printOneChar db '%c', 0
 printBye db 'Bye', 0
 prtHere db '(here %d)', 0
 openModeRB db 'rb', 0
+todo db "TODO: fill this in", 0
 
 ; -------------------------------------------------------------------------------------
 section '.idata' data readable import
@@ -1165,6 +1256,7 @@ import kernel32, ExitProcess,'ExitProcess', GetFileAttributes, 'GetFileAttribute
 
 import msvcrt, printf, 'printf', __getmainargs, '__getmainargs' \
     , fopen,'fopen', fclose, 'fclose', fseek, 'fseek', ftell, 'ftell' \
-    , fread, 'fread', fgetc, 'fgetc', malloc, 'malloc', putchar, 'putchar', getch, '_getch'
+    , fread, 'fread', fwrite, 'fwrite', fgetc, 'fgetc', malloc, 'malloc' \
+    , putchar, 'putchar', getch, '_getch', fgets, 'fgets'
 
     ; the end

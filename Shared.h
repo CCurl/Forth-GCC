@@ -45,12 +45,13 @@
 #define GETCH      39	// 27
 #define COMPAREI   40	// 28 ( addr1 addr2 -- bool )
 #define SLASHMOD   41	// 29
-#define USPUSH     42	// 2A ( val addr -- )
-#define USPOP      43	// 2B ( addr -- val )
+#define UNUSED1    42	// 2A ( val addr -- )
+#define UNUSED2    43	// 2B ( addr -- val )
 #define INC        44	// 2C 
 #define RDEPTH     45	// 2D
 #define DEC        46	// 2E 
 #define GETTICK    47   // 2F
+#define NOP       252	// FC
 #define BREAK     253	// FD
 #define RESET     254	// FE
 #define BYE       255	// FF

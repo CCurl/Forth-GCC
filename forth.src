@@ -20,6 +20,9 @@
 .VARIABLE. #NEG
 .VARIABLE. #LEN
 .VARIABLE. INPUT-FP
+.VARIABLE. T1			\ These are free to use, but since any word
+.VARIABLE. T2			\ might use one or more of them, there is no
+.VARIABLE. T3			\ guarantee that the value won't change across words.
 
 .NOP. \ marks the end of the variables
 
@@ -75,12 +78,13 @@
 : GETCH		[ 39 C, ] ; .INLINE
 : COMPAREI	[ 40 C, ] ; .INLINE
 : /MOD		[ 41 C, ] ; .INLINE		\ SLASHMOD ( n1 n2 -- r q )
-: USPUSH	[ 42 C, ] ; .INLINE
-: USPOP		[ 43 C, ] ; .INLINE
+\ : USPUSH	[ 42 C, ] ; .INLINE
+\ : USPOP		[ 43 C, ] ; .INLINE
 : INC		[ 44 C, ] ; .INLINE
 : RDEPTH	[ 45 C, ] ; .INLINE
 : DEC		[ 46 C, ] ; .INLINE
 : GETTICK	[ 47 C, ] ; .INLINE
+: NOP		[ 252 C, ] ; .INLINE
 : BREAK		[ 253 C, ] ; .INLINE
 : RESET		[ 254 C, ] ; .INLINE
 : BYE		[ 255 C, ] ; .INLINE
@@ -136,11 +140,13 @@
 : 2* 2 * ; INLINE 
 : 2/ 2 / ; INLINE
 
-: +!  TUCK @  + SWAP !  ;   \ ( n addr -- )
-: C+! TUCK C@ + SWAP C! ;   \ ( n addr -- )
+: -!  TUCK @  - SWAP !  ;   \ ( n addr -- )
 
-: += SWAP +! ;                  \ ( addr n -- )
+: += OVER @        + SWAP ! ;   \ ( addr n -- )
 : -= OVER @   SWAP - SWAP ! ;   \ ( addr n -- )
+
+: +!  SWAP +=  ;   \ ( n addr -- )
+\ : C+! TUCK C@ + SWAP C! ;   \ ( n addr -- )
 
 : ++ 1 += ;   \ ( addr -- )
 : -- 1 -= ;   \ ( addr -- )

@@ -520,13 +520,13 @@ CELL dis_one(char *bytes, char *desc)
 		sprintf(desc, "OR");
 		return 0;
 
-	case USPUSH:
-		sprintf(desc, "UPUSH");
-		return 0;
+	// case USPUSH:
+	// 	sprintf(desc, "UPUSH");
+	// 	return 0;
 
-	case USPOP:
-		sprintf(desc, "UPOP");
-		return 0;
+	// case USPOP:
+	// 	sprintf(desc, "UPOP");
+	// 	return 0;
 
 	case INC:
 		sprintf(desc, "INC");
@@ -542,6 +542,10 @@ CELL dis_one(char *bytes, char *desc)
 
 	case GETTICK:
 		sprintf(desc, "GETTICK");
+		return 0;
+
+	case NOP:
+		sprintf(desc, "NOP");
 		return 0;
 
 	case BREAK:

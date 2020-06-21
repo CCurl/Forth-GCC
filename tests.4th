@@ -4,7 +4,7 @@ CR sys-info
 last here
 variable th th !
 variable tl tl !
-: forget-these tl @ (last) ! th @ (here) ! ;
+: forget-tests tl @ (last) ! th @ (here) ! ;
 
 \ ---------------------------------------------- TESTS START HERE -----------------------------------------------------
 : test 1 2 = if 255 drop else 254 drop then ;
@@ -22,10 +22,11 @@ variable passed
     num-failed . " failed." CT CR ;
 
 : passed?  ( status -- )
-    dup 0= if 
-        " ***Test #" CT num-tests @ (.) "  FAILED***" CT CR
-    then
-    passed +! ;
+    IF
+        passed ++
+    ELSE
+        " ***Test #" CT num-tests @ . " FAILED***" CT CR
+    THEN ;
 
 
 : next-test: num-tests ++ ;
@@ -159,9 +160,9 @@ next-test: 8 pow-10  100 mil p= \ 57
 
 cr " Running benchmarks ... " ct 100 MIL do-benches cr
 
-\ 20 .lastx
+10 .lastx
 CR test-results
 
 \ ---------------------------------------------- TESTS END HERE -----------------------------------------------------
-forget-these
+forget-tests
 CR sys-info
