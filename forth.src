@@ -26,12 +26,12 @@
 
 .NOP. \ marks the end of the variables
 
-: CELL 4 ;
+: CELL 4 ; .INLINE
 
 : HERE (HERE) .FETCH. ;
 : LAST (LAST) .FETCH. ;
 
-: C, HERE .CSTORE. HERE 1    .ADD. (HERE) .STORE. ;
+: C, HERE .CSTORE. HERE      .INC. (HERE) .STORE. ;
 : ,  HERE .STORE.  HERE CELL .ADD. (HERE) .STORE. ;
 
 : [ 0 STATE .STORE. ; .IMMEDIATE
@@ -78,8 +78,8 @@
 : GETCH		[ 39 C, ] ; .INLINE
 : COMPAREI	[ 40 C, ] ; .INLINE
 : /MOD		[ 41 C, ] ; .INLINE		\ SLASHMOD ( n1 n2 -- r q )
-\ : USPUSH	[ 42 C, ] ; .INLINE
-\ : USPOP		[ 43 C, ] ; .INLINE
+\ USPUSH	[ 42 C, ] ; .INLINE
+\ USPOP		[ 43 C, ] ; .INLINE
 : INC		[ 44 C, ] ; .INLINE
 : RDEPTH	[ 45 C, ] ; .INLINE
 : DEC		[ 46 C, ] ; .INLINE
@@ -131,7 +131,7 @@
 : NIP   SWAP DROP ; INLINE
 : ROT   >R SWAP R> SWAP ; INLINE
 : -ROT  SWAP >R SWAP R> ; INLINE
-: / /MOD NIP ;      INLINE    \ ( n1 n2 -- q )
+: /   /MOD NIP  ;   INLINE    \ ( n1 n2 -- q )
 : MOD /MOD DROP ;   INLINE    \ ( n1 n2 -- r )
 
 : 1+ INC ; INLINE
@@ -140,12 +140,12 @@
 : 2* 2 * ; INLINE 
 : 2/ 2 / ; INLINE
 
-: -!  TUCK @  - SWAP !  ;   \ ( n addr -- )
-
-: += OVER @        + SWAP ! ;   \ ( addr n -- )
-: -= OVER @   SWAP - SWAP ! ;   \ ( addr n -- )
+: += OVER @      + SWAP ! ;   \ ( addr n -- )
+: -= OVER @ SWAP - SWAP ! ;   \ ( addr n -- )
 
 : +!  SWAP +=  ;   \ ( n addr -- )
+: -!  SWAP -=  ;   \ ( n addr -- )
+
 \ : C+! TUCK C@ + SWAP C! ;   \ ( n addr -- )
 
 : ++ 1 += ;   \ ( addr -- )
@@ -154,22 +154,24 @@
 : C++ DUP C@ 1+ SWAP C! ;   \ ( addr -- )
 : C-- DUP C@ 1- SWAP C! ;   \ ( addr -- )
 
-: 0= 0 =  ; INLINE
+: 0= 0  = ; INLINE
 : <> = 0= ; INLINE
 : <= > 0= ; INLINE
 : >= < 0= ; INLINE
 
-: TRUE 1  ; INLINE
+: TRUE -1 ; INLINE
 : FALSE 0 ; INLINE
 : NOT 0 = ; INLINE
 
 : COUNT DUP 1+ SWAP C@ ;		\ ( addr1 --  addr2 num )
 
-: TYPE     \ ( addr count -- ) 
-	OVER + SWAP
+: TYPE
 	BEGIN
-		2DUP <= IF 2DROP LEAVE THEN
-		DUP C@ EMIT 1+
+		DUP 0= IF
+			2DROP LEAVE
+		THEN
+		SWAP DUP C@ EMIT 1+ 
+		SWAP 1-
 	AGAIN ;
 
 : CT COUNT TYPE ;
@@ -746,34 +748,7 @@ DECIMAL
 
 : VARIABLE  CREATE-NAME HERE 2 + CELL + LITERAL , RET 0 , ;
 
-: countTo 
-    S" counting to " CT DUP . S" ... " CT
-    1
-    BEGIN
-        2DUP < 
-        IF
-            2DROP LEAVE
-        THEN
-        1+ 
-    AGAIN ;
-
-: countTo-FAST
-    S" counting to " CT DUP . S" ... " CT
-    BEGIN
-		1-
-		DUP 
-	WHILE 
-    DROP ;
-
-
 \ --------------------------------------------------------------------------------
-: period 46 EMIT ;
-: start-timer GETTICK ;
-: .ms 1000 /MOD (.) period .3 S"  seconds" CT ;
-: elapsed GETTICK SWAP - .ms ;
-
-: mil 1000 DUP * * ;
-: bench CR start-timer SWAP countTo-FAST elapsed ;
 
 sys-info
 

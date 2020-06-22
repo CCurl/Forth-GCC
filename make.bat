@@ -140,7 +140,7 @@ goto done
 echo fasm forth2.as
 fasm forth2.as
 if "--%2%--" == "----" goto done
-forth2 forth2.bin
+forth2 forth.bin
 goto done
 
 :make-fi
@@ -177,7 +177,8 @@ goto done
 :make-br
 call make fc 1
 call make fd 1
-call make forth 1
+call make forth
+call make f2 1
 goto done
 
 :unknown

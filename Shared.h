@@ -75,7 +75,7 @@ typedef struct {
 // flags is a bit field:
 #define IS_IMMEDIATE 0x01
 #define IS_INLINE    0x02
-#define IS_OPCODE    0x04
+#define IS_HIDDEN    0x04
 
 typedef struct {
 	CELL next, XT;

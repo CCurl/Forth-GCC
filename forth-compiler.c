@@ -296,9 +296,15 @@ char *ParseWord(char *word, char *line)
 		return line;
 	}
 
+	if (strcmp(word, ".INC.") == 0)
+	{
+		CComma(INC);
+		return line;
+	}
+
 	if (strcmp(word, ".NOP.") == 0)
 	{
-		CComma(0);
+		CComma(NOP);
 		return line;
 	}
 
