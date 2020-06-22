@@ -833,9 +833,11 @@ f_BREAK:
 f_BYE:
             invoke printf, printBye
             pop eax
+            mov esp, [InitialESP]
 
             push 0
             call [ExitProcess]
+            pop eax
             ret
 
 f_UnknownOpcode:
@@ -845,7 +847,7 @@ f_UnknownOpcode:
             pop eax
             pop eax
 
-            jmp f_BYE
+            ; jmp f_BYE
             jmp f_RESET
 
 ; -------------------------------------------------------------------------------------

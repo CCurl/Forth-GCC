@@ -16,7 +16,6 @@
 .VARIABLE. (MEM_SZ)
 
 .VARIABLE. >IN
-.VARIABLE. (tmp)
 .VARIABLE. #NEG
 .VARIABLE. #LEN
 .VARIABLE. INPUT-FP
@@ -125,6 +124,7 @@
 : R@ RFETCH ; INLINE
 : RDROP R> DROP   ; INLINE
 
+: ?DUP DUP IF DUP THEN ;
 : 2DUP  OVER OVER ; INLINE
 : 2DROP DROP DROP ; INLINE
 : TUCK  SWAP OVER ; INLINE
@@ -175,33 +175,28 @@
 
 : \ 0 >IN @ C! ; IMMEDIATE
 
-: ( BEGIN 
-	>IN @ C@ 
-	DUP 0= IF 
-		S" missing closing ')'" CT RESET
-	THEN
-	>IN ++		
-	41 = IF		\ 41 = ')'
-		LEAVE 
-	THEN
+: ( 
+	BEGIN 
+		>IN @ C@ 
+		DUP 0= IF 
+			S" missing closing ')'" CT RESET
+		THEN
+		>IN ++
+		41 = IF		\ 41 = ')'
+			LEAVE 
+		THEN
 	AGAIN ; IMMEDIATE
 
-: BL 32 EMIT ; INLINE
+: SPACE 32 EMIT ; INLINE
+: BL      SPACE ; INLINE
 : CRLF 13 EMIT 10 EMIT ; INLINE
 : CR CRLF ; INLINE
 
 : BETWEEN											\ ( num min max -- bool )
-	2 PICK 
-	< IF 2DROP FALSE LEAVE THEN
-	< 0=
-;
-
-: tmp-init LAST (tmp) ! ;							\ ( -- )
-: tmp-cur (tmp) @ ;
-: tmp-alloc (tmp) TUCK @ SWAP - SWAP ! tmp-cur ;	\ ( size -- addr )
-
-: PAD tmp-init 200 tmp-alloc ;
-: getInput PAD 128 0 FREADLINE DROP PAD ;			\ ( -- addr )
+	2 PICK < IF 
+		2DROP FALSE LEAVE 
+	THEN
+	< 0= ;
 
 : skipWS               								\ ( addr1 -- addr2 )
 	BEGIN
@@ -321,8 +316,6 @@
 		THEN
 	AGAIN
 ;
-
-: SPACE 32 EMIT ;
 
 : <# #NEG OFF #LEN OFF DUP 0 < IF NEGATE #NEG ON THEN 0 SWAP ; \ ( u1 -- 0 u2 )
 : # BASE @ /MOD SWAP 48 + DUP 57 > IF 7 + THEN #LEN ++ SWAP ; \  ( u1 -- c u2 )
@@ -516,24 +509,8 @@ DECIMAL
 	THEN
 ; 
 
-: LoadingFromFile? INPUT-FP @ ;		\ ( -- bool ) 
-
-: getLineFromFile		\ ( addr sz fp -- )
-	\ DROP 0 LEAVE
-	200 INPUT-FP @ FREADLINE 0 =
-	IF 
-		INPUT-FP OFF
-	THEN
-;
-
 : getLine			\ ( -- addr )
-	\ tmp-init 200 tmp-alloc (Pad) !
 	0 Pad DUP 1+ >IN ! C!
-
-	LoadingFromFile? IF
-		Pad getLineFromFile
-		LEAVE
-	THEN
 
 	BEGIN
 		0 >IN @ C!     \ Null term
@@ -573,7 +550,6 @@ DECIMAL
 ;
 
 : strcpy2c			\ ( from to -- ) from is NOT counted, to is to get count byte
-	\ 65 EMIT OVER . DUP . \ DEBUG
 	DUP >R					\ from to
 	0 OVER C!				\ from to (init count)
 	1+ SWAP					\ to+1 from
@@ -625,16 +601,18 @@ DECIMAL
 	STATE OFF
 ; IMMEDIATE
 
-: ForgetLast \ Forgets the last word
+: ForgetLast 				\ Forgets the last word
 	LAST CELL + @ (HERE) ! 
-	LAST @ (LAST) ! 
-;
+	LAST @ (LAST) ! ;
 
 : resetState ?COMPILING 
 	IF ForgetLast THEN 
 	STATE OFF
 	DECIMAL
-;
+	INPUT-FP @ ?DUP IF 
+		FCLOSE
+		0 INPUT-FP !
+	THEN ;
 
 : ALLOT HERE + (HERE) ! ;
 
@@ -647,7 +625,6 @@ DECIMAL
 : mainLoop 
 	resetState 
 	BEGIN 
-		tmp-init
 		?COMPILING 0= IF S"  OK" CT .S THEN
 		CRLF getLine 1+ >IN ! 
 		executeInput BL 
@@ -665,7 +642,8 @@ DECIMAL
 
 : load 0 0 FOPEN 		\ ( filename -- ) 
 	0= IF
-		S" Cannot open file." CT LEAVE
+		S" Cannot open file." CT 
+		LEAVE
 	THEN
 	INPUT-FP !
 	BEGIN
@@ -677,15 +655,14 @@ DECIMAL
 		ELSE
 			DROP
 			INPUT-FP @ FCLOSE
-			INPUT-FP OFF
+			0 INPUT-FP !
 			LEAVE
 		THEN
 	AGAIN ;
 
 \ ******************************************************************************************
 : STR.EMPTY 0 OVER ! ; INLINE		\ ( addr -- addr )
-
-: STR.LEN DUP C@ ; INLINE		\ ( addr -- addr len )
+: STR.LEN DUP C@     ; INLINE		\ ( addr -- addr len )
 
 : STR.CATC			\ ( addr ch -- addr )
     OVER
