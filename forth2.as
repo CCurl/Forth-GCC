@@ -1,12 +1,15 @@
+; **************************************************************************
+;
 ; This is a program that implements a forth CPU/VM.
 ; The CPU's opcodes are identified by their order in the [jmpTable].
 ; The VM's memory space is the allocated memory pointed to by [theMemory].
 ; When the "VM" starts up, the IP is set to point to memory address 0.
 ; This should be a JMP to the program's entry point.
-; 
-; **************************************************
+;
+; **************************************************************************
 ;                 x86 Register usage
-; **************************************************
+; **************************************************************************
+;
 ; eax: Free to use
 ; ebx: the VM's TOS (top-of-stack)
 ; ecx: Free to use
@@ -14,7 +17,8 @@
 ; esi: the VM's IP (instruction-pointer)
 ; edi: the start of the opcode jump table
 ; ebp: the VM's stack pointer
-; **************************************************
+;
+; **************************************************************************
 
 format PE console 
 
@@ -106,33 +110,12 @@ entry $
         ; Initialize the VM
         call f_SYS_INIT
 
-        ; A little test
-        ;m_push 1234
-        ;m_push 100
-        ;call f_SLASHMOD
-        ;call f_DOT
-        ;call f_DOT
-        
-
-        ; **************************************************
-        ;                 Register usage
-        ; **************************************************
-        ; eax: Free to use
-        ; ebx is the VM's TOS (top-of-stack)
-        ; ecx: Free to use
-        ; edx is the start of the VM's address space
-        ; esi is the VM's IP (instruction-pointer)
-        ; edi is the start of the opcode jump table
-        ; ebp is the VM's stack pointer
-        ; **************************************************
+; This is the main CPU Loop
 
 cpuLoop:
         xor ecx, ecx
         mov cl, [esi]
-                ;call dbgEsi ; debug
         mov eax, [edi+ecx*4]
-                ;mov ecx, esi ; debug
-                ;sub ecx, edx ; debug
         inc esi
         call eax
         jmp cpuLoop
@@ -165,67 +148,6 @@ f_SYS_INIT:
             ; esi = IP/PC
             mov esi, edx
             ret
-
-; -------------------------------------------------------------------------------------
-dbgEsi:
-        ; ret ; replace with nop (0x90) ... AKA xchg eax, eax
-
-        push ecx
-        push esi
-        push edi
-        push edx
-                sub esi, edx
-                push ebx
-                push ecx
-                push esi
-                push dbgEsiEcx
-                call [printf]
-                pop eax
-                pop eax
-                pop eax
-                pop eax
-        pop edx
-        pop edi
-        pop esi
-        pop ecx
-        ret
-; -------------------------------------------------------------------------------------
-f_DOT:
-        push edx
-        m_pop eax
-                push eax
-                push printOneCharD
-                call [printf]
-                pop eax
-                pop eax
-        pop edx
-        ret
-
-; -------------------------------------------------------------------------------------
-f_TYPE: ; ( addr count -- )
-        push edi
-        m_pop ecx
-        m_pop edi
-        add edi, edx
-
-ty1:    test ecx, ecx
-        jz @f
-        xor eax, eax
-        mov al, [edi]
-        m_push eax
-
-        push edi
-        push ecx
-        call f_EMIT
-        pop ecx
-        pop edi
-
-        inc edi
-        dec ecx
-        jmp ty1
-
-@@:    pop edi
-        ret
 
 ; -------------------------------------------------------------------------------------
 argError:
@@ -335,6 +257,7 @@ f_CALL:
             add esi, edx
             ret
 
+; -------------------------------------------------------------------------------------
 u_rPush:
         cmp [rDepth], 63
         jg @f
@@ -351,6 +274,7 @@ u_rPush:
 
 @@:    ret ; RStack overflow
 
+; -------------------------------------------------------------------------------------
 u_rPop:                                 ; returns the val in eax
        cmp [rDepth], 1
        jl @f
@@ -396,9 +320,8 @@ f_CLITERAL:
 ; -------------------------------------------------------------------------------------
 ; CFETCH
 f_CFETCH:
-            add ebx, edx
             xor eax, eax
-            mov al, [ebx]
+            mov al, [ebx + edx]
             m_setTOS eax
             ret
 
@@ -407,8 +330,7 @@ f_CFETCH:
 f_CSTORE:
             m_pop ecx
             m_pop eax
-            add ecx, edx
-            mov [ecx], al
+            mov [ecx + edx], al
             ret
 
 ; -------------------------------------------------------------------------------------
@@ -438,13 +360,6 @@ f_MUL:
 
 ; -------------------------------------------------------------------------------------
 f_SLASHMOD:
-        ;push edx
-        ;  push 1
-        ;  push prtHere
-        ;  call [printf]
-        ;  pop eax
-        ;  pop eax
-        ;pop edx
            push edx
            m_pop ecx
            m_pop eax
@@ -462,6 +377,7 @@ smDivBy0:
            call [printf]
            pop eax
            jmp f_RESET
+
 ; -------------------------------------------------------------------------------------
 ; DIV
 f_DIV:
@@ -577,17 +493,10 @@ cmpEQ:          mov eax, 0
 do_COMPARE:
                 call do_STRCMP
                 test eax, eax
-                jz cmpF
+                jz cmpT
                 mov eax, 0
                 ret
-                        push edx
-                        push 2
-                        push prtHere
-                        call [printf]
-                        pop eax
-                        pop eax
-                        pop edx
-cmpF:           mov eax, -1
+cmpT:           mov eax, -1
                 ret
 
 ; -------------------------------------------------------------------------------------
@@ -802,11 +711,7 @@ f_RTOD:
 ; -------------------------------------------------------------------------------------
 ; LOGLEVEL
 f_LOGLEVEL:
-            mov eax, todo ; TODO!
-            m_pop eax
-            m_push eax
-            m_getTOS eax
-            m_setTOS eax
+            ; TODO!
             ret
 
 ; -------------------------------------------------------------------------------------
@@ -820,7 +725,7 @@ f_AND:
 ; PICK
 f_PICK:
             m_getTOS eax
-            shl eax, CELL_SHIFT
+            shl eax, 2
             mov ecx, ebp
             sub ecx, eax
             mov eax, [ecx]
@@ -848,13 +753,6 @@ f_GETCH:
 ; -------------------------------------------------------------------------------------
 ; COMPAREI
 f_COMPAREI:
-        ;push edx
-        ;       push 2
-        ;       push prtHere
-        ;       call [printf]
-        ;       pop eax
-        ;       pop eax
-        ;pop edx
                 push esi
                 push edi
                 push edx
@@ -907,7 +805,6 @@ f_NOP:
 ; -------------------------------------------------------------------------------------
 ; BREAK
 f_BREAK:
-            ; TODO: fill this in
             mov ecx, edi
             sub ecx, edx
             int3
@@ -940,7 +837,6 @@ f_UnknownOpcode:
 section '.bss' data readable writable
 
 CELL_SIZE = 4
-CELL_SHIFT = 2
 STD_INPUT_HANDLE = -10
 STD_OUTPUT_HANDLE = -11
 STD_ERROR_HANDLE = -12
@@ -962,7 +858,7 @@ dDepth dd 0
 dStack dd 64 dup (0)
 rDepth dd 0
 rStack dd 64 dup (0)
-tmpBuf db 64 dup ('A')
+tmpBuf db 64 dup (0)
 
 ; -------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------
@@ -1231,19 +1127,10 @@ dd f_BYE                ; Hex: FF
 section '.rdata' data readable
 printArgError db 'Error: Wrong number of arguments. Run file with "program.exe <file>"', 0
 printFileError db 'Error: File [%s] does not exist. Check spelling and try again.', 0
-printFileSize db 'File [%s], size: %ld', 13, 10, 0
-dbgEsiEcx db ' (ESI: 0x%04lx, ECX: %02x, TOS: %d) ', 0
-printTheMemory db 'Memory: %08lX', 13, 10, 0
 unknownOpcode db 'unknown opcode! 0x%02X', 13, 10, 0
 divByZero db 'cannot divide by 0.', 0
-printOneCharH db '%02x ', 0
-printOneCharD db '%d ', 0
-jmpCalled db ' JMP called!', 0
-printOneChar db '%c', 0
 printBye db 'Bye', 0
-prtHere db '(here %d)', 0
 openModeRB db 'rb', 0
-todo db "TODO: fill this in", 0
 
 ; -------------------------------------------------------------------------------------
 section '.idata' data readable import
@@ -1258,5 +1145,3 @@ import msvcrt, printf, 'printf', __getmainargs, '__getmainargs' \
     , fopen,'fopen', fclose, 'fclose', fseek, 'fseek', ftell, 'ftell' \
     , fread, 'fread', fwrite, 'fwrite', fgetc, 'fgetc', malloc, 'malloc' \
     , putchar, 'putchar', getch, '_getch', fgets, 'fgets'
-
-    ; the end
