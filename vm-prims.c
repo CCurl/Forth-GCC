@@ -513,6 +513,20 @@ void prim_RTOD()
 	push(rpop());
 }
 
+// RFETCH - "peeks" the top of the return stack
+void prim_RFETCH()
+{
+	if (rdepth > 0)
+	{
+		push(*RSP);
+		return;
+	}
+	printf(" the return stack is empty! (at PC=0x%04lx)", PC-1);
+	reset_vm();
+}
+
+
+
 // LOGLEVEL - Doeswhat
 void prim_LOGLEVEL()
 {
@@ -572,14 +586,10 @@ void prim_SLASHMOD()
 	SETTOS(arg1/arg2);		// quotient
 }
 
-// User stacks look like this:
-// [SP][last-valid-SP][data]
-void prim_USPUSH()
+// NOT - Does NOTHING
+void prim_NOT()
 {
-	arg1 = pop();		// User Stack start address
-	arg2 = pop();		// Val
-	// trace("USPUSH %d to stack [0x%04lx]\n", arg2, arg1);
-	stk_push(arg1, arg2);
+	TOS = TOS == 0 ? -1 : 0;
 }
 
 void prim_USPOP()
@@ -698,8 +708,8 @@ void init_vm_vectors()
 	vm_prims[39] = prim_GETCH;
 	vm_prims[40] = prim_COMPAREI;
 	vm_prims[41] = prim_SLASHMOD;
-	// vm_prims[42] = prim_USPUSH;
-	// vm_prims[43] = prim_USPOP;
+	vm_prims[42] = prim_NOT;
+	vm_prims[43] = prim_RFETCH;
 	vm_prims[44] = prim_INC;
 	vm_prims[45] = prim_RDEPTH;
 	vm_prims[46] = prim_DEC;

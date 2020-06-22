@@ -45,8 +45,8 @@
 #define GETCH      39	// 27
 #define COMPAREI   40	// 28 ( addr1 addr2 -- bool )
 #define SLASHMOD   41	// 29
-#define UNUSED1    42	// 2A ( val addr -- )
-#define UNUSED2    43	// 2B ( addr -- val )
+#define NOT        42	// 2A ( val1 -- val2 )
+#define RFETCH     43	// 2B ( addr -- val )
 #define INC        44	// 2C 
 #define RDEPTH     45	// 2D
 #define DEC        46	// 2E 

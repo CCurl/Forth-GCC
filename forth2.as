@@ -276,19 +276,21 @@ u_rPush:
 
 ; -------------------------------------------------------------------------------------
 u_rPop:                                 ; returns the val in eax
-       cmp [rDepth], 1
-       jl @f
-       dec [rDepth]
+        cmp [rDepth], 1
+        jl rsU
+        dec [rDepth]
 
-       push ebp
-       mov ebp, [rStack]
-       mov eax, [ebp]
-       sub ebp, CELL_SIZE
-       mov [rStack], ebp
-       pop ebp
-       ret
+        push ebp
+        mov ebp, [rStack]
+        mov eax, [ebp]
+        sub ebp, CELL_SIZE
+        mov [rStack], ebp
+        pop ebp
+        ret
 
-@@:   ret ; RStack underflow
+rsU:    ; todo! Return stack empty!
+
+        ret
 
 ; -------------------------------------------------------------------------------------
 ; RET
@@ -709,6 +711,15 @@ f_RTOD:
             ret
 
 ; -------------------------------------------------------------------------------------
+; RFETCH - R@ ( -- n)
+f_RFETCH:
+                cmp [rDepth], 1
+                jl rsU
+                mov eax, [rStack]
+                m_push [eax]
+                ret
+
+; -------------------------------------------------------------------------------------
 ; LOGLEVEL
 f_LOGLEVEL:
             ; TODO!
@@ -720,6 +731,13 @@ f_AND:
             m_pop eax
             and ebx, eax
             ret
+
+; -------------------------------------------------------------------------------------
+; NOT ( n1 -- n2 )
+f_NOT:
+            test ebx, ebx
+            jz eq_T
+            jmp eq_F
 
 ; -------------------------------------------------------------------------------------
 ; PICK
@@ -905,8 +923,8 @@ dd f_DEPTH              ; Hex: 26
 dd f_GETCH              ; Hex: 27
 dd f_COMPAREI           ; Hex: 28
 dd f_SLASHMOD           ; Hex: 29
-dd f_UnknownOpcode      ; Hex: 2A
-dd f_UnknownOpcode      ; Hex: 2B
+dd f_NOT                ; Hex: 2A
+dd f_RFETCH             ; Hex: 2B
 dd f_INC                ; Hex: 2C
 dd f_RDEPTH             ; Hex: 2D
 dd f_DEC                ; Hex: 2E

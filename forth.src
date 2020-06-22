@@ -78,8 +78,8 @@
 : GETCH		[ 39 C, ] ; .INLINE
 : COMPAREI	[ 40 C, ] ; .INLINE
 : /MOD		[ 41 C, ] ; .INLINE		\ SLASHMOD ( n1 n2 -- r q )
-\ USPUSH	[ 42 C, ] ; .INLINE
-\ USPOP		[ 43 C, ] ; .INLINE
+: NOT		[ 42 C, ] ; .INLINE
+: RFETCH	[ 43 C, ] ; .INLINE
 : INC		[ 44 C, ] ; .INLINE
 : RDEPTH	[ 45 C, ] ; .INLINE
 : DEC		[ 46 C, ] ; .INLINE
@@ -122,7 +122,7 @@
 : DEBUG-ON  1 LOGLEVEL ; INLINE
 : DEBUG-OFF 0 LOGLEVEL ; INLINE
 
-: R@ R> DUP >R ; INLINE
+: R@ RFETCH ; INLINE
 : RDROP R> DROP   ; INLINE
 
 : 2DUP  OVER OVER ; INLINE
@@ -140,28 +140,25 @@
 : 2* 2 * ; INLINE 
 : 2/ 2 / ; INLINE
 
-: += OVER @      + SWAP ! ;   \ ( addr n -- )
-: -= OVER @ SWAP - SWAP ! ;   \ ( addr n -- )
+: += OVER @      + SWAP ! ;  INLINE  \ ( addr n -- )
+: -= OVER @ SWAP - SWAP ! ;  INLINE  \ ( addr n -- )
 
 : +!  SWAP +=  ;   \ ( n addr -- )
 : -!  SWAP -=  ;   \ ( n addr -- )
 
-\ : C+! TUCK C@ + SWAP C! ;   \ ( n addr -- )
+: ++  DUP @  1+ SWAP !  ;  INLINE  \ ( addr -- )
+: --  DUP @  1- SWAP !  ;  INLINE  \ ( addr -- )
 
-: ++ 1 += ;   \ ( addr -- )
-: -- 1 -= ;   \ ( addr -- )
+: C++ DUP C@ 1+ SWAP C! ;  INLINE  \ ( addr -- )
+: C-- DUP C@ 1- SWAP C! ;  INLINE  \ ( addr -- )
 
-: C++ DUP C@ 1+ SWAP C! ;   \ ( addr -- )
-: C-- DUP C@ 1- SWAP C! ;   \ ( addr -- )
-
-: 0= 0  = ; INLINE
+: 0= NOT  ; INLINE
 : <> = 0= ; INLINE
 : <= > 0= ; INLINE
 : >= < 0= ; INLINE
 
 : TRUE -1 ; INLINE
 : FALSE 0 ; INLINE
-: NOT 0 = ; INLINE
 
 : COUNT DUP 1+ SWAP C@ ;		\ ( addr1 --  addr2 num )
 
