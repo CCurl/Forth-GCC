@@ -137,7 +137,6 @@ f_SYS_INIT:
 
             ; Data stack
             mov ebp, dStack
-            mov [dDepth], 0
 
             ; opcode jump table
             mov edi, jmpTable
@@ -753,7 +752,10 @@ f_PICK:
 ; -------------------------------------------------------------------------------------
 ; DEPTH
 f_DEPTH:
-            mov eax, [dDepth]
+            mov eax, ebp
+            sub eax, dStack
+            shr eax, 2
+
             m_push eax
             ret
 
@@ -797,8 +799,8 @@ f_INC:
 ; -------------------------------------------------------------------------------------
 ; RDEPTH
 f_RDEPTH:
-            m_push [rDepth]
-            ret
+                m_push [rDepth]
+                ret
 
 ; -------------------------------------------------------------------------------------
 ; DEC
@@ -841,9 +843,14 @@ f_BYE:
             ret
 
 f_UnknownOpcode:
+            mov eax, esi
+            sub eax, edx
+            dec eax
+            push eax
             push ecx
             push unknownOpcode
             call [printf]
+            pop eax
             pop eax
             pop eax
 
@@ -874,7 +881,6 @@ InitialESP dd 0
 fileName dd ?
 fileSize dd ?
 theMemory dd ?
-dDepth dd 0
 dStack dd 64 dup (0)
 rDepth dd 0
 rStack dd 64 dup (0)
@@ -1147,7 +1153,7 @@ dd f_BYE                ; Hex: FF
 section '.rdata' data readable
 printArgError db 'Error: Wrong number of arguments. Run file with "program.exe <file>"', 0
 printFileError db 'Error: File [%s] does not exist. Check spelling and try again.', 0
-unknownOpcode db 'unknown opcode! 0x%02X', 13, 10, 0
+unknownOpcode db 'unknown opcode! 0x%02X at 0x%04lx', 13, 10, 0
 divByZero db 'cannot divide by 0.', 0
 printBye db 'Bye', 0
 openModeRB db 'rb', 0

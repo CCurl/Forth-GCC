@@ -9,7 +9,7 @@ macro m_setTOS val
 
 macro m_push val
 {
-       inc [dDepth]
+       ; inc [dDepth]
        add ebp, CELL_SIZE
        mov [ebp], ebx
        m_setTOS val
@@ -33,7 +33,7 @@ macro m_getTOS val
 
 macro m_drop
 {
-       dec [dDepth]
+       ; dec [dDepth]
        mov ebx, [ebp]
        sub ebp, CELL_SIZE
 }
@@ -68,3 +68,23 @@ macro SETAT addr, src
 }
 
 ; ------------------------------------------------------------------------------
+
+macro m_rpush reg
+{
+       push edi
+       add [rStack], 4
+       mov edi, [rStack]
+       mov [edi], reg
+       pop edi
+}
+ 
+macro m_rpop reg
+{
+       push edi
+       mov edi, [rStack]
+       mov reg, [edi]
+       sub [rStack], 4
+       pop edi
+}
+
+; -------------------------------------------------------------------------------------
