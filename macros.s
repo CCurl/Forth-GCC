@@ -72,8 +72,8 @@ macro SETAT addr, src
 macro m_rpush reg
 {
        push edi
-       add [rStack], 4
-       mov edi, [rStack]
+       add [rStackPtr], CELL_SIZE
+       mov edi, [rStackPtr]
        mov [edi], reg
        pop edi
 }
@@ -81,9 +81,9 @@ macro m_rpush reg
 macro m_rpop reg
 {
        push edi
-       mov edi, [rStack]
+       mov edi, [rStackPtr]
        mov reg, [edi]
-       sub [rStack], 4
+       sub [rStackPtr], CELL_SIZE
        pop edi
 }
 

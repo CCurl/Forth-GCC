@@ -131,8 +131,8 @@ f_RESET:
 f_SYS_INIT:
             ; Return stack
             mov eax, rStack
-            add eax, CELL_SIZE
-            mov [rStack], eax
+            sub eax, CELL_SIZE
+            mov [rStackPtr], eax
             mov [rDepth], 0
 
             ; Data stack
@@ -249,56 +249,34 @@ f_CALL:
             push dword [esi]
             add esi, CELL_SIZE
             sub esi, edx
-            push esi
-            call u_rPush
-            pop esi
+            m_rpush esi
             pop esi
             add esi, edx
             ret
 
 ; -------------------------------------------------------------------------------------
-u_rPush:
-        cmp [rDepth], 63
-        jg @f
-        inc [rDepth]
+checkStack:
+            cmp ebp, dStack
+            jl csUF
+            cmp ebp, tmpBuf2
+            jge csOF
+            ret
 
-        mov eax, [esp + 4]              ; the val to rpush
-        push ebp
-        mov ebp, [rStack]
-        add ebp, CELL_SIZE
-        mov [ebp], eax
-        mov [rStack], ebp
-        pop ebp
-        ret
+csUF:       push dsUnderFlow
+            call [printf]
+            pop eax
+            jmp f_RESET
 
-@@:    ret ; RStack overflow
-
-; -------------------------------------------------------------------------------------
-u_rPop:                                 ; returns the val in eax
-        cmp [rDepth], 1
-        jl rsU
-        dec [rDepth]
-
-        push ebp
-        mov ebp, [rStack]
-        mov eax, [ebp]
-        sub ebp, CELL_SIZE
-        mov [rStack], ebp
-        pop ebp
-        ret
-
-rsU:    ; todo! Return stack empty!
-
-        ret
+csOF:       push dsOverFlow
+            call [printf]
+            pop eax
+            jmp f_RESET
 
 ; -------------------------------------------------------------------------------------
 ; RET
 f_RET:
-            cmp [rDepth], 1
-            jl f_BYE
-
-            call u_rPop
-            mov esi, eax
+            call checkStack
+            m_rpop esi
             add esi, edx
             ret
 
@@ -532,7 +510,7 @@ f_FOPEN:
                 push edx
                 push edi
 
-                mov edi, tmpBuf
+                mov edi, tmpBuf1
 
                 m_pop ecx                       ; mode: 0 => read, 1 => write
                 mov al, 'r'
@@ -551,7 +529,7 @@ fopen2:         inc edi
 
                 inc edi
                 mov [edi], byte 0
-                ; now [tmpBuf] has the openMode for fopen()
+                ; now [tmpBuf1] has the openMode for fopen()
 
                 ; now for the filename
                 m_pop eax
@@ -559,7 +537,7 @@ fopen2:         inc edi
                 add eax, edx
 
                 ; function signature is fp = fopen(name, openMode);
-                push tmpBuf
+                push tmpBuf1
                 push eax
                 call [fopen]                    ; returns the FP in eax
                 pop ecx                         ; clean up the stack
@@ -697,25 +675,22 @@ f_FCLOSE:   ; ( fp -- )
 ; DTOR
 f_DTOR:
             m_pop eax
-            push eax
-            call u_rPush
-            pop eax
+            m_rpush eax
             ret
 
 ; -------------------------------------------------------------------------------------
 ; RTOD
 f_RTOD:
-            call u_rPop
+            m_rpop eax
             m_push eax
             ret
 
 ; -------------------------------------------------------------------------------------
 ; RFETCH - R@ ( -- n)
 f_RFETCH:
-                cmp [rDepth], 1
-                jl rsU
-                mov eax, [rStack]
-                m_push [eax]
+                mov ecx, [rStackPtr]
+                mov eax, [ecx]
+                m_push eax
                 ret
 
 ; -------------------------------------------------------------------------------------
@@ -881,10 +856,19 @@ InitialESP dd 0
 fileName dd ?
 fileSize dd ?
 theMemory dd ?
-dStack dd 64 dup (0)
 rDepth dd 0
-rStack dd 64 dup (0)
-tmpBuf db 64 dup (0)
+rStackPtr dd 0
+tmpBuf1 db  16 dup (0)          ; Buffer for data stack
+dStack  dd 128 dup (0)
+
+tmpBuf2 db  16 dup (0)          ; Buffer between stacks
+
+rStack  dd 128 dup (0)
+tmpBuf3 db  16 dup (0)          ; Buffer for return stack
+
+stopHere db 'stop here!', 0
+dsUnderFlow db '(Stack underflow!)', 0
+dsOverFlow  db '(Stack overflow!)', 0
 
 ; -------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------
