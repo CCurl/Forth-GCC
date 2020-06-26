@@ -104,7 +104,7 @@ entry $
 
         ; Close the file
         push [stream]
-        call f_FCLOSE
+        call [fclose]
         mov esp, ebp
 
         ; Initialize the VM
