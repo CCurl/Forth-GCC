@@ -83,6 +83,8 @@
 : RDEPTH	[ 45 C, ] ; .INLINE
 : DEC		[ 46 C, ] ; .INLINE
 : GETTICK	[ 47 C, ] ; .INLINE
+: <<		[ 48 C, ] ; .INLINE		\ SHIFTLEFT  ( n1 n2 -- n3 )
+: >>		[ 49 C, ] ; .INLINE		\ SHIFTRIGHT ( n1 n2 -- n3 )
 : NOP		[ 252 C, ] ; .INLINE
 : BREAK		[ 253 C, ] ; .INLINE
 : RESET		[ 254 C, ] ; .INLINE

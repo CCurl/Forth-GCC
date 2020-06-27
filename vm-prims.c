@@ -628,6 +628,20 @@ void prim_GETTICK()
 	push(arg1);
 }
 
+// SHIFTLEFT - Shifts TOS left <x> bits
+void prim_SHIFTLEFT()
+{
+	arg1 = pop();
+	TOS = TOS << (arg1 & 0x1F);
+}
+
+// SHIFTRIGHT - Shifts TOS right <x> bits
+void prim_SHIFTRIGHT()
+{
+	arg1 = pop();
+	TOS = TOS >> (arg1 & 0x1F);
+}
+
 // NOP - Does NOTHING
 void prim_NOP()
 {
@@ -714,6 +728,8 @@ void init_vm_vectors()
 	vm_prims[45] = prim_RDEPTH;
 	vm_prims[46] = prim_DEC;
 	vm_prims[47] = prim_GETTICK;
+	vm_prims[48] = prim_SHIFTLEFT;
+	vm_prims[49] = prim_SHIFTRIGHT;
 	vm_prims[252] = prim_NOP;
 	vm_prims[253] = prim_BREAK;
  	vm_prims[254] = prim_RESET;

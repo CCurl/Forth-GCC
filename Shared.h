@@ -51,6 +51,9 @@
 #define RDEPTH     45	// 2D
 #define DEC        46	// 2E 
 #define GETTICK    47   // 2F
+#define SHIFTLEFT  48   // 30
+#define SHIFTRIGHT 49   // 31
+
 #define NOP       252	// FC
 #define BREAK     253	// FD
 #define RESET     254	// FE

@@ -793,6 +793,18 @@ f_GETTICK:
                 ret
 
 ; -------------------------------------------------------------------------------------
+f_SHIFTLEFT:
+                m_pop ecx
+                shl ebx, cl
+                ret
+
+; -------------------------------------------------------------------------------------
+f_SHIFTRIGHT:
+                m_pop ecx
+                shr ebx, cl
+                ret
+
+; -------------------------------------------------------------------------------------
 ; NOP
 f_NOP:
             ret
@@ -921,8 +933,8 @@ dd f_INC                ; Hex: 2C
 dd f_RDEPTH             ; Hex: 2D
 dd f_DEC                ; Hex: 2E
 dd f_GETTICK            ; Hex: 2F
-dd f_UnknownOpcode ; 48
-dd f_UnknownOpcode ; 49
+dd f_SHIFTLEFT          ; Hex: 30
+dd f_SHIFTRIGHT         ; Hex: 31
 dd f_UnknownOpcode ; 50
 dd f_UnknownOpcode ; 51
 dd f_UnknownOpcode ; 52
