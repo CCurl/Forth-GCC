@@ -23,6 +23,12 @@ variable tl tl !
 : BL   32 EMIT         ; INLINE
 : CRLF 13 EMIT 10 EMIT ; INLINE
 
+: fill                          \ ( val addr num --  )
+    BEGIN
+        >R 2DUP C! 1+ R>
+        1- DUP
+    WHILE DROP 2DROP ;
+
 : ascii. DUP HEX.2 BL DUP DECIMAL.3 BL EMIT ;
 
 : ascii                         \ ( from to -- )
