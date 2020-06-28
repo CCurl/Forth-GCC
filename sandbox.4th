@@ -11,15 +11,15 @@ variable tl tl !
 variable rows
 variable cols
 
-20 rows ! 
-30 cols !
+30 rows ! 
+60 cols !
 2 rows +! 2 cols +!       \ buffer 
 
 variable grid
 rows @ cols @ * ALLOT
 
 : grid-sz rows @ cols @ * CELL + ;
-: grid-0-fill 0 grid grid-sz fill ;
+: grid-0-fill grid grid-sz 0 FILL ;
 
 start-timer
 grid-0-fill
@@ -102,32 +102,25 @@ elapsed cr
     WHILE 2DROP ;
 
 : one-cycle CR do-grid show-grid update-grid ;
-: go one-cycle ;
+
+: slow-down 1000 1000 * * begin 1- dup while drop ;
+: st start-timer swap slow-down elapsed ;
+
+: life BEGIN
+    one-cycle DUP . 25 slow-down
+    1- DUP WHILE DROP ;
 
 : set-cell cell-at 1 SWAP C! ;
 : clr-cell cell-at 0 SWAP C! ;
 : cell? cell-at C@ . ;
-12 12 set-cell
-12 13 set-cell
-12 14 set-cell
-13 13 do-cell
-13 13 cell? \ should be 1
 
-: b2 3 3 cell-at >R 
-    3 3 do-cell 
-    R> cell-update DROP ;
+: rr GETTICK 5000 MOD
+    grid grid-sz CMOVE show-grid ;
 
-: rr grid grid-sz 
-    BEGIN
-        >R
-        2DUP SWAP C@ SWAP C! 
-        1+ SWAP 1+ SWAP
-        R> 1- DUP
-    WHILE 2DROP DROP show-grid ;
+: b1 DUP * BEGIN 1- DUP WHILE DROP ;
+: bt start-timer SWAP b1 elapsed ;
 
-: b1 DUP * BEGIN b2 1- DUP WHILE DROP ;
-
-: bt start-timer swap b1 elapsed ;
+: rsb fsb lsb ;
 
 \ ------------- END OF SANDBOX -------------
 CR sys-info
