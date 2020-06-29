@@ -37,13 +37,15 @@ elapsed cr
 : cell-at                   \ ( r c -- addr )
     swap cols @ * swap + grid + ;
 
-: cell-sub              \ ( n1 addr1 -- n2 addr2 )
-    SWAP OVER C@ 1 AND + SWAP 1+ ;
+\ ( addr -- 0|1 )
+: is-alive? C@ 1 AND ; INLINE
 
-: do-cell               \ ( r c -- )
-    cell-at 
+: cell-sub              \ ( n1 addr1 -- n2 addr2 )
+    SWAP OVER is-alive? + SWAP 1+ ;
+
+: do-cell               \ ( addr -- )
     DUP T1 !
-    DUP C@ 1 AND T2 !
+    DUP is-alive? T2 !
     cols @ - 1-
     0 SWAP
 
@@ -65,29 +67,35 @@ elapsed cr
     T2 @ SWAP cell-new-val 4 << T2 @ +
     T1 @ C! ;
 
-: do-row cols @ 1- 1-             \ ( r -- )
+: do-row cols @ 2-             \ ( r -- )
+    TUCK cell-at SWAP
     BEGIN
-        2DUP do-cell
+        SWAP DUP do-cell 1- SWAP
         1- DUP
     WHILE 2DROP ;
 
-: do-grid rows @ 1- 1-             \ ( -- )
+: do-grid rows @ 2-             \ ( -- )
     BEGIN
         DUP do-row
         1- DUP
     WHILE DROP ;
 
-: show-row cols @ 1- 1-             \ ( r -- )
-    CR
+: show-cell                     \ ( addr -- addr+1 )
+    DUP is-alive?
+    IF 42 ELSE 32 THEN 
+    EMIT 1+ ;
+
+: show-row                      \ ( r -- )
+    1 cell-at
+    cols @ 2- CR
     BEGIN
-        2DUP cell-at c@ 1 AND
-        IF 42 ELSE 32 THEN EMIT
+        SWAP show-cell SWAP
         1- DUP
     WHILE 2DROP ;
 
-: show-grid rows @ 1- 1-             \ ( -- )
+: show-grid rows @ 2-             \ ( -- )
     BEGIN
-        DUP show-row
+        rows @ 2- OVER - 1+ show-row
         1- DUP
     WHILE DROP ;
 
@@ -107,14 +115,14 @@ elapsed cr
 : st start-timer swap slow-down elapsed ;
 
 : life BEGIN
-    one-cycle DUP . 25 slow-down
+    one-cycle DUP . 100 slow-down
     1- DUP WHILE DROP ;
 
 : set-cell cell-at 1 SWAP C! ;
 : clr-cell cell-at 0 SWAP C! ;
 : cell? cell-at C@ . ;
 
-: rr GETTICK 5000 MOD
+: rr GETTICK 5000 MOD DUP .
     grid grid-sz CMOVE show-grid ;
 
 : b1 DUP * BEGIN 1- DUP WHILE DROP ;

@@ -8,6 +8,8 @@ variable tl tl !
 : ?DUP DUP IF DUP THEN ;
 : 2DUP  OVER OVER ; INLINE
 : 2DROP DROP DROP ; INLINE
+: 2- 1- 1-        ; INLINE
+: 2+ 1+ 1+        ; INLINE
 
 : get-next-word                 \ ( -- addr|0 ) - NB addr is null-terminated and NOT counted
     >IN @ skipWS     >IN !
