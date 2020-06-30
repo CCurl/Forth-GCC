@@ -177,7 +177,7 @@ next-test: 8 pow-10  100 mil p= \ 57
         cr " bench #1 " ct dup bench1 
         cr " bench #2 " ct     bench2 ;
 
-cr " Running benchmarks ... " ct 300 MIL do-benches cr
+cr " Running benchmarks ... " ct 500 MIL do-benches cr
 
 10 .lastx
 CR test-results
