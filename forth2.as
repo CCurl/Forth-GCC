@@ -111,15 +111,8 @@ entry $
         call s_SYS_INIT
 
 ; This is the main CPU Loop
-
 cpuLoop:
-        xor ecx, ecx
-        mov cl, [esi]
-        mov eax, [edi+ecx*4]
-        inc esi
-        jmp eax
-        ; call eax
-        ; jmp cpuLoop
+        m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; RESET
@@ -163,7 +156,7 @@ fileError:
 ; The VM primitives
 ; -------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------
-; LITERAL
+; LITERAL (32-bit)
 f_LITERAL:
             mov eax, [esi]
             add esi, CELL_SIZE

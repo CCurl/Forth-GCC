@@ -115,7 +115,7 @@ elapsed cr
 : st start-timer swap slow-down elapsed ;
 
 : life BEGIN
-    one-cycle DUP . 100 slow-down
+    one-cycle DUP . 300 slow-down
     1- DUP WHILE DROP ;
 
 : set-cell cell-at 1 SWAP C! ;
