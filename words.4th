@@ -46,7 +46,7 @@ variable tl tl !
 : ascii                         \ ( from to -- )
     2DUP < IF SWAP THEN 
     BEGIN 
-        CRLF DUP ascii. 1 + 
+        CRLF DUP ascii. 1+ 
         2DUP > 
     WHILE
     2DROP ;
@@ -126,17 +126,11 @@ variable tl tl !
         DROP LEAVE
     THEN
     >R
-    R@ @ @
+    R@ stk-ptr @
     R> CELL -=
     ;
 
-: stk@ @ @ ; INLINE
-
-\ : >stk US-PUSH ;
-\ : stk> US-POP  ;
-\ : >stk USPUSH ; INLINE
-\ : stk> USPOP  ; INLINE
-\ : stk@ dup >R stk> dup R> >stk ;
+: stk@ stk-ptr @ ; INLINE
 
 \ --------------------------------------------------------------------------------
 \ -- Parameter stack words

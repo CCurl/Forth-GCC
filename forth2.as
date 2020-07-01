@@ -120,12 +120,13 @@ f_RESET:
         call s_SYS_INIT
         mov esp, [InitialESP]
         jmp cpuLoop
+
 ; -------------------------------------------------------------------------------------
-; f_SYS_INIT: Initialize the VM
+; s_SYS_INIT: Initialize the VM
 s_SYS_INIT:
             ; Return stack
-            mov eax, rStack
-            sub eax, CELL_SIZE
+            mov eax, rStack - CELL_SIZE
+            ; sub eax, CELL_SIZE
             mov [rStackPtr], eax
             mov [rDepth], 0
 
@@ -146,6 +147,7 @@ s_SYS_INIT:
 argError:
         invoke printf, printArgError
         jmp f_BYE
+
 ; -------------------------------------------------------------------------------------
 fileError:
         invoke printf, printFileError, [fileName]
@@ -153,7 +155,7 @@ fileError:
 
 ; -------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------
-; The VM primitives
+; The VM opcodes (primitives)
 ; -------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------
 ; LITERAL (32-bit)
