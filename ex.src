@@ -93,7 +93,6 @@
 : HEX     16 BASE .STORE. ;
 
 HEX
-: MEM_SZ 24 .FETCH. ;
 : H. BASE .FETCH. .SWAP.  HEX .DUP. 10 .LT. IF 30 .EMIT. THEN (.) BASE .STORE. ; 
 : D. BASE .FETCH. .SWAP.  DECIMAL (.) BASE .STORE. ;
 DECIMAL
@@ -128,7 +127,7 @@ DECIMAL
 	CR 33 55 ascii CR
 	WORDS
 	CR 1000 1000 .MUL. 250 .MUL. count-to CR
-	S" VM size is " CT MEM_SZ D. S"  bytes, " CT
+	S" VM size is " CT (MEM_SZ) .FETCH. D. S"  bytes, " CT
 	HERE D. S"  bytes used, " CT
 	LAST HERE .SUB. D. S"  bytes free" CT
 	S" ." CT
