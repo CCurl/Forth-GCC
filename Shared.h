@@ -16,7 +16,7 @@
 #define JMPNZ      10	// 0A
 #define CALL       11	// 0B
 #define RET        12	// 0C
-#define OR		   13	// 0D
+#define OR         13	// 0D
 #define CLITERAL   14	// 0E
 #define CFETCH     15	// 0F
 #define CSTORE     16	// 10
@@ -53,6 +53,9 @@
 #define GETTICK    47   // 2F
 #define SHIFTLEFT  48   // 30
 #define SHIFTRIGHT 49   // 31
+
+#define DBGDOT    100
+#define DBGDOTS   101
 
 #define NOP       252	// FC
 #define BREAK     253	// FD

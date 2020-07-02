@@ -26,6 +26,66 @@ CELL ADDR_MEM_SZ   = 0x24;
 
 extern int _QUIT_HIT;
 
+OPCODE_T theOpcodes[] = {
+       { ".LITERAL.", 1, "LITERAL" },
+       { ".FETCH.", 2, "FETCH" },
+       { ".STORE.", 3, "STORE" },
+       { ".SWAP.", 4, "SWAP" },
+       { ".DROP.", 5, "DROP" },
+       { ".DUP.", 6, "DUP" },
+       { ".SLITERAL.", 7, "SLITERAL" },
+       { ".JMP.", 8, "JMP" },
+       { ".JMPZ.", 9, "JMPZ" },
+       { ".JMPNZ.", 10, "JMPNZ" },
+       { ".CALL.", 11, "CALL" },
+       { ".RET.", 12, "RET" },
+       { ".OR.", 13, "OR" },
+       { ".CLITERAL.", 14, "CLITERAL" },
+       { ".CFETCH.", 15, "CFETCH" },
+       { ".CSTORE.", 16, "CSTORE" },
+       { ".ADD.", 17, "ADD" },
+       { ".SUB.", 18, "SUB" },
+       { ".MUL.", 19, "MUL" },
+       { ".DIV.", 20, "DIV" },
+       { ".LT.", 21, "LT" },
+       { ".EQ.", 22, "EQ" },
+       { ".GT.", 23, "GT" },
+       { ".DICTP.", 24, "DICTP" },
+       { ".EMIT.", 25, "EMIT" },
+       { ".OVER.", 26, "OVER" },
+       { ".COMPARE.", 27, "COMPARE" },
+       { ".FOPEN.", 28, "FOPEN" },
+       { ".FREAD.", 29, "FREAD" },
+       { ".FREADLINE.", 30, "FREADLINE" },
+       { ".FWRITE.", 31, "FWRITE" },
+       { ".FCLOSE.", 32, "FCLOSE" },
+       { ".DTOR.", 33, "DTOR" },
+       { ".RTOD.", 34, "RTOD" },
+       { ".LOGLEVEL.", 35, "LOGLEVEL" },
+       { ".AND.", 36, "AND" },
+       { ".PICK.", 37, "PICK" },
+       { ".DEPTH.", 38, "DEPTH" },
+       { ".GETCH.", 39, "GETCH" },
+       { ".COMPAREI.", 40, "COMPAREI" },
+       { ".SLASHMOD.", 41, "SLASHMOD" },
+       { ".NOT.", 42, "NOT" },
+       { ".RFETCH.", 43, "RFETCH" },
+       { ".INC.", 44, "INC" },
+       { ".RDEPTH.", 45, "RDEPTH" },
+       { ".DEC.", 46, "DEC" },
+       { ".GETTICK.", 47, "GETTICK" },
+       { ".SHIFTLEFT.", 48, "SHIFTLEFT" },
+       { ".SHIFTRIGHT.", 49, "SHIFTRIGHT" },
+       { ".DBGDOT.", 100, "DBGDOT" },
+       { ".DBGDOTS.", 101, "DBGDOTS" },
+       { ".NOP.", 252, "NOP" },
+       { ".BREAK.", 253, "BREAK" },
+       { ".RESET.", 254, "RESET" },
+       { ".BYE.", 255, "BYE" },
+	   { NULL, 0, NULL }
+ };
+
+
 /*
 NB build this in somehow to enable usage of VT100 ECSAPE sequences to control the screen
 
@@ -272,54 +332,72 @@ char *ParseWord(char *word, char *line)
 		return line;
 	}
 
-	if (strcmp(word, ".FETCH.") == 0)
-	{
-		CComma(FETCH);
-		return line;
-	}
+	// if (strcmp(word, ".FETCH.") == 0)
+	// {
+	// 	CComma(FETCH);
+	// 	return line;
+	// }
 
-	if (strcmp(word, ".STORE.") == 0)
-	{
-		CComma(STORE);
-		return line;
-	}
+	// if (strcmp(word, ".STORE.") == 0)
+	// {
+	// 	CComma(STORE);
+	// 	return line;
+	// }
 
-	if (strcmp(word, ".CSTORE.") == 0)
-	{
-		CComma(CSTORE);
-		return line;
-	}
+	// if (strcmp(word, ".CSTORE.") == 0)
+	// {
+	// 	CComma(CSTORE);
+	// 	return line;
+	// }
 
-	if (strcmp(word, ".ADD.") == 0)
-	{
-		CComma(ADD);
-		return line;
-	}
+	// if (strcmp(word, ".ADD.") == 0)
+	// {
+	// 	CComma(ADD);
+	// 	return line;
+	// }
 
-	if (strcmp(word, ".INC.") == 0)
-	{
-		CComma(INC);
-		return line;
-	}
+	// if (strcmp(word, ".INC.") == 0)
+	// {
+	// 	CComma(INC);
+	// 	return line;
+	// }
 
-	if (strcmp(word, ".NOP.") == 0)
-	{
-		CComma(NOP);
-		return line;
-	}
+	// if (strcmp(word, ".NOP.") == 0)
+	// {
+	// 	CComma(NOP);
+	// 	return line;
+	// }
 
-	if (strcmp(word, ".INLINE") == 0)
+	if (strcmp(word, ".INLINE.") == 0)
 	{
 		DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
 		dp->flags |= IS_INLINE;
 		return line;
 	}
 
-	if (strcmp(word, ".IMMEDIATE") == 0)
+	if (strcmp(word, ".IMMEDIATE.") == 0)
 	{
 		DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
 		dp->flags |= IS_IMMEDIATE;
 		return line;
+	}
+
+	// "Assembler" words
+	for (int i = 0; ; i++)
+	{
+		OPCODE_T *op = &(theOpcodes[i]);
+		if (op->asm_instr == NULL)
+		{
+			break;
+		}
+
+		// printf("[%s] == [%s]?\n", word, op->asm_instr);
+		if (strcmp(word, op->asm_instr) == 0)
+		{
+			CComma(op->opcode);
+			return line;
+		}
+
 	}
 
 	// These words are only for : definitions
@@ -491,7 +569,8 @@ void CompilerInit()
 	isEmbedded = true;
 
 	HERE = 0x0040;
-	LAST = MEM_SZ - STACKS_SZ - CELL_SZ;
+	// LAST = MEM_SZ - STACKS_SZ - CELL_SZ;
+	LAST = MEM_SZ - CELL_SZ;
 	STATE = 0;
 
 	Store(LAST, 0);
@@ -567,10 +646,10 @@ void write_output_file()
         exit(1);
     }
 
-	fwrite(the_memory, 1, MEM_SZ, output_fp);
+	int num = fwrite(the_memory, 1, MEM_SZ, output_fp);
     fclose(output_fp);
     output_fp = NULL;
-    printf("done.\n");
+    printf("%d bytes written.\n", num);
 }
 
 // *********************************************************************

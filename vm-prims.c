@@ -6,6 +6,8 @@
 #include "logger.h"
 #include "forth-vm.h"
 
+CELL dStack[128];
+CELL rStack[128];
 
 static inline CELL GETTOS() { return TOS; }
 static inline CELL GET2ND() { return *(DSP); }
@@ -66,7 +68,7 @@ CELL stk_pop(CELL stack)
 // The data stack starts at (MEM_SZ - STACKS_SZ) and grows upwards towards the return stack
 void overflow()
 {
-		printf(" stack overflow!");
+		printf(" stack overflow! (at 0x%04lx)", PC-1);
 		reset_vm();
 		// _QUIT_HIT = 1;
 		// isBYE = 1;
@@ -642,6 +644,27 @@ void prim_SHIFTRIGHT()
 	TOS = TOS >> (arg1 & 0x1F);
 }
 
+// SHIFTRIGHT - Shifts TOS right <x> bits
+void prim_DBGDOT()
+{
+	arg1 = pop();
+	printf("[%d] ", arg1);
+}
+
+// SHIFTRIGHT - Shifts TOS right <x> bits
+void prim_DBGDOTS()
+{
+	printf("(%d)[", depth);
+	for (int i = 0; i < depth; i++)
+	{
+		printf("(%d)",i);
+		push(i);
+		prim_PICK();
+		prim_DBGDOT();
+	}
+	printf("]");
+}
+
 // NOP - Does NOTHING
 void prim_NOP()
 {
@@ -730,6 +753,8 @@ void init_vm_vectors()
 	vm_prims[47] = prim_GETTICK;
 	vm_prims[48] = prim_SHIFTLEFT;
 	vm_prims[49] = prim_SHIFTRIGHT;
+	//vm_prims[100] = prim_DBGDOT;
+	//vm_prims[101] = prim_DBGDOTS;
 	vm_prims[252] = prim_NOP;
 	vm_prims[253] = prim_BREAK;
  	vm_prims[254] = prim_RESET;

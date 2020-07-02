@@ -25,7 +25,7 @@
 
 .NOP. \ marks the end of the variables
 
-: CELL 4 ; .INLINE
+: CELL 4 ; .INLINE.
 
 : HERE (HERE) .FETCH. ;
 : LAST (LAST) .FETCH. ;
@@ -33,62 +33,62 @@
 : C, HERE .CSTORE. HERE      .INC. (HERE) .STORE. ;
 : ,  HERE .STORE.  HERE CELL .ADD. (HERE) .STORE. ;
 
-: [ 0 STATE .STORE. ; .IMMEDIATE
-: ] 1 STATE .STORE. ; .IMMEDIATE
+: [ 0 STATE .STORE. ; .IMMEDIATE.
+: ] 1 STATE .STORE. ; .IMMEDIATE.
 
 : LITERAL	   1 C,   ;
-: @			[  2 C, ] ; .INLINE
-: !			[  3 C, ] ; .INLINE
-: SWAP		[  4 C, ] ; .INLINE
-: DROP		[  5 C, ] ; .INLINE
-: DUP		[  6 C, ] ; .INLINE
+: @			[  2 C, ] ; .INLINE.
+: !			[  3 C, ] ; .INLINE.
+: SWAP		[  4 C, ] ; .INLINE.
+: DROP		[  5 C, ] ; .INLINE.
+: DUP		[  6 C, ] ; .INLINE.
 : SLITERAL	   7 C,   ;
 : JMP		   8 C,   ;
 : JMPZ		   9 C,   ;
 : JMPNZ		  10 C,   ;
 : CALL		  11 C,   ;
 : RET		  12 C,   ;
-: OR		[ 13 C, ] ; .INLINE
-: CLITERAL	  14 C,   ; .INLINE
-: C@		[ 15 C, ] ; .INLINE
-: C!		[ 16 C, ] ; .INLINE
-: +			[ 17 C, ] ; .INLINE
-: -			[ 18 C, ] ; .INLINE
-: *			[ 19 C, ] ; .INLINE
-: /			[ 20 C, ] ; .INLINE
-: <			[ 21 C, ] ; .INLINE
-: =			[ 22 C, ] ; .INLINE
-: >			[ 23 C, ] ; .INLINE
-: DICTP		  24 C,   ; .INLINE
-: EMIT		[ 25 C, ] ; .INLINE
-: OVER		[ 26 C, ] ; .INLINE
-: COMPARE	[ 27 C, ] ; .INLINE
-: FOPEN		[ 28 C, ] ; .INLINE
-: FREAD		[ 29 C, ] ; .INLINE
-: FREADLINE	[ 30 C, ] ; .INLINE
-: FWRITE	[ 31 C, ] ; .INLINE
-: FCLOSE	[ 32 C, ] ; .INLINE
-: >R		[ 33 C, ] ; .INLINE
-: R>		[ 34 C, ] ; .INLINE
-: LOGLEVEL	[ 35 C, ] ; .INLINE
-: AND		[ 36 C, ] ; .INLINE
-: PICK		[ 37 C, ] ; .INLINE
-: DEPTH		[ 38 C, ] ; .INLINE
-: GETCH		[ 39 C, ] ; .INLINE
-: COMPAREI	[ 40 C, ] ; .INLINE
-: /MOD		[ 41 C, ] ; .INLINE		\ SLASHMOD ( n1 n2 -- r q )
-: NOT		[ 42 C, ] ; .INLINE
-: RFETCH	[ 43 C, ] ; .INLINE
-: INC		[ 44 C, ] ; .INLINE
-: RDEPTH	[ 45 C, ] ; .INLINE
-: DEC		[ 46 C, ] ; .INLINE
-: GETTICK	[ 47 C, ] ; .INLINE
-: <<		[ 48 C, ] ; .INLINE		\ SHIFTLEFT  ( n1 n2 -- n3 )
-: >>		[ 49 C, ] ; .INLINE		\ SHIFTRIGHT ( n1 n2 -- n3 )
-: NOP		[ 252 C, ] ; .INLINE
-: BREAK		[ 253 C, ] ; .INLINE
-: RESET		[ 254 C, ] ; .INLINE
-: BYE		[ 255 C, ] ; .INLINE
+: OR		[ 13 C, ] ; .INLINE.
+: CLITERAL	  14 C,   ; .INLINE.
+: C@		[ 15 C, ] ; .INLINE.
+: C!		[ 16 C, ] ; .INLINE.
+: +			[ 17 C, ] ; .INLINE.
+: -			[ 18 C, ] ; .INLINE.
+: *			[ 19 C, ] ; .INLINE.
+: /			[ 20 C, ] ; .INLINE.
+: <			[ 21 C, ] ; .INLINE.
+: =			[ 22 C, ] ; .INLINE.
+: >			[ 23 C, ] ; .INLINE.
+: DICTP		  24 C,   ; .INLINE.
+: EMIT		[ 25 C, ] ; .INLINE.
+: OVER		[ 26 C, ] ; .INLINE.
+: COMPARE	[ 27 C, ] ; .INLINE.
+: FOPEN		[ 28 C, ] ; .INLINE.
+: FREAD		[ 29 C, ] ; .INLINE.
+: FREADLINE	[ 30 C, ] ; .INLINE.
+: FWRITE	[ 31 C, ] ; .INLINE.
+: FCLOSE	[ 32 C, ] ; .INLINE.
+: >R		[ 33 C, ] ; .INLINE.
+: R>		[ 34 C, ] ; .INLINE.
+: LOGLEVEL	[ 35 C, ] ; .INLINE.
+: AND		[ 36 C, ] ; .INLINE.
+: PICK		[ 37 C, ] ; .INLINE.
+: DEPTH		[ 38 C, ] ; .INLINE.
+: GETCH		[ 39 C, ] ; .INLINE.
+: COMPAREI	[ 40 C, ] ; .INLINE.
+: /MOD		[ 41 C, ] ; .INLINE.	\ SLASHMOD ( n1 n2 -- r q )
+: NOT		[ 42 C, ] ; .INLINE.
+: RFETCH	[ 43 C, ] ; .INLINE.
+: INC		[ 44 C, ] ; .INLINE.
+: RDEPTH	[ 45 C, ] ; .INLINE.
+: DEC		[ 46 C, ] ; .INLINE.
+: GETTICK	[ 47 C, ] ; .INLINE.
+: <<		[ 48 C, ] ; .INLINE.	\ SHIFTLEFT  ( n1 n2 -- n3 )
+: >>		[ 49 C, ] ; .INLINE.	\ SHIFTRIGHT ( n1 n2 -- n3 )
+: NOP		[ 252 C, ] ; .INLINE.
+: BREAK		[ 253 C, ] ; .INLINE.
+: RESET		[ 254 C, ] ; .INLINE.
+: BYE		[ 255 C, ] ; .INLINE.
 
 : INLINE    LAST 2 CELL * + DUP C@ 2 OR SWAP C! ;
 : IMMEDIATE LAST 2 CELL * + DUP C@ 1 OR SWAP C! ;

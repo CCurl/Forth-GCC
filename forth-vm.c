@@ -25,6 +25,9 @@ bool isBYE = false;
 int _QUIT_HIT = 0;
 int MEM_SZ = 0;
 
+extern CELL dStack[];
+extern CELL rStack[];
+
 void init_vm_vectors();
 extern void (*vm_prims[])();
 
@@ -51,8 +54,10 @@ void destroy_vm()
 // ------------------------------------------------------------------------------------------
 void reset_vm()
 {
-	dsp_init = (CELL *)&the_memory[memory_size - STACKS_SZ];
-	rsp_init = (CELL *)&the_memory[memory_size - CELL_SZ];
+	//dsp_init = (CELL *)&the_memory[memory_size - STACKS_SZ];
+	//rsp_init = (CELL *)&the_memory[memory_size - CELL_SZ];
+	dsp_init = dStack;
+	rsp_init = rStack;
 	RSP = rsp_init;
 	DSP = dsp_init;
 	PC = 0;

@@ -318,6 +318,10 @@ CELL dis_one(char *bytes, char *desc)
 		sprintf(desc, "COMPAREI");
 		return 0;
 
+	case SLASHMOD:
+		sprintf(desc, "SLASHMOD");
+		return 0;
+
 	case SLITERAL:
 		// count, bytes, NULL - NULL delimited counted string
 		// 0100 0101 0102 0103 0104 0105
