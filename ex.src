@@ -10,7 +10,7 @@
 .VARIABLE. STATE
 .VARIABLE. (MEM_SZ)
 
-.VARIABLE. .GT.IN
+.VARIABLE. >IN
 .VARIABLE. #NEG
 .VARIABLE. #LEN
 .VARIABLE. INPUT-FP
@@ -20,23 +20,25 @@
 
 .NOP. \ marks the end of the variables
 
-: CELL 4 ;               .INLINE.
-: LAST (LAST) .FETCH. ;        .INLINE.
-: HERE (HERE) .FETCH. ;        .INLINE.
+: CELL 4 ;                  .INLINE.
+: LAST (LAST) .FETCH. ;     .INLINE.
+: HERE (HERE) .FETCH. ;     .INLINE.
+
 : ,  HERE .STORE.  HERE CELL .ADD. (HERE) .STORE. ;
 : C, HERE .CSTORE. HERE      .INC. (HERE) .STORE. ;
-: ?COMPILING STATE .FETCH. ;   .INLINE.
 
 : JMP    8 C, ;
 : JMPZ   9 C, ;
 : JMPNZ 10 C, ;
 : RET   12 C, ;
 
-: IF   ?COMPILING .IF JMPZ HERE 0 ,                             .THEN ; .IMMEDIATE.
-: ELSE ?COMPILING .IF JMP  HERE .SWAP.  0 , HERE .SWAP. .STORE. .THEN ; .IMMEDIATE.
+: ?COMPILING STATE .FETCH. ;   .INLINE.
+
+: IF   ?COMPILING .IF JMPZ HERE         0 ,                     .THEN ; .IMMEDIATE.
+\ ELSE ?COMPILING .IF JMP  HERE .SWAP.  0 , HERE .SWAP. .STORE. .THEN ; .IMMEDIATE.
 : THEN ?COMPILING .IF      HERE .SWAP.                  .STORE. .THEN ; .IMMEDIATE.
 
-: BEGIN ?COMPILING IF HERE THEN ;       .IMMEDIATE.
+: BEGIN ?COMPILING IF HERE    THEN ;    .IMMEDIATE.
 : AGAIN ?COMPILING IF JMP   , THEN ;    .IMMEDIATE.
 : WHILE ?COMPILING IF JMPNZ , THEN ;    .IMMEDIATE.
 : UNTIL ?COMPILING IF JMPZ  , THEN ;    .IMMEDIATE.
@@ -114,17 +116,12 @@ DECIMAL
 		.w
 	AGAIN ;
 
-: count-to
+: count-to                  \ ( n -- )
     S" counting to " CT .DUP. D. S"  ..." CT
-    1
-    BEGIN 
-        2DUP .LT. 
-        IF
-            S"  DONE." CT
-            .DROP. .DROP. LEAVE
-        THEN 
-        .INC.
-    AGAIN ;
+	BEGIN
+		.DEC. .DUP.
+	WHILE .DROP. 
+    S"  done." CT ;
 
 : main S" Hello, world!" COUNT TYPE 
 	LAST CELL .ADD. .FETCH. 1 .STORE.
