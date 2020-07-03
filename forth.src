@@ -192,10 +192,8 @@
 			S" missing closing ')'" CT RESET
 		THEN
 		>IN ++
-		41 = IF		\ 41 = ')'
-			LEAVE 
-		THEN
-	AGAIN ; IMMEDIATE
+		41 = 
+	UNTIL ; IMMEDIATE
 
 : SPACE 32 EMIT ; INLINE
 : BL      SPACE ; INLINE

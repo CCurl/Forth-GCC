@@ -550,37 +550,37 @@ CELL dis_one(char *bytes, char *desc)
 
 	case BRANCHF:
 		arg1 = the_memory[PC];
-		sprintf(desc, "BRANCHF %ld (0x%04lx)", arg1, PC+arg1);
+		sprintf(desc, "BRANCHF %ld (%04lx)", arg1, PC+arg1);
 		dis_PC2(1, bytes);
 		return 0;
 
 	case BRANCHFZ:
 		arg1 = the_memory[PC];
-		sprintf(desc, "BRANCHFZ %ld (0x%04lx)", arg1, PC+arg1);
+		sprintf(desc, "BRANCHFZ %ld (%04lx)", arg1, PC+arg1);
 		dis_PC2(1, bytes);
 		return 0;
 
 	case BRANCHFNZ:
 		arg1 = the_memory[PC];
-		sprintf(desc, "BRANCHFNZ %ld (0x%04lx)", arg1, PC+arg1);
+		sprintf(desc, "BRANCHFNZ %ld (%04lx)", arg1, PC+arg1);
 		dis_PC2(1, bytes);
 		return 0;
 
 	case BRANCHB:
 		arg1 = the_memory[PC];
-		sprintf(desc, "BRANCHB %ld (0x%04lx)", arg1, PC-arg1);
+		sprintf(desc, "BRANCHB %ld (%04lx)", arg1, PC-arg1);
 		dis_PC2(1, bytes);
 		return 0;
 
 	case BRANCHBZ:
 		arg1 = the_memory[PC];
-		sprintf(desc, "BRANCHBZ %ld (0x%04lx)", arg1, PC-arg1);
+		sprintf(desc, "BRANCHBZ %ld (%04lx)", arg1, PC-arg1);
 		dis_PC2(1, bytes);
 		return 0;
 
 	case BRANCHBNZ:
 		arg1 = the_memory[PC];
-		sprintf(desc, "BRANCHBNZ %ld (0x%04lx)", arg1, PC-arg1);
+		sprintf(desc, "BRANCHBNZ %ld (%04lx)", arg1, PC-arg1);
 		dis_PC2(1, bytes);
 		return 0;
 
