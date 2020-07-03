@@ -76,13 +76,19 @@ OPCODE_T theOpcodes[] = {
        { ".GETTICK.", 47, "GETTICK" },
        { ".SHIFTLEFT.", 48, "SHIFTLEFT" },
        { ".SHIFTRIGHT.", 49, "SHIFTRIGHT" },
-       { ".DBGDOT.", 100, "DBGDOT" },
-       { ".DBGDOTS.", 101, "DBGDOTS" },
+       { ".BRANCHF.",   90, "BRANCHF" },
+       { ".BRANCHB.",   91, "BRANCHB" },
+       { ".BRANCHFZ.",  92, "BRANCHFZ" },
+       { ".BRANCHBZ.",  93, "BRANCHBZ" },
+       { ".BRANCHFNZ.", 94, "BRANCHFNZ" },
+       { ".BRANCHBNZ.", 95, "BRANCHBNZ" },
        { ".NOP.", 252, "NOP" },
        { ".BREAK.", 253, "BREAK" },
        { ".RESET.", 254, "RESET" },
        { ".BYE.", 255, "BYE" },
-	   { NULL, 0, NULL }
+	   { NULL, 0, NULL },
+       { ".DBGDOT.", 100, "DBGDOT" },
+       { ".DBGDOTS.", 101, "DBGDOTS" },
  };
 
 

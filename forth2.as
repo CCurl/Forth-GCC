@@ -816,6 +816,55 @@ f_SHIFTRIGHT:
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
+; BRANCHF
+f_BRANCHF:
+                movzx eax, BYTE [esi]
+                add esi, eax
+                m_NEXT
+
+NOBRANCH:       inc esi
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
+; BRANCHFZ
+f_BRANCHFZ:
+                m_pop ecx
+                test ecx, ecx
+                jz f_BRANCHF
+                jmp NOBRANCH
+
+; -------------------------------------------------------------------------------------
+; BRANCHFZ
+f_BRANCHFNZ:
+                m_pop ecx
+                test ecx, ecx
+                jnz f_BRANCHF
+                jmp NOBRANCH
+
+; -------------------------------------------------------------------------------------
+; BRANCHB
+f_BRANCHB:
+                movzx eax, BYTE [esi]
+                sub esi, eax
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
+; BRANCHBZ
+f_BRANCHBZ:
+                m_pop ecx
+                test ecx, ecx
+                jz f_BRANCHB
+                jmp NOBRANCH
+
+; -------------------------------------------------------------------------------------
+; BRANCHBZ
+f_BRANCHBNZ:
+                m_pop ecx
+                test ecx, ecx
+                jnz f_BRANCHB
+                jmp NOBRANCH
+
+; -------------------------------------------------------------------------------------
 ; NOP
 f_NOP:
             m_NEXT
@@ -882,11 +931,11 @@ theMemory dd ?
 rDepth dd 0
 rStackPtr dd 0
 tmpBuf1 db  16 dup (0)          ; Buffer for data stack
-dStack  dd 128 dup (0)
+dStack  dd 256 dup (0)
 
 tmpBuf2 db  16 dup (0)          ; Buffer between stacks
 
-rStack  dd 128 dup (0)
+rStack  dd 256 dup (0)
 tmpBuf3 db  16 dup (0)          ; Buffer for return stack
 
 stopHere db 'stop here!', 0
@@ -986,12 +1035,12 @@ dd f_UnknownOpcode ; 86
 dd f_UnknownOpcode ; 87
 dd f_UnknownOpcode ; 88
 dd f_UnknownOpcode ; 89
-dd f_UnknownOpcode ; 90
-dd f_UnknownOpcode ; 91
-dd f_UnknownOpcode ; 92
-dd f_UnknownOpcode ; 93
-dd f_UnknownOpcode ; 94
-dd f_UnknownOpcode ; 95
+dd f_BRANCHF       ; 90
+dd f_BRANCHFZ      ; 91
+dd f_BRANCHFNZ     ; 92
+dd f_BRANCHB       ; 93
+dd f_BRANCHBZ      ; 94
+dd f_BRANCHBNZ     ; 95
 dd f_UnknownOpcode ; 96
 dd f_UnknownOpcode ; 97
 dd f_UnknownOpcode ; 98

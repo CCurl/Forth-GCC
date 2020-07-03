@@ -6,8 +6,8 @@
 #include "logger.h"
 #include "forth-vm.h"
 
-CELL dStack[128];
-CELL rStack[128];
+extern CELL dStack[];
+extern CELL rStack[];
 
 static inline CELL GETTOS() { return TOS; }
 static inline CELL GET2ND() { return *(DSP); }
@@ -644,6 +644,75 @@ void prim_SHIFTRIGHT()
 	TOS = TOS >> (arg1 & 0x1F);
 }
 
+
+void prim_BRANCHF()
+{
+	arg1 = the_memory[PC];
+	PC += arg1;
+}
+
+void prim_BRANCHFZ()
+{
+	arg1 = pop();
+	if (arg1 == 0)
+	{
+		arg1 = the_memory[PC];
+		PC += arg1;
+	}
+	else
+	{
+		PC++;
+	}
+}
+
+void prim_BRANCHFNZ()
+{
+	arg1 = pop();
+	if (arg1 != 0)
+	{
+		arg1 = the_memory[PC];
+		PC += arg1;
+	}
+	else
+	{
+		PC++;
+	}
+}
+
+void prim_BRANCHB()
+{
+	arg1 = the_memory[PC];
+	PC -= arg1;
+}
+
+void prim_BRANCHBZ()
+{
+	arg1 = pop();
+	if (arg1 == 0)
+	{
+		arg1 = the_memory[PC];
+		PC -= arg1;
+	}
+	else
+	{
+		PC++;
+	}
+}
+
+void prim_BRANCHBNZ()
+{
+	arg1 = pop();
+	if (arg1 != 0)
+	{
+		arg1 = the_memory[PC];
+		PC -= arg1;
+	}
+	else
+	{
+		PC++;
+	}
+}
+
 // SHIFTRIGHT - Shifts TOS right <x> bits
 void prim_DBGDOT()
 {
@@ -753,8 +822,17 @@ void init_vm_vectors()
 	vm_prims[47] = prim_GETTICK;
 	vm_prims[48] = prim_SHIFTLEFT;
 	vm_prims[49] = prim_SHIFTRIGHT;
+
+	vm_prims[90] = prim_BRANCHF;
+	vm_prims[91] = prim_BRANCHFZ;
+	vm_prims[92] = prim_BRANCHFNZ;
+	vm_prims[93] = prim_BRANCHB;
+	vm_prims[94] = prim_BRANCHBZ;
+	vm_prims[95] = prim_BRANCHBNZ;
+
 	//vm_prims[100] = prim_DBGDOT;
 	//vm_prims[101] = prim_DBGDOTS;
+
 	vm_prims[252] = prim_NOP;
 	vm_prims[253] = prim_BREAK;
  	vm_prims[254] = prim_RESET;

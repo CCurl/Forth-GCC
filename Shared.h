@@ -53,10 +53,17 @@
 #define GETTICK    47   // 2F
 #define SHIFTLEFT  48   // 30
 #define SHIFTRIGHT 49   // 31
-
-#define DBGDOT    100
-#define DBGDOTS   101
-
+// unused 50-89
+#define BRANCHF    90   // 5A
+#define BRANCHFZ   91   // 5B
+#define BRANCHFNZ  92   // 5C
+#define BRANCHB    93   // 5D
+#define BRANCHBZ   94   // 5E
+#define BRANCHBNZ  95   // 5F
+// unused 96-99
+//#define DBGDOT    100
+//#define DBGDOTS   101
+// unused 102-251
 #define NOP       252	// FC
 #define BREAK     253	// FD
 #define RESET     254	// FE

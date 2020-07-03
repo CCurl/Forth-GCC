@@ -25,8 +25,8 @@ bool isBYE = false;
 int _QUIT_HIT = 0;
 int MEM_SZ = 0;
 
-extern CELL dStack[];
-extern CELL rStack[];
+CELL dStack[256];
+CELL rStack[256];
 
 void init_vm_vectors();
 extern void (*vm_prims[])();
