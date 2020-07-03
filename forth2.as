@@ -880,9 +880,9 @@ f_BREAK:
 ; -------------------------------------------------------------------------------------
 ; BYE
 f_BYE:
-            invoke printf, printBye
-            pop eax
-            mov esp, [InitialESP]
+            ; invoke printf, printBye
+            ; pop eax
+            ; mov esp, [InitialESP]
 
             push 0
             call [ExitProcess]
