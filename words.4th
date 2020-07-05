@@ -190,35 +190,24 @@ decimal 64 ps stk-init
 	10 *
 	R> R> 1+ again ;
 
-
 \ --------------------------------------------------------------------------------
+
 : period 46 emit ;
 : start-timer gettick ;
 : .ms 1000 /mod (.) period .3 "  seconds" ct ;
 : elapsed gettick swap - .ms ;
 
-\ --------------------------------------------------------------------------------
-\ real simple and stupid decimal words
-\ a decimal is a 2-cell thing ( integer fraction )
+: zcount ( addr -- addr n )
+    0 OVER
+    BEGIN
+        DUP C@ IF
+            SWAP 1+ SWAP 1+
+        ELSE
+            DROP LEAVE
+        THEN
+    AGAIN ;
 
-\ usage: 123.45 543.21 should = 666.66
-\ 100 d.base !
-\ 12345 >d.b 54321 >d.b d.b+ d.b
+: >C-STR ( a1 n -- a2 )
+    OVER 1- C! 1- ;
 
-variable d.base 
-100 d.base !
-
-: >d.b d.base @ /mod swap ;
-: d.b swap (.) period d.base @ 
-     dup   100 = if drop .2 leave then
-     dup  1000 = if drop .3 leave then
-     dup 10000 = if drop .4 leave then
-     drop . ;
-: d.b> swap d.base @ * + ;
-: d.b>-2 d.b> -rot d.b> swap ;
-: d.b+ d.b>-2 + >d.b ;
-: d.b- d.b>-2 - >d.b ;
-: d.b* d.b>-2 * d.base @ / >d.b ;
-: d.b/ d.b> -rot d.b> d.base @ * swap / >d.b ;
-
-: fw forget-words ;
+: include get-next-word zcount >C-STR load ;
