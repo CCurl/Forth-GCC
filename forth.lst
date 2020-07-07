@@ -6,14 +6,14 @@
 ;
 0005: 00 00 00
 0008: 00000004 00000000
-0010: 00001323 0000f12f 0000000a 00000000
+0010: 00001322 0000f12f 0000000a 00000000
 0020: 00000000 00010000 00000000 00000000
 0030: 00000000 00000000 00000000 00000000
 ;
 0040: 18 eb ff 00 00             ; DICTP (HERE) (ffeb)
 0045: 01 4b 00 00 00             ; LITERAL 75 (0x004b)
 004a: 0c                         ; RET
-004b: 23 13 00 00                ; dw 0x1323
+004b: 22 13 00 00                ; dw 0x1322
 ;
 004f: 18 da ff 00 00             ; DICTP (LAST) (ffda)
 0054: 01 5a 00 00 00             ; LITERAL 90 (0x005a)
@@ -2134,55 +2134,55 @@
 12ad: 0c                         ; RET
 ;
 12ae: 18 55 f1 00 00             ; DICTP ll (f155)
-12b3: 07 09 6c 6f 61 64 73 2e 34 74 68 00 ; SLITERAL (12b4) [loads.4th]
-12bf: 0b 47 11 00 00             ; CALL load (1147)
-12c4: 0c                         ; RET
+12b3: 07 08 6c 6f 61 64 73 2e 66 73 00 ; SLITERAL (12b4) [loads.fs]
+12be: 0b 47 11 00 00             ; CALL load (1147)
+12c3: 0c                         ; RET
 ;
-12c5: 18 42 f1 00 00             ; DICTP sys-info (f142)
-12ca: 0b 0b 0b 00 00             ; CALL .(MEM_SZ) (0b0b)
-12cf: 0e 2c                      ; CLITERAL 44
-12d1: 19                         ; EMIT
-12d2: 0e 20                      ; CLITERAL 32
-12d4: 19                         ; EMIT
-12d5: 0b 44 0b 00 00             ; CALL .(HERE) (0b44)
-12da: 0e 2c                      ; CLITERAL 44
-12dc: 19                         ; EMIT
-12dd: 0e 20                      ; CLITERAL 32
-12df: 19                         ; EMIT
-12e0: 0b 7b 0b 00 00             ; CALL .(LAST) (0b7b)
-12e5: 0e 2c                      ; CLITERAL 44
-12e7: 19                         ; EMIT
-12e8: 0e 20                      ; CLITERAL 32
-12ea: 19                         ; EMIT
-12eb: 0b a0 10 00 00             ; CALL .FREE (10a0)
-12f0: 0e 0d                      ; CLITERAL 13
-12f2: 19                         ; EMIT
-12f3: 0e 0a                      ; CLITERAL 10
-12f5: 19                         ; EMIT
-12f6: 0c                         ; RET
+12c4: 18 42 f1 00 00             ; DICTP sys-info (f142)
+12c9: 0b 0b 0b 00 00             ; CALL .(MEM_SZ) (0b0b)
+12ce: 0e 2c                      ; CLITERAL 44
+12d0: 19                         ; EMIT
+12d1: 0e 20                      ; CLITERAL 32
+12d3: 19                         ; EMIT
+12d4: 0b 44 0b 00 00             ; CALL .(HERE) (0b44)
+12d9: 0e 2c                      ; CLITERAL 44
+12db: 19                         ; EMIT
+12dc: 0e 20                      ; CLITERAL 32
+12de: 19                         ; EMIT
+12df: 0b 7b 0b 00 00             ; CALL .(LAST) (0b7b)
+12e4: 0e 2c                      ; CLITERAL 44
+12e6: 19                         ; EMIT
+12e7: 0e 20                      ; CLITERAL 32
+12e9: 19                         ; EMIT
+12ea: 0b a0 10 00 00             ; CALL .FREE (10a0)
+12ef: 0e 0d                      ; CLITERAL 13
+12f1: 19                         ; EMIT
+12f2: 0e 0a                      ; CLITERAL 10
+12f4: 19                         ; EMIT
+12f5: 0c                         ; RET
 ;
-12f7: 18 2f f1 00 00             ; DICTP VARIABLE (f12f)
-12fc: 0b 7f 0f 00 00             ; CALL CREATE-NAME (0f7f)
-1301: 0b fd 00 00 00             ; CALL HERE (00fd)
-1306: 0e 02                      ; CLITERAL 2
-1308: 11                         ; ADD
-1309: 0e 04                      ; CLITERAL 4
-130b: 11                         ; ADD
-130c: 0b 63 01 00 00             ; CALL LITERAL (0163)
-1311: 0b 2d 01 00 00             ; CALL , (012d)
-1316: 0b d4 01 00 00             ; CALL RET (01d4)
-131b: 0e 00                      ; CLITERAL 0
-131d: 0b 2d 01 00 00             ; CALL , (012d)
-1322: 0c                         ; RET
+12f6: 18 2f f1 00 00             ; DICTP VARIABLE (f12f)
+12fb: 0b 7f 0f 00 00             ; CALL CREATE-NAME (0f7f)
+1300: 0b fd 00 00 00             ; CALL HERE (00fd)
+1305: 0e 02                      ; CLITERAL 2
+1307: 11                         ; ADD
+1308: 0e 04                      ; CLITERAL 4
+130a: 11                         ; ADD
+130b: 0b 63 01 00 00             ; CALL LITERAL (0163)
+1310: 0b 2d 01 00 00             ; CALL , (012d)
+1315: 0b d4 01 00 00             ; CALL RET (01d4)
+131a: 0e 00                      ; CLITERAL 0
+131c: 0b 2d 01 00 00             ; CALL , (012d)
+1321: 0c                         ; RET
 ;
 ; End of code, Dictionary:
 ;
 f12f: 42 f1 00 00                ; VARIABLE - (next: f142 sys-info)
-f133: f7 12 00 00 00             ; XT=12f7, flags=00
+f133: f6 12 00 00 00             ; XT=12f6, flags=00
 f138: 08 56 41 52 49 41 42 4c 45 00 ; 8, VARIABLE
 ;
 f142: 55 f1 00 00                ; sys-info - (next: f155 ll)
-f146: c5 12 00 00 00             ; XT=12c5, flags=00
+f146: c4 12 00 00 00             ; XT=12c4, flags=00
 f14b: 08 73 79 73 2d 69 6e 66 6f 00 ; 8, sys-info
 ;
 f155: 62 f1 00 00                ; ll - (next: f162 ")

@@ -4,7 +4,7 @@ variable th th !
 
 : forget-sieve tl @ (last) ! th @ (here) ! ;
 
-: sz 8192 ;        INLINE
+: sz 16384 ;        INLINE
 variable flags     inline
 sz allot
 
