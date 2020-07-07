@@ -720,7 +720,7 @@ DECIMAL
 		C,
 	AGAIN ; IMMEDIATE
 
-: ll S" loads.4th" load ;
+: ll S" loads.fs" load ;
 
 : sys-info
 	.(MEM_SZ) 44 EMIT BL
