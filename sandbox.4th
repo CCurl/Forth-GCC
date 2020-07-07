@@ -32,6 +32,25 @@ variable d.base
 : d.b/ d.b> -rot d.b> d.base @ * swap / >d.b ;
 
 
+: exists?      ( val addr num -- bool )
+     rot >r
+     begin
+          over c@ r@ = if
+               r> drop drop drop true
+               leave
+          then
+          1- swap 1+ swap
+          dup
+     while 
+     r> drop drop drop false ;
+
+variable num 
+1000 1000 * num !
+: t1 17 200 100 exists? drop ;
+: t2 begin t1 1- dup while drop ;
+: t3 start-timer num @ t2 elapsed ;
+
+
 \ ------------- END OF SANDBOX -------------
 CR sys-info
 \ fsb CR sys-info
