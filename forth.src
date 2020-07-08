@@ -85,6 +85,7 @@
 : GETTICK	[  47 C, ] ; .INLINE.
 : <<		[  48 C, ] ; .INLINE.	\ SHIFTLEFT  ( n1 n2 -- n3 )
 : >>		[  49 C, ] ; .INLINE.	\ SHIFTRIGHT ( n1 n2 -- n3 )
+: +!        [  50 C, ] ; .INLINE.   \ ( n addr -- )
 : BRANCHF      90 C,   ;
 : BRANCHFZ     91 C,   ;
 : BRANCHFNZ    92 C,   ; 
@@ -153,7 +154,7 @@
 : += OVER @      + SWAP ! ;  INLINE  \ ( addr n -- )
 : -= OVER @ SWAP - SWAP ! ;  INLINE  \ ( addr n -- )
 
-: +!  SWAP +=  ;   \ ( n addr -- )
+\ : +!  SWAP +=  ;   \ ( n addr -- )
 : -!  SWAP -=  ;   \ ( n addr -- )
 
 : ++  DUP @  1+ SWAP !  ;  INLINE  \ ( addr -- )

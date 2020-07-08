@@ -53,7 +53,8 @@
 #define GETTICK    47   // 2F
 #define SHIFTLEFT  48   // 30
 #define SHIFTRIGHT 49   // 31
-// unused 50-89
+#define PLUSSTORE  50   // 32
+// unused 51-89
 #define BRANCHF    90   // 5A
 #define BRANCHFZ   91   // 5B
 #define BRANCHFNZ  92   // 5C

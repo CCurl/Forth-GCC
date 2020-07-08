@@ -816,6 +816,15 @@ f_SHIFTRIGHT:
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
+; PLUSSTORE
+f_PLUSSTORE:
+                m_pop eax
+                m_pop ecx
+                ; add eax, edx
+                add [eax+edx], ecx
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
 ; BRANCHF
 f_BRANCHF:
                 movzx eax, BYTE [esi]
@@ -946,261 +955,261 @@ dsOverFlow  db '(Stack overflow!)', 0
 ; -------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------
 jmpTable dd f_UnknownOpcode ; 0
-dd f_LITERAL            ; Hex: 01
-dd f_FETCH              ; Hex: 02
-dd f_STORE              ; Hex: 03
-dd f_SWAP               ; Hex: 04
-dd f_DROP               ; Hex: 05
-dd f_DUP                ; Hex: 06
-dd f_SLITERAL           ; Hex: 07
-dd f_JMP                ; Hex: 08
-dd f_JMPZ               ; Hex: 09
-dd f_JMPNZ              ; Hex: 0A
-dd f_CALL               ; Hex: 0B
-dd f_RET                ; Hex: 0C
-dd f_OR                 ; Hex: 0D
-dd f_CLITERAL           ; Hex: 0E
-dd f_CFETCH             ; Hex: 0F
-dd f_CSTORE             ; Hex: 10
-dd f_ADD                ; Hex: 11
-dd f_SUB                ; Hex: 12
-dd f_MUL                ; Hex: 13
-dd f_DIV                ; Hex: 14
-dd f_LT                 ; Hex: 15
-dd f_EQ                 ; Hex: 16
-dd f_GT                 ; Hex: 17
-dd f_DICTP              ; Hex: 18
-dd f_EMIT               ; Hex: 19
-dd f_OVER               ; Hex: 1A
-dd f_COMPARE            ; Hex: 1B
-dd f_FOPEN              ; Hex: 1C
-dd f_FREAD              ; Hex: 1D
-dd f_FREADLINE          ; Hex: 1E
-dd f_FWRITE             ; Hex: 1F
-dd f_FCLOSE             ; Hex: 20
-dd f_DTOR               ; Hex: 21
-dd f_RTOD               ; Hex: 22
-dd f_LOGLEVEL           ; Hex: 23
-dd f_AND                ; Hex: 24
-dd f_PICK               ; Hex: 25
-dd f_DEPTH              ; Hex: 26
-dd f_GETCH              ; Hex: 27
-dd f_COMPAREI           ; Hex: 28
-dd f_SLASHMOD           ; Hex: 29
-dd f_NOT                ; Hex: 2A
-dd f_RFETCH             ; Hex: 2B
-dd f_INC                ; Hex: 2C
-dd f_RDEPTH             ; Hex: 2D
-dd f_DEC                ; Hex: 2E
-dd f_GETTICK            ; Hex: 2F
-dd f_SHIFTLEFT          ; Hex: 30
-dd f_SHIFTRIGHT         ; Hex: 31
-dd f_UnknownOpcode ; 50
-dd f_UnknownOpcode ; 51
-dd f_UnknownOpcode ; 52
-dd f_UnknownOpcode ; 53
-dd f_UnknownOpcode ; 54
-dd f_UnknownOpcode ; 55
-dd f_UnknownOpcode ; 56
-dd f_UnknownOpcode ; 57
-dd f_UnknownOpcode ; 58
-dd f_UnknownOpcode ; 59
-dd f_UnknownOpcode ; 60
-dd f_UnknownOpcode ; 61
-dd f_UnknownOpcode ; 62
-dd f_UnknownOpcode ; 63
-dd f_UnknownOpcode ; 64
-dd f_UnknownOpcode ; 65
-dd f_UnknownOpcode ; 66
-dd f_UnknownOpcode ; 67
-dd f_UnknownOpcode ; 68
-dd f_UnknownOpcode ; 69
-dd f_UnknownOpcode ; 70
-dd f_UnknownOpcode ; 71
-dd f_UnknownOpcode ; 72
-dd f_UnknownOpcode ; 73
-dd f_UnknownOpcode ; 74
-dd f_UnknownOpcode ; 75
-dd f_UnknownOpcode ; 76
-dd f_UnknownOpcode ; 77
-dd f_UnknownOpcode ; 78
-dd f_UnknownOpcode ; 79
-dd f_UnknownOpcode ; 80
-dd f_UnknownOpcode ; 81
-dd f_UnknownOpcode ; 82
-dd f_UnknownOpcode ; 83
-dd f_UnknownOpcode ; 84
-dd f_UnknownOpcode ; 85
-dd f_UnknownOpcode ; 86
-dd f_UnknownOpcode ; 87
-dd f_UnknownOpcode ; 88
-dd f_UnknownOpcode ; 89
-dd f_BRANCHF       ; 90
-dd f_BRANCHFZ      ; 91
-dd f_BRANCHFNZ     ; 92
-dd f_BRANCHB       ; 93
-dd f_BRANCHBZ      ; 94
-dd f_BRANCHBNZ     ; 95
-dd f_UnknownOpcode ; 96
-dd f_UnknownOpcode ; 97
-dd f_UnknownOpcode ; 98
-dd f_UnknownOpcode ; 99
-dd f_UnknownOpcode ; 100
-dd f_UnknownOpcode ; 101
-dd f_UnknownOpcode ; 102
-dd f_UnknownOpcode ; 103
-dd f_UnknownOpcode ; 104
-dd f_UnknownOpcode ; 105
-dd f_UnknownOpcode ; 106
-dd f_UnknownOpcode ; 107
-dd f_UnknownOpcode ; 108
-dd f_UnknownOpcode ; 109
-dd f_UnknownOpcode ; 110
-dd f_UnknownOpcode ; 111
-dd f_UnknownOpcode ; 112
-dd f_UnknownOpcode ; 113
-dd f_UnknownOpcode ; 114
-dd f_UnknownOpcode ; 115
-dd f_UnknownOpcode ; 116
-dd f_UnknownOpcode ; 117
-dd f_UnknownOpcode ; 118
-dd f_UnknownOpcode ; 119
-dd f_UnknownOpcode ; 120
-dd f_UnknownOpcode ; 121
-dd f_UnknownOpcode ; 122
-dd f_UnknownOpcode ; 123
-dd f_UnknownOpcode ; 124
-dd f_UnknownOpcode ; 125
-dd f_UnknownOpcode ; 126
-dd f_UnknownOpcode ; 127
-dd f_UnknownOpcode ; 128
-dd f_UnknownOpcode ; 129
-dd f_UnknownOpcode ; 130
-dd f_UnknownOpcode ; 131
-dd f_UnknownOpcode ; 132
-dd f_UnknownOpcode ; 133
-dd f_UnknownOpcode ; 134
-dd f_UnknownOpcode ; 135
-dd f_UnknownOpcode ; 136
-dd f_UnknownOpcode ; 137
-dd f_UnknownOpcode ; 138
-dd f_UnknownOpcode ; 139
-dd f_UnknownOpcode ; 140
-dd f_UnknownOpcode ; 141
-dd f_UnknownOpcode ; 142
-dd f_UnknownOpcode ; 143
-dd f_UnknownOpcode ; 144
-dd f_UnknownOpcode ; 145
-dd f_UnknownOpcode ; 146
-dd f_UnknownOpcode ; 147
-dd f_UnknownOpcode ; 148
-dd f_UnknownOpcode ; 149
-dd f_UnknownOpcode ; 150
-dd f_UnknownOpcode ; 151
-dd f_UnknownOpcode ; 152
-dd f_UnknownOpcode ; 153
-dd f_UnknownOpcode ; 154
-dd f_UnknownOpcode ; 155
-dd f_UnknownOpcode ; 156
-dd f_UnknownOpcode ; 157
-dd f_UnknownOpcode ; 158
-dd f_UnknownOpcode ; 159
-dd f_UnknownOpcode ; 160
-dd f_UnknownOpcode ; 161
-dd f_UnknownOpcode ; 162
-dd f_UnknownOpcode ; 163
-dd f_UnknownOpcode ; 164
-dd f_UnknownOpcode ; 165
-dd f_UnknownOpcode ; 166
-dd f_UnknownOpcode ; 167
-dd f_UnknownOpcode ; 168
-dd f_UnknownOpcode ; 169
-dd f_UnknownOpcode ; 170
-dd f_UnknownOpcode ; 171
-dd f_UnknownOpcode ; 172
-dd f_UnknownOpcode ; 173
-dd f_UnknownOpcode ; 174
-dd f_UnknownOpcode ; 175
-dd f_UnknownOpcode ; 176
-dd f_UnknownOpcode ; 177
-dd f_UnknownOpcode ; 178
-dd f_UnknownOpcode ; 179
-dd f_UnknownOpcode ; 180
-dd f_UnknownOpcode ; 181
-dd f_UnknownOpcode ; 182
-dd f_UnknownOpcode ; 183
-dd f_UnknownOpcode ; 184
-dd f_UnknownOpcode ; 185
-dd f_UnknownOpcode ; 186
-dd f_UnknownOpcode ; 187
-dd f_UnknownOpcode ; 188
-dd f_UnknownOpcode ; 189
-dd f_UnknownOpcode ; 190
-dd f_UnknownOpcode ; 191
-dd f_UnknownOpcode ; 192
-dd f_UnknownOpcode ; 193
-dd f_UnknownOpcode ; 194
-dd f_UnknownOpcode ; 195
-dd f_UnknownOpcode ; 196
-dd f_UnknownOpcode ; 197
-dd f_UnknownOpcode ; 198
-dd f_UnknownOpcode ; 199
-dd f_UnknownOpcode ; 200
-dd f_UnknownOpcode ; 201
-dd f_UnknownOpcode ; 202
-dd f_UnknownOpcode ; 203
-dd f_UnknownOpcode ; 204
-dd f_UnknownOpcode ; 205
-dd f_UnknownOpcode ; 206
-dd f_UnknownOpcode ; 207
-dd f_UnknownOpcode ; 208
-dd f_UnknownOpcode ; 209
-dd f_UnknownOpcode ; 210
-dd f_UnknownOpcode ; 211
-dd f_UnknownOpcode ; 212
-dd f_UnknownOpcode ; 213
-dd f_UnknownOpcode ; 214
-dd f_UnknownOpcode ; 215
-dd f_UnknownOpcode ; 216
-dd f_UnknownOpcode ; 217
-dd f_UnknownOpcode ; 218
-dd f_UnknownOpcode ; 219
-dd f_UnknownOpcode ; 220
-dd f_UnknownOpcode ; 221
-dd f_UnknownOpcode ; 222
-dd f_UnknownOpcode ; 223
-dd f_UnknownOpcode ; 224
-dd f_UnknownOpcode ; 225
-dd f_UnknownOpcode ; 226
-dd f_UnknownOpcode ; 227
-dd f_UnknownOpcode ; 228
-dd f_UnknownOpcode ; 229
-dd f_UnknownOpcode ; 230
-dd f_UnknownOpcode ; 231
-dd f_UnknownOpcode ; 232
-dd f_UnknownOpcode ; 233
-dd f_UnknownOpcode ; 234
-dd f_UnknownOpcode ; 235
-dd f_UnknownOpcode ; 236
-dd f_UnknownOpcode ; 237
-dd f_UnknownOpcode ; 238
-dd f_UnknownOpcode ; 239
-dd f_UnknownOpcode ; 240
-dd f_UnknownOpcode ; 241
-dd f_UnknownOpcode ; 242
-dd f_UnknownOpcode ; 243
-dd f_UnknownOpcode ; 244
-dd f_UnknownOpcode ; 245
-dd f_UnknownOpcode ; 246
-dd f_UnknownOpcode ; 247
-dd f_UnknownOpcode ; 248
-dd f_UnknownOpcode ; 249
-dd f_UnknownOpcode ; 250
-dd f_UnknownOpcode ; 251
-dd f_NOP                ; Hex: FC
-dd f_BREAK              ; Hex: FD
-dd f_RESET              ; Hex: FE
-dd f_BYE                ; Hex: FF
+dd f_LITERAL            ; Hex: 01 (1)
+dd f_FETCH              ; Hex: 02 (2)
+dd f_STORE              ; Hex: 03 (3)
+dd f_SWAP               ; Hex: 04 (4)
+dd f_DROP               ; Hex: 05 (5)
+dd f_DUP                ; Hex: 06 (6)
+dd f_SLITERAL           ; Hex: 07 (7)
+dd f_JMP                ; Hex: 08 (8)
+dd f_JMPZ               ; Hex: 09 (9)
+dd f_JMPNZ              ; Hex: 0A (10)
+dd f_CALL               ; Hex: 0B (11)
+dd f_RET                ; Hex: 0C (12)
+dd f_OR                 ; Hex: 0D (13)
+dd f_CLITERAL           ; Hex: 0E (14)
+dd f_CFETCH             ; Hex: 0F (15)
+dd f_CSTORE             ; Hex: 10 (16)
+dd f_ADD                ; Hex: 11 (17)
+dd f_SUB                ; Hex: 12 (18)
+dd f_MUL                ; Hex: 13 (19)
+dd f_DIV                ; Hex: 14 (20)
+dd f_LT                 ; Hex: 15 (21)
+dd f_EQ                 ; Hex: 16 (22)
+dd f_GT                 ; Hex: 17 (23)
+dd f_DICTP              ; Hex: 18 (24)
+dd f_EMIT               ; Hex: 19 (25)
+dd f_OVER               ; Hex: 1A (26)
+dd f_COMPARE            ; Hex: 1B (27)
+dd f_FOPEN              ; Hex: 1C (28)
+dd f_FREAD              ; Hex: 1D (29)
+dd f_FREADLINE          ; Hex: 1E (30)
+dd f_FWRITE             ; Hex: 1F (31)
+dd f_FCLOSE             ; Hex: 20 (32)
+dd f_DTOR               ; Hex: 21 (33)
+dd f_RTOD               ; Hex: 22 (34)
+dd f_LOGLEVEL           ; Hex: 23 (35)
+dd f_AND                ; Hex: 24 (36)
+dd f_PICK               ; Hex: 25 (37)
+dd f_DEPTH              ; Hex: 26 (38)
+dd f_GETCH              ; Hex: 27 (39)
+dd f_COMPAREI           ; Hex: 28 (40)
+dd f_SLASHMOD           ; Hex: 29 (41)
+dd f_NOT                ; Hex: 2A (42)
+dd f_RFETCH             ; Hex: 2B (43)
+dd f_INC                ; Hex: 2C (44)
+dd f_RDEPTH             ; Hex: 2D (45)
+dd f_DEC                ; Hex: 2E (46)
+dd f_GETTICK            ; Hex: 2F (47)
+dd f_SHIFTLEFT          ; Hex: 30 (48)
+dd f_SHIFTRIGHT         ; Hex: 31 (49)
+dd f_PLUSSTORE          ; Hex: 32 (50)
+dd f_UnknownOpcode      ; Hex: 33 (51)
+dd f_UnknownOpcode      ; Hex: 34 (52)
+dd f_UnknownOpcode      ; Hex: 35 (53)
+dd f_UnknownOpcode      ; Hex: 36 (54)
+dd f_UnknownOpcode      ; Hex: 37 (55)
+dd f_UnknownOpcode      ; Hex: 38 (56)
+dd f_UnknownOpcode      ; Hex: 39 (57)
+dd f_UnknownOpcode      ; Hex: 3A (58)
+dd f_UnknownOpcode      ; Hex: 3B (59)
+dd f_UnknownOpcode      ; Hex: 3C (60)
+dd f_UnknownOpcode      ; Hex: 3D (61)
+dd f_UnknownOpcode      ; Hex: 3E (62)
+dd f_UnknownOpcode      ; Hex: 3F (63)
+dd f_UnknownOpcode      ; Hex: 40 (64)
+dd f_UnknownOpcode      ; Hex: 41 (65)
+dd f_UnknownOpcode      ; Hex: 42 (66)
+dd f_UnknownOpcode      ; Hex: 43 (67)
+dd f_UnknownOpcode      ; Hex: 44 (68)
+dd f_UnknownOpcode      ; Hex: 45 (69)
+dd f_UnknownOpcode      ; Hex: 46 (70)
+dd f_UnknownOpcode      ; Hex: 47 (71)
+dd f_UnknownOpcode      ; Hex: 48 (72)
+dd f_UnknownOpcode      ; Hex: 49 (73)
+dd f_UnknownOpcode      ; Hex: 4A (74)
+dd f_UnknownOpcode      ; Hex: 4B (75)
+dd f_UnknownOpcode      ; Hex: 4C (76)
+dd f_UnknownOpcode      ; Hex: 4D (77)
+dd f_UnknownOpcode      ; Hex: 4E (78)
+dd f_UnknownOpcode      ; Hex: 4F (79)
+dd f_UnknownOpcode      ; Hex: 50 (80)
+dd f_UnknownOpcode      ; Hex: 51 (81)
+dd f_UnknownOpcode      ; Hex: 52 (82)
+dd f_UnknownOpcode      ; Hex: 53 (83)
+dd f_UnknownOpcode      ; Hex: 54 (84)
+dd f_UnknownOpcode      ; Hex: 55 (85)
+dd f_UnknownOpcode      ; Hex: 56 (86)
+dd f_UnknownOpcode      ; Hex: 57 (87)
+dd f_UnknownOpcode      ; Hex: 58 (88)
+dd f_UnknownOpcode      ; Hex: 59 (89)
+dd f_BRANCHF            ; Hex: 5A (90)
+dd f_BRANCHFZ           ; Hex: 5B (91)
+dd f_BRANCHFNZ          ; Hex: 5C (92)
+dd f_BRANCHB            ; Hex: 5D (93)
+dd f_BRANCHBZ           ; Hex: 5E (94)
+dd f_BRANCHBNZ          ; Hex: 5F (95)
+dd f_UnknownOpcode      ; Hex: 60 (96)
+dd f_UnknownOpcode      ; Hex: 61 (97)
+dd f_UnknownOpcode      ; Hex: 62 (98)
+dd f_UnknownOpcode      ; Hex: 63 (99)
+dd f_UnknownOpcode      ; Hex: 64 (100)
+dd f_UnknownOpcode      ; Hex: 65 (101)
+dd f_UnknownOpcode      ; Hex: 66 (102)
+dd f_UnknownOpcode      ; Hex: 67 (103)
+dd f_UnknownOpcode      ; Hex: 68 (104)
+dd f_UnknownOpcode      ; Hex: 69 (105)
+dd f_UnknownOpcode      ; Hex: 6A (106)
+dd f_UnknownOpcode      ; Hex: 6B (107)
+dd f_UnknownOpcode      ; Hex: 6C (108)
+dd f_UnknownOpcode      ; Hex: 6D (109)
+dd f_UnknownOpcode      ; Hex: 6E (110)
+dd f_UnknownOpcode      ; Hex: 6F (111)
+dd f_UnknownOpcode      ; Hex: 70 (112)
+dd f_UnknownOpcode      ; Hex: 71 (113)
+dd f_UnknownOpcode      ; Hex: 72 (114)
+dd f_UnknownOpcode      ; Hex: 73 (115)
+dd f_UnknownOpcode      ; Hex: 74 (116)
+dd f_UnknownOpcode      ; Hex: 75 (117)
+dd f_UnknownOpcode      ; Hex: 76 (118)
+dd f_UnknownOpcode      ; Hex: 77 (119)
+dd f_UnknownOpcode      ; Hex: 78 (120)
+dd f_UnknownOpcode      ; Hex: 79 (121)
+dd f_UnknownOpcode      ; Hex: 7A (122)
+dd f_UnknownOpcode      ; Hex: 7B (123)
+dd f_UnknownOpcode      ; Hex: 7C (124)
+dd f_UnknownOpcode      ; Hex: 7D (125)
+dd f_UnknownOpcode      ; Hex: 7E (126)
+dd f_UnknownOpcode      ; Hex: 7F (127)
+dd f_UnknownOpcode      ; Hex: 80 (128)
+dd f_UnknownOpcode      ; Hex: 81 (129)
+dd f_UnknownOpcode      ; Hex: 82 (130)
+dd f_UnknownOpcode      ; Hex: 83 (131)
+dd f_UnknownOpcode      ; Hex: 84 (132)
+dd f_UnknownOpcode      ; Hex: 85 (133)
+dd f_UnknownOpcode      ; Hex: 86 (134)
+dd f_UnknownOpcode      ; Hex: 87 (135)
+dd f_UnknownOpcode      ; Hex: 88 (136)
+dd f_UnknownOpcode      ; Hex: 89 (137)
+dd f_UnknownOpcode      ; Hex: 8A (138)
+dd f_UnknownOpcode      ; Hex: 8B (139)
+dd f_UnknownOpcode      ; Hex: 8C (140)
+dd f_UnknownOpcode      ; Hex: 8D (141)
+dd f_UnknownOpcode      ; Hex: 8E (142)
+dd f_UnknownOpcode      ; Hex: 8F (143)
+dd f_UnknownOpcode      ; Hex: 90 (144)
+dd f_UnknownOpcode      ; Hex: 91 (145)
+dd f_UnknownOpcode      ; Hex: 92 (146)
+dd f_UnknownOpcode      ; Hex: 93 (147)
+dd f_UnknownOpcode      ; Hex: 94 (148)
+dd f_UnknownOpcode      ; Hex: 95 (149)
+dd f_UnknownOpcode      ; Hex: 96 (150)
+dd f_UnknownOpcode      ; Hex: 97 (151)
+dd f_UnknownOpcode      ; Hex: 98 (152)
+dd f_UnknownOpcode      ; Hex: 99 (153)
+dd f_UnknownOpcode      ; Hex: 9A (154)
+dd f_UnknownOpcode      ; Hex: 9B (155)
+dd f_UnknownOpcode      ; Hex: 9C (156)
+dd f_UnknownOpcode      ; Hex: 9D (157)
+dd f_UnknownOpcode      ; Hex: 9E (158)
+dd f_UnknownOpcode      ; Hex: 9F (159)
+dd f_UnknownOpcode      ; Hex: A0 (160)
+dd f_UnknownOpcode      ; Hex: A1 (161)
+dd f_UnknownOpcode      ; Hex: A2 (162)
+dd f_UnknownOpcode      ; Hex: A3 (163)
+dd f_UnknownOpcode      ; Hex: A4 (164)
+dd f_UnknownOpcode      ; Hex: A5 (165)
+dd f_UnknownOpcode      ; Hex: A6 (166)
+dd f_UnknownOpcode      ; Hex: A7 (167)
+dd f_UnknownOpcode      ; Hex: A8 (168)
+dd f_UnknownOpcode      ; Hex: A9 (169)
+dd f_UnknownOpcode      ; Hex: AA (170)
+dd f_UnknownOpcode      ; Hex: AB (171)
+dd f_UnknownOpcode      ; Hex: AC (172)
+dd f_UnknownOpcode      ; Hex: AD (173)
+dd f_UnknownOpcode      ; Hex: AE (174)
+dd f_UnknownOpcode      ; Hex: AF (175)
+dd f_UnknownOpcode      ; Hex: B0 (176)
+dd f_UnknownOpcode      ; Hex: B1 (177)
+dd f_UnknownOpcode      ; Hex: B2 (178)
+dd f_UnknownOpcode      ; Hex: B3 (179)
+dd f_UnknownOpcode      ; Hex: B4 (180)
+dd f_UnknownOpcode      ; Hex: B5 (181)
+dd f_UnknownOpcode      ; Hex: B6 (182)
+dd f_UnknownOpcode      ; Hex: B7 (183)
+dd f_UnknownOpcode      ; Hex: B8 (184)
+dd f_UnknownOpcode      ; Hex: B9 (185)
+dd f_UnknownOpcode      ; Hex: BA (186)
+dd f_UnknownOpcode      ; Hex: BB (187)
+dd f_UnknownOpcode      ; Hex: BC (188)
+dd f_UnknownOpcode      ; Hex: BD (189)
+dd f_UnknownOpcode      ; Hex: BE (190)
+dd f_UnknownOpcode      ; Hex: BF (191)
+dd f_UnknownOpcode      ; Hex: C0 (192)
+dd f_UnknownOpcode      ; Hex: C1 (193)
+dd f_UnknownOpcode      ; Hex: C2 (194)
+dd f_UnknownOpcode      ; Hex: C3 (195)
+dd f_UnknownOpcode      ; Hex: C4 (196)
+dd f_UnknownOpcode      ; Hex: C5 (197)
+dd f_UnknownOpcode      ; Hex: C6 (198)
+dd f_UnknownOpcode      ; Hex: C7 (199)
+dd f_UnknownOpcode      ; Hex: C8 (200)
+dd f_UnknownOpcode      ; Hex: C9 (201)
+dd f_UnknownOpcode      ; Hex: CA (202)
+dd f_UnknownOpcode      ; Hex: CB (203)
+dd f_UnknownOpcode      ; Hex: CC (204)
+dd f_UnknownOpcode      ; Hex: CD (205)
+dd f_UnknownOpcode      ; Hex: CE (206)
+dd f_UnknownOpcode      ; Hex: CF (207)
+dd f_UnknownOpcode      ; Hex: D0 (208)
+dd f_UnknownOpcode      ; Hex: D1 (209)
+dd f_UnknownOpcode      ; Hex: D2 (210)
+dd f_UnknownOpcode      ; Hex: D3 (211)
+dd f_UnknownOpcode      ; Hex: D4 (212)
+dd f_UnknownOpcode      ; Hex: D5 (213)
+dd f_UnknownOpcode      ; Hex: D6 (214)
+dd f_UnknownOpcode      ; Hex: D7 (215)
+dd f_UnknownOpcode      ; Hex: D8 (216)
+dd f_UnknownOpcode      ; Hex: D9 (217)
+dd f_UnknownOpcode      ; Hex: DA (218)
+dd f_UnknownOpcode      ; Hex: DB (219)
+dd f_UnknownOpcode      ; Hex: DC (220)
+dd f_UnknownOpcode      ; Hex: DD (221)
+dd f_UnknownOpcode      ; Hex: DE (222)
+dd f_UnknownOpcode      ; Hex: DF (223)
+dd f_UnknownOpcode      ; Hex: E0 (224)
+dd f_UnknownOpcode      ; Hex: E1 (225)
+dd f_UnknownOpcode      ; Hex: E2 (226)
+dd f_UnknownOpcode      ; Hex: E3 (227)
+dd f_UnknownOpcode      ; Hex: E4 (228)
+dd f_UnknownOpcode      ; Hex: E5 (229)
+dd f_UnknownOpcode      ; Hex: E6 (230)
+dd f_UnknownOpcode      ; Hex: E7 (231)
+dd f_UnknownOpcode      ; Hex: E8 (232)
+dd f_UnknownOpcode      ; Hex: E9 (233)
+dd f_UnknownOpcode      ; Hex: EA (234)
+dd f_UnknownOpcode      ; Hex: EB (235)
+dd f_UnknownOpcode      ; Hex: EC (236)
+dd f_UnknownOpcode      ; Hex: ED (237)
+dd f_UnknownOpcode      ; Hex: EE (238)
+dd f_UnknownOpcode      ; Hex: EF (239)
+dd f_UnknownOpcode      ; Hex: F0 (240)
+dd f_UnknownOpcode      ; Hex: F1 (241)
+dd f_UnknownOpcode      ; Hex: F2 (242)
+dd f_UnknownOpcode      ; Hex: F3 (243)
+dd f_UnknownOpcode      ; Hex: F4 (244)
+dd f_UnknownOpcode      ; Hex: F5 (245)
+dd f_UnknownOpcode      ; Hex: F6 (246)
+dd f_UnknownOpcode      ; Hex: F7 (247)
+dd f_UnknownOpcode      ; Hex: F8 (248)
+dd f_UnknownOpcode      ; Hex: F9 (249)
+dd f_UnknownOpcode      ; Hex: FA (250)
+dd f_UnknownOpcode      ; Hex: FB (251)
+dd f_NOP                ; Hex: FC (252)
+dd f_BREAK              ; Hex: FD (253)
+dd f_RESET              ; Hex: FE (254)
+dd f_BYE                ; Hex: FF (255)
 
 ; -------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------

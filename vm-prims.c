@@ -644,6 +644,16 @@ void prim_SHIFTRIGHT()
 	TOS = TOS >> (arg1 & 0x1F);
 }
 
+// PLUSSTORE - !+
+void prim_PLUSSTORE()
+{
+	arg2 = pop();
+	arg1 = pop();
+	arg3 = GETAT(arg2);
+	arg3 += arg1;
+	SETAT(arg2, arg3);
+}
+
 
 void prim_BRANCHF()
 {
@@ -822,6 +832,7 @@ void init_vm_vectors()
 	vm_prims[47] = prim_GETTICK;
 	vm_prims[48] = prim_SHIFTLEFT;
 	vm_prims[49] = prim_SHIFTRIGHT;
+	vm_prims[50] = prim_PLUSSTORE;
 
 	vm_prims[90] = prim_BRANCHF;
 	vm_prims[91] = prim_BRANCHFZ;

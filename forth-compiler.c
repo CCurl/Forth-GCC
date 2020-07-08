@@ -76,6 +76,7 @@ OPCODE_T theOpcodes[] = {
        { ".GETTICK.", 47, "GETTICK" },
        { ".SHIFTLEFT.", 48, "SHIFTLEFT" },
        { ".SHIFTRIGHT.", 49, "SHIFTRIGHT" },
+       { ".PLUSSTORE.", 50, "PLUSSTORE" },
        { ".BRANCHF.",   90, "BRANCHF" },
        { ".BRANCHB.",   91, "BRANCHB" },
        { ".BRANCHFZ.",  92, "BRANCHFZ" },

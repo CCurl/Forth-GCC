@@ -548,6 +548,18 @@ CELL dis_one(char *bytes, char *desc)
 		sprintf(desc, "GETTICK");
 		return 0;
 
+	case SHIFTLEFT:
+		sprintf(desc, "SHIFTLEFT");
+		return 0;
+
+	case SHIFTRIGHT:
+		sprintf(desc, "SHIFTRIGHT");
+		return 0;
+
+	case PLUSSTORE:
+		sprintf(desc, "PLUSSTORE");
+		return 0;
+
 	case BRANCHF:
 		arg1 = the_memory[PC];
 		sprintf(desc, "BRANCHF %ld (%04lx)", arg1, PC+arg1);
