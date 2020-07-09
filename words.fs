@@ -192,7 +192,7 @@ decimal 64 ps stk-init
 
 \ --------------------------------------------------------------------------------
 
-: period 46 emit ;
+: period '.' emit ;
 : start-timer gettick ;
 : .ms 1000 /mod (.) period .3 "  seconds" ct ;
 : elapsed gettick swap - .ms ;

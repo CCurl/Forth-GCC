@@ -283,6 +283,12 @@ bool parseHex(char *word, CELL *val)
 {
 	CELL ret = 0;
 	char *cp = word+1;
+
+	if (strlen(word) == 1) 
+	{
+		return false;
+	}
+
 	while (*cp)
 	{
 		ret = (ret << 4);
@@ -381,7 +387,6 @@ char *ParseWord(char *word, char *line)
 			CComma(CLITERAL);
 			CComma(val);
 		}
-		
 		return line;
 	}
 
@@ -396,8 +401,8 @@ char *ParseWord(char *word, char *line)
 		{
 			if (val < 256)
 			{
-			CComma(CLITERAL);
-			CComma(val);
+				CComma(CLITERAL);
+				CComma(val);
 			}
 			else
 			{
@@ -406,7 +411,6 @@ char *ParseWord(char *word, char *line)
 			}
 			
 		}
-		
 		return line;
 	}
 

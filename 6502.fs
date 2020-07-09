@@ -14,11 +14,11 @@ variable th th !
 
 hex
 
-variable rom 0800 allot
-variable ram 4000 allot
+variable rom $0800 allot
+variable ram $4000 allot
 
-: >ram  7FF and ram + ;
-: >rom 3FFF and rom + ;
+: >ram $07FF and ram + ;
+: >rom $3FFF and rom + ;
 
 \ 6502 registers                                                                    
 variable reg-a   variable reg-x  variable reg-y
@@ -76,18 +76,18 @@ variable flag-z  variable flag-v
 : doNOP 1 cycle+ ;
 
 : one-instr ( instr -- instr )
-        dup 4C = if dojmp  leave then
-        dup A5 = if dolda  leave then
-        dup 85 = if dosta  leave then
-        dup F0 = if dobeq  leave then
-        dup D0 = if dobne  leave then
-        dup A9 = if doldai leave then
-        dup CA = if dodex  leave then
-        dup 88 = if dodey  leave then
-        dup E6 = if doinc  leave then
-        dup A0 = if doldy  leave then
-        dup EA = if doNOP  leave then
-        dup A2 = if doldx  leave then
+        dup $4C = if dojmp  leave then
+        dup $A5 = if dolda  leave then
+        dup $85 = if dosta  leave then
+        dup $F0 = if dobeq  leave then
+        dup $D0 = if dobne  leave then
+        dup $A9 = if doldai leave then
+        dup $CA = if dodex  leave then
+        dup $88 = if dodey  leave then
+        dup $E6 = if doinc  leave then
+        dup $A0 = if doldy  leave then
+        dup $EA = if doNOP  leave then
+        dup $A2 = if doldx  leave then
     ;
 
 : 6502emu ( cycles -- )                                                              
@@ -116,13 +116,11 @@ variable bp
     ;
                                                      
 : init-vm testcode
-    ram 4000 0 fill
-    0 cycle ! 8000 reg-pc ! ;
+    0 cycle ! $8000 reg-pc ! ;
 
-: bench6502 1000
+: bench6502 $1000
     begin 
-        \ ram 8 + C@ . 
-        init-vm 1000 6502emu 1- dup 
+        init-vm $1000 6502emu 1- dup 
     while drop ;
 
 : do-bench start-timer bench6502 elapsed ;
