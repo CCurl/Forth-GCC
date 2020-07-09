@@ -301,10 +301,27 @@
 : NEGATE 0 SWAP - ;
 : ABS DUP 0 < IF NEGATE THEN ;
 
-: isNumber?							\ ( addr -- num bool )
+: parse-hex 			\ ( addr -- num bool )
+	S" parsing-hex" COUNT TYPE
+	DROP 0 0 ;
+
+: parse-char 			\ ( addr -- num bool )
+	S" parsing-char" COUNT TYPE
+	DUP 2 +  C@ 39 <> IF DROP 0 0 LEAVE THEN
+	DUP 3 + C@ DUP 0 = IF DROP 32 THEN
+	32 <> IF DROP 0 0 LEAVE THEN
+	DROP 0 0 ;
+
+: isNumber?				\ ( addr -- num bool )
+	\ $xxx means it could be a HEX number
+	DUP C@ 36 = IF 1+ parse-hex LEAVE THEN
+
+	\ 'c' means it's a character literal
+	DUP C@ 39 = IF 1+ parse-char LEAVE THEN
+
 	\ find out if it is negative
 	DUP C@ 45 = DUP #NEG ! IF 1+ THEN
-	
+
 	\ accumulate the result on the return stack
 	0 >R
 	BEGIN
@@ -732,10 +749,9 @@ DECIMAL
 : VARIABLE  CREATE-NAME HERE 2 + CELL + LITERAL , RET 0 , ;
 
 \ --------------------------------------------------------------------------------
-
 sys-info
 
-\ This is so that forth-dis behaves as it used to
+\ This is so that forth-dis behaves as it should
 HEX
 	CELL   08 !
 	HERE   10 !

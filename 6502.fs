@@ -75,7 +75,7 @@ variable flag-z  variable flag-v
     3 cycle+ ;
 : doNOP 1 cycle+ ;
 
-: one-instr
+: one-instr ( instr -- instr )
         dup 4C = if dojmp  leave then
         dup A5 = if dolda  leave then
         dup 85 = if dosta  leave then
@@ -86,7 +86,7 @@ variable flag-z  variable flag-v
         dup 88 = if dodey  leave then
         dup E6 = if doinc  leave then
         dup A0 = if doldy  leave then
-        \ dup EA = if doNOP  leave then
+        dup EA = if doNOP  leave then
         dup A2 = if doldx  leave then
     ;
 

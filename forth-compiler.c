@@ -279,8 +279,37 @@ char *GetWord(char *line, char *word)
     return line;
 }
 
+bool parseHex(char *word, CELL *val)
+{
+	CELL ret = 0;
+	char *cp = word+1;
+	while (*cp)
+	{
+		ret = (ret << 4);
+		char c = toupper(*cp);
+		if (('0' <= c) && (c <= '9'))
+		{
+			ret += (c - '0');
+		}
+		else if (('A' <= c) && (c <= 'F'))
+		{
+			ret += (c - 'A');
+			ret += 10;
+		}
+		else
+		{
+			return false;
+		}
+		++cp;
+	}
+	*val = ret;
+	return true;
+}
+
 char *ParseWord(char *word, char *line)
 {
+	CELL val;
+
 	trace("Parse(): word=[%s], HERE=%04lx, LAST=%04lx, STATE=%ld\n", word, HERE, LAST, STATE);
 
 	if (string_equals(word, ".QUIT"))
@@ -339,17 +368,47 @@ char *ParseWord(char *word, char *line)
 		return line;
 	}
 
-	// if (strcmp(word, ".FETCH.") == 0)
-	// {
-	// 	CComma(FETCH);
-	// 	return line;
-	// }
+	// Character literal? e.g. - 'X'
+	if ((strlen(word) == 3) && (word[0] == '\'') && (word[2] == '\''))
+	{
+		val = word[1];
+		if (STATE == 0)
+		{
+			push(val);
+		}
+		else
+		{
+			CComma(CLITERAL);
+			CComma(val);
+		}
+		
+		return line;
+	}
 
-	// if (strcmp(word, ".STORE.") == 0)
-	// {
-	// 	CComma(STORE);
-	// 	return line;
-	// }
+	// HEX words look like this: $<hex-number>
+	if ((word[0] == '$') && (parseHex(word, &val)))
+	{
+		if (STATE == 0)
+		{
+			push(val);
+		}
+		else
+		{
+			if (val < 256)
+			{
+			CComma(CLITERAL);
+			CComma(val);
+			}
+			else
+			{
+				CComma(LITERAL);
+				Comma(val);
+			}
+			
+		}
+		
+		return line;
+	}
 
 	// if (strcmp(word, ".CSTORE.") == 0)
 	// {
