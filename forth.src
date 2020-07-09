@@ -218,6 +218,25 @@
 	AGAIN
 ;
 
+: to-upper  \ ( c1 -- c2 )
+     DUP 'a' < IF LEAVE THEN
+     DUP 'z' > IF LEAVE THEN
+     $20 - ;
+
+: to-lower  \ ( c1 -- c2 )
+     DUP 'A' < IF LEAVE THEN
+     DUP 'Z' > IF LEAVE THEN
+     $20 + ;
+
+: char-find \ ( ch str -- pos|-1 )
+     SWAP T2 ! 0 >R COUNT
+	BEGIN
+          DUP 0= IF 2DROP RDROP -1 LEAVE THEN
+		OVER C@ T2 @ = IF 2DROP R> LEAVE THEN
+          R> 1+ >R
+		1- SWAP 1+ SWAP
+	AGAIN ;
+
 : getOneWord										\ ( addr1 -- word-addr addr2 )
 	\ NB: this word assumes that 
 	\ leading WS has already been skipped.
@@ -285,68 +304,33 @@
 	AGAIN
 ;
 
-: isHEX? BASE @ $10 = ;
-
-: is-decimal-char?                 \ ( ch -- val bool )
-	DUP '0' '9' BETWEEN 
-	IF
-		'0' - 1
-	ELSE
-		0
-	THEN ;
-
-: is-hex-char?                     \ ( ch -- val bool )
-	DUP is-decimal-char? IF SWAP DROP  1 LEAVE THEN
-	DUP 'A' 'F' BETWEEN  IF DROP 'A' - 10 + 1 LEAVE THEN
-	DUP 'a' 'f' BETWEEN  IF DROP 'a' - 10 + 1 LEAVE THEN
-	0 ;
-
-: isNumChar?						\ ( ch -- val bool )
-	isHEX? IF 
-		is-hex-char? 
-	ELSE
-		is-decimal-char?
-	THEN ;
+: is-num-char?				\ ( base ch -- val bool )
+     to-upper
+     SWAP >R
+     S" 0123456789ABCDEF"
+     char-find DUP 0 < IF 0 RDROP LEAVE THEN     
+     R> 1- OVER < IF 0 ELSE 1 THEN ;
 
 : NEGATE 0 SWAP - ;
 : ABS DUP 0 < IF NEGATE THEN ;
-
-: parse-hex 			\ ( addr -- num bool )
-	DUP C@ 0 = IF 0 LEAVE THEN
-
-	\ accumulate the result on the return stack
-	0 >R
-	BEGIN
-		DUP C@
-		DUP 0 = 		\ end of word?
-		IF 
-			2DROP R> 
-			1 LEAVE
-		THEN
-
-		is-hex-char? 
-		IF
-			R> $10 * + >R
-			1+
-		ELSE
-			DROP R> 0 LEAVE
-		THEN
-	AGAIN ;
 
 : parse-char 			\ ( addr -- num bool )
 	DUP 1+  C@ ''' <> IF 0   LEAVE   THEN
 	DUP 2 + C@        IF 0 ELSE C@ 1 THEN ;
 
 : isNumber?				\ ( addr -- num bool )
-	\ $xxx means it could be a HEX number
-	DUP C@ '$' = IF 1+ parse-hex LEAVE THEN
-	BASE @ $10 = IF parse-hex LEAVE THEN
-
 	\ 'c' means it's a character literal
 	DUP C@ ''' = IF 1+ parse-char LEAVE THEN
 
-	\ find out if it is negative
-	DUP C@ '-' = DUP #NEG ! IF 1+ THEN
+	BASE @ T3 !
+	\ $xxx means it could be a HEX number
+	DUP C@ '$' = IF 1+ $10 T3 ! THEN
+	DUP C@ '#' = IF 1+  10 T3 ! THEN
+	DUP C@ '%' = IF 1+   2 T3 ! THEN
+
+	\ find out if it is negative (BASE 10 only)
+	#NEG OFF 
+	T3 @ 10 = IF DUP C@ '-' = DUP #NEG ! IF 1+ THEN THEN
 
 	\ accumulate the result on the return stack
 	0 >R
@@ -359,9 +343,10 @@
 			1 LEAVE
 		THEN
 
-		isNumChar? 
+		T3 @ SWAP is-num-char?
+		\ isNumChar?
 		IF
-			R> BASE @ * + >R
+			R> T3 @ * + >R
 			1+
 		ELSE
 			DROP R> 0 LEAVE

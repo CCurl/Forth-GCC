@@ -149,8 +149,10 @@ next-test: 0 pow-10    1     p= \ 55
 next-test: 3 pow-10 1000     p= \ 56
 next-test: 8 pow-10  100 mil p= \ 57
 
-next-test: 'd' $64 p=           \ 58
-next-test: 13  $D  p=           \ 59
+next-test: 'd' $64  p=           \ 58
+next-test: #13 $0d  p=           \ 59
+next-test: #31 $1F  p=           \ 60
+next-test: %11 $03  p=           \ 61
 
 \ ***************************************************
 \ wordsv

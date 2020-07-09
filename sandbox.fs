@@ -8,49 +8,52 @@ variable tl tl !
 
 \ ------------- START OF SANDBOX -------------
 
-\ real simple and stupid decimal words
-\ a decimal is a 2-cell thing ( integer fraction )
+: to-upper  ( c1 -- c2 )
+     DUP 'a' < IF LEAVE THEN
+     DUP 'z' > IF LEAVE THEN
+     $20 - ;
 
-\ usage: 123.45 543.21 should = 666.66
-\ 100 d.base !
-\ 12345 >d.b 54321 >d.b d.b+ d.b
+: to-lower  ( c1 -- c2 )
+     DUP 'A' < IF LEAVE THEN
+     DUP 'Z' > IF LEAVE THEN
+     $20 + ;
 
-variable d.base 
-100 d.base !
+: char-find       ( ch str -- pos|-1 )
+     SWAP T2 ! 0 >R COUNT
+	BEGIN
+          DUP 0= IF 2DROP RDROP -1 LEAVE THEN
+		OVER C@ T2 @ = IF 2DROP R> LEAVE THEN
+          R> 1+ >R
+		1- SWAP 1+ SWAP
+	AGAIN ;
 
-: >d.b d.base @ /mod swap ;
-: d.b swap (.) period d.base @ 
-     dup   100 = if drop .2 leave then
-     dup  1000 = if drop .3 leave then
-     dup 10000 = if drop .4 leave then
-     drop . ;
-: d.b> swap d.base @ * + ;
-: d.b>-2 d.b> -rot d.b> swap ;
-: d.b+ d.b>-2 + >d.b ;
-: d.b- d.b>-2 - >d.b ;
-: d.b* d.b>-2 * d.base @ / >d.b ;
-: d.b/ d.b> -rot d.b> d.base @ * swap / >d.b ;
+: is-num? ( base ch -- val bool )
+     to-upper
+     SWAP >R
+     " 0123456789ABCDEF" \ SWAP OVER + 1+ 0 SWAP C! DUP COUNT TYPE
+     char-find DUP 0 < IF 0 RDROP LEAVE THEN     
+     R> 1- .S OVER < IF 0 ELSE 1 THEN
+     \ 1 \ 1- 2DUP > IF DROP 0 LEAVE THEN
+     ;
 
+: t over . dup emit is-number? IF " -YES " CT . ELSE " -NO" CT DROP THEN CR ;
 
-: exists?      ( val addr num -- bool )
-     rot >r
-     begin
-          over c@ r@ = if
-               r> drop drop drop true
-               leave
-          then
-          1- swap 1+ swap
-          dup
-     while 
-     r> drop drop drop false ;
-
-variable num 
-1000 1000 * num !
-: t1 17 200 100 exists? drop ;
-: t2 begin t1 1- dup while drop ;
-: t3 start-timer num @ t2 elapsed ;
-
+02 '0' t
+02 '1' t
+02 '2' t
+08 '7' t
+08 '8' t
+10 '0' t
+10 '9' t
+10 'a' t
+16 '0' t
+16 '9' t
+16 'f' t
+16 'g' t
+\ 02 '3' is-num? . . CR
+\ 10 'a' is-num? . . CR
+\ 16 'a' is-num? . . CR
 
 \ ------------- END OF SANDBOX -------------
-CR sys-info
-\ fsb CR sys-info
+\ CR sys-info
+fsb \ CR sys-info
