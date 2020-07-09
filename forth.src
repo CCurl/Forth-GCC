@@ -195,9 +195,9 @@
 		')' = 
 	UNTIL ; IMMEDIATE
 
-: SPACE 32 EMIT ; INLINE
-: BL      SPACE ; INLINE
-: CRLF 13 EMIT 10 EMIT ; INLINE
+: SPACE #32 EMIT ; INLINE
+: BL SPACE       ; INLINE
+: CRLF #13 EMIT #10 EMIT ; INLINE
 : CR CRLF ; INLINE
 
 : BETWEEN											\ ( num min max -- bool )
@@ -210,7 +210,7 @@
 	BEGIN
 		DUP C@ DUP
 		IF
-			32 > 
+			#32 > 
 			IF LEAVE ELSE 1+ THEN
 		ELSE
 			DROP LEAVE
@@ -242,7 +242,7 @@
 	\ leading WS has already been skipped.
 	DUP >R >R
 	BEGIN
-		R@ C@ 32 > IF
+		R@ C@ #32 > IF
 			R> 1+ >R
 		ELSE
 			\ If not at the end of the line, stick a 
@@ -325,8 +325,8 @@
 	BASE @ T3 !
 	\ $xxx means it could be a HEX number
 	DUP C@ '$' = IF 1+ $10 T3 ! THEN
-	DUP C@ '#' = IF 1+  10 T3 ! THEN
-	DUP C@ '%' = IF 1+   2 T3 ! THEN
+	DUP C@ '#' = IF 1+ #10 T3 ! THEN
+	DUP C@ '%' = IF 1+ %10 T3 ! THEN
 
 	\ find out if it is negative (BASE 10 only)
 	#NEG OFF 
@@ -552,19 +552,19 @@ DECIMAL
 		0 >IN @ C!     \ Null term
 		GETCH 
 
-		DUP 13 = IF 
+		DUP #13 = IF 
 			DROP Pad BL LEAVE 
 		THEN
 
-		DUP 9 = IF     \ Tab?
+		DUP #9 = IF     \ Tab?
 			DROP 32    \ Change it into a BL
 		THEN
 
-		DUP 3 = IF
+		DUP #3 = IF
 			BYE
 		THEN
 		
-		DUP 8 = IF       \ Backspace?
+		DUP #8 = IF       \ Backspace?
 			Pad C@ 0 > IF 
 				Pad C--
 				>IN --
@@ -573,7 +573,7 @@ DECIMAL
 				DROP
 			THEN
 		ELSE
-			DUP 32 127 BETWEEN IF
+			DUP #32 127 BETWEEN IF
 				DUP EMIT
 				>IN @ C! 
 				>IN ++

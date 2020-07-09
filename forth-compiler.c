@@ -279,6 +279,62 @@ char *GetWord(char *line, char *word)
     return line;
 }
 
+bool parseBinary(char *word, CELL *val)
+{
+	CELL ret = 0;
+	char *cp = word+1;
+
+	if (strlen(word) == 1) 
+	{
+		return false;
+	}
+
+	while (*cp)
+	{
+		ret = (ret << 1);
+		char c = toupper(*cp);
+		if (('0' <= c) && (c <= '1'))
+		{
+			ret += (c - '0');
+		}
+		else
+		{
+			return false;
+		}
+		++cp;
+	}
+	*val = ret;
+	return true;
+}
+
+bool parseDecimal(char *word, CELL *val)
+{
+	CELL ret = 0;
+	char *cp = word+1;
+
+	if (strlen(word) == 1) 
+	{
+		return false;
+	}
+
+	while (*cp)
+	{
+		ret = (ret * 10);
+		char c = toupper(*cp);
+		if (('0' <= c) && (c <= '9'))
+		{
+			ret += (c - '0');
+		}
+		else
+		{
+			return false;
+		}
+		++cp;
+	}
+	*val = ret;
+	return true;
+}
+
 bool parseHex(char *word, CELL *val)
 {
 	CELL ret = 0;
@@ -392,6 +448,54 @@ char *ParseWord(char *word, char *line)
 
 	// HEX words look like this: $<hex-number>
 	if ((word[0] == '$') && (parseHex(word, &val)))
+	{
+		if (STATE == 0)
+		{
+			push(val);
+		}
+		else
+		{
+			if (val < 256)
+			{
+				CComma(CLITERAL);
+				CComma(val);
+			}
+			else
+			{
+				CComma(LITERAL);
+				Comma(val);
+			}
+			
+		}
+		return line;
+	}
+
+	// DECIMAL words look like this: #<decimal-number>
+	if ((word[0] == '#') && (parseDecimal(word, &val)))
+	{
+		if (STATE == 0)
+		{
+			push(val);
+		}
+		else
+		{
+			if (val < 256)
+			{
+				CComma(CLITERAL);
+				CComma(val);
+			}
+			else
+			{
+				CComma(LITERAL);
+				Comma(val);
+			}
+			
+		}
+		return line;
+	}
+
+	// BINARY words look like this: %<binary-number>
+	if ((word[0] == '%') && (parseBinary(word, &val)))
 	{
 		if (STATE == 0)
 		{
