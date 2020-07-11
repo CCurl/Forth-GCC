@@ -6,7 +6,7 @@
 // ------------------------------------------------------------------------------------------
 // The VM
 // ------------------------------------------------------------------------------------------
-BYTE *the_memory;
+BYTE the_memory[MEM_SZ];
 long memory_size = 0;
 
 CELL PC = 0;		// The "program counter"
@@ -23,7 +23,6 @@ bool isEmbedded = false;
 bool isBYE = false;
 
 int _QUIT_HIT = 0;
-int MEM_SZ = 0;
 
 CELL dStack[256];
 CELL rStack[256];
@@ -34,21 +33,21 @@ extern void (*vm_prims[])();
 // ------------------------------------------------------------------------------------------
 void create_vm()
 {
-	if (the_memory != (BYTE*) NULL)
-		free(the_memory);
+	// if (the_memory != (BYTE*) NULL)
+	// 	free(the_memory);
 
-	the_memory = malloc(memory_size);
+	// the_memory = malloc(memory_size);
 	memset(the_memory, 0, memory_size);
 }
 
 // ------------------------------------------------------------------------------------------
 void destroy_vm()
 {
-	if (the_memory)
-	{
-		free(the_memory);
-		the_memory = (BYTE*) NULL;
-	}
+	// if (the_memory)
+	// {
+	// 	free(the_memory);
+	// 	the_memory = (BYTE*) NULL;
+	// }
 }
 
 // ------------------------------------------------------------------------------------------
@@ -68,7 +67,8 @@ void reset_vm()
 // ------------------------------------------------------------------------------------------
 void init_vm(int vm_size)
 {
-	memory_size = vm_size > 0 ? vm_size : MEM_SZ;
+	// memory_size = vm_size > 0 ? vm_size : MEM_SZ;
+	memory_size = MEM_SZ;
 
 	init_vm_vectors();
 	create_vm();

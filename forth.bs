@@ -1,0 +1,20 @@
+\ primitive words hand-coded:
+\     dup swap over nip tuck drop
+\     >r r> r@
+\     @ c@ w@ ! c! w!
+\     (here) (last) state base
+\     + - * / /mod
+\     and or xor
+\     branch branch?
+\     < > =
+\     inline mem-size
+\     fopen fread fwrite fclose
+\     create-name : ;
+\     execute
+
+: cell 4 ; inline
+: here (here) @ ; inline
+: last (last) @ ; inline
+: c, here c! here 1 + (here) ! ;
+: w, here w! here 2 + (here) ! ;
+: ,  here !  here 4 + (here) ! ;

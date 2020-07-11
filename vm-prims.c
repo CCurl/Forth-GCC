@@ -26,7 +26,7 @@ extern CELL *rsp_init;
 extern CELL *dsp_init;
 
 extern bool isBYE;
-extern BYTE *the_memory;
+extern BYTE the_memory[];
 extern int __DEBUG__;
 extern int _QUIT_HIT;
 

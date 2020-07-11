@@ -18,7 +18,7 @@ extern CELL TOS; // The top of the stack
 
 extern bool isEmbedded;
 extern bool isBYE;
-extern BYTE *the_memory;
+extern BYTE the_memory[];
 extern long memory_size;
 
 // ------------------------------------------------------------------------------------------

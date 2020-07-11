@@ -24,6 +24,8 @@ CELL ADDR_BASE     = 0x18;
 CELL ADDR_STATE    = 0x20;
 CELL ADDR_MEM_SZ   = 0x24;
 
+bool isNew = true;
+
 extern int _QUIT_HIT;
 
 OPCODE_T theOpcodes[] = {
@@ -128,34 +130,38 @@ CELL CFetch(CELL loc)
 
 void Comma(CELL num)
 {
-	if ((0 <= HERE) && (HERE < LAST))
-	{
-		// printf(" , %04lx (%04lx)", num, HERE);
-		Store(HERE, num);
-		HERE += CELL_SZ;
-	}
-	else
-	{
-		printf("Comma(%04lx): out of memory!\n", num);
-		printf("HERE = %04lx, LAST = %04lx\n", HERE, LAST);
-		exit(0);
-	}
+	Store(HERE, num);
+	HERE += CELL_SZ;
+	// if ((0 <= HERE) && (HERE < LAST))
+	// {
+	// 	// printf(" , %04lx (%04lx)", num, HERE);
+	// 	Store(HERE, num);
+	// 	HERE += CELL_SZ;
+	// }
+	// else
+	// {
+	// 	printf("Comma(%04lx): out of memory!\n", num);
+	// 	printf("HERE = %04lx, LAST = %04lx\n", HERE, LAST);
+	// 	exit(0);
+	// }
 }
 
 void CComma(BYTE num)
 {
-	if (HERE < LAST)
-	{
-		// printf(" C, %02lx (%04lx)", num, HERE);
-		the_memory[HERE] = num;
-		HERE += 1;
-	}
-	else
-	{
-		printf("CComma(%02x): out of memory!\n", (int)num);
-		printf("HERE = %04lx, LAST = %04lx\n", HERE, LAST);
-		exit(0);
-	}
+	the_memory[HERE] = num;
+	HERE += 1;
+	// if (HERE < LAST)
+	// {
+	// 	// printf(" C, %02lx (%04lx)", num, HERE);
+	// 	the_memory[HERE] = num;
+	// 	HERE += 1;
+	// }
+	// else
+	// {
+	// 	printf("CComma(%02x): out of memory!\n", (int)num);
+	// 	printf("HERE = %04lx, LAST = %04lx\n", HERE, LAST);
+	// 	exit(0);
+	// }
 }
 
 void SyncMem(bool isSet)
@@ -189,20 +195,68 @@ CELL ExecuteXT(CELL XT)
 	return ret;
 }
 
-DICT_T *FindWord(LPCTSTR word)
+CELL FindWord_NEW(LPCTSTR word)
 {
 	trace(" looking for word [%s]\n", word);
-	DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
-	while (dp->next > 0)
+	CELL cur = LAST;
+	while (cur > 0)
 	{
+		DICT_T_NEW *dp = (DICT_T_NEW *)(&the_memory[cur]);
 		if (string_equals(word, dp->name))
 		{
-			return dp;
+			return cur;
 		}
-		dp = (DICT_T *)(&the_memory[dp->next]);
+		cur = dp->prev;
+	}
+
+	return cur;
+}
+
+CELL FindWord_OLD(LPCTSTR word)
+{
+	trace(" looking for word [%s]\n", word);
+	CELL cur = LAST;
+	while (cur > 0)
+	{
+		DICT_T *dp = (DICT_T *)(&the_memory[cur]);
+		if (string_equals(word, dp->name))
+		{
+			return cur;
+		}
+		cur = dp->next;
 	}
 
 	return 0;
+}
+
+CELL FindWord(LPCTSTR word)
+{
+	if (isNew)
+		return FindWord_NEW(word);
+	else
+		return FindWord_OLD(word);
+}
+
+BYTE GetFlags(CELL addr)
+{
+	addr += CELL_SZ;
+	addr += CELL_SZ;
+	return CFetch(addr);
+}
+
+CELL GetXT(CELL addr)
+{
+	if (isNew)
+	{
+		addr += CELL_SZ;			// next
+		addr += CELL_SZ;			// prev
+		addr += 1;					// flags
+		addr += CFetch(addr);	    // word-len
+		addr += 2;					// len byte, null-terminator
+
+		return addr;
+	}
+	return Fetch(addr + CELL_SZ);
 }
 
 bool MakeNumber(LPCTSTR word, CELL *the_num)
@@ -259,22 +313,25 @@ void DefineWord(LPCTSTR word, BYTE flags)
 
 void DefineWord_NEW(LPCTSTR word, BYTE flags)
 {
-	CELL curLAST = LAST;
-	LAST -= ((CELL_SZ*3) + 3 + string_len(word));
-	debug("Defining word [%s] at %04lx, HERE=%04lx\n", word, LAST, HERE);
+	int len = strlen(word);
+	CELL oldLAST = LAST;
 
-	DICT_T_NEW *cur = (DICT_T_NEW *)(&the_memory[curLAST]);
-	DICT_T_NEW *new = (DICT_T_NEW *)(&the_memory[LAST]);
+	debug("Defining word [%s] at %04lx, LAST=%04lx\n", word, HERE, LAST);
 
-	// bac
-	cur->prev = LAST;
+	// Doubly linked list
+	if (oldLAST > 0)
+		SETAT(oldLAST, HERE);
 
-	new->next = curLAST;
-	new->prev = 0;
-	new->XT = HERE;
-	new->flags = flags;
-	new->len = string_len(word);
-	strcpy(new->name, word);
+	LAST = HERE;
+	Comma(0);		// next
+	Comma(oldLAST);	// prev
+	CComma(flags);
+	CComma(len);
+	for (int i = 0; i < len; i++)
+	{
+		CComma(word[i]);
+	}
+	CComma(0);
 
 	SyncMem(true);
 }
@@ -412,7 +469,11 @@ char *ParseWord(char *word, char *line)
 	{
 		trace("\n");
 		line = GetWord(line, word);
-		DefineWord(word, 0);
+		if (isNew)
+			DefineWord_NEW(word, 0);
+		else
+			DefineWord(word, 0);
+		
 		CComma(DICTP);
 		Comma(LAST);
 		STATE = 1;
@@ -425,7 +486,10 @@ char *ParseWord(char *word, char *line)
 	{
 		trace("\n");
 		line = GetWord(line, word);
-		DefineWord(word, 0);
+		if (isNew)
+			DefineWord_NEW(word, 0);
+		else
+			DefineWord(word, 0);
 		CComma(DICTP);
 		Comma(LAST);
 		CComma(LITERAL);
@@ -566,15 +630,31 @@ char *ParseWord(char *word, char *line)
 
 	if (strcmp(word, ".INLINE.") == 0)
 	{
-		DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
-		dp->flags |= IS_INLINE;
+		if (isNew)
+		{
+			DICT_T_NEW *dp = (DICT_T_NEW *)(&the_memory[LAST]);
+			dp->flags |= IS_INLINE;
+		}
+		else
+		{
+			DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
+			dp->flags |= IS_INLINE;
+		}
 		return line;
 	}
 
 	if (strcmp(word, ".IMMEDIATE.") == 0)
 	{
-		DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
-		dp->flags |= IS_IMMEDIATE;
+		if (isNew)
+		{
+			DICT_T_NEW *dp = (DICT_T_NEW *)(&the_memory[LAST]);
+			dp->flags |= IS_IMMEDIATE;
+		}
+		else
+		{
+			DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
+			dp->flags |= IS_IMMEDIATE;
+		}
 		return line;
 	}
 
@@ -648,23 +728,25 @@ char *ParseWord(char *word, char *line)
 		}
 	}
 
-	DICT_T *dp = FindWord(word);
-	if (dp != NULL)
+	CELL wordAddr = FindWord(word);
+	if (wordAddr != 0)
 	{
-		debug("FORTH word [%s]. STATE=%ld ... ", dp->name, STATE);
+		CELL xt = GetXT(wordAddr);
+		CELL flags = GetFlags(wordAddr);
+		// debug("FORTH word [%s]. STATE=%ld ... ", dp->name, STATE);
 		if (STATE == 1)
 		{
-			debug("compiling into current word\n", dp->name, dp->XT, STATE);
-			if (dp->flags & IS_IMMEDIATE)
+			debug("compiling into current word\n");
+			if (flags & IS_IMMEDIATE)
 			{
-				// printf("executing 0x%04lx ...", dp->XT);
-				ExecuteXT(dp->XT);
+				// printf("executing 0x%04lx ...", xt);
+				ExecuteXT(xt);
 			}
-			else if (dp->flags & IS_INLINE)
+			else if (flags & IS_INLINE)
 			{
 				// Skip the DICTP instruction
-				CELL addr = dp->XT + 1 + CELL_SZ;
-				// printf("inlining 0x%04lx ...", dp->XT);
+				CELL addr = xt + 1 + CELL_SZ;
+				// printf("inlining 0x%04lx ...", xt);
 
 				// Copy bytes until the first RET
 				while (true)
@@ -680,13 +762,13 @@ char *ParseWord(char *word, char *line)
 			else
 			{
 				CComma(CALL);
-				Comma(dp->XT);
+				Comma(xt);
 			}
 		}
 		else
 		{
 			debug("executing it ...\n");
-			ExecuteXT(dp->XT);
+			ExecuteXT(xt);
 		}
 		return line;
 	}
@@ -765,11 +847,14 @@ void CompilerInit()
 	isEmbedded = true;
 
 	HERE = 0x0040;
-	// LAST = MEM_SZ - STACKS_SZ - CELL_SZ;
 	LAST = MEM_SZ - CELL_SZ;
+	if (isNew)
+	{
+		LAST = 0;
+		// Comma(0);
+	}
 	STATE = 0;
 
-	Store(LAST, 0);
 	Store(ADDR_CELL, CELL_SZ);
 	Store(ADDR_BASE, BASE);
 }
@@ -795,18 +880,19 @@ void Compile(FILE *fp_in)
     }
     fclose(fp_in);
 
-	DICT_T *dp = FindWord("main");
-	if (dp == NULL)
-	{
-		dp = FindWord("MAIN");
-		if (dp == NULL)
-		{
-			dp = (DICT_T *)&the_memory[LAST];
-		}
-	}
+	// CELL addr = FindWord("main");
+	// if (addr == NULL)
+	// {
+	// 	addr = FindWord("MAIN");
+	// 	if (addr == NULL)
+	// 	{
+	// 		addr = LAST;
+	// 	}
+	// }
 
 	CStore(0, JMP);
-	Store(1, dp->XT);
+	// Store(1, GetXT(addr));
+	Store(1, 12345);
 
 	SyncMem(true);
 }
@@ -911,7 +997,7 @@ int main (int argc, char **argv)
         }
     }
 
-	MEM_SZ = mem_size_KB * 1024;
+	// MEM_SZ = mem_size_KB * 1024;
     do_compile();
 	write_output_file();
 

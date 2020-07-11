@@ -27,7 +27,7 @@ rem gcc -g -o %output% %c-files%
 gcc -g -o tmp %c-files%
 strip -o %output%.exe -g -S -d -X tmp.exe
 del tmp.exe
-if "--%2%--" == "--1--" forth-compiler
+if "--%2%--" == "--1--" forth-compiler -t
 goto done
 
 :make-nc
@@ -178,7 +178,7 @@ goto done
 call make fc 1
 call make fd 1
 call make forth
-call make f2 1
+rem call make f2 1
 goto done
 
 :unknown

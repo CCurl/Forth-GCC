@@ -99,8 +99,7 @@ typedef struct {
 } DICT_T;
 
 typedef struct {
-	BYTE next, prev;
-	CELL XT;
+	CELL next, prev;
 	BYTE flags;
 	BYTE len;
 	char name[32];
@@ -126,7 +125,7 @@ extern CELL ADDR_MEM_SZ;   // 0x24
 
 #define ONE_KB (1024)
 #define ONE_MB (ONE_KB * ONE_KB)
-extern int MEM_SZ;
+#define MEM_SZ (256 * ONE_KB)
 
 #define GETAT(loc) *(CELL *)(&the_memory[loc])
 #define SETAT(loc, val) *(CELL *)(&the_memory[loc]) = val

@@ -76,10 +76,19 @@ void string_makeZ(char *dest)
 }
 
 // *********************************************************************
-bool string_equals(char *str1, char *str2)
+bool string_equals_case(char *str1, char *str2)
 {
-    return strcmp(str1, str2) == 0 ? true : false;
+    return stricmp(str1, str2) == 0 ? true : false;
 }
+
+// *********************************************************************
+bool string_equals_nocase(char *str1, char *str2)
+{
+    return stricmp(str1, str2) == 0 ? true : false;
+}
+
+// *********************************************************************
+#define string_equals(str1, str2) string_equals_case(str1, str2)
 
 // *********************************************************************
 bool string_isEmpty(char *str)
@@ -92,12 +101,6 @@ bool string_isEmpty(char *str)
 		return false;
 	}
 	
-}
-
-// *********************************************************************
-bool string_equals_nocase(char *str1, char *str2)
-{
-    return stricmp(str1, str2) == 0 ? true : false;
 }
 
 // *********************************************************************
