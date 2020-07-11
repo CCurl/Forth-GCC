@@ -98,6 +98,14 @@ typedef struct {
 	char name[30];
 } DICT_T;
 
+typedef struct {
+	BYTE next, prev;
+	CELL XT;
+	BYTE flags;
+	BYTE len;
+	char name[32];
+} DICT_T_NEW;
+
 #undef NULL
 #define NULL (0)
 #define CELL_SZ (sizeof(CELL))

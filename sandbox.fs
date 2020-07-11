@@ -8,52 +8,53 @@ variable tl tl !
 
 \ ------------- START OF SANDBOX -------------
 
-: to-upper  ( c1 -- c2 )
-     DUP 'a' < IF LEAVE THEN
-     DUP 'z' > IF LEAVE THEN
-     $20 - ;
+: ->next    ; inline
+: ->prev 1+ ; inline
+: ->xt   2+ ; inline
+: ->flags CELL + 2+  ;
+: ->len   CELL + 3 + ;
+: ->name  CELL + 4 + ;
 
-: to-lower  ( c1 -- c2 )
-     DUP 'A' < IF LEAVE THEN
-     DUP 'Z' > IF LEAVE THEN
-     $20 + ;
+variable (n.last)
+: n.last (n.last) @ ;
 
-: char-find       ( ch str -- pos|-1 )
-     SWAP T2 ! 0 >R COUNT
-	BEGIN
-          DUP 0= IF 2DROP RDROP -1 LEAVE THEN
-		OVER C@ T2 @ = IF 2DROP R> LEAVE THEN
-          R> 1+ >R
-		1- SWAP 1+ SWAP
-	AGAIN ;
+variable n.newlast
+variable n.oldlast
 
-: is-num? ( base ch -- val bool )
-     to-upper
-     SWAP >R
-     " 0123456789ABCDEF" \ SWAP OVER + 1+ 0 SWAP C! DUP COUNT TYPE
-     char-find DUP 0 < IF 0 RDROP LEAVE THEN     
-     R> 1- .S OVER < IF 0 ELSE 1 THEN
-     \ 1 \ 1- 2DUP > IF DROP 0 LEAVE THEN
-     ;
+: l,  n.last !  4 (n.last) +! ;
+: lc, n.last C! 1 (n.last) +! ;
+: n.create-name ( cstr -- )
+    count dup CELL + 5 + DUP
+    n.last swap - DUP >R (n.last) !
+    DUP >R 
+    lc, 0 lc, here l, 0 lc, dup lc, 
+    'a' lc, 'b' lc, 'c' lc, 'd' lc, 0 lc,
+    drop drop \ temp
+    n.last 1+ r> 1+ swap c! 
+    R> (n.last) ! ;
 
-: t over . dup emit is-number? IF " -YES " CT . ELSE " -NO" CT DROP THEN CR ;
+19 $3000 !
+$3000 (n.last) !
+\ n.last hex. cr
 
-02 '0' t
-02 '1' t
-02 '2' t
-08 '7' t
-08 '8' t
-10 '0' t
-10 '9' t
-10 'a' t
-16 '0' t
-16 '9' t
-16 'f' t
-16 'g' t
-\ 02 '3' is-num? . . CR
-\ 10 'a' is-num? . . CR
-\ 16 'a' is-num? . . CR
+\ n.last n.oldlast !
+\ n.last 17 - n.newlast !
+\ n.newlast @ (n.last) !
+\ n.newlast @ hex. space n.oldlast @ hex. space here hex.
+
+\ 17 lc, 0 lc, here l, 0 lc,
+\ 8 lc, 
+\ 'v' lc, 'a' lc, 'r' lc, 'i' lc, 
+\ 'a' lc, 'b' lc, 'l' lc, 'e' lc, 0 lc, 
+\ 99 lc,
+\ n.newlast @ (n.last) !
+\ n.last n.oldlast @ 1- dump
+\ space n.last ->len count type
+
+cr n.last DUP hex. space " abcd" n.create-name n.last DUP hex.
+space n.last ->len count type
+SWAP 1+ hex cr .s decimal dump
 
 \ ------------- END OF SANDBOX -------------
 \ CR sys-info
-fsb \ CR sys-info
+fsb

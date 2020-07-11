@@ -257,6 +257,28 @@ void DefineWord(LPCTSTR word, BYTE flags)
 	SyncMem(true);
 }
 
+void DefineWord_NEW(LPCTSTR word, BYTE flags)
+{
+	CELL curLAST = LAST;
+	LAST -= ((CELL_SZ*3) + 3 + string_len(word));
+	debug("Defining word [%s] at %04lx, HERE=%04lx\n", word, LAST, HERE);
+
+	DICT_T_NEW *cur = (DICT_T_NEW *)(&the_memory[curLAST]);
+	DICT_T_NEW *new = (DICT_T_NEW *)(&the_memory[LAST]);
+
+	// bac
+	cur->prev = LAST;
+
+	new->next = curLAST;
+	new->prev = 0;
+	new->XT = HERE;
+	new->flags = flags;
+	new->len = string_len(word);
+	strcpy(new->name, word);
+
+	SyncMem(true);
+}
+
 // Returns a pointer to the first char after the first word in the line
 // NB: this is NOT a counted string
 char *GetWord(char *line, char *word)
