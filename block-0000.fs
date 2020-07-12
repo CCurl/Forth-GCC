@@ -4,7 +4,7 @@
 \ It then writes that image to a file specified by -i:<filename>. The default is forth.bin.
 \ The image file is read by the VM (forth.exe) when it boots.
 \
-\ NB: don't inline anything with a 12 (0x0C) in it ... that is RET
+\ NB: don't inline anything with a #12 (0x0C) in it ... that is RET
 \ -----------------------------------------------------------------------------------------------
 
 \ Variables mess up the disassembler, put them first
@@ -256,20 +256,23 @@
 	AGAIN
 ;
 
-: DICT>NEXT ;
-: DICT>XT     CELL + ;
-: DICT>FLAGS  2 CELLS + ;
-: DICT>NAME   DICT>FLAGS 1+ ;
+\ [prev][next][flags][len][name][0]
 
-: NEXT>DICT ;
-: XT>DICT     CELL - ;
-: FLAGS>DICT  2 CELLS - ;
-: NAME>DICT   1- 2 CELLS - ;
+: DICT>PREV          ;
+: DICT>NEXT   CELL + ;
+: DICT>FLAGS  CELL + CELL + ;
+: DICT>NAME   DICT>FLAGS 1+ ;
+: DICT>XT     DUP DICT>NAME C@ + 1+ ;
+
+\ : NEXT>DICT ;
+\ : XT>DICT     CELL - ;
+\ : FLAGS>DICT  2 CELLS - ;
+\ : NAME>DICT   1- 2 CELLS - ;
 
 : DICT.GetXT DICT>XT @ ;
 : DICT.GetFLAGS DICT>FLAGS C@ ;
 
-: DICTP>NAME 1+ @ DICT>NAME ;
+\ : DICTP>NAME 1+ @ DICT>NAME ;
 
 : XT.GetDICTP 						\ ( XT -- dictp )
 	DUP C@ [ CLITERAL DICTP ] = 
@@ -285,6 +288,7 @@
 
 : DICT.GetIMMEDIATE DICT.GetFLAGS FLAGS.ISIMMEDIATE? ;
 : DICT.GetINLINE    DICT.GetFLAGS FLAGS.ISINLINE? ;
+
 
 : findInDict						\ ( addr -- XT IMM bool )
 	LAST >R
@@ -395,35 +399,18 @@ DECIMAL
 	AGAIN
 ;
 
-: .(MEM_SZ) S" Memory: " CT MEM_SZ DUP HEX. S"  (" CT (.) S" )" CT ;
-: .(HERE)   S" HERE: "   CT HERE   DUP HEX. S"  (" CT (.) S" )" CT ;
-: .(LAST)   S" LAST: "   CT LAST   DUP HEX. S"  (" CT (.) S" )" CT ;
+\ : WORDSV LAST HEX.4 SPACE CRLF LAST BEGIN DUP @ 0= IF DROP CRLF LEAVE THEN .WORD-LONG  AGAIN ;
 
-: .WORD-SHORT DUP DICT>NAME CT BL @ ;
-: WORDS LAST BEGIN DUP @ 0= IF DROP CRLF LEAVE THEN .WORD-SHORT AGAIN ;
-
-: .WORD-LONG  
-		DUP HEX. ':' EMIT BL
-		DUP DICT>NAME CT BL
-		DUP DICT.GetXT 40 EMIT HEX.4 41 EMIT \ DEBUG
-		DUP DICT>FLAGS C@ \ DEBUG
-		DUP S" , Flags: " CT HEX.2 \ DEBUG
-		DUP FLAGS.ISINLINE? IF S"  (INLINE)" CT THEN \ DEBUG
-		FLAGS.ISIMMEDIATE? IF S"  (IMMEDIATE)" CT THEN \ DEBUG
-		CRLF @ ;
-
-: WORDSV .(LAST) CRLF LAST BEGIN DUP @ 0= IF DROP CRLF LEAVE THEN .WORD-LONG  AGAIN ;
-
-: NUM-WORDS 0 >R LAST BEGIN DUP @ 0= IF DROP R> CRLF LEAVE THEN R> 1+ >R @ AGAIN ;
+\ : NUM-WORDS 0 >R LAST BEGIN DUP @ 0= IF DROP R> CRLF LEAVE THEN R> 1+ >R @ AGAIN ;
 
 \ Prints the last <x> words
-: .lastx CR LAST SWAP
-    BEGIN
-            SWAP .WORD-LONG SWAP
-			1- 
-			DUP 
-	WHILE
-    DROP DROP ;
+\ : .lastx CR LAST SWAP
+\    BEGIN
+\            SWAP .WORD-LONG SWAP
+\			1- 
+\			DUP 
+\	WHILE
+\   DROP DROP ;
 
 : EXECUTE RDROP >R ;		\ ( addr -- )
 
@@ -655,19 +642,6 @@ DECIMAL
 : ? @ . ;		\ ( addr -- )
 : C? C@ . ;		\ ( addr -- )
 
-: FREE LAST HERE - ;
-: .FREE FREE (.) S"  bytes free." CT ;
-
-: mainLoop 
-	resetState 
-	BEGIN 
-		?COMPILING 0= IF S"  OK" CT .S THEN
-		CRLF getLine 1+ >IN ! 
-		executeInput BL 
-	AGAIN ;
-
-: main STATE @ 99 = IF STATE OFF S" Hello." CT THEN mainLoop ;
-
 \ ------------------------------------------------------------------------------------
 : file-getLine		\ ( fp -- addr num-read )
 	Pad SWAP 200 SWAP
@@ -750,6 +724,13 @@ DECIMAL
 
 : ll S" loads.fs" load ;
 
+: .(MEM_SZ) S" Memory: " CT MEM_SZ DUP HEX.4 S"  (" CT (.) S" )" CT ;
+: .(HERE)   S" HERE: "   CT HERE   DUP HEX.4 S"  (" CT (.) S" )" CT ;
+: .(LAST)   S" LAST: "   CT LAST   DUP HEX.4 S"  (" CT (.) S" )" CT ;
+
+: FREE MEM_SZ HERE - ;
+: .FREE FREE (.) S"  bytes free." CT ;
+
 : sys-info
 	.(MEM_SZ) 44 EMIT BL
 	.(HERE)   44 EMIT BL 
@@ -757,6 +738,147 @@ DECIMAL
 	.FREE CR ;
 
 : VARIABLE  CREATE-NAME HERE 2 + CELL + LITERAL , RET 0 , ;
+: PAD HERE $100 + ;
+
+: ?echo 			\ ( ch -- ch )
+	INPUT-FP @ 0 = 
+	IF 
+		DUP #13 = IF 
+			S"  Ok" COUNT TYPE DUP EMIT #10 EMIT 
+		ELSE
+			DUP EMIT 
+		THEN
+	THEN ;
+
+: get-char  		\ ( -- ch )
+	GETCH DUP #3 = 
+	IF BYE THEN ?echo ;
+
+: skip-ws  		\ ( -- ch )
+	BEGIN
+		get-char 
+		DUP #32 > 
+		IF LEAVE THEN
+		DROP
+	AGAIN ;
+
+: get-char-word		\ ( -- ch )
+	get-char DUP 
+	#33 < IF LEAVE THEN ;
+
+: get-word      \ ( -- addr )
+	0 PAD !
+	PAD 1+ >R
+	skip-ws
+	BEGIN
+		R@ C! R> 1+ DUP 0 SWAP C! >R
+		PAD DUP C@ 1+ SWAP C!
+		get-char-word
+		DUP #33 <
+	UNTIL
+	DROP R> DROP PAD ;
+
+: ->next 0 + ;
+: ->prev CELL + ;
+: ->flags 2 CELLS + ;
+: ->len   2 CELLS + 1+ ;
+: ->name  2 CELLS + 1+ ;
+: ->xt   ->len DUP C@ + 1+ 1+ ;
+
+: .WORD-LONG
+		DUP HEX. ':' EMIT BL
+		DUP ->name COUNT TYPE SPACE
+		DUP ->xt '(' EMIT HEX.4 ')' EMIT \ DEBUG
+		DUP ->flags C@ \ DEBUG
+		DUP S" , Flags: " CT HEX.2 \ DEBUG
+		DUP FLAGS.ISINLINE? IF S"  (INLINE)" COUNT TYPE THEN \ DEBUG
+		FLAGS.ISIMMEDIATE? IF S"  (IMMEDIATE)" COUNT TYPE THEN \ DEBUG
+		CRLF DROP ;
+
+: .WORD-SHORT ->name COUNT TYPE SPACE ;
+: WORDS LAST BEGIN 
+		DUP .WORD-SHORT ->prev @ DUP
+	WHILE ;
+
+: find-word						\ ( addr -- XT IMM bool )
+	LAST >R
+	BEGIN
+		\ name is a counted string
+		\ DUP COUNT TYPE SPACE
+		\ R@ ->name COUNT TYPE SPACE CR
+
+		R@ ->name OVER COMPAREI
+		IF
+			DROP R@ ->xt R> ->flags C@ FLAG_IMMEDIATE AND -1
+			LEAVE
+		THEN
+		R> ->prev @ >R
+		R@
+	WHILE
+	DROP R> 0 0 ;
+
+: is-number?				\ ( c-str -- num bool )
+	\ 'c' means it's a character literal
+	DUP C@ ''' = IF 1+ parse-char LEAVE THEN
+
+	BASE @ T3 !
+	\ $xxx means it could be a HEX number
+	DUP C@ '$' = IF 1+ $10 T3 ! THEN
+	DUP C@ '#' = IF 1+ #10 T3 ! THEN
+	DUP C@ '%' = IF 1+ %10 T3 ! THEN
+
+	\ find out if it is negative (BASE 10 only)
+	#NEG OFF 
+	T3 @ 10 = IF DUP C@ '-' = DUP #NEG ! IF 1+ THEN THEN
+
+	\ accumulate the result on the return stack
+	0 >R
+	BEGIN
+		DUP C@
+		DUP 0 = \ end of word?
+		IF 
+			2DROP R> 
+			#NEG @ IF NEGATE THEN
+			1 LEAVE
+		THEN
+
+		T3 @ SWAP is-num-char?
+		\ isNumChar?
+		IF
+			R> T3 @ * + >R
+			1+
+		ELSE
+			DROP R> 0 LEAVE
+		THEN
+	AGAIN ;
+
+: execute-word		\ ( addr -- )
+	DUP find-word
+	IF
+		DROP SWAP DROP
+		>R LEAVE
+		LEAVE
+	THEN
+
+	DROP DROP
+
+	DUP 1+ is-number? IF
+		SWAP DROP LEAVE
+	THEN
+
+	DROP
+	COUNT TYPE S" : not found." COUNT TYPE CR ;
+
+: main
+	STATE @ #99 = IF S" Hello." COUNT TYPE CRLF THEN
+	0 STATE !
+
+	\ The REPL (read, execute, print loop)
+	BEGIN 
+		get-word
+		execute-word
+	AGAIN ;
+
 
 \ --------------------------------------------------------------------------------
 sys-info
@@ -770,7 +892,7 @@ HEX
 	0      20 ! \ STATE
 	MEM_SZ 24 !
 DECIMAL
-99 STATE !
+#99 STATE !
 
 \ CELL ADDR_CELL     = 0x08;
 \ CELL ADDR_HERE     = 0x10;

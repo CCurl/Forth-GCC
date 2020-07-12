@@ -1,6 +1,8 @@
 #ifndef __FORTH_SHARED__
 #define __FORTH_SHARED__
 
+#define MEM_SZ_KB 16
+
 // ************************************************************************************************
 // The VM's instruction set
 // ************************************************************************************************
@@ -125,7 +127,7 @@ extern CELL ADDR_MEM_SZ;   // 0x24
 
 #define ONE_KB (1024)
 #define ONE_MB (ONE_KB * ONE_KB)
-#define MEM_SZ (256 * ONE_KB)
+#define MEM_SZ (MEM_SZ_KB * ONE_KB)
 
 #define GETAT(loc) *(CELL *)(&the_memory[loc])
 #define SETAT(loc, val) *(CELL *)(&the_memory[loc]) = val

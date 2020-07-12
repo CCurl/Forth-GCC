@@ -27,6 +27,7 @@ CELL ADDR_MEM_SZ   = 0x24;
 bool isNew = true;
 
 extern int _QUIT_HIT;
+bool _ALL_OK;
 
 OPCODE_T theOpcodes[] = {
        { ".LITERAL.", 1, "LITERAL" },
@@ -456,6 +457,7 @@ char *ParseWord(char *word, char *line)
 	if (string_equals(word, ".QUIT"))
 	{
 		_QUIT_HIT = 1;
+		_ALL_OK = false;
 		return line;
 	}
 
@@ -474,8 +476,8 @@ char *ParseWord(char *word, char *line)
 		else
 			DefineWord(word, 0);
 		
-		CComma(DICTP);
-		Comma(LAST);
+		// CComma(DICTP);
+		// Comma(LAST);
 		STATE = 1;
 
 		return line;
@@ -490,8 +492,8 @@ char *ParseWord(char *word, char *line)
 			DefineWord_NEW(word, 0);
 		else
 			DefineWord(word, 0);
-		CComma(DICTP);
-		Comma(LAST);
+		// CComma(DICTP);
+		// Comma(LAST);
 		CComma(LITERAL);
 		Comma(HERE + 5);
 		CComma(RET);
@@ -745,7 +747,7 @@ char *ParseWord(char *word, char *line)
 			else if (flags & IS_INLINE)
 			{
 				// Skip the DICTP instruction
-				CELL addr = xt + 1 + CELL_SZ;
+				CELL addr = xt; // + 1 + CELL_SZ;
 				// printf("inlining 0x%04lx ...", xt);
 
 				// Copy bytes until the first RET
@@ -799,6 +801,7 @@ char *ParseWord(char *word, char *line)
 	}
 
 	_QUIT_HIT = 1;
+	_ALL_OK = false;
 	printf("ERROR: '%s'??\n", word);
 	return line;
 }
@@ -880,19 +883,18 @@ void Compile(FILE *fp_in)
     }
     fclose(fp_in);
 
-	// CELL addr = FindWord("main");
-	// if (addr == NULL)
-	// {
-	// 	addr = FindWord("MAIN");
-	// 	if (addr == NULL)
-	// 	{
-	// 		addr = LAST;
-	// 	}
-	// }
+	CELL addr = FindWord("main");
+	if (addr == NULL)
+	{
+		addr = FindWord("MAIN");
+		if (addr == NULL)
+		{
+			addr = LAST;
+		}
+	}
 
 	CStore(0, JMP);
-	// Store(1, GetXT(addr));
-	Store(1, 12345);
+	Store(1, GetXT(addr));
 
 	SyncMem(true);
 }
@@ -966,7 +968,7 @@ void process_arg(char *arg)
     {
         printf("usage: forth-compiler [args]\n");
         printf("  -i:inputFile (full or relative path)\n");
-        printf("      default inputFile is forth.src\n");
+        printf("      default inputFile is block-0000.fs\n");
         printf("  -o:outputFile (full or relative path)\n");
         printf("      default outputFile is forth.bin\n");
         printf("  -m:<KB> - Memory size in KB\n");
@@ -984,8 +986,9 @@ void process_arg(char *arg)
 
 int main (int argc, char **argv)
 {
-    strcpy(input_fn, "forth.src");
+    strcpy(input_fn, "block-0000.fs");
     strcpy(output_fn, "forth.bin");
+	_ALL_OK = true;
 	debug_off();
 
     for (int i = 1; i < argc; i++)
@@ -1000,6 +1003,18 @@ int main (int argc, char **argv)
 	// MEM_SZ = mem_size_KB * 1024;
     do_compile();
 	write_output_file();
+
+	if (_ALL_OK)
+	{
+		PC = 0;
+		SyncMem(true);
+		PC = 0;
+		isBYE = false;
+		isEmbedded = false;
+		CELL ret = cpu_loop();
+		SyncMem(false);
+	}
+
 
     return 0;
 }

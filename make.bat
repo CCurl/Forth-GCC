@@ -13,6 +13,7 @@ if "--%1%--" == "--aa--" goto make-aa
 if "--%1%--" == "--st--" goto make-st
 if "--%1%--" == "--br--" goto make-br
 if "--%1%--" == "--f2--" goto make-f2
+if "--%1%--" == "--f3--" goto make-f3
 goto unknown
 
 :make-fc
@@ -27,7 +28,22 @@ rem gcc -g -o %output% %c-files%
 gcc -g -o tmp %c-files%
 strip -o %output%.exe -g -S -d -X tmp.exe
 del tmp.exe
-if "--%2%--" == "--1--" forth-compiler -t
+if "--%2%--" == "--1--" forth-compiler
+goto done
+
+:make-f3
+set output=forth3
+set c-files=forth3.c 
+set c-files=%c-files% forth-vm.c
+set c-files=%c-files% vm-prims.c
+set c-files=%c-files% logger.c
+echo making %output% ...
+echo gcc -g -o %output% %c-files%
+rem gcc -g -o %output% %c-files%
+gcc -g -o tmp %c-files%
+strip -o %output%.exe -g -S -d -X tmp.exe
+del tmp.exe
+if "--%2%--" == "--1--" forth3
 goto done
 
 :make-nc
@@ -179,6 +195,7 @@ call make fc 1
 call make fd 1
 call make forth
 rem call make f2 1
+forth 1
 goto done
 
 :unknown

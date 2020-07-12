@@ -21,6 +21,8 @@ CELL ADDR_INPUTFP  = 0x1C;
 CELL ADDR_STATE    = 0x20;
 CELL ADDR_MEM_SZ   = 0x24;
 
+CELL HERE;
+
 // ------------------------------------------------------------------------------------------
 void dis_range(CELL start, CELL end, char *bytes)
 {
@@ -264,8 +266,9 @@ CELL dis_one(char *bytes, char *desc)
 		// rpush(PC);
 		// PC = arg1;
 		arg2 = GETAT(arg1+1);
-		DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
-		sprintf(desc, "CALL %s (%04lx)", dp->name, arg1);
+		// DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
+		// sprintf(desc, "CALL %s (%04lx)", dp->name, arg1);
+		sprintf(desc, "CALL %04lx", arg1);
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
 
@@ -627,46 +630,48 @@ CELL dis_one(char *bytes, char *desc)
 }
 
 // ------------------------------------------------------------------------------------------
-void dis_dict(FILE *write_to, CELL dict_addr)
+CELL dis_dict(FILE *write_to, CELL dict_addr)
 {
 	char bytes[128], desc[128];
-	DICT_T *dp = (DICT_T *)&the_memory[dict_addr];
-	DICT_T *next_dp = (DICT_T *)&the_memory[dp->next];
+	DICT_T_NEW *dp = (DICT_T_NEW *)&the_memory[dict_addr];
 	CELL addr = dict_addr;
 
-	if (dp->next == 0)
-	{
-		sprintf(bytes, "%04lx:", addr);
-		dis_start(addr, CELL_SZ, bytes);
-		fprintf(write_to, "%-32s ; End.\n", bytes);
-		return;
-	}
+	// if (dp->next == 0)
+	// {
+	// 	sprintf(bytes, "%04lx:", addr);
+	// 	dis_start(addr, CELL_SZ, bytes);
+	// 	fprintf(write_to, "%-32s ; End.\n", bytes);
+	// 	return;
+	// }
 
 	// Next
 	sprintf(bytes, "%04lx:", addr);
 	dis_start(addr, CELL_SZ, bytes);
-	sprintf(desc, "%s - (next: %04lx %s)", dp->name, dp->next, (next_dp->next > 0) ? next_dp->name : "<end>");
-	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
+	sprintf(desc, "NEXT: %04lx", dp->next);
+	fprintf(write_to, ";\n%-32s ; %s\n", bytes, desc);
 	addr += CELL_SZ;
 
-	// XT, Flags
+	// PREV, Flags
 	sprintf(bytes, "%04lx:", addr);
 	dis_start(addr, CELL_SZ+1, bytes);
-	sprintf(desc, "XT=%04lx, flags=%02x", dp->XT, dp->flags);
+	sprintf(desc, "PREV: %04lx, flags: %02x", dp->prev, dp->flags);
 	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
 	addr += CELL_SZ+1;
 
 	// Name
 	sprintf(bytes, "%04lx: %02x", addr++, dp->len);
 	dis_start(addr, dp->len+1, bytes);
-	sprintf(desc, "%d, %s", (int)dp->len, dp->name);
-	fprintf(write_to, "%-32s ; %s\n;\n", bytes, desc);
+	sprintf(desc, "LEN: %d, NAME: %s", (int)dp->len, dp->name);
+	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
+
+	addr += dp->len + 1;
+	return addr;
 }
 
 // ------------------------------------------------------------------------------------------
 void dis_vm(FILE *write_to)
 {
-	int here = GETAT(ADDR_HERE);
+	HERE = GETAT(ADDR_HERE);
 	char bytes[128], desc[128];
 
 	// Initial JMP
@@ -695,25 +700,25 @@ void dis_vm(FILE *write_to)
 	fflush(write_to);
 
 	// Code
-	PC = dis_vars(write_to);
+	// PC = dis_vars(write_to);
 
-	while (PC < here)
+	while (PC < HERE)
 	{
-		dis_one(bytes, desc);
-		fprintf(write_to, "%-32s ; %s\n", bytes, desc);
+		DICT_T_NEW *curr_dp = (DICT_T_NEW *)(&the_memory[PC]);
+		CELL stop_here = curr_dp->next;
+		stop_here = (stop_here > 0) ? stop_here : HERE;
+		PC = dis_dict(write_to, PC);
 		fflush(write_to);
+		while (PC < stop_here)
+		{
+			dis_one(bytes, desc);
+			fprintf(write_to, "%-32s ; %s\n", bytes, desc);
+			fflush(write_to);
+		}
+		PC = stop_here;
 	}
 
-	fprintf(write_to, ";\n; End of code, Dictionary:\n;\n");
-
-	// Dictionary
-	PC = GETAT(ADDR_LAST);
-	while (PC > 0)
-	{
-		dis_dict(write_to, PC);
-		fflush(write_to);
-		PC = GETAT(PC);
-	}
+	fprintf(write_to, ";\n; End of code\n");
 }
 
 // *********************************************************************
@@ -740,11 +745,11 @@ void load_vm()
 	fclose(input_fp);
 	input_fp = NULL;
 
-	ADDR_HERE = GetSysVarAddr("(HERE)");
-	ADDR_LAST = GetSysVarAddr("(LAST)");
-	ADDR_BASE = GetSysVarAddr("BASE");
-	ADDR_STATE = GetSysVarAddr("STATE");
-	ADDR_MEM_SZ = GetSysVarAddr("(MEM_SZ)");
+	// ADDR_HERE = GetSysVarAddr("(HERE)");
+	// ADDR_LAST = GetSysVarAddr("(LAST)");
+	// ADDR_BASE = GetSysVarAddr("BASE");
+	// ADDR_STATE = GetSysVarAddr("STATE");
+	// ADDR_MEM_SZ = GetSysVarAddr("(MEM_SZ)");
 
 	printf(" done.\n");
 }
