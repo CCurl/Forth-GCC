@@ -25,6 +25,7 @@ CELL ADDR_STATE    = 0x20;
 CELL ADDR_MEM_SZ   = 0x24;
 
 bool isNew = true;
+bool run_vm = true;
 
 extern int _QUIT_HIT;
 bool _ALL_OK;
@@ -299,21 +300,6 @@ bool MakeNumber(LPCTSTR word, CELL *the_num)
 
 void DefineWord(LPCTSTR word, BYTE flags)
 {
-	CELL curLAST = LAST;
-	LAST -= ((CELL_SZ*2) + 3 + string_len(word));
-	debug("Defining word [%s] at %04lx, HERE=%04lx\n", word, LAST, HERE);
-
-	DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
-	dp->next = curLAST;
-	dp->XT = HERE;
-	dp->flags = flags;
-	dp->len = string_len(word);
-	strcpy(dp->name, word);
-	SyncMem(true);
-}
-
-void DefineWord_NEW(LPCTSTR word, BYTE flags)
-{
 	int len = strlen(word);
 	CELL oldLAST = LAST;
 
@@ -321,11 +307,11 @@ void DefineWord_NEW(LPCTSTR word, BYTE flags)
 
 	// Doubly linked list
 	if (oldLAST > 0)
-		SETAT(oldLAST, HERE);
+		SETAT(oldLAST + CELL_SZ, HERE);
 
 	LAST = HERE;
-	Comma(0);		// next
 	Comma(oldLAST);	// prev
+	Comma(0);		// next
 	CComma(flags);
 	CComma(len);
 	for (int i = 0; i < len; i++)
@@ -471,10 +457,7 @@ char *ParseWord(char *word, char *line)
 	{
 		trace("\n");
 		line = GetWord(line, word);
-		if (isNew)
-			DefineWord_NEW(word, 0);
-		else
-			DefineWord(word, 0);
+		DefineWord(word, 0);
 		
 		// CComma(DICTP);
 		// Comma(LAST);
@@ -488,10 +471,7 @@ char *ParseWord(char *word, char *line)
 	{
 		trace("\n");
 		line = GetWord(line, word);
-		if (isNew)
-			DefineWord_NEW(word, 0);
-		else
-			DefineWord(word, 0);
+		DefineWord(word, 0);
 		// CComma(DICTP);
 		// Comma(LAST);
 		CComma(LITERAL);
@@ -842,7 +822,6 @@ void ParseLine(char *line)
 	}
 }
 
-
 void CompilerInit()
 {
 	init_vm(MEM_SZ);
@@ -860,6 +839,20 @@ void CompilerInit()
 
 	Store(ADDR_CELL, CELL_SZ);
 	Store(ADDR_BASE, BASE);
+}
+
+void GeneratePrimitive(char *name, BYTE opcode, BYTE flags)
+{
+	DefineWord(name, flags);
+	CComma(opcode);
+	CComma(RET);
+}
+
+extern void prim_EMIT();
+void GeneratePrimitives()
+{
+	GeneratePrimitive("EMIT", EMIT, 0);
+	SyncMem(true);
 }
 
 void Compile(FILE *fp_in)
@@ -903,6 +896,7 @@ void do_compile()
 {
     printf("compiling from %s...\n", input_fn);
 	CompilerInit();
+	GeneratePrimitives();
 	// return;
 
     input_fp = fopen(input_fn, "rt");
@@ -964,6 +958,11 @@ void process_arg(char *arg)
 		debug_on();
 		printf("log level set to debug.\n");
     }
+    else if (*arg == 'n')
+    {
+		run_vm = false;
+		printf("log level set to debug.\n");
+    }
     else if (*arg == '?')
     {
         printf("usage: forth-compiler [args]\n");
@@ -1004,17 +1003,15 @@ int main (int argc, char **argv)
     do_compile();
 	write_output_file();
 
-	if (_ALL_OK)
+	if (run_vm && _ALL_OK)
 	{
 		PC = 0;
 		SyncMem(true);
 		PC = 0;
 		isBYE = false;
-		isEmbedded = false;
+		isEmbedded = true;
 		CELL ret = cpu_loop();
-		SyncMem(false);
 	}
-
 
     return 0;
 }

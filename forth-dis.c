@@ -146,6 +146,7 @@ CELL dis_vars(FILE *write_to)
 CELL dis_one(char *bytes, char *desc)
 {
 	IR = the_memory[PC];
+	// printf("(PC=%04lx, IR=%02x)", PC, (int)IR);
 	sprintf(bytes, "%04lx: %02x", PC, (int)IR);
 	++PC;
 
@@ -262,10 +263,11 @@ CELL dis_one(char *bytes, char *desc)
 
 	case CALL:
 		arg1 = GETAT(PC);
+		// printf("(CALL) %04lx", PC);
 		// PC += CELL_SZ;
 		// rpush(PC);
 		// PC = arg1;
-		arg2 = GETAT(arg1+1);
+		// arg2 = GETAT(arg1+1);
 		// DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
 		// sprintf(desc, "CALL %s (%04lx)", dp->name, arg1);
 		sprintf(desc, "CALL %04lx", arg1);
@@ -644,17 +646,17 @@ CELL dis_dict(FILE *write_to, CELL dict_addr)
 	// 	return;
 	// }
 
-	// Next
+	// Prev
 	sprintf(bytes, "%04lx:", addr);
 	dis_start(addr, CELL_SZ, bytes);
-	sprintf(desc, "NEXT: %04lx", dp->next);
+	sprintf(desc, "PREV: %04lx", dp->prev);
 	fprintf(write_to, ";\n%-32s ; %s\n", bytes, desc);
 	addr += CELL_SZ;
 
-	// PREV, Flags
+	// Next, Flags
 	sprintf(bytes, "%04lx:", addr);
 	dis_start(addr, CELL_SZ+1, bytes);
-	sprintf(desc, "PREV: %04lx, flags: %02x", dp->prev, dp->flags);
+	sprintf(desc, "NEXT: %04lx, flags: %02x", dp->next, dp->flags);
 	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
 	addr += CELL_SZ+1;
 
@@ -712,6 +714,7 @@ void dis_vm(FILE *write_to)
 		while (PC < stop_here)
 		{
 			dis_one(bytes, desc);
+			// printf("got here: PC = %04lx\n", PC);
 			fprintf(write_to, "%-32s ; %s\n", bytes, desc);
 			fflush(write_to);
 		}

@@ -77,7 +77,7 @@
 // ************************************************************************************************
 
 typedef unsigned char BYTE;
-typedef long CELL;				// Use long for a 32-bit implementation, short for a 16-bit
+typedef unsigned long CELL;				// Use long for a 32-bit implementation, short for a 16-bit
 // #define CELL long;				// Use long for a 32-bit implementation, short for a 16-bit
 typedef int bool;
 typedef char *String;
@@ -101,7 +101,7 @@ typedef struct {
 } DICT_T;
 
 typedef struct {
-	CELL next, prev;
+	CELL prev, next;
 	BYTE flags;
 	BYTE len;
 	char name[32];

@@ -43,7 +43,10 @@ rem gcc -g -o %output% %c-files%
 gcc -g -o tmp %c-files%
 strip -o %output%.exe -g -S -d -X tmp.exe
 del tmp.exe
-if "--%2%--" == "--1--" forth3
+if "--%2%--" == "----" goto done
+forth3 -n
+forth-dis
+forth3
 goto done
 
 :make-nc
