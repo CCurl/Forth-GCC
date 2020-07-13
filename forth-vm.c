@@ -10,7 +10,7 @@ BYTE the_memory[MEM_SZ];
 long memory_size = 0;
 
 CELL PC = 0;		// The "program counter"
-BYTE IR = 0;		// The "instruction register"
+CELL IR = 0;		// The "instruction register"
 
 CELL *RSP = NULL, rdepth = 0;	// the return stack
 CELL *DSP = NULL, depth = 0;	// the data stack
@@ -85,11 +85,18 @@ CELL cpu_loop()
 {
 	isBYE = false;
 	debug("Running (PC=%04lx) ... ", PC);
+
+	void (*vm_prim)();
+
 	while (true)
 	{
-        IR = GETBYTE(PC++);
+		vm_prim = (void (*)())GETCELL(PC);
+		PC += CELL_SZ;
+		vm_prim();
+
+        // IR = GETBYTE(PC++);
         // printf("PC=%04lx, IR=%d - ", PC-1, IR);
-        vm_prims[IR]();
+        // vm_prims[IR]();
 
 		if (isBYE)
 		{

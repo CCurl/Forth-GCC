@@ -23,58 +23,59 @@ extern int _QUIT_HIT;
 bool _ALL_OK;
 
 extern void do_dis(char *);
+extern void (*vm_prims[])();
 
 OPCODE_T theOpcodes[] = {
-       { ".LITERAL.", 1, "LITERAL" },
-       { ".FETCH.", 2, "FETCH" },
-       { ".STORE.", 3, "STORE" },
-       { ".SWAP.", 4, "SWAP" },
-       { ".DROP.", 5, "DROP" },
-       { ".DUP.", 6, "DUP" },
-       { ".SLITERAL.", 7, "S\"" },
+       { ".LITERAL.", 1, "LITERAL", 0, IS_INLINE },
+       { ".FETCH.", 2, "FETCH", 0, IS_INLINE },
+       { ".STORE.", 3, "STORE, 0, IS_INLINE" },
+       { ".SWAP.", 4, "SWAP", 0, IS_INLINE },
+       { ".DROP.", 5, "DROP", 0, IS_INLINE },
+       { ".DUP.", 6, "DUP", 0, IS_INLINE },
+       { ".SLITERAL.", 7, "S\"", 0, IS_IMMEDIATE },
        { ".JMP.", 8, "JMP" },
        { ".JMPZ.", 9, "JMPZ" },
        { ".JMPNZ.", 10, "JMPNZ" },
        { ".CALL.", 11, "CALL" },
        { ".RET.", 12, "RET" },
-       { ".OR.", 13, "OR" },
-       { ".CLITERAL.", 14, "CLITERAL" },
-       { ".CFETCH.", 15, "CFETCH" },
-       { ".CSTORE.", 16, "CSTORE" },
-       { ".ADD.", 17, "ADD" },
-       { ".SUB.", 18, "SUB" },
-       { ".MUL.", 19, "MUL" },
-       { ".DIV.", 20, "DIV" },
-       { ".LT.", 21, "LT" },
-       { ".EQ.", 22, "EQ" },
-       { ".GT.", 23, "GT" },
+       { ".OR.", 13, "OR", 0, IS_INLINE },
+       { ".CLITERAL.", 14, "CLITERAL", 0, IS_INLINE },
+       { ".CFETCH.", 15, "CFETCH", 0, IS_INLINE },
+       { ".CSTORE.", 16, "CSTORE", 0, IS_INLINE },
+       { ".ADD.", 17, "ADD", 0, IS_INLINE },
+       { ".SUB.", 18, "SUB", 0, IS_INLINE },
+       { ".MUL.", 19, "MUL", 0, IS_INLINE },
+       { ".DIV.", 20, "DIV", 0, IS_INLINE },
+       { ".LT.", 21, "LT", 0, IS_INLINE },
+       { ".EQ.", 22, "EQ", 0, IS_INLINE },
+       { ".GT.", 23, "GT", 0, IS_INLINE },
        { ".DICTP.", 24, "DICTP" },
-       { ".EMIT.", 25, "EMIT" },
-       { ".OVER.", 26, "OVER" },
-       { ".COMPARE.", 27, "COMPARE" },
+       { ".EMIT.", 25, "EMIT", 0, IS_INLINE },
+       { ".OVER.", 26, "OVER", 0, IS_INLINE },
+       { ".COMPARE.", 27, "COMPARE", 0, IS_INLINE },
        { ".FOPEN.", 28, "FOPEN" },
        { ".FREAD.", 29, "FREAD" },
        { ".FREADLINE.", 30, "FREADLINE" },
        { ".FWRITE.", 31, "FWRITE" },
        { ".FCLOSE.", 32, "FCLOSE" },
-       { ".DTOR.", 33, "DTOR" },
-       { ".RTOD.", 34, "RTOD" },
+       { ".DTOR.", 33, "DTOR", 0, IS_INLINE },
+       { ".RTOD.", 34, "RTOD", 0, IS_INLINE },
        { ".LOGLEVEL.", 35, "LOGLEVEL" },
-       { ".AND.", 36, "AND" },
-       { ".PICK.", 37, "PICK" },
-       { ".DEPTH.", 38, "DEPTH" },
-       { ".GETCH.", 39, "GETCH" },
-       { ".COMPAREI.", 40, "COMPAREI" },
-       { ".SLASHMOD.", 41, "SLASHMOD" },
-       { ".NOT.", 42, "NOT" },
-       { ".RFETCH.", 43, "RFETCH" },
-       { ".INC.", 44, "INC" },
-       { ".RDEPTH.", 45, "RDEPTH" },
-       { ".DEC.", 46, "DEC" },
-       { ".GETTICK.", 47, "GETTICK" },
-       { ".SHIFTLEFT.", 48, "SHIFTLEFT" },
-       { ".SHIFTRIGHT.", 49, "SHIFTRIGHT" },
-       { ".PLUSSTORE.", 50, "PLUSSTORE" },
+       { ".AND.", 36, "AND", 0, IS_INLINE },
+       { ".PICK.", 37, "PICK", 0, IS_INLINE },
+       { ".DEPTH.", 38, "DEPTH", 0, IS_INLINE },
+       { ".GETCH.", 39, "GETCH", 0, IS_INLINE },
+       { ".COMPAREI.", 40, "COMPAREI", 0, IS_INLINE },
+       { ".SLASHMOD.", 41, "SLASHMOD", 0, IS_INLINE },
+       { ".NOT.", 42, "NOT", 0, IS_INLINE },
+       { ".RFETCH.", 43, "RFETCH", 0, IS_INLINE },
+       { ".INC.", 44, "INC", 0, IS_INLINE },
+       { ".RDEPTH.", 45, "RDEPTH", 0, IS_INLINE },
+       { ".DEC.", 46, "DEC", 0, IS_INLINE },
+       { ".GETTICK.", 47, "GETTICK", 0, IS_INLINE },
+       { ".SHIFTLEFT.", 48, "SHIFTLEFT", 0, IS_INLINE },
+       { ".SHIFTRIGHT.", 49, "SHIFTRIGHT", 0, IS_INLINE },
+       { ".PLUSSTORE.", 50, "PLUSSTORE", 0, IS_INLINE },
        { ".BRANCHF.",   90, "BRANCHF" },
        { ".BRANCHB.",   91, "BRANCHB" },
        { ".BRANCHFZ.",  92, "BRANCHFZ" },
@@ -84,12 +85,12 @@ OPCODE_T theOpcodes[] = {
        { ".NOP.", 252, "NOP" },
        { ".BREAK.", 253, "BREAK" },
        { ".RESET.", 254, "RESET" },
-       { ".BYE.", 255, "BYE" },
-	   { NULL, 0, NULL },
-       { ".DBGDOT.", 100, "DBGDOT" },
-       { ".DBGDOTS.", 101, "DBGDOTS" },
+       { ".BYE.", 255, "BYE", 0, IS_INLINE },
+//	   { NULL, 0, NULL },
+       { ".DBGDOT.", 100, "DBGDOT", 0, IS_INLINE },
+       { ".DBGDOTS.", 101, "DBGDOTS", 0, IS_INLINE },
+	   { NULL, 0, NULL }
  };
-
 
 /*
 NB build this in somehow to enable usage of VT100 ECSAPE sequences to control the screen
@@ -175,17 +176,13 @@ BYTE GetFlags(CELL addr)
 
 CELL GetXT(CELL addr)
 {
-	if (isNew)
-	{
-		addr += CELL_SZ;			// prev
-		addr += CELL_SZ;			// next
-		addr += 1;					// flags
-		addr += GETBYTE(addr);	    // word-len
-		addr += 2;					// len byte, null-terminator
+	addr += CELL_SZ;			// prev
+	addr += CELL_SZ;			// next
+	addr += 1;					// flags
+	addr += GETBYTE(addr);	    // word-len
+	addr += 2;					// len byte, null-terminator
 
-		return addr;
-	}
-	return GETCELL(addr + CELL_SZ);
+	return addr;
 }
 
 bool MakeNumber(LPCTSTR word, CELL *the_num)
@@ -416,7 +413,7 @@ char *ParseWord(char *word, char *line)
 		}
 		else
 		{
-			CComma(CLITERAL);
+			Comma((CELL)vm_prims[CLITERAL]);
 			CComma(val);
 		}
 		return line;
@@ -433,15 +430,14 @@ char *ParseWord(char *word, char *line)
 		{
 			if (val < 256)
 			{
-				CComma(CLITERAL);
+				Comma((CELL)vm_prims[CLITERAL]);
 				CComma(val);
 			}
 			else
 			{
-				CComma(LITERAL);
+				Comma((CELL)vm_prims[LITERAL]);
 				Comma(val);
 			}
-			
 		}
 		return line;
 	}
@@ -457,13 +453,13 @@ char *ParseWord(char *word, char *line)
 		{
 			if (val < 256)
 			{
-				CComma(CLITERAL);
+				Comma((CELL)vm_prims[CLITERAL]);
 				CComma(val);
 			}
 			else
 			{
-				CComma(LITERAL);
-				Comma(val);
+				Comma((CELL)vm_prims[LITERAL]);
+				CComma(val);
 			}
 			
 		}
@@ -481,12 +477,12 @@ char *ParseWord(char *word, char *line)
 		{
 			if (val < 256)
 			{
-				CComma(CLITERAL);
+				Comma((CELL)vm_prims[CLITERAL]);
 				CComma(val);
 			}
 			else
 			{
-				CComma(LITERAL);
+				Comma((CELL)vm_prims[LITERAL]);
 				Comma(val);
 			}
 			
@@ -496,16 +492,8 @@ char *ParseWord(char *word, char *line)
 
 	if (strcmp(word, ".INLINE.") == 0)
 	{
-		if (isNew)
-		{
-			DICT_T_NEW *dp = (DICT_T_NEW *)(&the_memory[LAST]);
-			dp->flags |= IS_INLINE;
-		}
-		else
-		{
-			DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
-			dp->flags |= IS_INLINE;
-		}
+		DICT_T_NEW *dp = (DICT_T_NEW *)(LAST);
+		dp->flags |= IS_INLINE;
 		return line;
 	}
 
@@ -513,12 +501,7 @@ char *ParseWord(char *word, char *line)
 	{
 		if (isNew)
 		{
-			DICT_T_NEW *dp = (DICT_T_NEW *)(&the_memory[LAST]);
-			dp->flags |= IS_IMMEDIATE;
-		}
-		else
-		{
-			DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
+			DICT_T_NEW *dp = (DICT_T_NEW *)(LAST);
 			dp->flags |= IS_IMMEDIATE;
 		}
 		return line;
@@ -528,7 +511,7 @@ char *ParseWord(char *word, char *line)
 	for (int i = 0; ; i++)
 	{
 		OPCODE_T *op = &(theOpcodes[i]);
-		if (op->asm_instr == NULL)
+		if (op->opcode == 0)
 		{
 			break;
 		}
@@ -536,7 +519,7 @@ char *ParseWord(char *word, char *line)
 		// printf("[%s] == [%s]?\n", word, op->asm_instr);
 		if (strcmp(word, op->asm_instr) == 0)
 		{
-			CComma(op->opcode);
+			Comma((CELL)vm_prims[op->opcode]);
 			return line;
 		}
 
@@ -547,7 +530,7 @@ char *ParseWord(char *word, char *line)
 	{
 		if (string_equals(word, ";"))
 		{
-			CComma(RET);
+			Comma((CELL)vm_prims[RET]);
 			STATE = 0;
 			return line;
 		}
@@ -612,22 +595,22 @@ char *ParseWord(char *word, char *line)
 			{
 				// Skip the DICTP instruction
 				CELL addr = xt; // + 1 + CELL_SZ;
-				printf("inlining 0x%08lx ...", xt);
+				// printf("inlining 0x%08lx ...", xt);
 
+				CELL addrRET = (CELL)vm_prims[RET];
 				// Copy bytes until the first RET
 				while (true)
 				{
-					BYTE b = GETBYTE(addr++);
-					if (b == RET)
+					if (GETCELL(addr) == addrRET)
 					{
 						break;
 					}
-					CComma(b);
+					CComma(GETBYTE(addr++));
 				}
 			}
 			else
 			{
-				CComma(CALL);
+				Comma((CELL)vm_prims[CALL]);
 				Comma(xt);
 			}
 		}
@@ -639,22 +622,24 @@ char *ParseWord(char *word, char *line)
 		return line;
 	}
 
+	printf("checking if number ...");
 	CELL num = 0;
 	if (MakeNumber(word, &num))
 	{
 		printf("IsNumber: %ld (%04lx), STATE=%ld\n", num, num, STATE);
 		if (STATE == 1) // Compiling
 		{
-			if ((0 <= num) && (num <= 0xFF))
-			{
-				CComma(CLITERAL);
-				CComma((BYTE)num);
-			}
-			else
-			{
-				CComma(LITERAL);
+			// if ((0 <= num) && (num <= 0xFF))
+			// {
+			// 	CComma(CLITERAL);
+			// 	CComma((BYTE)num);
+			// }
+			// else
+			// {
+				Comma((CELL)vm_prims[LITERAL]);
+				// Comma(LITERAL);
 				Comma(num);
-			}
+			// }
 		}
 		else
 		{
@@ -718,19 +703,66 @@ void CompilerInit()
 	BASE = 10;
 }
 
+void GenerateWord(char *name, BYTE flags, CELL *opcodes)
+{
+	DefineWord(name, flags);
+	// printf("GenerateWord(): %d", opcodes[0]);
+	for (int i = 0; opcodes[i] != 0; i++)
+	{
+		BYTE opcode = opcodes[i];
+		Comma((CELL)vm_prims[opcode]);
+		if (opcode == LITERAL)
+		{
+			Comma(opcodes[++i]);
+		}
+		if (opcode == CLITERAL)
+		{
+			CComma(opcodes[++i]);
+		}
+		if (opcode == CALL)
+		{
+			Comma(opcodes[++i]);
+		}
+	}
+}
+
+CELL xt4(char *name)
+{
+	CELL addr = FindWord(name);
+	return (addr > 0) ? GetXT(addr) : 0;
+}
+
 void GenerateVariable(char *name, CELL addr)
 {
-	DefineWord(name, 0);
-	CComma(LITERAL);
-	Comma(addr);
-	CComma(RET);
+	DefineWord(name, IS_INLINE);
+	if (addr < 0x0100)
+	{
+		Comma((CELL)vm_prims[CLITERAL]);
+		CComma(addr);
+	}
+	else
+	{
+		Comma((CELL)vm_prims[LITERAL]);
+		Comma(addr);
+	}
+	Comma((CELL)vm_prims[RET]);
 }
 
 void GeneratePrimitive(char *name, BYTE opcode, BYTE flags)
 {
 	DefineWord(name, flags);
-	CComma(opcode);
-	CComma(RET);
+	if (flags == IS_IMMEDIATE)
+	{
+		Comma((CELL)vm_prims[LITERAL]);
+		Comma((CELL)vm_prims[opcode]);
+		Comma((CELL)vm_prims[CALL]);
+		Comma(xt4(","));
+	}
+	else
+	{
+		Comma((CELL)vm_prims[opcode]);
+	}
+	Comma((CELL)vm_prims[RET]);
 }
 
 void GeneratePrimitives()
@@ -740,6 +772,15 @@ void GeneratePrimitives()
 	GenerateVariable("BASE", (CELL) &BASE);
 	GenerateVariable("STATE", (CELL) &STATE);
 	GenerateVariable("CELL", (CELL) CELL_SZ);
+
+	GenerateWord("HERE", 0, (CELL[]){ LITERAL, (CELL) &HERE, FETCH, RET, 0});
+	GenerateWord("C,", 0, (CELL[]){ CALL, xt4("HERE"), CSTORE, 
+		CALL, xt4("(HERE)"), DUP, FETCH, INC, SWAP, STORE, 
+		RET, 0});
+	GenerateWord(",", 0, (CELL[]){ CALL, xt4("HERE"), STORE, 
+		CALL, xt4("(HERE)"), DUP, FETCH, CLITERAL, CELL_SZ, ADD, SWAP, STORE, 
+		RET, 0});
+
 	for (int i = 0;; i++)
 	{
 		OPCODE_T x = theOpcodes[i];
@@ -747,7 +788,7 @@ void GeneratePrimitives()
 		{
 			break;
 		}
-		GeneratePrimitive(x.forth_prim, x.opcode, 0);
+		GeneratePrimitive(x.forth_prim, x.opcode, x.flags);
 	}
 }
 
@@ -782,8 +823,8 @@ void Compile(FILE *fp_in)
 		}
 	}
 
-	CStore(0, JMP);
-	Store(1, GetXT(addr));
+	Store(0, (CELL)vm_prims[JMP]);
+	Store(4, GetXT(addr));
 }
 
 void do_compile()

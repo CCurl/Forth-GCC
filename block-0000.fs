@@ -1,21 +1,10 @@
-: BEGIN ;
-: AGAIN ;
+: BL #32 ; .INLINE.
+: SPACE BL EMIT ; .INLINE.
+: CR #13 EMIT #10 EMIT ;
 
-: SPACE #32 EMIT ;
+: .S DBGDOTS ;
 
-: get-word ;
-: execute-word ;
+: ok SPACE 'O' EMIT 'K' EMIT SPACE .S CR ;
+: hello SPACE 'H' EMIT 'e' EMIT 'l' EMIT 'l' EMIT 'o' EMIT '.' EMIT ;
 
-: start-message 'H' EMIT 'e' EMIT 'l' EMIT 'l' EMIT 'o' EMIT ;
-: ok  SPACE 'O' EMIT 'K' EMIT ;
-
-: get-line ;
-: execute-line ;
-
-: main
-	start-message
-	BEGIN 
-		get-line
-		execute-line
-        ok
-	AGAIN ;
+: main hello 123 456 ok BYE ;

@@ -9,6 +9,7 @@
 CELL ORG;
 extern CELL HERE;
 extern CELL LAST;
+extern OPCODE_T theOpcodes[];
 
 // ------------------------------------------------------------------------------------------
 void dis_range(CELL start, CELL end, char *bytes)
@@ -53,31 +54,97 @@ void dis_PC2(int num, char *bytes)
 	}
 }
 
+typedef struct {
+	CELL opcode;
+	CELL addr;
+	char *name;
+} DIS_PRIMS;
+
+DIS_PRIMS dis_prims[256];
+extern void (*vm_prims[])();
+int num_prims = 0;
+
+void dis_add_prim(int opcode, void (*func)(), char *name)
+{
+	dis_prims[num_prims].opcode = opcode;
+	dis_prims[num_prims].addr = (CELL)func;
+	dis_prims[num_prims].name = name;
+	num_prims++;
+}
+
+void init_prims()
+{
+	num_prims = 0;
+	for (int i = 0; i < 256; i++)
+	{
+		OPCODE_T *op = &(theOpcodes[i]);
+		if (op->opcode == 0)
+			break;
+		void (*func)() = vm_prims[op->opcode];
+		dis_add_prim(op->opcode, func, op->forth_prim);
+	}
+	dis_add_prim(0, 0, 0);
+}
+
+char *prim_name(CELL addr, CELL *opcode)
+{
+	if (num_prims == 0)
+		init_prims();
+
+	for (int i = 0; i < num_prims; i++)
+	{
+		if (dis_prims[i].addr == addr)
+		{
+			*opcode = dis_prims[i].opcode;
+			return dis_prims[i].name;
+		}
+	}
+
+	*opcode = 0;
+	return "unknown primitive";
+}
+
 // ------------------------------------------------------------------------------------------
 // Where all the work is done
 // ------------------------------------------------------------------------------------------
 CELL dis_one(char *bytes, char *desc)
 {
-	IR = GETBYTE(PC++);
+	char add_this[256];
+	CELL func = GETCELL(PC);
+	sprintf(bytes, "%08lx: %08lx", PC, func);
+	sprintf(desc, "%s", prim_name(func, &IR));
+	PC += CELL_SZ;
+
+	// IR = GETBYTE(PC++);
 	// printf("(PC=%08lx, IR=%02x)", PC-1, (int)IR);
-	sprintf(bytes, "%08lx: %02x", PC-1, (int)IR);
+	// sprintf(bytes, "%08lx: %02x", PC-1, (int)IR);
 
 	switch (IR)
 	{
 	case LITERAL:
 		arg1 = GETCELL(PC);
-		// PC += CELL_SZ;
 		// push(arg1);
-		dis_PC2(CELL_SZ, bytes);
-		sprintf(desc, "LITERAL %ld (%0lx)", arg1, arg1);
+		dis_rangeCell(PC, PC, bytes);
+		sprintf(add_this, " $%08lx", arg1);
+		strcat(desc, add_this);
+		sprintf(add_this, ", #%d", arg1);
+		strcat(desc, add_this);
+		PC += CELL_SZ;
 		return CELL_SZ;
 
 	case CLITERAL:
 		arg1 = GETBYTE(PC);
-		// PC++;
-		// push(arg1);
-		dis_PC2(1, bytes);
-		sprintf(desc, "CLITERAL %ld", arg1);
+		dis_range(PC, PC, bytes);
+		sprintf(add_this, " $%02lx", arg1);
+		strcat(desc, add_this);
+		sprintf(add_this, ", #%d", arg1);
+		strcat(desc, add_this);
+		if ((arg1 > 0x20) && (arg1 < 0x80) )
+		{
+			sprintf(add_this, ", '%c'", arg1);
+			strcat(desc, add_this);
+		}
+		PC += 1;
 		return 1;
 
 	case FETCH:
@@ -169,15 +236,9 @@ CELL dis_one(char *bytes, char *desc)
 
 	case CALL:
 		arg1 = GETCELL(PC);
-		// printf("(CALL) %08lx", PC);
-		// PC += CELL_SZ;
-		// rpush(PC);
-		// PC = arg1;
-		// arg2 = GETCELL(arg1+1);
-		// DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
-		// sprintf(desc, "CALL %s (%08lx)", dp->name, arg1);
-		sprintf(desc, "CALL %08lx", arg1);
-		dis_PC2(CELL_SZ, bytes);
+		dis_rangeCell(PC, PC, bytes);
+		dis_rangeCell(PC, PC, desc);
+		PC += CELL_SZ;
 		return CELL_SZ;
 
 	case RET:
@@ -207,8 +268,8 @@ CELL dis_one(char *bytes, char *desc)
 		arg2 = arg1 + 2;  // count-byte + count + NULL
 		// PC += arg2;
 		// push(arg1);
-		sprintf(desc, "SLITERAL (%08lx) [%s]", PC, (char *)PC+1);
-		dis_PC2(arg2, bytes);
+		// sprintf(desc, "SLITERAL (%08lx) [%s]", PC, (char *)PC+1);
+		// dis_PC2(arg2, bytes);
 		return PC-arg1;
 
 	case CFETCH:
@@ -488,6 +549,11 @@ CELL dis_one(char *bytes, char *desc)
 		sprintf(desc, "BYE");
 		return 0;
 
+	case DBGDOT:
+		// isBYE = true;
+		// sprintf(desc, "BYE");
+		return 0;
+
 	case RESET:
 	default:
 		// DSP = dsp_init;
@@ -550,14 +616,9 @@ void dis_vm(FILE *write_to)
 	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
 	fflush(write_to);
 
-	PC = (CELL)the_memory+0x05;
-	sprintf(bytes, "%08lx:", PC);
-	dis_range(PC, PC+2, bytes);
-	fprintf(write_to, "%s\n", bytes);
-
 	PC = (CELL)the_memory+0x08;
-	sprintf(bytes, "%08lx:");
-	dis_rangeCell((CELL)PC, (CELL)PC+0x08, bytes);
+	sprintf(bytes, "%08lx:", PC);
+	dis_rangeCell((CELL)PC, (CELL)PC+0x07, bytes);
 	fprintf(write_to, "%s\n", bytes);
 
 	PC = (CELL)the_memory+0x10;

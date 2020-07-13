@@ -460,8 +460,9 @@ void prim_PICK()
 // DEPTH - Doeswhat
 void prim_DEPTH()
 {
-	//trace("DEPTH (%ld)\n", depth);
-	push(depth);
+	CELL offset = DSP - dsp_init;
+	// printf("(%ld, %ld, %ld)\n", DSP, dsp_init, offset);
+	push(offset);
 }
 
 // GETCH - Doeswhat
@@ -627,8 +628,12 @@ void prim_DBGDOT()
 // SHIFTRIGHT - Shifts TOS right <x> bits
 void prim_DBGDOTS()
 {
-	printf("(%d)[", depth);
-	for (int i = 0; i < depth; i++)
+	CELL d;
+	prim_DEPTH();
+	d = pop();
+	// printf("DEPTH=(%d)[ ", d);
+	printf("[ ", d);
+	for (int i = (d-1); i >= 0; i--)
 	{
 		printf("(%d)",i);
 		push(i);
@@ -735,8 +740,8 @@ void init_vm_vectors()
 	vm_prims[94] = prim_BRANCHBZ;
 	vm_prims[95] = prim_BRANCHBNZ;
 
-	//vm_prims[100] = prim_DBGDOT;
-	//vm_prims[101] = prim_DBGDOTS;
+	vm_prims[100] = prim_DBGDOT;
+	vm_prims[101] = prim_DBGDOTS;
 
 	vm_prims[252] = prim_NOP;
 	vm_prims[253] = prim_BREAK;

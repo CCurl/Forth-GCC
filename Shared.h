@@ -64,8 +64,8 @@
 #define BRANCHBZ   94   // 5E
 #define BRANCHBNZ  95   // 5F
 // unused 96-99
-//#define DBGDOT    100
-//#define DBGDOTS   101
+#define DBGDOT    100
+#define DBGDOTS   101
 // unused 102-251
 #define NOP       252	// FC
 #define BREAK     253	// FD
@@ -86,6 +86,8 @@ typedef struct {
 	char *asm_instr;
 	BYTE opcode;
 	char *forth_prim;
+	void (*func)();
+	BYTE flags;
 } OPCODE_T;
 
 // flags is a bit field:

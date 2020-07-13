@@ -6,7 +6,7 @@
 // ------------------------------------------------------------------------------------------
 
 extern CELL PC;		// The "program counter"
-extern BYTE IR;		// The "instruction register"
+extern CELL IR;		// The "instruction register"
 
 // extern CELL *dsp_init;
 // extern CELL *rsp_init;
