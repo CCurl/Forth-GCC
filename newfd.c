@@ -48,7 +48,7 @@ void dis_rangeCell(CELL start, CELL end, char *bytes)
 	char x[8];
 	while (start <= end)
 	{
-		CELL val = GETAT(start);
+		CELL val = GETCELL(start);
 		start += 4;
 		sprintf(x, " %08lx", (CELL)val);
 		strcat(bytes, x);
@@ -79,7 +79,7 @@ CELL dis_one(char *bytes, char *desc)
 	switch (IR)
 	{
 	case LITERAL:
-		arg1 = GETAT(PC);
+		arg1 = GETCELL(PC);
 		// PC += CELL_SZ;
 		// push(arg1);
 		dis_PC2(CELL_SZ, bytes);
@@ -96,7 +96,7 @@ CELL dis_one(char *bytes, char *desc)
 
 	case FETCH:
 		// arg1 = GETTOS();
-		// arg2 = GETAT(arg1);
+		// arg2 = GETCELL(arg1);
 		// SETTOS(arg2);
 		sprintf(desc, "FETCH");
 		return 0;
@@ -104,7 +104,7 @@ CELL dis_one(char *bytes, char *desc)
 	case STORE:
 		// arg1 = pop();
 		// arg2 = pop();
-		// SETAT(arg1, arg2);
+		// SETCELL(arg1, arg2);
 		sprintf(desc, "STORE");
 		return 0;
 
@@ -148,12 +148,12 @@ CELL dis_one(char *bytes, char *desc)
 		return 0;
 
 	case JMP:
-		// PC = GETAT(PC);
-		arg1 = GETAT(PC);
+		// PC = GETCELL(PC);
+		arg1 = GETCELL(PC);
 		sprintf(desc, "JMP %04lx", arg1);
 		if (the_memory[arg1] == DICTP)
 		{
-			arg2 = GETAT(arg1+1);
+			arg2 = GETCELL(arg1+1);
 			DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
 			sprintf(desc, "JMP %s (%04lx)\n;", dp->name, arg1);
 		}
@@ -163,23 +163,23 @@ CELL dis_one(char *bytes, char *desc)
 	case JMPZ:
 		// if (pop() == 0)
 		// {
-		// 	PC = GETAT(PC);
+		// 	PC = GETCELL(PC);
 		// }
 		// else
 		// {
 		// 	PC += CELL_SZ;
 		// }
-		sprintf(desc, "JMPZ %04lx", GETAT(PC));
+		sprintf(desc, "JMPZ %04lx", GETCELL(PC));
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
 
 	case JMPNZ:
-		sprintf(desc, "JMPNZ %04lx", GETAT(PC));
+		sprintf(desc, "JMPNZ %04lx", GETCELL(PC));
 		dis_PC2(CELL_SZ, bytes);
 		// arg1 = pop();
 		// if (arg1 != 0)
 		// {
-		// 	PC = GETAT(PC);
+		// 	PC = GETCELL(PC);
 		// }
 		// else
 		// {
@@ -192,7 +192,7 @@ CELL dis_one(char *bytes, char *desc)
 		// PC += CELL_SZ;
 		// rpush(PC);
 		// PC = arg1;
-		// arg2 = GETAT(arg1+1);
+		// arg2 = GETCELL(arg1+1);
 		// DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
 		sprintf(desc, "CALL (%04lx)",  arg1);
 		dis_PC2(CELL_SZ, bytes);
@@ -325,7 +325,7 @@ CELL dis_one(char *bytes, char *desc)
 		return 0;
 
 	case DICTP:
-		arg1 = GETAT(PC);
+		arg1 = GETCELL(PC);
 		// PC += CELL_SZ;
 		sprintf(desc, "DICTP %s (%04lx)", &(the_memory[arg1+10]), arg1);
 		dis_PC2(CELL_SZ, bytes);
@@ -521,7 +521,7 @@ CELL dis_dict(FILE *write_to)
 // ------------------------------------------------------------------------------------------
 void dis_vm(FILE *write_to)
 {
-	int here = GETAT(ADDR_HERE);
+	int here = GETCELL(ADDR_HERE);
 	char bytes[128], desc[128];
 
 	// Initial JMP

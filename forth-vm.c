@@ -24,8 +24,11 @@ bool isBYE = false;
 
 int _QUIT_HIT = 0;
 
+CELL buf0[4];
 CELL dStack[256];
+CELL buf1[4];
 CELL rStack[256];
+CELL buf2[4];
 
 void init_vm_vectors();
 extern void (*vm_prims[])();
@@ -59,7 +62,7 @@ void reset_vm()
 	rsp_init = rStack;
 	RSP = rsp_init;
 	DSP = dsp_init;
-	PC = 0;
+	PC = (CELL)the_memory;
 	depth = 0;
 	rdepth = 0;
 }
@@ -73,7 +76,6 @@ void init_vm(int vm_size)
 	init_vm_vectors();
 	create_vm();
 	reset_vm();
-	SETAT(ADDR_MEM_SZ, memory_size);
 }
 
 // ------------------------------------------------------------------------------------------

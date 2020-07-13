@@ -52,7 +52,7 @@ CELL GetSysVarAddr(char *name)
 			printf("[%s] NOT FOUND!\n", name);
 			return 0;
 		}
-		CELL tmp = GETAT(addr+1);
+		CELL tmp = GETCELL(addr+1);
 		DICT_T *dp = (DICT_T *)&the_memory[tmp];
 		// printf("0x%04lX, 0x%04lX, [%s] = [%s]?\n", addr, dp, name, dp->name);
 		if (strcmp(dp->name, name) == 0)
@@ -264,7 +264,7 @@ void dis_rangeCell(CELL start, CELL end, char *bytes)
 	char x[8];
 	while (start <= end)
 	{
-		CELL val = GETAT(start);
+		CELL val = GETCELL(start);
 		start += 4;
 		sprintf(x, " %08lx", (CELL)val);
 		strcat(bytes, x);
@@ -347,7 +347,7 @@ void dis_one_FASM()
 	switch (IR)
 	{
 	case LITERAL:
-		arg1 = GETAT(PC);
+		arg1 = GETCELL(PC);
 		PC += CELL_SZ;
 		// push(arg1);
 		// line = make_code(NULL, "prim_LITERAL");
@@ -364,7 +364,7 @@ void dis_one_FASM()
 
 	case FETCH:
 		// arg1 = GETTOS();
-		// arg2 = GETAT(arg1);
+		// arg2 = GETCELL(arg1);
 		// SETTOS(arg2);
 		// make_code(NULL, "prim_FETCH");
 		line = make_codeU(NULL, "mov ebx, [ebx]");
@@ -375,7 +375,7 @@ void dis_one_FASM()
 	case STORE:
 		// arg1 = pop();
 		// arg2 = pop();
-		// SETAT(arg1, arg2);
+		// SETCELL(arg1, arg2);
 		line = make_code(line, "prim_STORE");
 		return;
 
@@ -420,8 +420,8 @@ void dis_one_FASM()
 		return;
 
 	case JMP:
-		// PC = GETAT(PC);
-		arg1 = GETAT(PC);
+		// PC = GETCELL(PC);
+		arg1 = GETCELL(PC);
 		PC += CELL_SZ;
 		set_tag(arg1, 0);
 		line = make_code(NULL, "prim_JMP", arg1);
@@ -431,13 +431,13 @@ void dis_one_FASM()
 	case JMPZ:
 		// if (pop() == 0)
 		// {
-		// 	PC = GETAT(PC);
+		// 	PC = GETCELL(PC);
 		// }
 		// else
 		// {
 		// 	PC += CELL_SZ;
 		// }
-		arg1 = GETAT(PC);
+		arg1 = GETCELL(PC);
 		PC += CELL_SZ;
 		set_tag(arg1, 0);
 		line = make_code(NULL, "prim_JMPZ", arg1);
@@ -448,13 +448,13 @@ void dis_one_FASM()
 		// arg1 = pop();
 		// if (arg1 != 0)
 		// {
-		// 	PC = GETAT(PC);
+		// 	PC = GETCELL(PC);
 		// }
 		// else
 		// {
 		// 	PC += CELL_SZ;
 		// }
-		arg1 = GETAT(PC);
+		arg1 = GETCELL(PC);
 		PC += CELL_SZ;
 		set_tag(arg1, 0);
 		line = make_code(NULL, "prim_JMPNZ", arg1);
@@ -465,11 +465,11 @@ void dis_one_FASM()
 		// PC += CELL_SZ;
 		// rpush(PC);
 		// PC = arg1;
-		arg1 = GETAT(PC);
+		arg1 = GETCELL(PC);
 		PC += CELL_SZ;
         if (the_memory[arg1] == DICTP)
         {
-            arg2 = GETAT(arg1+1);
+            arg2 = GETCELL(arg1+1);
             DICT_T *dp = (DICT_T *)&the_memory[arg2];
     		make_code(line, "L%08lX", dp->XT);
         }
@@ -610,12 +610,12 @@ void dis_one_FASM()
 		return;
 
 	case DICTP:
-		// arg1 = GETAT(PC);
+		// arg1 = GETCELL(PC);
 		// // PC += CELL_SZ;
 		// sprintf(line1, "# DICTP %s (%04lx)", &(the_memory[arg1+10]), arg1);
 		// dis_PC2(CELL_SZ, bytes);
 		{
-			arg1 = GETAT(PC);
+			arg1 = GETCELL(PC);
 			PC += CELL_SZ;
             arg2 = LAST_PC;
             LAST_PC = 0;
@@ -891,7 +891,7 @@ void dis_dict(CELL dict_addr)
 // ------------------------------------------------------------------------------------------
 void dis_vm()
 {
-	int here = GETAT(ADDR_HERE);
+	int here = GETCELL(ADDR_HERE);
 	char line[1024];
     int tagLen = 12;
     int codeLen = 24;
@@ -934,11 +934,11 @@ void dis_vm()
 	// make_comment(NULL, "\n; End of code, Dictionary:\n;\n");
 
 	// // Dictionary
-	// PC = GETAT(ADDR_LAST);
+	// PC = GETCELL(ADDR_LAST);
 	// while (PC > 0)
 	// {
 	// 	dis_dict(PC);
-	// 	PC = GETAT(PC);
+	// 	PC = GETCELL(PC);
 	// }
 }
 

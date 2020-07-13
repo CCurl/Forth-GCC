@@ -1,5 +1,6 @@
 : BEGIN ;
 : AGAIN ;
+
 : SPACE #32 EMIT ;
 
 : get-word ;
@@ -18,4 +19,3 @@
 		execute-line
         ok
 	AGAIN ;
-

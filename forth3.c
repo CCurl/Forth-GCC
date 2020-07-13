@@ -14,21 +14,15 @@ FILE *input_fp = NULL;
 FILE *output_fp = NULL;
 int mem_size_KB = 64;
 
-CELL HERE, LAST, STATE;
-CELL BASE = 10;
-
-CELL ADDR_CELL     = 0x08;
-CELL ADDR_HERE     = 0x10;
-CELL ADDR_LAST     = 0x14;
-CELL ADDR_BASE     = 0x18;
-CELL ADDR_STATE    = 0x20;
-CELL ADDR_MEM_SZ   = 0x24;
+CELL HERE, LAST, STATE, BASE;
 
 bool isNew = true;
 bool run_vm = true;
 
 extern int _QUIT_HIT;
 bool _ALL_OK;
+
+extern void do_dis(char *);
 
 OPCODE_T theOpcodes[] = {
        { ".LITERAL.", 1, "LITERAL" },
@@ -132,133 +126,68 @@ CELL CFetch(CELL loc)
 
 void Comma(CELL num)
 {
-	Store(HERE, num);
+	SETCELL(HERE, num);
 	HERE += CELL_SZ;
-	// if ((0 <= HERE) && (HERE < LAST))
-	// {
-	// 	// printf(" , %04lx (%04lx)", num, HERE);
-	// 	Store(HERE, num);
-	// 	HERE += CELL_SZ;
-	// }
-	// else
-	// {
-	// 	printf("Comma(%04lx): out of memory!\n", num);
-	// 	printf("HERE = %04lx, LAST = %04lx\n", HERE, LAST);
-	// 	exit(0);
-	// }
 }
 
 void CComma(BYTE num)
 {
-	the_memory[HERE] = num;
+	SETBYTE(HERE, num);
 	HERE += 1;
-	// if (HERE < LAST)
-	// {
-	// 	// printf(" C, %02lx (%04lx)", num, HERE);
-	// 	the_memory[HERE] = num;
-	// 	HERE += 1;
-	// }
-	// else
-	// {
-	// 	printf("CComma(%02x): out of memory!\n", (int)num);
-	// 	printf("HERE = %04lx, LAST = %04lx\n", HERE, LAST);
-	// 	exit(0);
-	// }
-}
-
-void SyncMem(bool isSet)
-{
-	if (isSet)
-	{
-		Store(ADDR_LAST,  LAST);
-		Store(ADDR_HERE,  HERE);
-		Store(ADDR_BASE,  BASE);
-		Store(ADDR_STATE, STATE);
-		Store(ADDR_MEM_SZ, MEM_SZ);
-	}
-	else
-	{
-		LAST  = Fetch(ADDR_LAST);
-		HERE  = Fetch(ADDR_HERE);
-		BASE  = Fetch(ADDR_BASE);
-		STATE = Fetch(ADDR_STATE);
-	}
 }
 
 CELL ExecuteXT(CELL XT)
 {
-	SyncMem(true);
 	PC = XT;
 	isBYE = false;
 	isEmbedded = true;
 	CELL ret = cpu_loop();
-	SyncMem(false);
 
 	return ret;
 }
 
-CELL FindWord_NEW(LPCTSTR word)
-{
-	trace(" looking for word [%s]\n", word);
-	CELL cur = LAST;
-	while (cur > 0)
-	{
-		DICT_T_NEW *dp = (DICT_T_NEW *)(&the_memory[cur]);
-		if (string_equals(word, dp->name))
-		{
-			return cur;
-		}
-		cur = dp->prev;
-	}
-
-	return cur;
-}
-
-CELL FindWord_OLD(LPCTSTR word)
-{
-	trace(" looking for word [%s]\n", word);
-	CELL cur = LAST;
-	while (cur > 0)
-	{
-		DICT_T *dp = (DICT_T *)(&the_memory[cur]);
-		if (string_equals(word, dp->name))
-		{
-			return cur;
-		}
-		cur = dp->next;
-	}
-
-	return 0;
-}
-
 CELL FindWord(LPCTSTR word)
 {
-	if (isNew)
-		return FindWord_NEW(word);
-	else
-		return FindWord_OLD(word);
+	int i = 0;
+	trace(" looking for word [%s]\n", word);
+	CELL cur = LAST;
+	do
+	{
+		if (++i > 20)
+			return 0; 
+		DICT_T_NEW *dp = (DICT_T_NEW *)(cur);
+		// printf("(%lx, [%s]==[%s]?)", cur, word, dp->name);
+		if (string_equals(word, dp->name))
+		{
+			return cur;
+		}
+		// printf("next, %lx", dp->prev);
+		cur = dp->prev;
+	} while (cur > 0);
+
+	return cur;
 }
 
 BYTE GetFlags(CELL addr)
 {
 	addr += CELL_SZ;
 	addr += CELL_SZ;
-	return CFetch(addr);
+	return GETBYTE(addr);
 }
 
 CELL GetXT(CELL addr)
 {
 	if (isNew)
 	{
-		addr += CELL_SZ;			// next
 		addr += CELL_SZ;			// prev
+		addr += CELL_SZ;			// next
 		addr += 1;					// flags
-		addr += CFetch(addr);	    // word-len
+		addr += GETBYTE(addr);	    // word-len
 		addr += 2;					// len byte, null-terminator
 
 		return addr;
 	}
-	return Fetch(addr + CELL_SZ);
+	return GETCELL(addr + CELL_SZ);
 }
 
 bool MakeNumber(LPCTSTR word, CELL *the_num)
@@ -301,16 +230,18 @@ bool MakeNumber(LPCTSTR word, CELL *the_num)
 void DefineWord(LPCTSTR word, BYTE flags)
 {
 	int len = strlen(word);
-	CELL oldLAST = LAST;
+	CELL newLAST = HERE;
 
 	debug("Defining word [%s] at %04lx, LAST=%04lx\n", word, HERE, LAST);
 
 	// Doubly linked list
-	if (oldLAST > 0)
-		SETAT(oldLAST + CELL_SZ, HERE);
+	if (LAST > 0)
+	{
+		CELL next = LAST + CELL_SZ;
+		SETCELL(next, newLAST);
+	}
 
-	LAST = HERE;
-	Comma(oldLAST);	// prev
+	Comma(LAST);	// prev
 	Comma(0);		// next
 	CComma(flags);
 	CComma(len);
@@ -319,8 +250,7 @@ void DefineWord(LPCTSTR word, BYTE flags)
 		CComma(word[i]);
 	}
 	CComma(0);
-
-	SyncMem(true);
+	LAST = newLAST;
 }
 
 // Returns a pointer to the first char after the first word in the line
@@ -443,7 +373,6 @@ char *ParseWord(char *word, char *line)
 	if (string_equals(word, ".QUIT"))
 	{
 		_QUIT_HIT = 1;
-		_ALL_OK = false;
 		return line;
 	}
 
@@ -472,29 +401,10 @@ char *ParseWord(char *word, char *line)
 		trace("\n");
 		line = GetWord(line, word);
 		DefineWord(word, 0);
-		// CComma(DICTP);
-		// Comma(LAST);
 		CComma(LITERAL);
 		Comma(HERE + 5);
 		CComma(RET);
-
-		if (strcmp(word, "(HERE)") == 0)
-			ADDR_HERE = HERE;
-
-		if (strcmp(word, "(LAST)") == 0)
-			ADDR_LAST = HERE;
-
-		if (strcmp(word, "BASE") == 0)
-			ADDR_BASE = HERE;
-
-		if (strcmp(word, "STATE") == 0)
-			ADDR_STATE = HERE;
-
-		if (strcmp(word, "(MEM_SZ)") == 0)
-			ADDR_MEM_SZ = HERE;
-
 		Comma(0);
-		SyncMem(true);
 		return line;
 	}
 
@@ -585,30 +495,6 @@ char *ParseWord(char *word, char *line)
 		}
 		return line;
 	}
-
-	// if (strcmp(word, ".CSTORE.") == 0)
-	// {
-	// 	CComma(CSTORE);
-	// 	return line;
-	// }
-
-	// if (strcmp(word, ".ADD.") == 0)
-	// {
-	// 	CComma(ADD);
-	// 	return line;
-	// }
-
-	// if (strcmp(word, ".INC.") == 0)
-	// {
-	// 	CComma(INC);
-	// 	return line;
-	// }
-
-	// if (strcmp(word, ".NOP.") == 0)
-	// {
-	// 	CComma(NOP);
-	// 	return line;
-	// }
 
 	if (strcmp(word, ".INLINE.") == 0)
 	{
@@ -828,17 +714,10 @@ void CompilerInit()
 	the_memory[0] = RET;
 	isEmbedded = true;
 
-	HERE = 0x0040;
-	LAST = MEM_SZ - CELL_SZ;
-	if (isNew)
-	{
-		LAST = 0;
-		// Comma(0);
-	}
+	HERE = PC + 0x0040;
+	LAST = 0;
 	STATE = 0;
-
-	Store(ADDR_CELL, CELL_SZ);
-	Store(ADDR_BASE, BASE);
+	BASE = 10;
 }
 
 void GeneratePrimitive(char *name, BYTE opcode, BYTE flags)
@@ -852,7 +731,6 @@ extern void prim_EMIT();
 void GeneratePrimitives()
 {
 	GeneratePrimitive("EMIT", EMIT, 0);
-	SyncMem(true);
 }
 
 void Compile(FILE *fp_in)
@@ -888,8 +766,6 @@ void Compile(FILE *fp_in)
 
 	CStore(0, JMP);
 	Store(1, GetXT(addr));
-
-	SyncMem(true);
 }
 
 void do_compile()
@@ -907,7 +783,7 @@ void do_compile()
     }
 
 	Compile(input_fp);
-	Store(ADDR_BASE, 10);
+    printf("(here 2)");
     fclose(input_fp);
     input_fp = NULL;
 }
@@ -961,15 +837,14 @@ void process_arg(char *arg)
     else if (*arg == 'n')
     {
 		run_vm = false;
-		printf("log level set to debug.\n");
     }
     else if (*arg == '?')
     {
-        printf("usage: forth-compiler [args]\n");
+        printf("usage: forth3 [args]\n");
         printf("  -i:inputFile (full or relative path)\n");
         printf("      default inputFile is block-0000.fs\n");
         printf("  -o:outputFile (full or relative path)\n");
-        printf("      default outputFile is forth.bin\n");
+        printf("      default outputFile is forth3.bin\n");
         printf("  -m:<KB> - Memory size in KB\n");
         printf("      default value is 64\n");
         printf("  -t (set log level to trace)\n");
@@ -989,6 +864,8 @@ int main (int argc, char **argv)
     strcpy(output_fn, "forth.bin");
 	_ALL_OK = true;
 	debug_off();
+	debug_on();
+	run_vm = false;
 
     for (int i = 1; i < argc; i++)
     {
@@ -1002,11 +879,11 @@ int main (int argc, char **argv)
 	// MEM_SZ = mem_size_KB * 1024;
     do_compile();
 	write_output_file();
+	do_dis("forth3.lst");
 
 	if (run_vm && _ALL_OK)
 	{
-		PC = 0;
-		SyncMem(true);
+		PC = (CELL)the_memory;
 		PC = 0;
 		isBYE = false;
 		isEmbedded = true;

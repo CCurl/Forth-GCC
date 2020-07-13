@@ -5,23 +5,10 @@
 #include "logger.h"
 #include "forth-vm.h"
 
-CELL ORG = 0x0040;
-
-char input_fn[64];
-char output_fn[64];
-FILE *input_fp = NULL;
-FILE *output_fp = NULL;
-
-
-CELL ADDR_CELL     = 0x08;
-CELL ADDR_HERE     = 0x10;
-CELL ADDR_LAST     = 0x14;
-CELL ADDR_BASE     = 0x18;
-CELL ADDR_INPUTFP  = 0x1C;
-CELL ADDR_STATE    = 0x20;
-CELL ADDR_MEM_SZ   = 0x24;
-
-CELL HERE;
+#define ORG_OFFSET 0x0040;
+CELL ORG;
+extern CELL HERE;
+extern CELL LAST;
 
 // ------------------------------------------------------------------------------------------
 void dis_range(CELL start, CELL end, char *bytes)
@@ -47,7 +34,7 @@ void dis_rangeCell(CELL start, CELL end, char *bytes)
 	char x[8];
 	while (start <= end)
 	{
-		CELL val = GETAT(start);
+		CELL val = GETCELL(start);
 		start += 4;
 		sprintf(x, " %08lx", (CELL)val);
 		strcat(bytes, x);
@@ -60,84 +47,10 @@ void dis_PC2(int num, char *bytes)
 	char x[8];
 	for (int i = 0; i < num; i++)
 	{
-		BYTE val = the_memory[PC++];
+		BYTE val = *(BYTE *)(PC++);
 		sprintf(x, " %02x", (int)val);
 		strcat(bytes, x);
 	}
-}
-
-// ------------------------------------------------------------------------------------------
-CELL GetSysVarAddr(char *name)
-{
-	// printf("Looking for [%s] ...\n", name);
-	CELL addr = ORG;
-	CELL def_sz = 0x0f;
-	while ( addr < 0x1000 )
-	{
-		if ( the_memory[addr] != DICTP )
-		{
-			printf("[%s] NOT FOUND!\n", name);
-			return 0;
-		}
-		CELL tmp = GETAT(addr+1);
-		DICT_T *dp = (DICT_T *)&the_memory[tmp];
-		// printf("0x%04lX, 0x%04lX, [%s] = [%s]?\n", addr, dp, name, dp->name);
-		if (strcmp(dp->name, name) == 0)
-		{
-			tmp = addr + 11;
-			// printf("[%s] FOUND at 0x%04lx\n", name, tmp);
-			return tmp;
-		}
-		addr += def_sz;
-	}
-	return 0;
-}
-
-// ------------------------------------------------------------------------------------------
-CELL dis_vars(FILE *write_to)
-{
-	CELL addr = ORG;
-	char bytes[256];
-	char desc[256];
-	CELL def_sz = 0x0f;
-	while ( true )
-	{
-		if ( the_memory[addr] != DICTP )
-		{
-			return addr;
-		}
-		CELL tmp = GETAT(addr+1);
-		CELL tmp2;
-		DICT_T *dp = (DICT_T *)&the_memory[tmp];
-
-		sprintf(bytes, "%04lx:", addr);
-		dis_start(addr, 5, bytes);
-		sprintf(desc, "DICTP %s (%04lx)", dp->name, tmp);
-		fprintf(write_to, "%-32s ; %s\n", bytes, desc);
-
-		tmp = addr+5;
-		tmp2 = GETAT(tmp+1);
-		sprintf(bytes, "%04lx:", tmp);
-		dis_start(tmp, 5, bytes);
-		sprintf(desc, "LITERAL %d (0x%04lx)", tmp2, tmp2);
-		fprintf(write_to, "%-32s ; %s\n", bytes, desc);
-
-		tmp = tmp+5;
-		sprintf(bytes, "%04lx:", tmp);
-		dis_start(tmp, 1, bytes);
-		sprintf(desc, "RET");
-		fprintf(write_to, "%-32s ; %s\n", bytes, desc);
-
-		tmp = tmp+1;
-		tmp2 = GETAT(tmp);
-		sprintf(bytes, "%04lx:", tmp);
-		dis_start(tmp, 4, bytes);
-		sprintf(desc, "dw 0x%04lx", tmp2);
-		fprintf(write_to, "%-32s ; %s\n;\n", bytes, desc);
-
-		addr += def_sz;
-	}
-	return 0;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -153,7 +66,7 @@ CELL dis_one(char *bytes, char *desc)
 	switch (IR)
 	{
 	case LITERAL:
-		arg1 = GETAT(PC);
+		arg1 = GETCELL(PC);
 		// PC += CELL_SZ;
 		// push(arg1);
 		dis_PC2(CELL_SZ, bytes);
@@ -170,7 +83,7 @@ CELL dis_one(char *bytes, char *desc)
 
 	case FETCH:
 		// arg1 = GETTOS();
-		// arg2 = GETAT(arg1);
+		// arg2 = GETCELL(arg1);
 		// SETTOS(arg2);
 		sprintf(desc, "FETCH");
 		return 0;
@@ -178,7 +91,7 @@ CELL dis_one(char *bytes, char *desc)
 	case STORE:
 		// arg1 = pop();
 		// arg2 = pop();
-		// SETAT(arg1, arg2);
+		// SETCELL(arg1, arg2);
 		sprintf(desc, "STORE");
 		return 0;
 
@@ -222,12 +135,12 @@ CELL dis_one(char *bytes, char *desc)
 		return 0;
 
 	case JMP:
-		// PC = GETAT(PC);
-		arg1 = GETAT(PC);
+		// PC = GETCELL(PC);
+		arg1 = GETCELL(PC);
 		sprintf(desc, "JMP %04lx", arg1);
 		if (the_memory[arg1] == DICTP)
 		{
-			arg2 = GETAT(arg1+1);
+			arg2 = GETCELL(arg1+1);
 			DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
 			sprintf(desc, "JMP %s (%04lx)\n;", dp->name, arg1);
 		}
@@ -237,23 +150,23 @@ CELL dis_one(char *bytes, char *desc)
 	case JMPZ:
 		// if (pop() == 0)
 		// {
-		// 	PC = GETAT(PC);
+		// 	PC = GETCELL(PC);
 		// }
 		// else
 		// {
 		// 	PC += CELL_SZ;
 		// }
-		sprintf(desc, "JMPZ %04lx", GETAT(PC));
+		sprintf(desc, "JMPZ %04lx", GETCELL(PC));
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
 
 	case JMPNZ:
-		sprintf(desc, "JMPNZ %04lx", GETAT(PC));
+		sprintf(desc, "JMPNZ %04lx", GETCELL(PC));
 		dis_PC2(CELL_SZ, bytes);
 		// arg1 = pop();
 		// if (arg1 != 0)
 		// {
-		// 	PC = GETAT(PC);
+		// 	PC = GETCELL(PC);
 		// }
 		// else
 		// {
@@ -262,12 +175,12 @@ CELL dis_one(char *bytes, char *desc)
 		return CELL_SZ;
 
 	case CALL:
-		arg1 = GETAT(PC);
+		arg1 = GETCELL(PC);
 		// printf("(CALL) %04lx", PC);
 		// PC += CELL_SZ;
 		// rpush(PC);
 		// PC = arg1;
-		// arg2 = GETAT(arg1+1);
+		// arg2 = GETCELL(arg1+1);
 		// DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
 		// sprintf(desc, "CALL %s (%04lx)", dp->name, arg1);
 		sprintf(desc, "CALL %04lx", arg1);
@@ -405,7 +318,7 @@ CELL dis_one(char *bytes, char *desc)
 		return 0;
 
 	case DICTP:
-		arg1 = GETAT(PC);
+		arg1 = GETCELL(PC);
 		// PC += CELL_SZ;
 		sprintf(desc, "DICTP %s (%04lx)", &(the_memory[arg1+10]), arg1);
 		dis_PC2(CELL_SZ, bytes);
@@ -647,21 +560,21 @@ CELL dis_dict(FILE *write_to, CELL dict_addr)
 	// }
 
 	// Prev
-	sprintf(bytes, "%04lx:", addr);
+	sprintf(bytes, "%08lx:", addr);
 	dis_start(addr, CELL_SZ, bytes);
-	sprintf(desc, "PREV: %04lx", dp->prev);
+	sprintf(desc, "PREV: %08lx", dp->prev);
 	fprintf(write_to, ";\n%-32s ; %s\n", bytes, desc);
 	addr += CELL_SZ;
 
 	// Next, Flags
-	sprintf(bytes, "%04lx:", addr);
+	sprintf(bytes, "%08lx:", addr);
 	dis_start(addr, CELL_SZ+1, bytes);
-	sprintf(desc, "NEXT: %04lx, flags: %02x", dp->next, dp->flags);
+	sprintf(desc, "NEXT: %08lx, flags: %02x", dp->next, dp->flags);
 	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
 	addr += CELL_SZ+1;
 
 	// Name
-	sprintf(bytes, "%04lx: %02x", addr++, dp->len);
+	sprintf(bytes, "%08lx: %02x", addr++, dp->len);
 	dis_start(addr, dp->len+1, bytes);
 	sprintf(desc, "LEN: %d, NAME: %s", (int)dp->len, dp->name);
 	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
@@ -673,23 +586,24 @@ CELL dis_dict(FILE *write_to, CELL dict_addr)
 // ------------------------------------------------------------------------------------------
 void dis_vm(FILE *write_to)
 {
-	HERE = GETAT(ADDR_HERE);
 	char bytes[128], desc[128];
 
 	// Initial JMP
-	PC = 0;
+	PC = (CELL)the_memory;
 	dis_one(bytes, desc);
 	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
+	fflush(write_to);
 
-	sprintf(bytes, "0005:");
-	dis_range(5, 7, bytes);
+	sprintf(bytes, "%08lx:", PC);
+	dis_range((CELL)the_memory+0x05, (CELL)the_memory+0x07, bytes);
 	fprintf(write_to, "%s\n", bytes);
 
-	sprintf(bytes, "0008:");
-	dis_rangeCell(0x08, 0x0f, bytes);
+	sprintf(bytes, "%08lx:");
+	dis_rangeCell((CELL)the_memory+0x08, (CELL)the_memory+0x0f, bytes);
 	fprintf(write_to, "%s\n", bytes);
 
-	PC = 0x10;
+	PC = (CELL)the_memory+0x10;
+	ORG = (CELL)the_memory+ORG_OFFSET;
 	while (PC < ORG)
 	{
 		sprintf(bytes, "%04lx:", PC);
@@ -706,7 +620,7 @@ void dis_vm(FILE *write_to)
 
 	while (PC < HERE)
 	{
-		DICT_T_NEW *curr_dp = (DICT_T_NEW *)(&the_memory[PC]);
+		DICT_T_NEW *curr_dp = (DICT_T_NEW *)(PC);
 		CELL stop_here = curr_dp->next;
 		stop_here = (stop_here > 0) ? stop_here : HERE;
 		PC = dis_dict(write_to, PC);
@@ -725,120 +639,21 @@ void dis_vm(FILE *write_to)
 }
 
 // *********************************************************************
-void load_vm()
+void do_dis(char *output_fn)
 {
-	printf("loading VM from %s ...", input_fn);
-	input_fp = fopen(input_fn, "rb");
-	if (!input_fp)
-	{
-		printf("\ncannot open file %s!", input_fn);
-        exit(1);
-	}
-
-    fseek(input_fp, 0L, SEEK_END);
-    long file_sz = ftell(input_fp);
-    debug("file_sz: %ld bytes, ", file_sz);
-    fseek(input_fp, 0L, SEEK_SET);
-
-    memory_size = file_sz;
-    init_vm(file_sz);
-
-	int num_read = fread(the_memory, 1, memory_size, input_fp);
-    debug("%ld bytes read\n", num_read);
-	fclose(input_fp);
-	input_fp = NULL;
-
-	// ADDR_HERE = GetSysVarAddr("(HERE)");
-	// ADDR_LAST = GetSysVarAddr("(LAST)");
-	// ADDR_BASE = GetSysVarAddr("BASE");
-	// ADDR_STATE = GetSysVarAddr("STATE");
-	// ADDR_MEM_SZ = GetSysVarAddr("(MEM_SZ)");
-
-	printf(" done.\n");
-}
-
-// *********************************************************************
-void do_dis()
-{
-    output_fp = fopen(output_fn, "wt");
+    FILE *output_fp = fopen(output_fn, "wt");
     if (!output_fp)
     {
-        printf("ERROR: Can't open assembly file.\n");
+        printf("ERROR: Can't open disassembly file.\n");
         return;
     }
 
     printf("disassembling to file %s... ", output_fn);
-    fprintf(output_fp, "; memory-size: %ld bytes, (%04lx hex)\n", memory_size, memory_size);
-    fprintf(output_fp, "; data-stack: %04lx, grows up\n", memory_size - STACKS_SZ);
-    fprintf(output_fp, "; return-stack: %04lx, grows down\n;\n", memory_size - CELL_SZ);
+    fprintf(output_fp, "; memory-size: %ld bytes, (%04lx hex)\n;\n", memory_size, memory_size);
 	dis_vm(output_fp);
 
     fclose(output_fp);
     output_fp = NULL;
 
-    dis_vm(output_fp);
-
     printf(" done.\n");
-}
-
-// *********************************************************************
-void process_arg(char *arg)
-{
-    if (*arg == 'i') 
-    {
-        arg = arg+2;
-        strcpy(input_fn, arg);
-    }
-    else if (*arg == 'o') 
-    {
-        arg = arg+2;
-        strcpy(output_fn, arg);
-    }
-    else if (*arg == 't') 
-    {
-		trace_on();
-		printf("log level set to trace.\n");
-    }
-    else if (*arg == 'd') 
-    {
-		debug_on();
-		printf("log level set to debug.\n");
-    }
-    else if (*arg == '?') 
-    {
-        printf("usage: forth-compiler [args]\n");
-        printf("  -i:inputFile (full or relative path)\n");
-        printf("      default inputFile is forth.bin\n");
-        printf("  -o:outputFile (full or relative path)\n");
-        printf("      default outputFile is forth.lst\n");
-        printf("  -t (set log level to trace)\n");
-        printf("  -d (set log level to debug)\n");
-        printf("  -? (prints this message)\n");
-		exit(0);
-    }
-    else
-    {
-        printf("unknown arg '-%s'\n", arg);
-    }
-}
-
-int main (int argc, char **argv)
-{
-    strcpy(input_fn, "forth.bin");
-	strcpy(output_fn, "forth.lst");
-	debug_off();
-
-    for (int i = 1; i < argc; i++)
-    {
-        char *cp = argv[i];
-        if (*cp == '-')
-        {
-            process_arg(++cp);
-        }
-    }
-
-    load_vm();
-	do_dis();
-
-    return 0;
 }

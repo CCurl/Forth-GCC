@@ -37,6 +37,7 @@ set c-files=forth3.c
 set c-files=%c-files% forth-vm.c
 set c-files=%c-files% vm-prims.c
 set c-files=%c-files% logger.c
+set c-files=%c-files% forth-dis.c
 echo making %output% ...
 echo gcc -g -o %output% %c-files%
 rem gcc -g -o %output% %c-files%

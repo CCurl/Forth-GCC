@@ -30,131 +30,60 @@ extern BYTE the_memory[];
 extern int __DEBUG__;
 extern int _QUIT_HIT;
 
-// A stack looks like this: [sp][top-addr][data]
-void stk_push(CELL stack, CELL val)
-{
-	CELL sp = GETAT(stack);
-	CELL top = GETAT(stack+CELL_SZ);
-	if ( sp > top )
-	{
-		printf("Stack full.");
-		reset_vm();
-		return;
-	}
+#define m_DROP() TOS = *(DSP--)
 
-	SETAT(sp, val);
-	sp += CELL_SZ;
-	SETAT(stack, sp);
+inline void push(CELL val) 
+{ 
+	*(++DSP) = TOS;
+	TOS = val;
 }
 
-// A stack looks like this: [sp][top-addr][data]
-CELL stk_pop(CELL stack)
+inline CELL pop()
 {
-	CELL sp = GETAT(stack);
-	CELL bottom = stack+(CELL_SZ*2);
-	sp -= CELL_SZ;
-	if ( sp < bottom )
-	{
-		SETAT(stack, bottom);
-		printf("Stack empty.");
-		reset_vm();
-		return 0;
-	}
-
-	SETAT(stack, sp);
-	return GETAT(sp);
-}
-
-// The data stack starts at (MEM_SZ - STACKS_SZ) and grows upwards towards the return stack
-void overflow()
-{
-		printf(" stack overflow! (at 0x%04lx)", PC-1);
-		reset_vm();
-		// _QUIT_HIT = 1;
-		// isBYE = 1;
-}
-
-void underflow()
-{
-		printf(" stack underflow!");
-		reset_vm();
-		// _QUIT_HIT = 1;
-		// isBYE = 1;
-}
-
-void push(CELL val)
-{
-	// trace(" push(%ld, DSP=0x%08lx) ", val, DSP);
-	if (depth < 64)
-	{
-		++depth;
-		*(++DSP) = TOS;
-		TOS = val;
-		return;
-	}
-	overflow();
-}
-
-CELL pop()
-{
-	if (depth > 0)
-	{
-		CELL ret = TOS;
-		--depth;
-		TOS = *(DSP--);
-		return ret;
-	}
-	underflow();
-	return 0;
-}
-
-void drop()
-{
-	if (depth > 0)
-	{
-		--depth;
-		TOS = *(DSP--);
-	}
-	else
-	{
-		underflow();
-	}
+	 CELL val = TOS; 
+	 TOS = *(DSP--); 
+	 return val; 
 }
 
 // The return stack starts at (MEM_SZ) and grows downwards towards the data stack
 void rpush(CELL val)
 {
-	if (rdepth  < 64)
-	{
-		++rdepth;
-		*(--RSP) = (CELL)(val);
-		return;
-	}
-
-	printf(" return stack overflow!");
-	reset_vm();
-	// _QUIT_HIT = 1;
-	// isBYE = 1;
+	++rdepth;
+	*(--RSP) = (CELL)(val);
 }
 
 CELL rpop()
 {
-	if (rdepth > 0)
+	--rdepth;
+	return *(RSP++);
+}
+
+void checkStacks()
+{
+	isBYE = 1;
+	if (depth < 0)
 	{
-		--rdepth;
-		return *(RSP++);
+		printf(" stack underflow! (at PC=0x%04lx)", PC-1);
 	}
-	printf(" return stack underflow! (at PC=0x%04lx)", PC-1);
-	reset_vm();
-	// _QUIT_HIT = 1;
-	// isBYE = 1;
-	return PC;
+	if (rdepth < 0)
+	{
+		printf(" return stack underflow! (at PC=0x%04lx)", PC-1);
+	}
+	if (depth > DSTACK_SZ)
+	{
+		printf(" stack overflow! (at PC=0x%04lx)", PC-1);
+	}
+	if (rdepth > RSTACK_SZ)
+	{
+		printf(" return stack overflow! (at PC=0x%04lx)", PC-1);
+	}
+	isBYE = 0;
 }
 
 // LITERAL - Doeswhat
 void prim_LITERAL()
 {
-	arg1 = GETAT(PC);
+	arg1 = GETCELL(PC);
 	// trace("LITERAL (%d, 0x%04lx)\n", arg1, arg1);
 	PC += CELL_SZ;
 	push(arg1);
@@ -163,8 +92,8 @@ void prim_LITERAL()
 // FETCH - Doeswhat
 void prim_FETCH()
 {
-	// printf("FETCH (from 0x%04lx - %04lx)\n", TOS, GETAT(TOS));
-    TOS = GETAT(TOS);
+	// printf("FETCH (from 0x%04lx - %04lx)\n", TOS, GETCELL(TOS));
+    TOS = GETCELL(TOS);
 }
 
 // STORE - Doeswhat
@@ -173,57 +102,34 @@ void prim_STORE()
     arg2 = pop();
     arg1 = pop();
 	// printf("STORE (0x%04lx to 0x%04lx)\n", arg1, arg2);
-    SETAT(arg2, arg1);
+    SETCELL(arg2, arg1);
 }
 
 // SWAP - Doeswhat
 void prim_SWAP()
 {
-	if (depth < 1)
-	{
-		underflow();
-		return;
-	}
     arg1 = GET2ND();
-    arg2 = GETTOS();
-	// trace("SWAP (%ld and %ld)\n", arg1, arg2);
-    SET2ND(arg2);
+    SET2ND(TOS);
     SETTOS(arg1);
 }
 
 // DROP - Doeswhat
 void prim_DROP()
 {
-	//trace("DROP\n");
-	if (depth)
-	{
-    	drop();
-	}
-	else
-	{
-		underflow();
-	}
+   	m_DROP();
 }
 
 // DUP - Doeswhat
 void prim_DUP()
 {
-	//trace("DUP (%ld)\n", arg1);
-	if (depth)
-	{
-    	push(TOS);
-	}
-	else
-	{
-		underflow();
-	}
+   	push(TOS);
 }
 
 // SLITERAL - Doeswhat
 void prim_SLITERAL()
 {
 	// trace("SLITERAL\n");
-	arg2 = the_memory[PC]; // count-byte
+	arg2 = GETBYTE(PC); // count-byte
 	push(PC);
 	PC += (arg2 + 2); // +2 => count-byte and NULL-terminator
 }
@@ -231,7 +137,7 @@ void prim_SLITERAL()
 // JMP - Doeswhat
 void prim_JMP()
 {
-	PC = GETAT(PC);
+	PC = GETCELL(PC);
 	// trace("JMP (to %04lx)\n", PC);
 }
 
@@ -240,13 +146,13 @@ void prim_JMPZ()
 {
 	if (TOS == 0)
 	{
-		PC = GETAT(PC);
+		PC = GETCELL(PC);
 	}
 	else
 	{
 		PC += CELL_SZ;
 	}
-	drop();
+	m_DROP();
 }
 
 // JMPNZ - Doeswhat
@@ -254,20 +160,20 @@ void prim_JMPNZ()
 {
 	if (TOS != 0)
 	{
-		PC = GETAT(PC);
+		PC = GETCELL(PC);
 	}
 	else
 	{
 		PC += CELL_SZ;
 	}
-	drop();
+	m_DROP();
 }
 
 // CALL - Doeswhat
 void prim_CALL()
 {
 	rpush(PC+CELL_SZ);
-	PC = GETAT(PC);
+	PC = GETCELL(PC);
 }
 
 // RET - Doeswhat
@@ -298,7 +204,7 @@ void prim_OR()
 // CLITERAL - Doeswhat
 void prim_CLITERAL()
 {
-	arg1 = the_memory[PC++];
+	arg1 = GETBYTE(PC++);
 	// trace("CLITERAL (%ld)\n", arg1);
 	push(arg1);
 }
@@ -306,7 +212,7 @@ void prim_CLITERAL()
 // CFETCH - Doeswhat
 void prim_CFETCH()
 {
-	TOS = the_memory[TOS];
+	TOS = GETBYTE(TOS);
 }
 
 // CSTORE - Doeswhat
@@ -315,7 +221,7 @@ void prim_CSTORE()
 	arg1 = pop();
 	arg2 = pop();
 	// printf("CSTORE (%ld to 0x%04lx)\n", arg2, arg1);
-	the_memory[arg1] = (BYTE)arg2;
+	SETBYTE(arg1, arg2);
 }
 
 // ADD - Doeswhat
@@ -381,7 +287,7 @@ void prim_GT()
 // DICTP - Doeswhat
 void prim_DICTP()
 {
-	arg1 = GETAT(PC);
+	arg1 = GETCELL(PC);
 	PC += CELL_SZ;
 	//trace("DICTP %04lx", arg1);
 	//trace(" ; %s\n", &(the_memory[arg1+10]));
@@ -410,8 +316,8 @@ void prim_COMPARE()
 	arg2 = pop();
 	arg1 = pop();
 	{
-		char *cp1 = (char *)&the_memory[arg1];
-		char *cp2 = (char *)&the_memory[arg2];
+		char *cp1 = (char *)arg1;
+		char *cp2 = (char *)arg2;
 		arg3 = strcmp(cp1, cp2) ? 0 : 1;
 		push(arg3);
 	}
@@ -424,13 +330,12 @@ void prim_FOPEN()
 	arg2 = pop();   // mode: 0 => read, 1 => write
 	arg1 = pop();   // name
 	{
-		char *fileName = (char *)&the_memory[arg1 + 1];
+		char *fileName = (char *)(arg1 + 1);
 		char mode[4];
 		sprintf(mode, "%c%c", (arg2 == 0) ? 'r' : 'w', (arg3 == 0) ? 't' : 'b');
 		trace("FOPEN %s, %s\n", fileName, mode);
 		FILE *fp = fopen(fileName, mode);
-		arg1 = (CELL) fp;
-		push(arg1);
+		push((CELL)fp);
 		push(fp != NULL ? 1 : 0);
 	}
 }
@@ -457,7 +362,7 @@ void prim_FREADLINE()
 	arg2 = pop();		// max-sz
 	arg1 = pop();		// to-addr - NB: this is a COUNTED and NULL-TERMINATED string!
 	{
-		char *tgt = (char *)&the_memory[arg1];
+		char *tgt = (char *)arg1;
 		FILE *fp = arg3 ? (FILE *)arg3 : stdin;
 		char *pBuf = tgt;
 		if (fgets((pBuf+1), arg2, fp) != (pBuf+1))
@@ -487,7 +392,7 @@ void prim_FWRITE()
 	arg2 = pop();
 	arg1 = pop();
 	{
-		BYTE *pBuf = (BYTE *)&the_memory[arg1];
+		BYTE *pBuf = (BYTE *)arg1;
 		int num = fwrite(pBuf, sizeof(BYTE), arg2, arg3 == 0 ? stdin : (FILE *)arg3);
 		push(num);
 	}
@@ -572,8 +477,8 @@ void prim_COMPAREI()
 	arg2 = pop();
 	arg1 = pop();
 	{
-		char *cp1 = (char *)&the_memory[arg1];
-		char *cp2 = (char *)&the_memory[arg2];
+		char *cp1 = (char *)arg1;
+		char *cp2 = (char *)arg2;
 		arg3 = _strcmpi(cp1, cp2) ? 0 : 1;
 		push(arg3);
 	}
@@ -591,18 +496,7 @@ void prim_SLASHMOD()
 // NOT - Does NOTHING
 void prim_NOT()
 {
-	TOS = TOS == 0 ? -1 : 0;
-}
-
-void prim_USPOP()
-{
-	arg1 = pop();		// User Stack start address
-	CELL sp = GETAT(arg1);
-	CELL firstOK = arg1 + (2 * CELL_SZ);
-	CELL lastOK = GETAT(arg1 + CELL_SZ);
-	// trace("USPOP from stack [0x%04lx]\n", arg1);
-	arg2 = stk_pop(arg1);
-	push(arg2);
+	TOS = (TOS == 0) ? -1 : 0;
 }
 
 // INC - Doeswhat
@@ -649,9 +543,9 @@ void prim_PLUSSTORE()
 {
 	arg2 = pop();
 	arg1 = pop();
-	arg3 = GETAT(arg2);
+	arg3 = GETCELL(arg2);
 	arg3 += arg1;
-	SETAT(arg2, arg3);
+	SETCELL(arg2, arg3);
 }
 
 
