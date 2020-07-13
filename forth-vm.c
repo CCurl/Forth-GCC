@@ -87,8 +87,8 @@ CELL cpu_loop()
 	debug("Running (PC=%04lx) ... ", PC);
 	while (true)
 	{
-        // trace("PC=%04lx, IR=%d - ", PC, (int)the_memory[PC]);
-        IR = the_memory[PC++];
+        IR = GETBYTE(PC++);
+        // printf("PC=%04lx, IR=%d - ", PC-1, IR);
         vm_prims[IR]();
 
 		if (isBYE)

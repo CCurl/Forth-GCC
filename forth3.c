@@ -31,7 +31,7 @@ OPCODE_T theOpcodes[] = {
        { ".SWAP.", 4, "SWAP" },
        { ".DROP.", 5, "DROP" },
        { ".DUP.", 6, "DUP" },
-       { ".SLITERAL.", 7, "SLITERAL" },
+       { ".SLITERAL.", 7, "S\"" },
        { ".JMP.", 8, "JMP" },
        { ".JMPZ.", 9, "JMPZ" },
        { ".JMPNZ.", 10, "JMPNZ" },
@@ -149,12 +149,10 @@ CELL ExecuteXT(CELL XT)
 CELL FindWord(LPCTSTR word)
 {
 	int i = 0;
-	trace(" looking for word [%s]\n", word);
+	// printf("\nlooking for word [%s]", word);
 	CELL cur = LAST;
 	do
 	{
-		if (++i > 20)
-			return 0; 
 		DICT_T_NEW *dp = (DICT_T_NEW *)(cur);
 		// printf("(%lx, [%s]==[%s]?)", cur, word, dp->name);
 		if (string_equals(word, dp->name))
@@ -232,7 +230,7 @@ void DefineWord(LPCTSTR word, BYTE flags)
 	int len = strlen(word);
 	CELL newLAST = HERE;
 
-	debug("Defining word [%s] at %04lx, LAST=%04lx\n", word, HERE, LAST);
+	// printf("Defining word [%s] at %04lx, LAST=%04lx\n", word, HERE, LAST);
 
 	// Doubly linked list
 	if (LAST > 0)
@@ -565,7 +563,7 @@ char *ParseWord(char *word, char *line)
 		if (strcmp(word, ".THEN") == 0)
 		{
 			CELL tmp = pop();
-			Store(tmp, HERE);
+			SETBYTE(tmp, HERE);
 			return line;
 		}
 
@@ -591,7 +589,7 @@ char *ParseWord(char *word, char *line)
 				}
 			}
 			CComma(0);
-			CStore(cur_here, count);
+			SETBYTE(cur_here, count);
 			return line;
 		}
 	}
@@ -601,25 +599,25 @@ char *ParseWord(char *word, char *line)
 	{
 		CELL xt = GetXT(wordAddr);
 		CELL flags = GetFlags(wordAddr);
-		// debug("FORTH word [%s]. STATE=%ld ... ", dp->name, STATE);
+		// printf("FORTH word at [%08lx]. STATE=%ld ... ", wordAddr, STATE);
 		if (STATE == 1)
 		{
-			debug("compiling into current word\n");
+			// printf("compiling into current word\n");
 			if (flags & IS_IMMEDIATE)
 			{
-				// printf("executing 0x%04lx ...", xt);
+				printf("executing 0x%08lx ...", xt);
 				ExecuteXT(xt);
 			}
 			else if (flags & IS_INLINE)
 			{
 				// Skip the DICTP instruction
 				CELL addr = xt; // + 1 + CELL_SZ;
-				// printf("inlining 0x%04lx ...", xt);
+				printf("inlining 0x%08lx ...", xt);
 
 				// Copy bytes until the first RET
 				while (true)
 				{
-					BYTE b = CFetch(addr++);
+					BYTE b = GETBYTE(addr++);
 					if (b == RET)
 					{
 						break;
@@ -644,7 +642,7 @@ char *ParseWord(char *word, char *line)
 	CELL num = 0;
 	if (MakeNumber(word, &num))
 	{
-		trace("IsNumber: %ld (%04lx), STATE=%ld\n", num, num, STATE);
+		printf("IsNumber: %ld (%04lx), STATE=%ld\n", num, num, STATE);
 		if (STATE == 1) // Compiling
 		{
 			if ((0 <= num) && (num <= 0xFF))
@@ -720,6 +718,14 @@ void CompilerInit()
 	BASE = 10;
 }
 
+void GenerateVariable(char *name, CELL addr)
+{
+	DefineWord(name, 0);
+	CComma(LITERAL);
+	Comma(addr);
+	CComma(RET);
+}
+
 void GeneratePrimitive(char *name, BYTE opcode, BYTE flags)
 {
 	DefineWord(name, flags);
@@ -727,10 +733,22 @@ void GeneratePrimitive(char *name, BYTE opcode, BYTE flags)
 	CComma(RET);
 }
 
-extern void prim_EMIT();
 void GeneratePrimitives()
 {
-	GeneratePrimitive("EMIT", EMIT, 0);
+	GenerateVariable("(HERE)", (CELL) &HERE);
+	GenerateVariable("(LAST)", (CELL) &LAST);
+	GenerateVariable("BASE", (CELL) &BASE);
+	GenerateVariable("STATE", (CELL) &STATE);
+	GenerateVariable("CELL", (CELL) CELL_SZ);
+	for (int i = 0;; i++)
+	{
+		OPCODE_T x = theOpcodes[i];
+		if (x.opcode == 0)
+		{
+			break;
+		}
+		GeneratePrimitive(x.forth_prim, x.opcode, 0);
+	}
 }
 
 void Compile(FILE *fp_in)
@@ -783,7 +801,6 @@ void do_compile()
     }
 
 	Compile(input_fp);
-    printf("(here 2)");
     fclose(input_fp);
     input_fp = NULL;
 }
@@ -864,8 +881,7 @@ int main (int argc, char **argv)
     strcpy(output_fn, "forth.bin");
 	_ALL_OK = true;
 	debug_off();
-	debug_on();
-	run_vm = false;
+	run_vm = true;
 
     for (int i = 1; i < argc; i++)
     {
@@ -884,7 +900,6 @@ int main (int argc, char **argv)
 	if (run_vm && _ALL_OK)
 	{
 		PC = (CELL)the_memory;
-		PC = 0;
 		isBYE = false;
 		isEmbedded = true;
 		CELL ret = cpu_loop();

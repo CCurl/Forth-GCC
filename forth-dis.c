@@ -16,7 +16,7 @@ void dis_range(CELL start, CELL end, char *bytes)
 	char x[8];
 	while (start <= end)
 	{
-		BYTE val = the_memory[start++];
+		BYTE val = GETBYTE(start++);
 		sprintf(x, " %02x", (int)val);
 		strcat(bytes, x);
 	}
@@ -58,10 +58,9 @@ void dis_PC2(int num, char *bytes)
 // ------------------------------------------------------------------------------------------
 CELL dis_one(char *bytes, char *desc)
 {
-	IR = the_memory[PC];
-	// printf("(PC=%04lx, IR=%02x)", PC, (int)IR);
-	sprintf(bytes, "%04lx: %02x", PC, (int)IR);
-	++PC;
+	IR = GETBYTE(PC++);
+	// printf("(PC=%08lx, IR=%02x)", PC-1, (int)IR);
+	sprintf(bytes, "%08lx: %02x", PC-1, (int)IR);
 
 	switch (IR)
 	{
@@ -74,7 +73,7 @@ CELL dis_one(char *bytes, char *desc)
 		return CELL_SZ;
 
 	case CLITERAL:
-		arg1 = the_memory[PC];
+		arg1 = GETBYTE(PC);
 		// PC++;
 		// push(arg1);
 		dis_PC2(1, bytes);
@@ -137,13 +136,7 @@ CELL dis_one(char *bytes, char *desc)
 	case JMP:
 		// PC = GETCELL(PC);
 		arg1 = GETCELL(PC);
-		sprintf(desc, "JMP %04lx", arg1);
-		if (the_memory[arg1] == DICTP)
-		{
-			arg2 = GETCELL(arg1+1);
-			DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
-			sprintf(desc, "JMP %s (%04lx)\n;", dp->name, arg1);
-		}
+		sprintf(desc, "JMP %08lx", arg1);
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
 
@@ -156,12 +149,12 @@ CELL dis_one(char *bytes, char *desc)
 		// {
 		// 	PC += CELL_SZ;
 		// }
-		sprintf(desc, "JMPZ %04lx", GETCELL(PC));
+		sprintf(desc, "JMPZ %08lx", GETCELL(PC));
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
 
 	case JMPNZ:
-		sprintf(desc, "JMPNZ %04lx", GETCELL(PC));
+		sprintf(desc, "JMPNZ %08lx", GETCELL(PC));
 		dis_PC2(CELL_SZ, bytes);
 		// arg1 = pop();
 		// if (arg1 != 0)
@@ -176,63 +169,26 @@ CELL dis_one(char *bytes, char *desc)
 
 	case CALL:
 		arg1 = GETCELL(PC);
-		// printf("(CALL) %04lx", PC);
+		// printf("(CALL) %08lx", PC);
 		// PC += CELL_SZ;
 		// rpush(PC);
 		// PC = arg1;
 		// arg2 = GETCELL(arg1+1);
 		// DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
-		// sprintf(desc, "CALL %s (%04lx)", dp->name, arg1);
-		sprintf(desc, "CALL %04lx", arg1);
+		// sprintf(desc, "CALL %s (%08lx)", dp->name, arg1);
+		sprintf(desc, "CALL %08lx", arg1);
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
 
 	case RET:
-		// if (RSP == rsp_init)
-		// {
-		// 	if (isEmbedded)
-		// 	{
-		// 		isBYE = true;
-		// 	}
-		// 	else
-		// 	{
-		// 		PC = 0;
-		// 	}
-		// }
-		// else
-		// {
-		// 	PC = rpop();
-		// }
 		sprintf(desc, "RET");
-		if (the_memory[PC] == DICTP)
-		{
-			strcat(desc, "\n;");
-		}
 		return 0;
 
 	case COMPARE:
-		// arg2 = pop();
-		// arg1 = pop();
-		// {
-		// 	char *cp1 = (char *)&the_memory[arg1];
-		// 	char *cp2 = (char *)&the_memory[arg2];
-		// 	arg3 = strcmp(cp1, cp2) ? 0 : 1;
-		// 	push(arg3);
-		// }
-		// isBYE = true;
 		sprintf(desc, "COMPARE");
 		return 0;
 
 	case COMPAREI:
-		// arg2 = pop();
-		// arg1 = pop();
-		// {
-		// 	char *cp1 = (char *)&the_memory[arg1];
-		// 	char *cp2 = (char *)&the_memory[arg2];
-		// 	arg3 = _strcmpi(cp1, cp2) ? 0 : 1;
-		// 	push(arg3);
-		// }
-		// isBYE = true;
 		sprintf(desc, "COMPAREI");
 		return 0;
 
@@ -247,11 +203,11 @@ CELL dis_one(char *bytes, char *desc)
 		// SLIT   03    A    B    C   00
 		// PC starts at 0101, should be set to 0106
 
-		arg1 = the_memory[PC]; // count-byte (and the beginning of the counted string)
+		arg1 = GETBYTE(PC); // count-byte (and the beginning of the counted string)
 		arg2 = arg1 + 2;  // count-byte + count + NULL
 		// PC += arg2;
 		// push(arg1);
-		sprintf(desc, "SLITERAL (%04lx) [%s]", PC, (char *)&the_memory[PC+1]);
+		sprintf(desc, "SLITERAL (%08lx) [%s]", PC, (char *)PC+1);
 		dis_PC2(arg2, bytes);
 		return PC-arg1;
 
@@ -320,7 +276,7 @@ CELL dis_one(char *bytes, char *desc)
 	case DICTP:
 		arg1 = GETCELL(PC);
 		// PC += CELL_SZ;
-		sprintf(desc, "DICTP %s (%04lx)", &(the_memory[arg1+10]), arg1);
+		sprintf(desc, "DICTP");
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
 
@@ -479,38 +435,38 @@ CELL dis_one(char *bytes, char *desc)
 		return 0;
 
 	case BRANCHF:
-		arg1 = the_memory[PC];
-		sprintf(desc, "BRANCHF %ld (%04lx)", arg1, PC+arg1);
+		arg1 = GETBYTE(PC);
+		sprintf(desc, "BRANCHF %ld (%08lx)", arg1, PC+arg1);
 		dis_PC2(1, bytes);
 		return 0;
 
 	case BRANCHFZ:
-		arg1 = the_memory[PC];
-		sprintf(desc, "BRANCHFZ %ld (%04lx)", arg1, PC+arg1);
+		arg1 = GETBYTE(PC);
+		sprintf(desc, "BRANCHFZ %ld (%08lx)", arg1, PC+arg1);
 		dis_PC2(1, bytes);
 		return 0;
 
 	case BRANCHFNZ:
-		arg1 = the_memory[PC];
-		sprintf(desc, "BRANCHFNZ %ld (%04lx)", arg1, PC+arg1);
+		arg1 = GETBYTE(PC);
+		sprintf(desc, "BRANCHFNZ %ld (%08lx)", arg1, PC+arg1);
 		dis_PC2(1, bytes);
 		return 0;
 
 	case BRANCHB:
-		arg1 = the_memory[PC];
-		sprintf(desc, "BRANCHB %ld (%04lx)", arg1, PC-arg1);
+		arg1 = GETBYTE(PC);
+		sprintf(desc, "BRANCHB %ld (%08lx)", arg1, PC-arg1);
 		dis_PC2(1, bytes);
 		return 0;
 
 	case BRANCHBZ:
-		arg1 = the_memory[PC];
-		sprintf(desc, "BRANCHBZ %ld (%04lx)", arg1, PC-arg1);
+		arg1 = GETBYTE(PC);
+		sprintf(desc, "BRANCHBZ %ld (%08lx)", arg1, PC-arg1);
 		dis_PC2(1, bytes);
 		return 0;
 
 	case BRANCHBNZ:
-		arg1 = the_memory[PC];
-		sprintf(desc, "BRANCHBNZ %ld (%04lx)", arg1, PC-arg1);
+		arg1 = GETBYTE(PC);
+		sprintf(desc, "BRANCHBNZ %ld (%08lx)", arg1, PC-arg1);
 		dis_PC2(1, bytes);
 		return 0;
 
@@ -548,12 +504,12 @@ CELL dis_one(char *bytes, char *desc)
 CELL dis_dict(FILE *write_to, CELL dict_addr)
 {
 	char bytes[128], desc[128];
-	DICT_T_NEW *dp = (DICT_T_NEW *)&the_memory[dict_addr];
+	DICT_T_NEW *dp = (DICT_T_NEW *)dict_addr;
 	CELL addr = dict_addr;
 
 	// if (dp->next == 0)
 	// {
-	// 	sprintf(bytes, "%04lx:", addr);
+	// 	sprintf(bytes, "%08lx:", addr);
 	// 	dis_start(addr, CELL_SZ, bytes);
 	// 	fprintf(write_to, "%-32s ; End.\n", bytes);
 	// 	return;
@@ -594,19 +550,21 @@ void dis_vm(FILE *write_to)
 	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
 	fflush(write_to);
 
+	PC = (CELL)the_memory+0x05;
 	sprintf(bytes, "%08lx:", PC);
-	dis_range((CELL)the_memory+0x05, (CELL)the_memory+0x07, bytes);
+	dis_range(PC, PC+2, bytes);
 	fprintf(write_to, "%s\n", bytes);
 
+	PC = (CELL)the_memory+0x08;
 	sprintf(bytes, "%08lx:");
-	dis_rangeCell((CELL)the_memory+0x08, (CELL)the_memory+0x0f, bytes);
+	dis_rangeCell((CELL)PC, (CELL)PC+0x08, bytes);
 	fprintf(write_to, "%s\n", bytes);
 
 	PC = (CELL)the_memory+0x10;
 	ORG = (CELL)the_memory+ORG_OFFSET;
 	while (PC < ORG)
 	{
-		sprintf(bytes, "%04lx:", PC);
+		sprintf(bytes, "%08lx:", PC);
 		dis_rangeCell(PC, PC+0x0f, bytes);
 		fprintf(write_to, "%s\n", bytes);
 		PC += 0x10;
@@ -618,6 +576,7 @@ void dis_vm(FILE *write_to)
 	// Code
 	// PC = dis_vars(write_to);
 
+	PC = ORG;
 	while (PC < HERE)
 	{
 		DICT_T_NEW *curr_dp = (DICT_T_NEW *)(PC);
@@ -628,7 +587,7 @@ void dis_vm(FILE *write_to)
 		while (PC < stop_here)
 		{
 			dis_one(bytes, desc);
-			// printf("got here: PC = %04lx\n", PC);
+			// printf("got here: PC = %08lx\n", PC);
 			fprintf(write_to, "%-32s ; %s\n", bytes, desc);
 			fflush(write_to);
 		}
@@ -649,7 +608,8 @@ void do_dis(char *output_fn)
     }
 
     printf("disassembling to file %s... ", output_fn);
-    fprintf(output_fp, "; memory-size: %ld bytes, (%04lx hex)\n;\n", memory_size, memory_size);
+    fprintf(output_fp, "; memory-size: %ld bytes, (%08lx hex)\n;\n", memory_size, memory_size);
+	fflush(output_fp);
 	dis_vm(output_fp);
 
     fclose(output_fp);
