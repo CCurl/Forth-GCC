@@ -26,65 +26,66 @@ extern void do_dis(char *);
 extern void (*vm_prims[])();
 
 OPCODE_T theOpcodes[] = {
-       { ".LITERAL.", 1, "LITERAL", 0, IS_INLINE },
-       { ".FETCH.", 2, "FETCH", 0, IS_INLINE },
-       { ".STORE.", 3, "STORE, 0, IS_INLINE" },
+       { ".LITERAL.", 1, "LITERAL", 0, IS_COMPILE },
+       { ".FETCH.", 2, "@", 0, IS_INLINE },
+       { ".STORE.", 3, "!", 0, IS_INLINE },
        { ".SWAP.", 4, "SWAP", 0, IS_INLINE },
        { ".DROP.", 5, "DROP", 0, IS_INLINE },
        { ".DUP.", 6, "DUP", 0, IS_INLINE },
        { ".SLITERAL.", 7, "S\"", 0, IS_IMMEDIATE },
-       { ".JMP.", 8, "JMP" },
-       { ".JMPZ.", 9, "JMPZ" },
-       { ".JMPNZ.", 10, "JMPNZ" },
-       { ".CALL.", 11, "CALL" },
-       { ".RET.", 12, "RET" },
+       { ".JMP.", 8, "JMP", 0, IS_COMPILE },
+       { ".JMPZ.", 9, "JMPZ", 0, IS_COMPILE },
+       { ".JMPNZ.", 10, "JMPNZ", 0, IS_COMPILE },
+       { ".CALL.", 11, "CALL", 0, IS_COMPILE },
+       { ".RET.", 12, ";", 0, IS_IMMEDIATE },
+       { ".RET.", 12, "RET", 0, IS_COMPILE },
        { ".OR.", 13, "OR", 0, IS_INLINE },
-       { ".CLITERAL.", 14, "CLITERAL", 0, IS_INLINE },
-       { ".CFETCH.", 15, "CFETCH", 0, IS_INLINE },
-       { ".CSTORE.", 16, "CSTORE", 0, IS_INLINE },
-       { ".ADD.", 17, "ADD", 0, IS_INLINE },
-       { ".SUB.", 18, "SUB", 0, IS_INLINE },
-       { ".MUL.", 19, "MUL", 0, IS_INLINE },
-       { ".DIV.", 20, "DIV", 0, IS_INLINE },
-       { ".LT.", 21, "LT", 0, IS_INLINE },
-       { ".EQ.", 22, "EQ", 0, IS_INLINE },
-       { ".GT.", 23, "GT", 0, IS_INLINE },
+       { ".CLITERAL.", 14, "CLITERAL", 0, IS_COMPILE },
+       { ".CFETCH.", 15, "C@", 0, IS_INLINE },
+       { ".CSTORE.", 16, "C!", 0, IS_INLINE },
+       { ".ADD.", 17, "1+", 0, IS_INLINE },
+       { ".SUB.", 18, "-", 0, IS_INLINE },
+       { ".MUL.", 19, "*", 0, IS_INLINE },
+       { ".DIV.", 20, "/", 0, IS_INLINE },
+       { ".LT.", 21, "<", 0, IS_INLINE },
+       { ".EQ.", 22, "=", 0, IS_INLINE },
+       { ".GT.", 23, "=>", 0, IS_INLINE },
        { ".DICTP.", 24, "DICTP" },
        { ".EMIT.", 25, "EMIT", 0, IS_INLINE },
        { ".OVER.", 26, "OVER", 0, IS_INLINE },
        { ".COMPARE.", 27, "COMPARE", 0, IS_INLINE },
-       { ".FOPEN.", 28, "FOPEN" },
-       { ".FREAD.", 29, "FREAD" },
-       { ".FREADLINE.", 30, "FREADLINE" },
-       { ".FWRITE.", 31, "FWRITE" },
-       { ".FCLOSE.", 32, "FCLOSE" },
-       { ".DTOR.", 33, "DTOR", 0, IS_INLINE },
-       { ".RTOD.", 34, "RTOD", 0, IS_INLINE },
-       { ".LOGLEVEL.", 35, "LOGLEVEL" },
+       { ".FOPEN.", 28, "FOPEN", 0, IS_INLINE },
+       { ".FREAD.", 29, "FREAD", 0, IS_INLINE },
+       { ".FREADLINE.", 30, "FREADLINE", 0, IS_INLINE },
+       { ".FWRITE.", 31, "FWRITE", 0, IS_INLINE },
+       { ".FCLOSE.", 32, "FCLOSE", 0, IS_INLINE },
+       { ".DTOR.", 33, ">R", 0, IS_INLINE },
+       { ".RTOD.", 34, "R>", 0, IS_INLINE },
+       { ".LOGLEVEL.", 35, "LOGLEVEL", 0, IS_INLINE },
        { ".AND.", 36, "AND", 0, IS_INLINE },
        { ".PICK.", 37, "PICK", 0, IS_INLINE },
        { ".DEPTH.", 38, "DEPTH", 0, IS_INLINE },
        { ".GETCH.", 39, "GETCH", 0, IS_INLINE },
        { ".COMPAREI.", 40, "COMPAREI", 0, IS_INLINE },
-       { ".SLASHMOD.", 41, "SLASHMOD", 0, IS_INLINE },
+       { ".SLASHMOD.", 41, "/MOD", 0, IS_INLINE },
        { ".NOT.", 42, "NOT", 0, IS_INLINE },
-       { ".RFETCH.", 43, "RFETCH", 0, IS_INLINE },
-       { ".INC.", 44, "INC", 0, IS_INLINE },
+       { ".RFETCH.", 43, "R@", 0, IS_INLINE },
+       { ".INC.", 44, "1+", 0, IS_INLINE },
        { ".RDEPTH.", 45, "RDEPTH", 0, IS_INLINE },
-       { ".DEC.", 46, "DEC", 0, IS_INLINE },
+       { ".DEC.", 46, "1-", 0, IS_INLINE },
        { ".GETTICK.", 47, "GETTICK", 0, IS_INLINE },
-       { ".SHIFTLEFT.", 48, "SHIFTLEFT", 0, IS_INLINE },
-       { ".SHIFTRIGHT.", 49, "SHIFTRIGHT", 0, IS_INLINE },
-       { ".PLUSSTORE.", 50, "PLUSSTORE", 0, IS_INLINE },
-       { ".BRANCHF.",   90, "BRANCHF" },
-       { ".BRANCHB.",   91, "BRANCHB" },
-       { ".BRANCHFZ.",  92, "BRANCHFZ" },
-       { ".BRANCHBZ.",  93, "BRANCHBZ" },
-       { ".BRANCHFNZ.", 94, "BRANCHFNZ" },
-       { ".BRANCHBNZ.", 95, "BRANCHBNZ" },
-       { ".NOP.", 252, "NOP" },
-       { ".BREAK.", 253, "BREAK" },
-       { ".RESET.", 254, "RESET" },
+       { ".SHIFTLEFT.", 48, "<<", 0, IS_INLINE },
+       { ".SHIFTRIGHT.", 49, ">>", 0, IS_INLINE },
+       { ".PLUSSTORE.", 50, "+!", 0, IS_INLINE },
+       { ".BRANCHF.",   90, "BRANCHF", 0, IS_COMPILE },
+       { ".BRANCHFZ.",  91, "BRANCHFZ", 0, IS_COMPILE },
+       { ".BRANCHFNZ.", 92, "BRANCHFNZ", 0, IS_COMPILE },
+       { ".BRANCHB.",   93, "BRANCHB", 0, IS_COMPILE },
+       { ".BRANCHBZ.",  94, "BRANCHBZ", 0, IS_COMPILE },
+       { ".BRANCHBNZ.", 95, "BRANCHBNZ", 0, IS_COMPILE },
+       { ".NOP.", 252, "NOP", 0, IS_INLINE },
+       { ".BREAK.", 253, "BREAK", 0, IS_INLINE },
+       { ".RESET.", 254, "RESET", 0, IS_INLINE },
        { ".BYE.", 255, "BYE", 0, IS_INLINE },
 //	   { NULL, 0, NULL },
        { ".DBGDOT.", 100, "DBGDOT", 0, IS_INLINE },
@@ -537,22 +538,23 @@ char *ParseWord(char *word, char *line)
 
 		if (strcmp(word, ".IF") == 0)
 		{
-			CComma(JMPZ);
+			Comma((CELL)vm_prims[BRANCHFZ]);
 			push(HERE);
-			Comma(0);
+			CComma(0);
 			return line;
 		}
 
 		if (strcmp(word, ".THEN") == 0)
 		{
 			CELL tmp = pop();
-			SETBYTE(tmp, HERE);
+			CELL offset = HERE - tmp;
+			SETBYTE(tmp, offset);
 			return line;
 		}
 
 		if (string_equals(word, "S\""))
 		{
-			CComma(SLITERAL);
+			Comma((CELL)vm_prims[SLITERAL]);
 			int count = 0;
 			bool done = false;
 			line += 1;
@@ -582,13 +584,13 @@ char *ParseWord(char *word, char *line)
 	{
 		CELL xt = GetXT(wordAddr);
 		CELL flags = GetFlags(wordAddr);
-		// printf("FORTH word at [%08lx]. STATE=%ld ... ", wordAddr, STATE);
+		// printf("\nFORTH word (%s) at [%08lx]. STATE=%ld ...", word, wordAddr, STATE);
 		if (STATE == 1)
 		{
 			// printf("compiling into current word\n");
 			if (flags & IS_IMMEDIATE)
 			{
-				printf("executing 0x%08lx ...", xt);
+				// printf("Immediate at 0x%08lx ...", xt);
 				ExecuteXT(xt);
 			}
 			else if (flags & IS_INLINE)
@@ -616,30 +618,29 @@ char *ParseWord(char *word, char *line)
 		}
 		else
 		{
-			debug("executing it ...\n");
+			// printf("executing it ...\n");
 			ExecuteXT(xt);
 		}
 		return line;
 	}
 
-	printf("checking if number ...");
+	// printf("checking if number ...");
 	CELL num = 0;
 	if (MakeNumber(word, &num))
 	{
-		printf("IsNumber: %ld (%04lx), STATE=%ld\n", num, num, STATE);
+		// printf("IsNumber: %ld (%04lx), STATE=%ld\n", num, num, STATE);
 		if (STATE == 1) // Compiling
 		{
-			// if ((0 <= num) && (num <= 0xFF))
-			// {
-			// 	CComma(CLITERAL);
-			// 	CComma((BYTE)num);
-			// }
-			// else
-			// {
+			if ((0 <= num) && (num <= 0xFF))
+			{
+				Comma((CELL)vm_prims[CLITERAL]);
+				CComma((BYTE)num);
+			}
+			else
+			{
 				Comma((CELL)vm_prims[LITERAL]);
-				// Comma(LITERAL);
 				Comma(num);
-			// }
+			}
 		}
 		else
 		{
@@ -752,6 +753,13 @@ void GeneratePrimitive(char *name, BYTE opcode, BYTE flags)
 {
 	DefineWord(name, flags);
 	if (flags == IS_IMMEDIATE)
+	{
+		Comma((CELL)vm_prims[LITERAL]);
+		Comma((CELL)vm_prims[opcode]);
+		Comma((CELL)vm_prims[CALL]);
+		Comma(xt4(","));
+	}
+	else if (flags == IS_COMPILE)
 	{
 		Comma((CELL)vm_prims[LITERAL]);
 		Comma((CELL)vm_prims[opcode]);

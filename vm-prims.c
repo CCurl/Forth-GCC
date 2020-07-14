@@ -552,7 +552,7 @@ void prim_PLUSSTORE()
 
 void prim_BRANCHF()
 {
-	arg1 = the_memory[PC];
+	arg1 = GETBYTE(PC);
 	PC += arg1;
 }
 
@@ -561,7 +561,7 @@ void prim_BRANCHFZ()
 	arg1 = pop();
 	if (arg1 == 0)
 	{
-		arg1 = the_memory[PC];
+		arg1 = GETBYTE(PC);
 		PC += arg1;
 	}
 	else
@@ -575,7 +575,7 @@ void prim_BRANCHFNZ()
 	arg1 = pop();
 	if (arg1 != 0)
 	{
-		arg1 = the_memory[PC];
+		arg1 = GETBYTE(PC);
 		PC += arg1;
 	}
 	else
@@ -586,7 +586,7 @@ void prim_BRANCHFNZ()
 
 void prim_BRANCHB()
 {
-	arg1 = the_memory[PC];
+	arg1 = GETCELL(PC);
 	PC -= arg1;
 }
 
@@ -595,7 +595,7 @@ void prim_BRANCHBZ()
 	arg1 = pop();
 	if (arg1 == 0)
 	{
-		arg1 = the_memory[PC];
+		arg1 = GETCELL(PC);
 		PC -= arg1;
 	}
 	else
@@ -609,7 +609,7 @@ void prim_BRANCHBNZ()
 	arg1 = pop();
 	if (arg1 != 0)
 	{
-		arg1 = the_memory[PC];
+		arg1 = GETCELL(PC);
 		PC -= arg1;
 	}
 	else
