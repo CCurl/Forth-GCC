@@ -1,3 +1,7 @@
+: CELLS CELL * ; .INLINE.
+: IMMEDIATE LAST 2 CELLS + DUP C@ 2 OR SWAP C! ;
+: INLINE    LAST 2 CELLS + DUP C@ 2 OR SWAP C! ;
+
 : BL #32 ; .INLINE.
 : SPACE BL EMIT ; .INLINE.
 : CR #13 EMIT #10 EMIT ;
@@ -28,9 +32,36 @@
 		SWAP 1-
 	AGAIN ;
 
-: get-word \ ( addr1 -- addr2 addr3 )
-    DROP $1234 0
-    ;
+: TRUE -1 ; INLINE
+
+\ addr1 => current place in line
+\ addr2 => next non-WS address, 0 if EOL
+\ bool => EOL indicator: -1 if EOL, else 0
+\ NB: If bool = -1 (EOL), then addr2 is not on the stack
+: skip-wS        \ ( addr1 -- [addr2 bool]|bool )
+	BEGIN
+		DUP C@ DUP 
+        IF
+            #32 >  
+            IF 
+                0 LEAVE
+            THEN
+            1+
+		ELSE
+			DROP DROP TRUE LEAVE
+		THEN
+	AGAIN ;
+
+\ addr1 => current place in line
+\ addr2 => end of word (not counted), 0 if EOL
+\ addr3 => start of extracted word (counted), 0 if EOL
+\ NB: If bool = -1 (EOL), then addr2 and addr3 are not on the stack
+\     This indicated an EOL condition
+: get-word \ ( addr1 -- [addr2 addr3 bool]|[bool] )
+    skip-ws IF DROP TRUE THEN
+    BEGIN
+
+    WHILE ;
 
 : execute-word \ ( addr -- )
     DROP

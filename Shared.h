@@ -16,7 +16,7 @@
 #define JMP         8	// 08
 #define JMPZ        9	// 09
 #define JMPNZ      10	// 0A
-#define CALL       11	// 0B
+#define CALL       0x9a	// 0B
 #define RET        12	// 0C
 #define OR         13	// 0D
 #define CLITERAL   14	// 0E
