@@ -20,6 +20,9 @@ extern bool isEmbedded;
 extern bool isBYE;
 extern BYTE the_memory[];
 extern long memory_size;
+extern OPCODE_T theOpcodes[];
+extern void (*vm_prims[])();
+extern void init_vm_vectors();
 
 // ------------------------------------------------------------------------------------------
 extern void push(CELL);
@@ -32,11 +35,42 @@ extern void init_vm(int);
 extern void reset_vm();
 extern CELL cpu_step();
 extern CELL cpu_loop();
+extern CELL GetXT(CELL);
 
 
 
 
 
+extern void prim_LITERAL();
+extern void prim_FETCH();
+extern void prim_STORE();
+extern void prim_SWAP();
+extern void prim_DROP();
+extern void prim_DUP();
+extern void prim_SLITERAL();
+extern void prim_JMP();
+extern void prim_JMPZ();
+extern void prim_JMPNZ();
+extern void prim_CALL();
+extern void prim_RET();
+extern void prim_OR();
+extern void prim_CLITERAL();
+extern void prim_CFETCH();
+extern void prim_CSTORE();
+extern void prim_ADD();
+extern void prim_SUB();
+extern void prim_MUL();
+extern void prim_DIV();
+extern void prim_LT();
+extern void prim_EQ();
+extern void prim_GT();
+extern void prim_DICTP();
+extern void prim_EMIT();
+extern void prim_OVER();
+extern void prim_COMPARE();
+extern void prim_FOPEN();
+extern void prim_FREAD();
+extern void prim_FREADLINE();
 extern void prim_FWRITE();
 extern void prim_FCLOSE();
 extern void prim_DTOR();
@@ -69,3 +103,8 @@ extern void prim_NOP();
 extern void prim_BREAK();
 extern void prim_RESET();
 extern void prim_BYE();
+extern void prim_INLINE();
+extern void prim_IMMEDIATE();
+extern void prim_LOAD();
+extern void prim_CREATE();
+extern void prim_VARIABLE();

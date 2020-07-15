@@ -23,71 +23,75 @@ extern int _QUIT_HIT;
 bool _ALL_OK;
 
 extern void do_dis(char *);
-extern void (*vm_prims[])();
 
 OPCODE_T theOpcodes[] = {
-		  { ".LITERAL.",    LITERAL,       "LITERAL",     prim_LITERAL,   IS_IMMEDIATE }
-		, { ".FETCH.",      FETCH,         "FETCH",       prim_FETCH,     IS_IMMEDIATE }
-		, { ".STORE.",      STORE,         "STORE",       prim_STORE,     IS_IMMEDIATE }
-		, { ".SWAP.",       SWAP,          "SWAP",        prim_SWAP,      IS_IMMEDIATE }
-		, { ".DROP.",       DROP,          "DROP",        prim_DROP,      IS_IMMEDIATE }
-		, { ".DUP.",        DUP,           "DUP",         prim_DUP,       IS_IMMEDIATE }
-		, { ".SLITERAL.",   SLITERAL,      "SLITERAL",    prim_SLITERAL,  IS_IMMEDIATE }
-		, { ".JMP.",        JMP,           "JMP",         prim_JMP,       IS_IMMEDIATE }
-		, { ".JMPZ.",       JMPZ,          "JMPZ",        prim_JMPZ,      IS_IMMEDIATE }
-		, { ".JMPNZ.",      JMPNZ,         "JMPNZ",       prim_JMPNZ,     IS_IMMEDIATE }
-		, { ".CALL.",       CALL,          "CALL",        prim_CALL,      IS_IMMEDIATE }
-		, { ".RET.",        RET,           "RET",         prim_RET,       IS_IMMEDIATE }
-		, { ".OR.",         OR,            "OR",          prim_OR,        IS_IMMEDIATE }
-		, { ".CLITERAL.",   CLITERAL,      "CLITERAL",    prim_CLITERAL,  IS_IMMEDIATE }
-		, { ".CFETCH.",     CFETCH,        "CFETCH",      prim_CFETCH,    IS_IMMEDIATE }
-		, { ".CSTORE.",     CSTORE,        "CSTORE",      prim_CSTORE,    IS_IMMEDIATE }
-		, { ".ADD.",        ADD,           "ADD",         prim_ADD,       IS_IMMEDIATE }
-		, { ".SUB.",        SUB,           "SUB",         prim_SUB,       IS_IMMEDIATE }
-		, { ".MUL.",        MUL,           "MUL",         prim_MUL,       IS_IMMEDIATE }
-		, { ".DIV.",        DIV,           "DIV",         prim_DIV,       IS_IMMEDIATE }
-		, { ".LT.",         LT,            "LT",          prim_LT,        IS_IMMEDIATE }
-		, { ".EQ.",         EQ,            "EQ",          prim_EQ,        IS_IMMEDIATE }
-		, { ".GT.",         GT,            "GT",          prim_GT,        IS_IMMEDIATE }
-		, { ".DICTP.",      DICTP,         "DICTP",       prim_DICTP,     IS_IMMEDIATE }
-		, { ".EMIT.",       EMIT,          "EMIT",        prim_EMIT,      IS_IMMEDIATE }
-		, { ".OVER.",       OVER,          "OVER",        prim_OVER,      IS_IMMEDIATE }
-		, { ".COMPARE.",    COMPARE,       "COMPARE",     prim_COMPARE,   IS_IMMEDIATE }
-		, { ".FOPEN.",      FOPEN,         "FOPEN",       prim_FOPEN,     IS_IMMEDIATE }
-		, { ".FREAD.",      FREAD,         "FREAD",       prim_FREAD,     IS_IMMEDIATE }
-		, { ".FREADLINE.",  FREADLINE,     "FREADLINE",   prim_FREADLINE, IS_IMMEDIATE }
-		, { ".FWRITE.",     FWRITE,        "FWRITE",      prim_FWRITE,    IS_IMMEDIATE }
-		, { ".FCLOSE.",     FCLOSE,        "FCLOSE",      prim_FCLOSE,    IS_IMMEDIATE }
-		, { ".DTOR.",       DTOR,          "DTOR",        prim_DTOR,      IS_IMMEDIATE }
-		, { ".RTOD.",       RTOD,          "RTOD",        prim_RTOD,      IS_IMMEDIATE }
-		, { ".LOGLEVEL.",   LOGLEVEL,      "LOGLEVEL",    prim_LOGLEVEL,  IS_IMMEDIATE }
-		, { ".AND.",        AND,           "AND",         prim_AND,       IS_IMMEDIATE }
-		, { ".PICK.",       PICK,          "PICK",        prim_PICK,      IS_IMMEDIATE }
-		, { ".DEPTH.",      DEPTH,         "DEPTH",       prim_DEPTH,     IS_IMMEDIATE }
-		, { ".GETCH.",      GETCH,         "GETCH",       prim_GETCH,     IS_IMMEDIATE }
-		, { ".COMPAREI.",   COMPAREI,      "COMPAREI",    prim_COMPAREI,  IS_IMMEDIATE }
-		, { ".SLASHMOD.",   SLASHMOD,      "SLASHMOD",    prim_SLASHMOD,  IS_IMMEDIATE }
-		, { ".NOT.",        NOT,           "NOT",         prim_NOT,       IS_IMMEDIATE }
-		, { ".RFETCH.",     RFETCH,        "RFETCH",      prim_RFETCH,    IS_IMMEDIATE }
-		, { ".INC.",        INC,           "INC",         prim_INC,       IS_IMMEDIATE }
-		, { ".RDEPTH.",     RDEPTH,        "RDEPTH",      prim_RDEPTH,    IS_IMMEDIATE }
-		, { ".DEC.",        DEC,           "DEC",         prim_DEC,       IS_IMMEDIATE }
-		, { ".GETTICK.",    GETTICK,       "GETTICK",     prim_GETTICK,   IS_IMMEDIATE }
-		, { ".SHIFTLEFT.",  SHIFTLEFT,     "SHIFTLEFT",   prim_SHIFTLEFT, IS_IMMEDIATE }
-		, { ".SHIFTRIGHT.", SHIFTRIGHT,    "SHIFTRIGHT",  prim_SHIFTRIGHT IS_IMMEDIATE }
-		, { ".PLUSSTORE.",  PLUSSTORE,     "PLUSSTORE",   prim_PLUSSTORE, IS_IMMEDIATE }
-		, { ".BRANCHF.",    BRANCHF,       "BRANCHF",     prim_BRANCHF,   IS_IMMEDIATE }
-		, { ".BRANCHFZ.",   BRANCHFZ,      "BRANCHFZ",    prim_BRANCHFZ,  IS_IMMEDIATE }
-		, { ".BRANCHFNZ.",  BRANCHFNZ,     "BRANCHFNZ",   prim_BRANCHFNZ, IS_IMMEDIATE }
-		, { ".BRANCHB.",    BRANCHB,       "BRANCHB",     prim_BRANCHB,   IS_IMMEDIATE }
-		, { ".BRANCHBZ.",   BRANCHBZ,      "BRANCHBZ",    prim_BRANCHBZ,  IS_IMMEDIATE }
-		, { ".BRANCHBNZ.",  BRANCHBNZ,     "BRANCHBNZ",   prim_BRANCHBNZ, IS_IMMEDIATE }
-		, { ".DBGDOT.",     DBGDOT,        "DBGDOT",      prim_DBGDOT,    IS_IMMEDIATE }
-		, { ".DBGDOTS.",    DBGDOTS,       "DBGDOTS",     prim_DBGDOTS,   IS_IMMEDIATE }
-		, { ".NOP.",        NOP,           "NOP",         prim_NOP,       IS_IMMEDIATE }
-		, { ".BREAK.",      BREAK,         "BREAK",       prim_BREAK,     IS_IMMEDIATE }
-		, { ".RESET.",      RESET,         "RESET",       prim_RESET,     IS_IMMEDIATE }
-			, { ".BYE.",        BYE,           "BYE",         prim_BYE,       IS_IMMEDIATE }
+		  { ".LITERAL.",        LITERAL,            "LITERAL",          prim_LITERAL,        IS_COMPILE }
+		, { ".FETCH.",          FETCH,              "@",                prim_FETCH,          IS_INLINE }
+		, { ".STORE.",          STORE,              "!",                prim_STORE,          IS_INLINE }
+		, { ".SWAP.",           SWAP,               "SWAP",             prim_SWAP,           IS_INLINE }
+		, { ".DROP.",           DROP,               "DROP",             prim_DROP,           IS_INLINE }
+		, { ".DUP.",            DUP,                "DUP",              prim_DUP,            IS_INLINE }
+		, { ".SLITERAL.",       SLITERAL,           "SLITERAL",         prim_SLITERAL,       IS_COMPILE }
+		, { ".JMP.",            JMP,                "JMP",              prim_JMP,            IS_COMPILE }
+		, { ".JMPZ.",           JMPZ,               "JMPZ",             prim_JMPZ,           IS_COMPILE }
+		, { ".JMPNZ.",          JMPNZ,              "JMPNZ",            prim_JMPNZ,          IS_COMPILE }
+		, { ".CALL.",           CALL,               "CALL",             prim_CALL,           IS_COMPILE }
+		, { ".RET.",            RET,                ";",                prim_RET,            IS_IMMEDIATE }
+		, { ".RET.",            RET,                "RET",              prim_RET,            IS_COMPILE }
+		, { ".OR.",             OR,                 "OR",               prim_OR,             IS_INLINE }
+		, { ".CLITERAL.",       CLITERAL,           "CLITERAL",         prim_CLITERAL,       IS_COMPILE }
+		, { ".CFETCH.",         CFETCH,             "C@",               prim_CFETCH,         IS_INLINE }
+		, { ".CSTORE.",         CSTORE,             "C!",               prim_CSTORE,         IS_INLINE }
+		, { ".ADD.",            ADD,                "+",                prim_ADD,            IS_INLINE }
+		, { ".SUB.",            SUB,                "-",                prim_SUB,            IS_INLINE }
+		, { ".MUL.",            MUL,                "*",                prim_MUL,            IS_INLINE }
+		, { ".DIV.",            DIV,                "/",                prim_DIV,            IS_INLINE }
+		, { ".LT.",             LT,                 "<",                prim_LT,             IS_INLINE }
+		, { ".EQ.",             EQ,                 "=",                prim_EQ,             IS_INLINE }
+		, { ".GT.",             GT,                 ">",                prim_GT,             IS_INLINE }
+		, { ".DICTP.",          DICTP,              "DICTP",            prim_DICTP,          IS_INLINE }
+		, { ".EMIT.",           EMIT,               "EMIT",             prim_EMIT,           IS_INLINE }
+		, { ".OVER.",           OVER,               "OVER",             prim_OVER,           IS_INLINE }
+		, { ".COMPARE.",        COMPARE,            "COMPARE",          prim_COMPARE,        IS_INLINE }
+		, { ".FOPEN.",          FOPEN,              "FOPEN",            prim_FOPEN,          IS_INLINE }
+		, { ".FREAD.",          FREAD,              "FREAD",            prim_FREAD,          IS_INLINE }
+		, { ".FREADLINE.",      FREADLINE,          "FREADLINE",        prim_FREADLINE,      IS_INLINE }
+		, { ".FWRITE.",         FWRITE,             "FWRITE",           prim_FWRITE,         IS_INLINE }
+		, { ".FCLOSE.",         FCLOSE,             "FCLOSE",           prim_FCLOSE,         IS_INLINE }
+		, { ".DTOR.",           DTOR,               ">R",               prim_DTOR,           IS_INLINE }
+		, { ".RTOD.",           RTOD,               "R>",               prim_RTOD,           IS_INLINE }
+		, { ".LOGLEVEL.",       LOGLEVEL,           "LOGLEVEL",         prim_LOGLEVEL,       IS_INLINE }
+		, { ".AND.",            AND,                "AND",              prim_AND,            IS_INLINE }
+		, { ".PICK.",           PICK,               "PICK",             prim_PICK,           IS_INLINE }
+		, { ".DEPTH.",          DEPTH,              "DEPTH",            prim_DEPTH,          IS_INLINE }
+		, { ".GETCH.",          GETCH,              "GETCH",            prim_GETCH,          IS_INLINE }
+		, { ".COMPAREI.",       COMPAREI,           "COMPAREI",         prim_COMPAREI,       IS_INLINE }
+		, { ".SLASHMOD.",       SLASHMOD,           "/MOD",             prim_SLASHMOD,       IS_INLINE }
+		, { ".NOT.",            NOT,                "NOT",              prim_NOT,            IS_INLINE }
+		, { ".RFETCH.",         RFETCH,             "RFETCH",           prim_RFETCH,         IS_INLINE }
+		, { ".INC.",            INC,                "1+",               prim_INC,            IS_INLINE }
+		, { ".RDEPTH.",         RDEPTH,             "RDEPTH",           prim_RDEPTH,         IS_INLINE }
+		, { ".DEC.",            DEC,                "1-",               prim_DEC,            IS_INLINE }
+		, { ".GETTICK.",        GETTICK,            "GETTICK",          prim_GETTICK,        IS_INLINE }
+		, { ".SHIFTLEFT.",      SHIFTLEFT,          "<<",               prim_SHIFTLEFT,      IS_INLINE }
+		, { ".SHIFTRIGHT.",     SHIFTRIGHT,         ">>",               prim_SHIFTRIGHT,     IS_INLINE }
+		, { ".PLUSSTORE.",      PLUSSTORE,          "PLUSSTORE",        prim_PLUSSTORE,      IS_INLINE }
+		, { ".BRANCHF.",        BRANCHF,            "BRANCHF",          prim_BRANCHF,        IS_COMPILE }
+		, { ".BRANCHFZ.",       BRANCHFZ,           "BRANCHFZ",         prim_BRANCHFZ,       IS_COMPILE }
+		, { ".BRANCHFNZ.",      BRANCHFNZ,          "BRANCHFNZ",        prim_BRANCHFNZ,      IS_COMPILE }
+		, { ".BRANCHB.",        BRANCHB,            "BRANCHB",          prim_BRANCHB,        IS_COMPILE }
+		, { ".BRANCHBZ.",       BRANCHBZ,           "BRANCHBZ",         prim_BRANCHBZ,       IS_COMPILE }
+		, { ".BRANCHBNZ.",      BRANCHBNZ,          "BRANCHBNZ",        prim_BRANCHBNZ,      IS_COMPILE }
+		, { ".DBGDOT.",         DBGDOT,             "(.)",              prim_DBGDOT,         IS_INLINE }
+		, { ".DBGDOTS.",        DBGDOTS,            ".S",               prim_DBGDOTS,        IS_INLINE }
+		, { ".NOP.",            NOP,                "NOP",              prim_NOP,            IS_INLINE }
+		, { ".BREAK.",          BREAK,              "BREAK",            prim_BREAK,          IS_INLINE }
+		, { ".RESET.",          RESET,              "RESET",            prim_RESET,          IS_INLINE }
+		, { ".BYE.",            BYE,                "BYE",              prim_BYE,            IS_INLINE }
+		, { ".INLINE.",         DYNAMIC,            "INLINE",           prim_INLINE,         0 }
+		, { ".CREATE.",         DYNAMIC,            "CREATE",           prim_CREATE,         0 }
+		, { ".VARIABLE.",       DYNAMIC,            "VARIABLE",         prim_VARIABLE,       0 }
+		, { "",                 0,                  "",                 0,                   0 }
  };
 
 /*
@@ -389,15 +393,13 @@ char *ParseWord(char *word, char *line)
 	}
 
 
-	if (string_equals(word, ".VARIABLE."))
+	if (string_equals(word, "VARIABLE"))
 	{
 		trace("\n");
 		line = GetWord(line, word);
-		DefineWord(word, 0);
-		CComma(LITERAL);
-		Comma(HERE + 5);
-		CComma(RET);
-		Comma(0);
+		push(0);
+		push((CELL)word);
+		prim_VARIABLE();
 		return line;
 	}
 
@@ -485,13 +487,6 @@ char *ParseWord(char *word, char *line)
 			}
 			
 		}
-		return line;
-	}
-
-	if (strcmp(word, ".INLINE.") == 0)
-	{
-		DICT_T_NEW *dp = (DICT_T_NEW *)(LAST);
-		dp->flags |= IS_INLINE;
 		return line;
 	}
 
@@ -704,23 +699,22 @@ void CompilerInit()
 void GenerateWord(char *name, BYTE flags, CELL *opcodes)
 {
 	DefineWord(name, flags);
-	// printf("GenerateWord(): %d", opcodes[0]);
+	// printf("\nGenerateWord(%s): %ld", name, opcodes[0]);
 	for (int i = 0; opcodes[i] != 0; i++)
 	{
-		BYTE opcode = opcodes[i];
-		Comma((CELL)vm_prims[opcode]);
+		CELL opcode = opcodes[i];
+		// printf(",op=%lx,HERE=%lx", opcode, HERE);
+		if ( (0x0000 < opcode) && (opcode < 0x0100) )
+			Comma((CELL)vm_prims[opcode]);
+		else
+			Comma(opcode);
+
 		if (opcode == LITERAL)
-		{
 			Comma(opcodes[++i]);
-		}
 		if (opcode == CLITERAL)
-		{
 			CComma(opcodes[++i]);
-		}
 		if (opcode == CALL)
-		{
 			Comma(opcodes[++i]);
-		}
 	}
 }
 
@@ -746,26 +740,33 @@ void GenerateVariable(char *name, CELL addr)
 	Comma((CELL)vm_prims[RET]);
 }
 
-void GeneratePrimitive(char *name, BYTE opcode, BYTE flags)
+void GeneratePrimitive(OPCODE_T *op)
 {
-	DefineWord(name, flags);
-	if (flags == IS_IMMEDIATE)
+	DefineWord(op->forth_prim, op->flags);
+	if (op->opcode == DYNAMIC)
+	{
+		Comma((CELL)op->func);
+		Comma((CELL)vm_prims[RET]);
+		return;
+	}
+
+	if (op->flags == IS_IMMEDIATE)
 	{
 		Comma((CELL)vm_prims[LITERAL]);
-		Comma((CELL)vm_prims[opcode]);
+		Comma((CELL)vm_prims[op->opcode]);
 		Comma((CELL)vm_prims[CALL]);
 		Comma(xt4(","));
 	}
-	else if (flags == IS_COMPILE)
+	else if (op->flags == IS_COMPILE)
 	{
 		Comma((CELL)vm_prims[LITERAL]);
-		Comma((CELL)vm_prims[opcode]);
+		Comma((CELL)vm_prims[op->opcode]);
 		Comma((CELL)vm_prims[CALL]);
 		Comma(xt4(","));
 	}
 	else
 	{
-		Comma((CELL)vm_prims[opcode]);
+		Comma((CELL)vm_prims[op->opcode]);
 	}
 	Comma((CELL)vm_prims[RET]);
 }
@@ -777,8 +778,8 @@ void GeneratePrimitives()
 	GenerateVariable("BASE", (CELL) &BASE);
 	GenerateVariable("STATE", (CELL) &STATE);
 	GenerateVariable("CELL", (CELL) CELL_SZ);
-
 	GenerateWord("HERE", 0, (CELL[]){ LITERAL, (CELL) &HERE, FETCH, RET, 0});
+
 	GenerateWord("C,", 0, (CELL[]){ CALL, xt4("HERE"), CSTORE, 
 		CALL, xt4("(HERE)"), DUP, FETCH, INC, SWAP, STORE, 
 		RET, 0});
@@ -786,6 +787,8 @@ void GeneratePrimitives()
 		CALL, xt4("(HERE)"), DUP, FETCH, CLITERAL, CELL_SZ, ADD, SWAP, STORE, 
 		RET, 0});
 	GenerateWord("LAST", 0, (CELL[]){ LITERAL, (CELL) &LAST, FETCH, RET, 0});
+	GenerateWord("IMMEDIATE", 0, (CELL[]){ (CELL)prim_IMMEDIATE, RET, 0});
+	GenerateWord("LOAD", 0, (CELL[]){ (CELL)prim_LOAD, RET, 0});
 
 	for (int i = 0;; i++)
 	{
@@ -794,7 +797,7 @@ void GeneratePrimitives()
 		{
 			break;
 		}
-		GeneratePrimitive(x.forth_prim, x.opcode, x.flags);
+		GeneratePrimitive(&x);
 	}
 }
 
@@ -816,21 +819,12 @@ void Compile(FILE *fp_in)
 			printf("QUIT hit on line %d: %s\n", line_no, line);
 			break;
 		}
-    }
-    fclose(fp_in);
-
-	CELL addr = FindWord("main");
-	if (addr == NULL)
-	{
-		addr = FindWord("MAIN");
-		if (addr == NULL)
+		if (fp_in == NULL)
 		{
-			addr = LAST;
+			printf("%s was closed.\n", line_no, line);
+			break;
 		}
-	}
-
-	Store(0, (CELL)vm_prims[JMP]);
-	Store(4, GetXT(addr));
+    }
 }
 
 void do_compile()
@@ -850,6 +844,19 @@ void do_compile()
 	Compile(input_fp);
     fclose(input_fp);
     input_fp = NULL;
+
+	CELL addr = FindWord("main");
+	if (addr == NULL)
+	{
+		addr = FindWord("MAIN");
+		if (addr == NULL)
+		{
+			addr = LAST;
+		}
+	}
+
+	Store(0, (CELL)vm_prims[JMP]);
+	Store(4, GetXT(addr));
 }
 
 // *********************************************************************
@@ -953,4 +960,56 @@ int main (int argc, char **argv)
 	}
 
     return 0;
+}
+
+void prim_INLINE()
+{
+	DICT_T_NEW *dp = (DICT_T_NEW *)LAST;
+	dp->flags |= IS_INLINE;
+}
+
+void prim_IMMEDIATE()
+{
+	// printf("-pi=%lx-", (CELL)prim_IMMEDIATE);
+	// printf("-IMM-");
+	DICT_T_NEW *dp = (DICT_T_NEW *)LAST;
+	dp->flags |= IS_IMMEDIATE;
+}
+
+void prim_LOAD()
+{
+	FILE *curr_fp = input_fp;
+	arg1 = pop();
+	sprintf(input_fn, "block-%04d.fs", arg1);
+	printf("loading [%s] ... ", input_fn);
+	input_fp = fopen(input_fn, "rt");
+	if (input_fp)
+	{
+		Compile(input_fp);
+	}
+	else
+	{
+		printf("Can't open [%s]\n", input_fn);
+	}
+	
+	printf("\n");
+	fclose(input_fp);
+	input_fp = curr_fp;
+}
+
+void prim_CREATE()
+{
+	arg1 = pop();
+	arg2 = pop();
+	printf("CREATE('%s', %d)", arg1, arg2);
+	DefineWord((char *)arg1, arg2);
+}
+
+void prim_VARIABLE()
+{
+	prim_CREATE();
+	Comma((CELL)prim_LITERAL);
+	Comma(HERE + 8);
+	Comma((CELL)prim_RET);
+	Comma(0);
 }

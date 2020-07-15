@@ -25,6 +25,8 @@ extern CELL PC;					// The program counter
 extern CELL *rsp_init;
 extern CELL *dsp_init;
 
+extern CELL BASE, HERE, LAST, STATE;
+
 extern bool isBYE;
 extern BYTE the_memory[];
 extern int __DEBUG__;
@@ -622,7 +624,15 @@ void prim_BRANCHBNZ()
 void prim_DBGDOT()
 {
 	arg1 = pop();
-	printf("[%d] ", arg1);
+	if (BASE == 10)
+		printf("%d", arg1);
+	else if (BASE == 0x10)
+		printf("%x", arg1);
+	else
+	{
+		printf("base(%d, %d)", BASE, arg1);
+	}
+	
 }
 
 // SHIFTRIGHT - Shifts TOS right <x> bits
@@ -632,15 +642,14 @@ void prim_DBGDOTS()
 	prim_DEPTH();
 	d = pop();
 	// printf("DEPTH=(%d)[ ", d);
-	printf("[ ", d);
+	printf("( ", d);
 	for (int i = (d-1); i >= 0; i--)
 	{
-		printf("(%d)",i);
 		push(i);
 		prim_PICK();
 		prim_DBGDOT();
 	}
-	printf("]");
+	printf(" )");
 }
 
 // NOP - Does NOTHING
@@ -664,7 +673,8 @@ void prim_RESET()
 // BYE - Doeswhat
 void prim_BYE()
 {
-	isBYE = true;
+    printf(" Bye!");
+	ExitProcess(0);
 }
 
 // Unknown - Doeswhat
@@ -682,69 +692,10 @@ void init_vm_vectors()
     {
         vm_prims[i] = prim_Unknown;
     }
-	vm_prims[LITERAL] = prim_LITERAL;
-	vm_prims[FETCH] = prim_FETCH;
-	vm_prims[STORE] = prim_STORE;
-	vm_prims[SWAP] = prim_SWAP;
-	vm_prims[DROP] = prim_DROP;
-	vm_prims[DUP] = prim_DUP;
-	vm_prims[SLITERAL] = prim_SLITERAL;
-	vm_prims[JMP] = prim_JMP;
-	vm_prims[JMPZ] = prim_JMPZ;
-	vm_prims[JMPNZ] = prim_JMPNZ;
-	vm_prims[CALL] = prim_CALL;
-	vm_prims[RET] = prim_RET;
-	vm_prims[OR] = prim_OR;
-	vm_prims[CLITERAL] = prim_CLITERAL;
-	vm_prims[CFETCH] = prim_CFETCH;
-	vm_prims[CSTORE] = prim_CSTORE;
-	vm_prims[ADD] = prim_ADD;
-	vm_prims[SUB] = prim_SUB;
-	vm_prims[MUL] = prim_MUL;
-	vm_prims[DIV] = prim_DIV;
-	vm_prims[LT] = prim_LT;
-	vm_prims[EQ] = prim_EQ;
-	vm_prims[GT] = prim_GT;
-	vm_prims[DICTP] = prim_DICTP;
-	vm_prims[EMIT] = prim_EMIT;
-	vm_prims[OVER] = prim_OVER;
-	vm_prims[COMPARE] = prim_COMPARE;
-	vm_prims[FOPEN] = prim_FOPEN;
-	vm_prims[FREAD] = prim_FREAD;
-	vm_prims[FREADLINE] = prim_FREADLINE;
-	vm_prims[FWRITE] = prim_FWRITE;
-	vm_prims[FCLOSE] = prim_FCLOSE;
-	vm_prims[DTOR] = prim_DTOR;
-	vm_prims[RTOD] = prim_RTOD;
-	vm_prims[LOGLEVEL] = prim_LOGLEVEL;
-	vm_prims[AND] = prim_AND;
-	vm_prims[PICK] = prim_PICK;
-	vm_prims[DEPTH] = prim_DEPTH;
-	vm_prims[GETCH] = prim_GETCH;
-	vm_prims[COMPAREI] = prim_COMPAREI;
-	vm_prims[SLASHMOD] = prim_SLASHMOD;
-	vm_prims[NOT] = prim_NOT;
-	vm_prims[RFETCH] = prim_RFETCH;
-	vm_prims[INC] = prim_INC;
-	vm_prims[RDEPTH] = prim_RDEPTH;
-	vm_prims[DEC] = prim_DEC;
-	vm_prims[GETTICK] = prim_GETTICK;
-	vm_prims[SHIFTLEFT] = prim_SHIFTLEFT;
-	vm_prims[SHIFTRIGHT] = prim_SHIFTRIGHT;
-	vm_prims[PLUSSTORE] = prim_PLUSSTORE;
-
-	vm_prims[BRANCHF] = prim_BRANCHF;
-	vm_prims[BRANCHFZ] = prim_BRANCHFZ;
-	vm_prims[BRANCHFNZ] = prim_BRANCHFNZ;
-	vm_prims[BRANCHB] = prim_BRANCHB;
-	vm_prims[BRANCHBZ] = prim_BRANCHBZ;
-	vm_prims[BRANCHBNZ] = prim_BRANCHBNZ;
-
-	vm_prims[DBGDOT] = prim_DBGDOT;
-	vm_prims[DBGDOTS] = prim_DBGDOTS;
-
-	vm_prims[NOP] = prim_NOP;
-	vm_prims[BREAK] = prim_BREAK;
- 	vm_prims[RESET] = prim_RESET;
-	vm_prims[BYE] = prim_BYE;
+	OPCODE_T *op = theOpcodes;
+	while (op->opcode > 0)
+	{
+		vm_prims[op->opcode] = op->func;
+		++op;
+	}
 }

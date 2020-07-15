@@ -30,9 +30,6 @@ CELL buf1[4];
 CELL rStack[256];
 CELL buf2[4];
 
-void init_vm_vectors();
-extern void (*vm_prims[])();
-
 // ------------------------------------------------------------------------------------------
 void create_vm()
 {

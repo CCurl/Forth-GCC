@@ -66,12 +66,14 @@
 // unused 96-99
 #define DBGDOT    100
 #define DBGDOTS   101
+#define INLINE    102
 // unused 102-251
 #define NOP       252	// FC
 #define BREAK     253	// FD
 #define RESET     254	// FE
 #define BYE       255	// FF
 
+#define DYNAMIC   0x100
 // ************************************************************************************************
 // ************************************************************************************************
 // ************************************************************************************************
@@ -84,7 +86,7 @@ typedef char *String;
 
 typedef struct {
 	char *asm_instr;
-	BYTE opcode;
+	CELL opcode;
 	char *forth_prim;
 	void (*func)();
 	BYTE flags;

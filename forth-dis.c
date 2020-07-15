@@ -58,9 +58,9 @@ typedef struct {
 	CELL opcode;
 	CELL addr;
 	char *name;
-} DIS_PRIMS;
+} DIS_PRIM_T;
 
-DIS_PRIMS dis_prims[256];
+DIS_PRIM_T *dis_prims = NULL;
 extern void (*vm_prims[])();
 int num_prims = 0;
 
@@ -75,6 +75,10 @@ void dis_add_prim(int opcode, void (*func)(), char *name)
 void init_prims()
 {
 	num_prims = 0;
+	const CELL max_prims = 512;
+	const CELL sz = sizeof(DIS_PRIM_T)*max_prims;
+	dis_prims = (DIS_PRIM_T *)malloc(sz);
+	memset(dis_prims, 0, sz);
 	for (int i = 0; i < 256; i++)
 	{
 		OPCODE_T *op = &(theOpcodes[i]);
@@ -98,6 +102,23 @@ char *prim_name(CELL addr, CELL *opcode)
 			*opcode = dis_prims[i].opcode;
 			return dis_prims[i].name;
 		}
+	}
+
+	DICT_T_NEW *cur = (DICT_T_NEW *)LAST;
+	while (cur)
+	{
+		CELL xt = GetXT((CELL)cur);
+		xt = GETCELL(xt);
+		// printf("\naddr=%lx,xt=%lx?(%s)", addr, xt, cur->name);
+		if (xt == addr)
+		{
+			// Add it for next time
+			--num_prims;
+			dis_add_prim(DYNAMIC, (void *)xt, cur->name);
+			*opcode = DYNAMIC;
+			return cur->name;
+		}
+		cur = (DICT_T_NEW *)cur->prev;
 	}
 
 	*opcode = 0;
@@ -264,13 +285,14 @@ CELL dis_one(char *bytes, char *desc)
 		// SLIT   03    A    B    C   00
 		// PC starts at 0101, should be set to 0106
 
+		printf("SLITERAL ...");
+		//printf("SLITERAL (%08lx) [%lx]", PC+1, (char *)(PC+1));
 		arg1 = GETBYTE(PC); // count-byte (and the beginning of the counted string)
-		arg2 = arg1 + 2;  // count-byte + count + NULL
-		// PC += arg2;
-		// push(arg1);
-		// sprintf(desc, "SLITERAL (%08lx) [%s]", PC, (char *)PC+1);
-		// dis_PC2(arg2, bytes);
-		return PC-arg1;
+		arg2 = arg1 + 2;    // count-byte + count + NULL
+		sprintf(desc, "SLITERAL (%08lx) [%s]", PC+1, PC+1);
+		dis_start(PC, (arg2 > 10) ? 10 : arg2, bytes);
+		PC += arg2;
+		return 0;
 
 	case CFETCH:
 		// arg1 = GETTOS();
@@ -549,9 +571,22 @@ CELL dis_one(char *bytes, char *desc)
 		sprintf(desc, "BYE");
 		return 0;
 
-	case DBGDOT:
+	case INLINE:
 		// isBYE = true;
-		// sprintf(desc, "BYE");
+		sprintf(desc, "INLINE");
+		return 0;
+
+	case DBGDOT:
+		sprintf(desc, "(.)");
+		return 0;
+
+	case DBGDOTS:
+		sprintf(desc, ".S");
+		return 0;
+
+	case DYNAMIC:
+		// sprintf("--DYNAMIC--");
+		// sprintf(desc, "");
 		return 0;
 
 	case RESET:
@@ -583,22 +618,29 @@ CELL dis_dict(FILE *write_to, CELL dict_addr)
 
 	// Prev
 	sprintf(bytes, "%08lx:", addr);
-	dis_start(addr, CELL_SZ, bytes);
+	dis_rangeCell(addr, addr, bytes);
 	sprintf(desc, "PREV: %08lx", dp->prev);
 	fprintf(write_to, ";\n%-32s ; %s\n", bytes, desc);
 	addr += CELL_SZ;
 
-	// Next, Flags
+	// Next
 	sprintf(bytes, "%08lx:", addr);
-	dis_start(addr, CELL_SZ+1, bytes);
-	sprintf(desc, "NEXT: %08lx, flags: %02x", dp->next, dp->flags);
+	dis_rangeCell(addr, addr, bytes);
+	sprintf(desc, "NEXT: %08lx", dp->next);
 	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
-	addr += CELL_SZ+1;
+	addr += CELL_SZ;
+
+	// Flags, len
+	sprintf(bytes, "%08lx: %02x %02x", addr, dp->flags, dp->len);
+	sprintf(desc, "Flags: %02x, Len: %d", dp->flags, dp->len);
+	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
+	dis_start(addr, 2, bytes);
+	addr += 2;
 
 	// Name
-	sprintf(bytes, "%08lx: %02x", addr++, dp->len);
+	sprintf(bytes, "%08lx:", addr);
 	dis_start(addr, dp->len+1, bytes);
-	sprintf(desc, "LEN: %d, NAME: %s", (int)dp->len, dp->name);
+	sprintf(desc, "Name: %s", dp->name);
 	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
 
 	addr += dp->len + 1;
