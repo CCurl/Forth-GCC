@@ -88,10 +88,15 @@ OPCODE_T theOpcodes[] = {
 		, { ".BREAK.",          BREAK,              "BREAK",            prim_BREAK,          IS_INLINE }
 		, { ".RESET.",          RESET,              "RESET",            prim_RESET,          IS_INLINE }
 		, { ".BYE.",            BYE,                "BYE",              prim_BYE,            IS_INLINE }
-		, { ".INLINE.",         DYNAMIC,            "INLINE",           prim_INLINE,         0 }
-		, { ".CREATE.",         DYNAMIC,            "CREATE",           prim_CREATE,         0 }
-		, { ".VARIABLE.",       DYNAMIC,            "VARIABLE",         prim_VARIABLE,       0 }
-		, { "",                 0,                  "",                 0,                   0 }
+		, { ".INLINE.",         DYNAMIC,            "INLINE",           prim_INLINE,         IS_INLINE }
+		, { ".IMMEDIATE.",      DYNAMIC,            "IMMEDIATE",        prim_IMMEDIATE,      IS_INLINE }
+		, { ".CREATE.",         DYNAMIC,            "CREATE",           prim_CREATE,         IS_INLINE }
+		, { ".VARIABLE.",       DYNAMIC,            "VARIABLE",         prim_VARIABLE,       IS_INLINE }
+		, { ".COMMA.",          DYNAMIC,            ",",                prim_COMMA,          IS_INLINE }
+		, { ".CCOMMA.",         DYNAMIC,            "C,",               prim_CCOMMA,         IS_INLINE }
+		, { ".QCOMMA.",         DYNAMIC,            "?,",               prim_QCOMMA,         IS_INLINE }
+		, { ".LOAD.",           DYNAMIC,            "LOAD",             prim_LOAD,           IS_INLINE }
+		, { "",                 0,                  "",                 0,                   IS_INLINE }
  };
 
 /*
@@ -117,26 +122,16 @@ void CStore(CELL loc, BYTE num)
 	the_memory[loc] = num;
 }
 
-CELL Fetch(CELL loc)
-{
-	return *(CELL *)(&the_memory[loc]);
-}
-
-CELL CFetch(CELL loc)
-{
-	return (CELL)the_memory[loc];
-}
-
 void Comma(CELL num)
 {
-	SETCELL(HERE, num);
-	HERE += CELL_SZ;
+	push(num);
+	prim_COMMA();
 }
 
 void CComma(BYTE num)
 {
-	SETBYTE(HERE, num);
-	HERE += 1;
+	push(num);
+	prim_CCOMMA();
 }
 
 CELL ExecuteXT(CELL XT)
@@ -512,7 +507,7 @@ char *ParseWord(char *word, char *line)
 		// printf("[%s] == [%s]?\n", word, op->asm_instr);
 		if (strcmp(word, op->asm_instr) == 0)
 		{
-			Comma((CELL)vm_prims[op->opcode]);
+			Comma((CELL)op->func);
 			return line;
 		}
 
@@ -754,15 +749,13 @@ void GeneratePrimitive(OPCODE_T *op)
 	{
 		Comma((CELL)vm_prims[LITERAL]);
 		Comma((CELL)vm_prims[op->opcode]);
-		Comma((CELL)vm_prims[CALL]);
-		Comma(xt4(","));
+		Comma((CELL)prim_COMMA);
 	}
 	else if (op->flags == IS_COMPILE)
 	{
 		Comma((CELL)vm_prims[LITERAL]);
 		Comma((CELL)vm_prims[op->opcode]);
-		Comma((CELL)vm_prims[CALL]);
-		Comma(xt4(","));
+		Comma((CELL)prim_COMMA);
 	}
 	else
 	{
@@ -779,16 +772,7 @@ void GeneratePrimitives()
 	GenerateVariable("STATE", (CELL) &STATE);
 	GenerateVariable("CELL", (CELL) CELL_SZ);
 	GenerateWord("HERE", 0, (CELL[]){ LITERAL, (CELL) &HERE, FETCH, RET, 0});
-
-	GenerateWord("C,", 0, (CELL[]){ CALL, xt4("HERE"), CSTORE, 
-		CALL, xt4("(HERE)"), DUP, FETCH, INC, SWAP, STORE, 
-		RET, 0});
-	GenerateWord(",", 0, (CELL[]){ CALL, xt4("HERE"), STORE, 
-		CALL, xt4("(HERE)"), DUP, FETCH, CLITERAL, CELL_SZ, ADD, SWAP, STORE, 
-		RET, 0});
 	GenerateWord("LAST", 0, (CELL[]){ LITERAL, (CELL) &LAST, FETCH, RET, 0});
-	GenerateWord("IMMEDIATE", 0, (CELL[]){ (CELL)prim_IMMEDIATE, RET, 0});
-	GenerateWord("LOAD", 0, (CELL[]){ (CELL)prim_LOAD, RET, 0});
 
 	for (int i = 0;; i++)
 	{
@@ -829,21 +813,13 @@ void Compile(FILE *fp_in)
 
 void do_compile()
 {
-    printf("compiling from %s...\n", input_fn);
+    // printf("compiling from %s...\n", input_fn);
 	CompilerInit();
 	GeneratePrimitives();
 	// return;
 
-    input_fp = fopen(input_fn, "rt");
-    if (!input_fp)
-    {
-        printf("can't open input file!");
-        exit(1);
-    }
-
-	Compile(input_fp);
-    fclose(input_fp);
-    input_fp = NULL;
+	push(0);
+	prim_LOAD();
 
 	CELL addr = FindWord("main");
 	if (addr == NULL)
@@ -947,7 +923,7 @@ int main (int argc, char **argv)
     }
 
 	// MEM_SZ = mem_size_KB * 1024;
-    do_compile();
+	do_compile();
 	write_output_file();
 	do_dis("forth3.lst");
 
@@ -960,56 +936,4 @@ int main (int argc, char **argv)
 	}
 
     return 0;
-}
-
-void prim_INLINE()
-{
-	DICT_T_NEW *dp = (DICT_T_NEW *)LAST;
-	dp->flags |= IS_INLINE;
-}
-
-void prim_IMMEDIATE()
-{
-	// printf("-pi=%lx-", (CELL)prim_IMMEDIATE);
-	// printf("-IMM-");
-	DICT_T_NEW *dp = (DICT_T_NEW *)LAST;
-	dp->flags |= IS_IMMEDIATE;
-}
-
-void prim_LOAD()
-{
-	FILE *curr_fp = input_fp;
-	arg1 = pop();
-	sprintf(input_fn, "block-%04d.fs", arg1);
-	printf("loading [%s] ... ", input_fn);
-	input_fp = fopen(input_fn, "rt");
-	if (input_fp)
-	{
-		Compile(input_fp);
-	}
-	else
-	{
-		printf("Can't open [%s]\n", input_fn);
-	}
-	
-	printf("\n");
-	fclose(input_fp);
-	input_fp = curr_fp;
-}
-
-void prim_CREATE()
-{
-	arg1 = pop();
-	arg2 = pop();
-	printf("CREATE('%s', %d)", arg1, arg2);
-	DefineWord((char *)arg1, arg2);
-}
-
-void prim_VARIABLE()
-{
-	prim_CREATE();
-	Comma((CELL)prim_LITERAL);
-	Comma(HERE + 8);
-	Comma((CELL)prim_RET);
-	Comma(0);
 }

@@ -31,17 +31,24 @@ extern bool isBYE;
 extern BYTE the_memory[];
 extern int __DEBUG__;
 extern int _QUIT_HIT;
+extern FILE *input_fp;
+extern char input_fn[];
+extern void Compile(FILE *);
+extern void DefineWord(char *, BYTE);
+extern void Comma(CELL);
 
 #define m_DROP() TOS = *(DSP--)
 
 inline void push(CELL val) 
 { 
+	++depth;
 	*(++DSP) = TOS;
 	TOS = val;
 }
 
 inline CELL pop()
 {
+	--depth;
 	 CELL val = TOS; 
 	 TOS = *(DSP--); 
 	 return val; 
@@ -80,6 +87,29 @@ void checkStacks()
 		printf(" return stack overflow! (at PC=0x%04lx)", PC-1);
 	}
 	isBYE = 0;
+}
+
+// Unknown - Doeswhat
+void prim_Unknown()
+{
+    printf("Unknown instruction at addr: 0x%04lx, (0x%02x)", PC-1, IR);
+    reset_vm();
+	// isBYE = true;
+}
+
+void init_vm_vectors()
+{
+    memset(vm_prims, 0, sizeof(vm_prims));
+    for (int i = 0; i < 256; i++)
+    {
+        vm_prims[i] = prim_Unknown;
+    }
+	OPCODE_T *op = theOpcodes;
+	while (op->opcode > 0)
+	{
+		vm_prims[op->opcode] = op->func;
+		++op;
+	}
 }
 
 // LITERAL - Doeswhat
@@ -462,9 +492,7 @@ void prim_PICK()
 // DEPTH - Doeswhat
 void prim_DEPTH()
 {
-	CELL offset = DSP - dsp_init;
-	// printf("(%ld, %ld, %ld)\n", DSP, dsp_init, offset);
-	push(offset);
+	push(depth);
 }
 
 // GETCH - Doeswhat
@@ -677,25 +705,80 @@ void prim_BYE()
 	ExitProcess(0);
 }
 
-// Unknown - Doeswhat
-void prim_Unknown()
+
+
+
+void prim_INLINE()
 {
-    printf("Unknown instruction at addr: 0x%04lx, (0x%02x)", PC-1, IR);
-    reset_vm();
-	// isBYE = true;
+	DICT_T_NEW *dp = (DICT_T_NEW *)LAST;
+	dp->flags |= IS_INLINE;
 }
 
-void init_vm_vectors()
+void prim_IMMEDIATE()
 {
-    memset(vm_prims, 0, sizeof(vm_prims));
-    for (int i = 0; i < 256; i++)
-    {
-        vm_prims[i] = prim_Unknown;
-    }
-	OPCODE_T *op = theOpcodes;
-	while (op->opcode > 0)
+	// printf("-pi=%lx-", (CELL)prim_IMMEDIATE);
+	// printf("-IMM-");
+	DICT_T_NEW *dp = (DICT_T_NEW *)LAST;
+	dp->flags |= IS_IMMEDIATE;
+}
+
+void prim_LOAD()
+{
+	FILE *curr_fp = input_fp;
+	arg1 = pop();
+	sprintf(input_fn, "block-%04d.fs", arg1);
+	printf("loading [%s] ... ", input_fn);
+	input_fp = fopen(input_fn, "rt");
+	if (input_fp)
 	{
-		vm_prims[op->opcode] = op->func;
-		++op;
+		Compile(input_fp);
 	}
+	else
+	{
+		printf("Can't open [%s]\n", input_fn);
+	}
+	
+	printf("\n");
+	fclose(input_fp);
+	input_fp = curr_fp;
+}
+
+void prim_CREATE()
+{
+	arg1 = pop();
+	arg2 = pop();
+	printf("CREATE('%s', %d)", arg1, arg2);
+	DefineWord((char *)arg1, arg2);
+}
+
+void prim_VARIABLE()
+{
+	prim_CREATE();
+	Comma((CELL)prim_LITERAL);
+	Comma(HERE + 8);
+	Comma((CELL)prim_RET);
+	Comma(0);
+}
+
+void prim_COMMA()
+{
+	arg1 = pop();
+	SETCELL(HERE, arg1);
+	HERE += CELL_SZ;
+}
+
+void prim_CCOMMA()
+{
+	arg1 = pop();
+	SETBYTE(HERE, arg1);
+	++HERE;
+}
+
+void prim_QCOMMA()
+{
+	if ((TOS >= 0x00) && (TOS < 0x0100))
+		prim_CCOMMA();
+	else
+		prim_COMMA();
+
 }

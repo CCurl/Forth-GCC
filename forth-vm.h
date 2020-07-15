@@ -108,3 +108,6 @@ extern void prim_IMMEDIATE();
 extern void prim_LOAD();
 extern void prim_CREATE();
 extern void prim_VARIABLE();
+extern void prim_COMMA();
+extern void prim_CCOMMA();
+extern void prim_QCOMMA();
