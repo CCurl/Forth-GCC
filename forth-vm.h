@@ -111,3 +111,5 @@ extern void prim_VARIABLE();
 extern void prim_COMMA();
 extern void prim_CCOMMA();
 extern void prim_QCOMMA();
+extern void prim_PARSELINE();
+extern void prim_GETLINE();

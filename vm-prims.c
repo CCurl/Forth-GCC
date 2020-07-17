@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <memory.h>
 #include <conio.h>
+#include <stdio.h>
 #include "Shared.h"
 #include "logger.h"
 #include "forth-vm.h"
@@ -36,8 +37,9 @@ extern char input_fn[];
 extern void Compile(FILE *);
 extern void DefineWord(char *, BYTE);
 extern void Comma(CELL);
-
-#define m_DROP() TOS = *(DSP--)
+extern char *GetWord(char *, char *);
+extern char *ParseWord(char *, char *);
+extern int string_rtrim(char *);
 
 inline void push(CELL val) 
 { 
@@ -148,7 +150,7 @@ void prim_SWAP()
 // DROP - Doeswhat
 void prim_DROP()
 {
-   	m_DROP();
+   	pop();
 }
 
 // DUP - Doeswhat
@@ -161,9 +163,9 @@ void prim_DUP()
 void prim_SLITERAL()
 {
 	// trace("SLITERAL\n");
-	arg2 = GETBYTE(PC); // count-byte
+	arg1 = GETBYTE(PC); // count-byte
 	push(PC);
-	PC += (arg2 + 2); // +2 => count-byte and NULL-terminator
+	PC += (arg1 + 2); // +2 => count-byte and NULL-terminator
 }
 
 // JMP - Doeswhat
@@ -184,7 +186,7 @@ void prim_JMPZ()
 	{
 		PC += CELL_SZ;
 	}
-	m_DROP();
+	prim_DROP();
 }
 
 // JMPNZ - Doeswhat
@@ -198,7 +200,7 @@ void prim_JMPNZ()
 	{
 		PC += CELL_SZ;
 	}
-	m_DROP();
+	prim_DROP();
 }
 
 // CALL - Doeswhat
@@ -666,18 +668,23 @@ void prim_DBGDOT()
 // SHIFTRIGHT - Shifts TOS right <x> bits
 void prim_DBGDOTS()
 {
-	CELL d;
-	prim_DEPTH();
-	d = pop();
-	// printf("DEPTH=(%d)[ ", d);
-	printf("( ", d);
-	for (int i = (d-1); i >= 0; i--)
+	if (depth > 0)
 	{
-		push(i);
-		prim_PICK();
-		prim_DBGDOT();
+		printf("( ");
+		for (int i = (depth-1); i >= 0; i--)
+		{
+			push(i);
+			prim_PICK();
+			prim_DBGDOT();
+			printf(" ");
+		}
+		printf(")");
 	}
-	printf(" )");
+	else
+	{
+		printf("(%c)", 237);
+	}
+	
 }
 
 // NOP - Does NOTHING
@@ -727,7 +734,9 @@ void prim_LOAD()
 	FILE *curr_fp = input_fp;
 	arg1 = pop();
 	sprintf(input_fn, "block-%04d.fs", arg1);
-	printf("loading [%s] ... ", input_fn);
+	#ifdef __VERBOSE__
+	printf("loading [%s]\n", input_fn);
+	#endif
 	input_fp = fopen(input_fn, "rt");
 	if (input_fp)
 	{
@@ -738,7 +747,6 @@ void prim_LOAD()
 		printf("Can't open [%s]\n", input_fn);
 	}
 	
-	printf("\n");
 	fclose(input_fp);
 	input_fp = curr_fp;
 }
@@ -781,4 +789,75 @@ void prim_QCOMMA()
 	else
 		prim_COMMA();
 
+}
+
+void prim_PARSELINE()
+{
+	char *line = (char *)pop();
+	// ParseLine(line);
+	char word[128];
+
+	// trace("Parse(): line=[%s]\n", line);
+
+	// for debugging
+	// if (0x05c8 < HERE)
+	// {
+	// 	trace_on();
+	// }
+
+	// for debugging
+	// if (0x0680 < HERE)
+	// {
+	// 	debug_off();
+	// }
+
+	while (strlen(line) > 0)
+	{
+		line = GetWord(line, word);
+		if (strcmp(word, "\\") == 0)
+		{
+			return;
+		}
+
+		if (strlen(word) == 0)
+		{
+			// printf("-EOL-");
+			return;
+		}
+
+		// printf("-%s-", word);
+		line = ParseWord(word, line);
+	}
+}
+
+void prim_GETLINE()
+{
+	char *buf = (char *)pop();
+	FILE *fp = (FILE *)pop();
+	char *chars = buf+1;
+	size_t buf_sz = 256;
+
+	if (fp)
+	{
+		// prim_DBGDOTS();
+		if (chars == fgets(chars, buf_sz, fp))
+		{
+			*buf = (BYTE)strlen(chars);
+			push(0);
+		}
+		else
+		{
+			push(-1);
+		}
+	}
+	else
+	{
+		printf("(get-line)");
+		char *l = buf+1;
+		size_t num = getline(&l, &buf_sz, stdin);
+		string_rtrim(l);
+		buf[0] = (BYTE)strlen(l);
+		printf("(HERE=%lx,buf=%lx,len=%d)", HERE, buf, buf[0]);
+		push(0);
+	}
 }

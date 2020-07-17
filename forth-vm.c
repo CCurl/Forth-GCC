@@ -24,11 +24,11 @@ bool isBYE = false;
 
 int _QUIT_HIT = 0;
 
-CELL buf0[4];
+CELL dsBuf[4];
 CELL dStack[256];
 CELL buf1[4];
 CELL rStack[256];
-CELL buf2[4];
+CELL rsBuf[4];
 
 // ------------------------------------------------------------------------------------------
 void create_vm()
@@ -56,7 +56,7 @@ void reset_vm()
 	//dsp_init = (CELL *)&the_memory[memory_size - STACKS_SZ];
 	//rsp_init = (CELL *)&the_memory[memory_size - CELL_SZ];
 	dsp_init = dStack;
-	rsp_init = rStack;
+	rsp_init = (CELL *)rsBuf;
 	RSP = rsp_init;
 	DSP = dsp_init;
 	PC = (CELL)the_memory;

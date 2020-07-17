@@ -202,9 +202,9 @@
 
 : BETWEEN											\ ( num min max -- bool )
 	2 PICK < IF 
-		2DROP FALSE LEAVE 
+		DROP DROP FALSE LEAVE 
 	THEN
-	< 0= ;
+	< NOT ;
 
 : skipWS               								\ ( addr1 -- addr2 )
 	BEGIN

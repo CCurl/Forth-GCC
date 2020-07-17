@@ -96,6 +96,8 @@ OPCODE_T theOpcodes[] = {
 		, { ".CCOMMA.",         DYNAMIC,            "C,",               prim_CCOMMA,         IS_INLINE }
 		, { ".QCOMMA.",         DYNAMIC,            "?,",               prim_QCOMMA,         IS_INLINE }
 		, { ".LOAD.",           DYNAMIC,            "LOAD",             prim_LOAD,           IS_INLINE }
+		, { ".<none>.",         DYNAMIC,            "GET-LINE",         prim_GETLINE,        IS_INLINE }
+		, { ".<none>.",         DYNAMIC,            "EXECUTE-LINE",     prim_PARSELINE,      IS_INLINE }
 		, { "",                 0,                  "",                 0,                   IS_INLINE }
  };
 
@@ -356,6 +358,20 @@ bool parseHex(char *word, CELL *val)
 	return true;
 }
 
+void QLiteral()
+{
+	if ((TOS >= 0x00) && (TOS < 0x0100))
+	{
+		Comma((CELL)prim_CLITERAL);
+		prim_CCOMMA();
+	}
+	else
+	{
+		Comma((CELL)prim_LITERAL);
+		prim_COMMA();
+	}
+}
+
 char *ParseWord(char *word, char *line)
 {
 	CELL val;
@@ -402,14 +418,10 @@ char *ParseWord(char *word, char *line)
 	if ((strlen(word) == 3) && (word[0] == '\'') && (word[2] == '\''))
 	{
 		val = word[1];
-		if (STATE == 0)
+		push(val);
+		if (STATE == 1)
 		{
-			push(val);
-		}
-		else
-		{
-			Comma((CELL)vm_prims[CLITERAL]);
-			CComma(val);
+			QLiteral();
 		}
 		return line;
 	}
@@ -417,22 +429,10 @@ char *ParseWord(char *word, char *line)
 	// HEX words look like this: $<hex-number>
 	if ((word[0] == '$') && (parseHex(word, &val)))
 	{
-		if (STATE == 0)
+		push(val);
+		if (STATE == 1)
 		{
-			push(val);
-		}
-		else
-		{
-			if (val < 256)
-			{
-				Comma((CELL)vm_prims[CLITERAL]);
-				CComma(val);
-			}
-			else
-			{
-				Comma((CELL)vm_prims[LITERAL]);
-				Comma(val);
-			}
+			QLiteral();
 		}
 		return line;
 	}
@@ -440,23 +440,10 @@ char *ParseWord(char *word, char *line)
 	// DECIMAL words look like this: #<decimal-number>
 	if ((word[0] == '#') && (parseDecimal(word, &val)))
 	{
-		if (STATE == 0)
+		push(val);
+		if (STATE == 1)
 		{
-			push(val);
-		}
-		else
-		{
-			if (val < 256)
-			{
-				Comma((CELL)vm_prims[CLITERAL]);
-				CComma(val);
-			}
-			else
-			{
-				Comma((CELL)vm_prims[LITERAL]);
-				CComma(val);
-			}
-			
+			QLiteral();
 		}
 		return line;
 	}
@@ -464,25 +451,11 @@ char *ParseWord(char *word, char *line)
 	// BINARY words look like this: %<binary-number>
 	if ((word[0] == '%') && (parseBinary(word, &val)))
 	{
-		if (STATE == 0)
+		push(val);
+		if (STATE == 1)
 		{
-			push(val);
+			QLiteral();
 		}
-		else
-		{
-			if (val < 256)
-			{
-				Comma((CELL)vm_prims[CLITERAL]);
-				CComma(val);
-			}
-			else
-			{
-				Comma((CELL)vm_prims[LITERAL]);
-				Comma(val);
-			}
-			
-		}
-		return line;
 	}
 
 	if (strcmp(word, ".IMMEDIATE.") == 0)
@@ -541,7 +514,7 @@ char *ParseWord(char *word, char *line)
 
 		if (string_equals(word, "S\""))
 		{
-			Comma((CELL)vm_prims[SLITERAL]);
+			Comma((CELL)prim_SLITERAL);
 			int count = 0;
 			bool done = false;
 			line += 1;
@@ -615,24 +588,11 @@ char *ParseWord(char *word, char *line)
 	CELL num = 0;
 	if (MakeNumber(word, &num))
 	{
+		push(num);
 		// printf("IsNumber: %ld (%04lx), STATE=%ld\n", num, num, STATE);
 		if (STATE == 1) // Compiling
 		{
-			if ((0 <= num) && (num <= 0xFF))
-			{
-				Comma((CELL)vm_prims[CLITERAL]);
-				CComma((BYTE)num);
-			}
-			else
-			{
-				Comma((CELL)vm_prims[LITERAL]);
-				Comma(num);
-			}
-		}
-		else
-		{
-			push(num);
-			return line;
+			QLiteral();
 		}
 		return line;
 	}
@@ -641,42 +601,6 @@ char *ParseWord(char *word, char *line)
 	_ALL_OK = false;
 	printf("ERROR: '%s'??\n", word);
 	return line;
-}
-
-void ParseLine(char *line)
-{
-	char *source = line;
-	char word[128];
-
-	trace("Parse(): line=[%s]\n", line);
-
-	// for debugging
-	// if (0x05c8 < HERE)
-	// {
-	// 	trace_on();
-	// }
-
-	// for debugging
-	// if (0x0680 < HERE)
-	// {
-	// 	debug_off();
-	// }
-
-	while (string_len(line) > 0)
-	{
-		line = GetWord(line, word);
-		if (string_equals(word, "\\"))
-		{
-			return;
-		}
-
-		if (string_len(word) == 0)
-		{
-			return;
-		}
-
-		line = ParseWord(word, line);
-	}
 }
 
 void CompilerInit()
@@ -711,12 +635,6 @@ void GenerateWord(char *name, BYTE flags, CELL *opcodes)
 		if (opcode == CALL)
 			Comma(opcodes[++i]);
 	}
-}
-
-CELL xt4(char *name)
-{
-	CELL addr = FindWord(name);
-	return (addr > 0) ? GetXT(addr) : 0;
 }
 
 void GenerateVariable(char *name, CELL addr)
@@ -788,26 +706,40 @@ void GeneratePrimitives()
 void Compile(FILE *fp_in)
 {
 	int line_no = 0;
-	char buf[128];
-	char line[128];
+	char buf[256];
 
-    while (fgets(buf, sizeof(buf), fp_in) == buf)
+    while (true)
     {
-		string_rtrim(buf);
-        ++line_no;
-		// printf("(%d) HERE = 0x%04lx\n", line_no, HERE);
-        strcpy(line, buf);
-        ParseLine(buf);
 		if (_QUIT_HIT == 1)
 		{
-			printf("QUIT hit on line %d: %s\n", line_no, line);
+			printf("QUIT hit on line %d: %s\n", line_no, buf+1);
 			break;
 		}
+
 		if (fp_in == NULL)
 		{
-			printf("%s was closed.\n", line_no, line);
+			printf("File was closed.\n");
 			break;
 		}
+
+		push((CELL)fp_in);
+		push((CELL)buf);
+		prim_GETLINE();
+		CELL isEOF = pop();
+		if (isEOF)
+		{
+			break;
+		}
+
+        ++line_no;
+		if (buf[0] > 0)
+		{
+			push((CELL)buf+1);
+			prim_PARSELINE();
+		}
+
+		// string_rtrim(line);
+		// printf("(%d) HERE = 0x%04lx\n", line_no, HERE);
     }
 }
 
@@ -838,19 +770,23 @@ void do_compile()
 // *********************************************************************
 void write_output_file()
 {
+	#ifdef __VERBOSE__
     printf("writing output file %s ... ", output_fn);
+	#endif
 
     output_fp = fopen(output_fn, "wb");
     if (!output_fp)
     {
-        printf("ERROR: Can't open output file!");
+        printf("ERROR: Can't open output file (%s)!", output_fn);
         exit(1);
     }
 
 	int num = fwrite(the_memory, 1, MEM_SZ, output_fp);
     fclose(output_fp);
     output_fp = NULL;
+	#ifdef __VERBOSE__
     printf("%d bytes written.\n", num);
+	#endif
 }
 
 // *********************************************************************

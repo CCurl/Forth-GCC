@@ -2,6 +2,8 @@
 #define __FORTH_SHARED__
 
 #define MEM_SZ_KB 16
+#define __CHECKSTACKS__ 1
+// #define __VERBOSE__ 1
 
 // ************************************************************************************************
 // The VM's instruction set

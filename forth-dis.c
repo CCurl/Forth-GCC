@@ -90,39 +90,19 @@ void init_prims()
 	dis_add_prim(0, 0, 0);
 }
 
-char *prim_name(CELL addr, CELL *opcode)
+OPCODE_T *opcodeFromPrim(CELL prim)
 {
-	if (num_prims == 0)
-		init_prims();
-
-	for (int i = 0; i < num_prims; i++)
+	for (int i = 0; i < 256; i++)
 	{
-		if (dis_prims[i].addr == addr)
+		OPCODE_T *op = &(theOpcodes[i]);
+		if (op->opcode == 0)
+			break;
+		if ((CELL)op->func == prim)
 		{
-			*opcode = dis_prims[i].opcode;
-			return dis_prims[i].name;
+			return op;
 		}
 	}
-
-	DICT_T_NEW *cur = (DICT_T_NEW *)LAST;
-	while (cur)
-	{
-		CELL xt = GetXT((CELL)cur);
-		xt = GETCELL(xt);
-		// printf("\naddr=%lx,xt=%lx?(%s)", addr, xt, cur->name);
-		if (xt == addr)
-		{
-			// Add it for next time
-			--num_prims;
-			dis_add_prim(DYNAMIC, (void *)xt, cur->name);
-			*opcode = DYNAMIC;
-			return cur->name;
-		}
-		cur = (DICT_T_NEW *)cur->prev;
-	}
-
-	*opcode = 0;
-	return "unknown primitive";
+	return NULL;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -132,15 +112,19 @@ CELL dis_one(char *bytes, char *desc)
 {
 	char add_this[256];
 	CELL func = GETCELL(PC);
+	OPCODE_T *op = opcodeFromPrim(func);
 	sprintf(bytes, "%08lx: %08lx", PC, func);
-	sprintf(desc, "%s", prim_name(func, &IR));
 	PC += CELL_SZ;
 
-	// IR = GETBYTE(PC++);
-	// printf("(PC=%08lx, IR=%02x)", PC-1, (int)IR);
-	// sprintf(bytes, "%08lx: %02x", PC-1, (int)IR);
+	if (!op)
+	{
+		sprintf(desc, "--UNKNOWN-- (%08lx)", func);
+		return 0;
+	}
 
-	switch (IR)
+	sprintf(desc, "%s", op->forth_prim);
+
+	switch (op->opcode)
 	{
 	case LITERAL:
 		arg1 = GETCELL(PC);
@@ -168,59 +152,6 @@ CELL dis_one(char *bytes, char *desc)
 		PC += 1;
 		return 1;
 
-	case FETCH:
-		// arg1 = GETTOS();
-		// arg2 = GETCELL(arg1);
-		// SETTOS(arg2);
-		sprintf(desc, "FETCH");
-		return 0;
-
-	case STORE:
-		// arg1 = pop();
-		// arg2 = pop();
-		// SETCELL(arg1, arg2);
-		sprintf(desc, "STORE");
-		return 0;
-
-	case SWAP:
-		// arg1 = GET2ND();
-		// arg2 = GETTOS();
-		// SET2ND(arg2);
-		// SETTOS(arg1);
-		sprintf(desc, "SWAP");
-		return 0;
-
-	case DROP:
-		// arg1 = pop();
-		sprintf(desc, "DROP");
-		return 0;
-
-	case DUP:
-		// arg1 = GETTOS();
-		// push(arg1);
-		sprintf(desc, "DUP");
-		return 0;
-
-	case OVER:
-		// arg1 = GET2ND();
-		// push(arg1);
-		sprintf(desc, "OVER");
-		return 0;
-
-	case PICK:
-		// arg1 = pop();
-		// arg2 = *(DSP - arg1);
-		// push(arg2);
-		sprintf(desc, "PICK");
-		return 0;
-
-	case LOGLEVEL:
-		// arg1 = pop();
-		// arg2 = *(DSP - arg1);
-		// push(arg2);
-		sprintf(desc, "LOGLEVEL");
-		return 0;
-
 	case JMP:
 		// PC = GETCELL(PC);
 		arg1 = GETCELL(PC);
@@ -229,14 +160,6 @@ CELL dis_one(char *bytes, char *desc)
 		return CELL_SZ;
 
 	case JMPZ:
-		// if (pop() == 0)
-		// {
-		// 	PC = GETCELL(PC);
-		// }
-		// else
-		// {
-		// 	PC += CELL_SZ;
-		// }
 		sprintf(desc, "JMPZ %08lx", GETCELL(PC));
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
@@ -244,15 +167,6 @@ CELL dis_one(char *bytes, char *desc)
 	case JMPNZ:
 		sprintf(desc, "JMPNZ %08lx", GETCELL(PC));
 		dis_PC2(CELL_SZ, bytes);
-		// arg1 = pop();
-		// if (arg1 != 0)
-		// {
-		// 	PC = GETCELL(PC);
-		// }
-		// else
-		// {
-		// 	PC += CELL_SZ;
-		// }
 		return CELL_SZ;
 
 	case CALL:
@@ -266,16 +180,20 @@ CELL dis_one(char *bytes, char *desc)
 		sprintf(desc, "RET");
 		return 0;
 
-	case COMPARE:
-		sprintf(desc, "COMPARE");
+	case FETCH:
+		sprintf(desc, "FETCH");
 		return 0;
 
-	case COMPAREI:
-		sprintf(desc, "COMPAREI");
+	case CFETCH:
+		sprintf(desc, "CFETCH");
 		return 0;
 
-	case SLASHMOD:
-		sprintf(desc, "SLASHMOD");
+	case STORE:
+		sprintf(desc, "STORE");
+		return 0;
+
+	case CSTORE:
+		sprintf(desc, "CSTORE");
 		return 0;
 
 	case SLITERAL:
@@ -285,236 +203,12 @@ CELL dis_one(char *bytes, char *desc)
 		// SLIT   03    A    B    C   00
 		// PC starts at 0101, should be set to 0106
 
-		printf("SLITERAL ...");
 		//printf("SLITERAL (%08lx) [%lx]", PC+1, (char *)(PC+1));
 		arg1 = GETBYTE(PC); // count-byte (and the beginning of the counted string)
 		arg2 = arg1 + 2;    // count-byte + count + NULL
 		sprintf(desc, "SLITERAL (%08lx) [%s]", PC+1, PC+1);
 		dis_start(PC, (arg2 > 10) ? 10 : arg2, bytes);
 		PC += arg2;
-		return 0;
-
-	case CFETCH:
-		// arg1 = GETTOS();
-		// SETTOS(the_memory[arg1]);
-		sprintf(desc, "CFETCH");
-		return 0;
-
-	case CSTORE:
-		// arg1 = pop();
-		// arg2 = pop();
-		// the_memory[arg1] = (BYTE)arg2;
-		sprintf(desc, "CSTORE");
-		return 0;
-
-	case ADD:
-		// arg1 = pop();
-		// arg2 = pop();
-		// push(arg2 + arg1);
-		sprintf(desc, "ADD");
-		return 0;
-
-	case SUB:
-		// arg1 = pop();
-		// arg2 = pop();
-		// push(arg2 - arg1);
-		sprintf(desc, "SUB");
-		return 0;
-
-	case MUL:
-		// arg1 = pop();
-		// arg2 = pop();
-		// push(arg2 * arg1);
-		sprintf(desc, "MUL");
-		return 0;
-
-	case DIV:
-		// arg1 = pop();
-		// arg2 = pop();
-		// push(arg2 / arg1);
-		sprintf(desc, "DIV");
-		return 0;
-
-	case LT:
-		// arg1 = pop();
-		// arg2 = pop();
-		// push(arg2 < arg1 ? 1 : 0);
-		sprintf(desc, "LT");
-		return 0;
-
-	case EQ:
-		// arg1 = pop();
-		// arg2 = pop();
-		// push(arg2 == arg1 ? 1 : 0);
-		sprintf(desc, "EQ");
-		return 0;
-
-	case GT:
-		// arg1 = pop();
-		// arg2 = pop();
-		// push(arg2 > arg1 ? 1 : 0);
-		sprintf(desc, "GT");
-		return 0;
-
-	case DICTP:
-		arg1 = GETCELL(PC);
-		// PC += CELL_SZ;
-		sprintf(desc, "DICTP");
-		dis_PC2(CELL_SZ, bytes);
-		return CELL_SZ;
-
-	case EMIT:
-		// arg1 = pop();
-		// putchar(arg1);
-		sprintf(desc, "EMIT");
-		return 0;
-
-	case FOPEN:
-		// ( name mode -- fp status ) - mode: 0 = read, 1 = write
-		// arg2 = pop();
-		// arg1 = pop();
-		// {
-		// 	char *fileName = (char *)&the_memory[arg1 + 1];
-		// 	char mode[4];
-		// 	sprintf(mode, "%cb", arg2 == 0 ? 'r' : 'w');
-		// 	FILE *fp = fopen(fileName, mode);
-		// 	push((int)fp);
-		// 	push(fp != NULL ? 0 : 1);
-		// }
-		sprintf(desc, "FOPEN");
-		return 0;
-
-	case FREAD:			// ( addr num fp -- count ) - fp == 0 means STDIN
-		// arg3 = pop(); -- FP
-		// arg2 = pop(); -- NUM
-		// arg1 = pop(); -- ADDR
-		// {
-		// 	BYTE *pBuf = (BYTE *)&the_memory[arg1 + 1];
-		// 	int num = fread(pBuf, sizeof(BYTE), arg2, (arg3 == 0) ? stdin : (FILE *)arg3);
-		// 	push(num);
-		// }
-		sprintf(desc, "FREAD");
-		return 0;
-
-	case FREADLINE:
-		// Puts a counted string at addr
-		// ( addr num fp -- count )
-		// arg3 = pop(); -- FP (0 means STDIN)
-		// arg2 = pop(); -- NUM
-		// arg1 = pop(); -- ADDR
-		// {
-		// 	char *pBuf = (char *)&the_memory[arg1 + 1];
-		// 	FILE *fp = arg3 ? (FILE *)arg3 : stdin;
-		// 	if (fgets(pBuf, arg2, fp) != pBuf)
-		// 	{
-		// 		*pBuf = (char)NULL;
-		// 	}
-		// 	arg2 = (CELL)strlen(pBuf);
-		// 	// Strip off any trailing newline
-		// 	if ((arg2 > 0) && (pBuf[arg2 - 1] == '\n'))
-		// 	{
-		// 		pBuf[--arg2] = (char)NULL;
-		// 	}
-		// 	*(--pBuf) = (char)arg2;
-		// 	push(arg2);
-		// }
-		sprintf(desc, "FREADLINE");
-		return 0;
-
-	case FWRITE:
-		// ( addr num fp -- count ) - fp == 0 means STDOUT
-		// arg3 = pop();
-		// arg2 = pop();
-		// arg1 = pop();
-		// {
-		// 	BYTE *pBuf = (BYTE *)&the_memory[arg1];
-		// 	int num = fwrite(pBuf, sizeof(BYTE), arg2, arg3 == 0 ? stdin : (FILE *)arg3);
-		// 	push(num);
-		// }
-		sprintf(desc, "FWRITE");
-		return 0;
-
-	case FCLOSE:
-		// arg1 = pop();
-		// if (arg1 != 0)
-		// {
-		// 	fclose((FILE *)arg1);
-		// }
-		sprintf(desc, "FCLOSE");
-		return 0;
-
-	case GETCH:
-		// arg1 = getchar();
-		// push(arg1);
-		sprintf(desc, "GETCH");
-		return 0;
-
-	case DTOR:
-		// arg1 = pop();
-		// rpush(arg1);
-		sprintf(desc, "DTOR");
-		return 0;
-
-	case RTOD:
-		// arg1 = rpop();
-		// push(arg1);
-		sprintf(desc, "RTOD");
-		return 0;
-
-	case DEPTH:
-		// arg1 = DSP - dsp_init;
-		// push(arg1);
-		sprintf(desc, "DEPTH");
-		return 0;
-
-	case AND:
-		// arg1 = pop();
-		// arg2 = pop();
-		// push(arg2 & arg1);
-		sprintf(desc, "AND");
-		return 0;
-
-	case OR:
-		// arg1 = pop();
-		// arg2 = pop();
-		// push(arg2 | arg1);
-		sprintf(desc, "OR");
-		return 0;
-
-	case NOT:
-		sprintf(desc, "NOT");
-		return 0;
-
-	case RFETCH:
-		sprintf(desc, "RFETCH");
-		return 0;
-
-	case INC:
-		sprintf(desc, "INC");
-		return 0;
-
-	case RDEPTH:
-		sprintf(desc, "RDEPTH");
-		return 0;
-
-	case DEC:
-		sprintf(desc, "DEC");
-		return 0;
-
-	case GETTICK:
-		sprintf(desc, "GETTICK");
-		return 0;
-
-	case SHIFTLEFT:
-		sprintf(desc, "SHIFTLEFT");
-		return 0;
-
-	case SHIFTRIGHT:
-		sprintf(desc, "SHIFTRIGHT");
-		return 0;
-
-	case PLUSSTORE:
-		sprintf(desc, "PLUSSTORE");
 		return 0;
 
 	case BRANCHF:
@@ -551,51 +245,6 @@ CELL dis_one(char *bytes, char *desc)
 		arg1 = GETBYTE(PC);
 		sprintf(desc, "BRANCHBNZ %ld (%08lx)", arg1, PC-arg1);
 		dis_PC2(1, bytes);
-		return 0;
-
-	case NOP:
-		sprintf(desc, "NOP");
-		return 0;
-
-	case BREAK:
-	// {
-	// 	arg1 = the_memory[ADDR_HERE];
-	// 	arg2 = the_memory[ADDR_LAST];
-	// 	arg3 = arg2 - arg1;
-	// }
-		sprintf(desc, "BREAK");
-		return 0;
-
-	case BYE:
-		// isBYE = true;
-		sprintf(desc, "BYE");
-		return 0;
-
-	case INLINE:
-		// isBYE = true;
-		sprintf(desc, "INLINE");
-		return 0;
-
-	case DBGDOT:
-		sprintf(desc, "(.)");
-		return 0;
-
-	case DBGDOTS:
-		sprintf(desc, ".S");
-		return 0;
-
-	case DYNAMIC:
-		// sprintf("--DYNAMIC--");
-		// sprintf(desc, "");
-		return 0;
-
-	case RESET:
-	default:
-		// DSP = dsp_init;
-		// RSP = rsp_init;
-		// PC = 0;
-		// isBYE = isEmbedded;
-		sprintf(desc, "RESET");
 		return 0;
 	}
 	return 0;
@@ -710,7 +359,9 @@ void do_dis(char *output_fn)
         return;
     }
 
+	#ifdef __VERBOSE__
     printf("disassembling to file %s... ", output_fn);
+	#endif
     fprintf(output_fp, "; memory-size: %ld bytes, (%08lx hex)\n;\n", memory_size, memory_size);
 	fflush(output_fp);
 	dis_vm(output_fp);
@@ -718,5 +369,7 @@ void do_dis(char *output_fn)
     fclose(output_fp);
     output_fp = NULL;
 
+	#ifdef __VERBOSE__
     printf(" done.\n");
+	#endif
 }
