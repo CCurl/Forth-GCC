@@ -100,7 +100,9 @@ OPCODE_T theOpcodes[] = {
 		, { ".<none>.",         DYNAMIC,            "EXECUTE-LINE",     prim_PARSELINE,      IS_INLINE }
 		, { ".<none>.",         DYNAMIC,            "EXECUTE-WORD",     prim_EXECUTEWORD,    IS_INLINE }
 		, { ".<none>.",         DYNAMIC,            "GET-WORD",         prim_GETWORD,        IS_INLINE }
-		, { ".<none>.",         DYNAMIC,            "FIND-WORD",        prim_FINDWORD,       IS_INLINE }
+		, { ".<none>.",         DYNAMIC,            "IS-WORD?",         prim_ISWORD,         IS_INLINE }
+		, { ".<none>.",         DYNAMIC,            "IS-NUMBER?",       prim_ISNUMBER,       IS_INLINE }
+		, { ".<none>.",         DYNAMIC,            "(do-col)",         prim_DOCOL,          IS_PRIVATE }
 		, { "",                 0,                  "",                 0,                   IS_INLINE }
  };
 
@@ -121,11 +123,11 @@ void Store(CELL loc, CELL num)
 	*(CELL *)(&the_memory[loc]) = num;
 }
 
-void CStore(CELL loc, BYTE num)
-{
-	//trace("storing %d to %04lx", num, loc);
-	the_memory[loc] = num;
-}
+// void CStore(CELL loc, BYTE num)
+// {
+// 	//trace("storing %d to %04lx", num, loc);
+// 	the_memory[loc] = num;
+// }
 
 void Comma(CELL num)
 {
@@ -141,26 +143,15 @@ void CComma(BYTE num)
 
 CELL ExecuteXT(DICT_T_NEW *dp)
 {
-	if (isRunning)
-	{
-		// printf("(ex-%s)", dp->name);
-		rpush(PC);
-		PC = dp->XT;
-	}
-	else
-	{
-		isBYE = false;
-		isEmbedded = true;
-		PC = dp->XT;
-		cpu_loop();
-	}
-
+	TRACE("exec-[%s],XT=%08lx", dp->name, dp->XT);
+	push(dp->XT);
+	prim_DOCOL();
 	return 0;
 }
 
 DICT_T_NEW *FindWord(LPCTSTR word)
 {
-	// printf("\nlooking for word [%s]", word);
+	TRACE("\nlooking for word [%s]", word);
 	DICT_T_NEW *dp = (DICT_T_NEW *)LAST;
 	do
 	{
@@ -174,24 +165,6 @@ DICT_T_NEW *FindWord(LPCTSTR word)
 	} while (dp != NULL);
 
 	return dp;
-}
-
-BYTE GetFlags(CELL addr)
-{
-	addr += CELL_SZ;
-	addr += CELL_SZ;
-	return GETBYTE(addr);
-}
-
-CELL GetXT(CELL addr)
-{
-	addr += CELL_SZ;			// prev
-	addr += CELL_SZ;			// next
-	addr += 1;					// flags
-	addr += GETBYTE(addr);	    // word-len
-	addr += 2;					// len byte, null-terminator
-
-	return addr;
 }
 
 bool MakeNumber(LPCTSTR word, CELL *the_num)
@@ -233,6 +206,10 @@ bool MakeNumber(LPCTSTR word, CELL *the_num)
 
 void DefineWord(LPCTSTR word, BYTE flags)
 {
+	// "Private" words are there for the disassembler
+	if (flags == IS_PRIVATE)
+		return;
+
 	// printf("defining word [%s]", word);
 	int len = strlen(word);
 	CELL newLAST = HERE;
@@ -406,8 +383,7 @@ char *ParseWord(char *word, char *line)
 		line = GetWord(line, word);
 		DefineWord(word, 0);
 		
-		// CComma(DICTP);
-		// Comma(LAST);
+		Comma((CELL)prim_DOCOL);
 		STATE = 1;
 
 		return line;
@@ -752,20 +728,20 @@ void Compile(FILE *fp_in)
 		}
 
 		// string_rtrim(line);
-		// printf("(%d) HERE = 0x%04lx\n", line_no, HERE);
+		TRACE("(%d) HERE = 0x%04lx\n", line_no, HERE);
     }
 }
 
 void do_compile()
 {
-    // printf("compiling from %s...\n", input_fn);
+    TRACE("compiling from %s...\n", input_fn);
 	CompilerInit();
 	GeneratePrimitives();
 	// return;
 
 	push(0);
 	prim_LOAD();
-	// printf("done.\n");
+	TRACE("done.\n");
 
 	DICT_T_NEW *dp = FindWord("main");
 	if (dp == NULL)
@@ -858,7 +834,7 @@ void process_arg(char *arg)
 int main (int argc, char **argv)
 {
     strcpy(input_fn, "block-0000.fs");
-    strcpy(output_fn, "forth.bin");
+    strcpy(output_fn, "forth3.bin");
 	_ALL_OK = true;
 	debug_off();
 	run_vm = true;
@@ -879,7 +855,7 @@ int main (int argc, char **argv)
 
 	if (run_vm && _ALL_OK)
 	{
-		// printf("running ...\n");
+		TRACE("running ...\n");
 		PC = (CELL)the_memory;
 		isBYE = false;
 		isEmbedded = true;

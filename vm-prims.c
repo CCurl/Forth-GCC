@@ -744,9 +744,7 @@ void prim_LOAD()
 	FILE *curr_fp = input_fp;
 	arg1 = pop();
 	sprintf(input_fn, "block-%04d.fs", arg1);
-	#ifdef __VERBOSE__
-	printf("loading [%s]\n", input_fn);
-	#endif
+	TRACE("loading [%s]\n", input_fn);
 	input_fp = fopen(input_fn, "rt");
 	if (input_fp)
 	{
@@ -765,7 +763,7 @@ void prim_CREATE()
 {
 	arg1 = pop();
 	arg2 = pop();
-	printf("CREATE('%s', %d)", arg1, arg2);
+	TRACE("CREATE('%s', %d)", arg1, arg2);
 	DefineWord((char *)arg1, arg2);
 }
 
@@ -807,7 +805,7 @@ void prim_PARSELINE()
 	// ParseLine(line);
 	char word[128];
 
-	// trace("Parse(): line=[%s]\n", line);
+	// TRACE("Parse(): line=[%s]\n", line);
 
 	// for debugging
 	// if (0x05c8 < HERE)
@@ -831,23 +829,31 @@ void prim_PARSELINE()
 
 		if (strlen(word) == 0)
 		{
-			// printf("-EOL-");
+			TRACE("-EOL-");
 			// prim_DBGDOTS();
 			return;
 		}
 
 		line = ParseWord(word, line);
-		// printf("(%d,%s)", strlen(word), word);
+		TRACE("(pw-%s)", strlen(word), word);
 		if (line == NULL)
 			return;
+
+		push((CELL)word);
+		prim_ISWORD();
+		arg1 = pop();
+		if (arg1)
+		{
+			
+		}
 	}
 }
 
 void prim_EXECUTEWORD()
 {
-	printf("(ew-%08lx,", PC);
+	TRACE("(ew-%08lx,", PC);
 	PC = pop();
-	printf("%08lx)", PC);
+	TRACE("%08lx)", PC);
 }
 
 // ( n1 a1 -- bool )
@@ -875,21 +881,21 @@ void prim_GETLINE()
 	}
 	else
 	{
-		// printf("(get-line)");
+		// TRACE("(get-line)");
 		char *l = buf+1;
 		size_t num = getline(&l, &buf_sz, stdin);
 		string_rtrim(l);
 		buf[0] = (BYTE)strlen(l);
-		// printf("(HERE=%lx,buf=%lx,len=%d)", HERE, buf, buf[0]);
+		// TRACE("(HERE=%lx,buf=%lx,len=%d)", HERE, buf, buf[0]);
 		push(-1);
 	}
 }
 
 // ( a1 -- a2 a3 a4 )
 // a1: line
-// a2: word
+// a2: word (counted string)
 // a3: len
-// a4: new-line
+// a4: new-line (not counted, null-terminated)
 void prim_GETWORD()
 {
 	static char word[66];
@@ -915,23 +921,54 @@ void prim_GETWORD()
 	push((CELL)line);
 }
 
-// if found:     ( a1 -- xt flags true )
-// if not found: ( a1 -- a1 false )
-// a1: word
-// a4: len
-void prim_FINDWORD()
+// if found:     ( c-str -- link true )
+// if not found: ( c-str -- false )
+// c-str: word
+void prim_ISWORD()
 {
-	char *word = (char *) pop();
+	char *word = (char *) TOS;
 	DICT_T_NEW *dp = (DICT_T_NEW *)FindWord(word+1);
 	if (dp)
 	{
-		push(dp->XT);
-		push(dp->flags);
+		TOS = (CELL)dp;
 		push(-1);
 	}
 	else
 	{
-		push((CELL)word);
-		push(0);
+		TOS = 0;
 	}
+}
+
+// if is a number:     ( c-str -- num true )
+// if not: ( c-str -- false )
+// c-str: word
+void prim_ISNUMBER()
+{
+	TOS - 0;
+}
+
+// ( XT -- )
+void prim_DOCOL()
+{
+	void (*vm_prim)();
+
+	rpush(PC);
+	PC = pop();
+
+	while (true)
+	{
+		vm_prim = (void (*)())GETCELL(PC);
+
+		if (vm_prim == prim_RET)
+		{
+			PC = rpop();
+			checkStacks();
+			return;
+		}
+		else
+		{
+			PC += CELL_SZ;
+			vm_prim();
+		}
+ 	}
 }

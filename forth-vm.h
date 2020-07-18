@@ -119,3 +119,6 @@ extern void prim_GETLINE();
 extern void prim_EXECUTEWORD();
 extern void prim_GETWORD();
 extern void prim_FINDWORD();
+extern void prim_DOCOL();
+extern void prim_ISWORD();
+extern void prim_ISNUMBER();

@@ -124,6 +124,8 @@ CELL dis_one(char *bytes, char *desc)
 
 	sprintf(desc, "%s", op->forth_prim);
 
+	// The only ones that need extra logic are those the change the PC,
+	// or those that not very human readable (e.g. - ";")
 	switch (op->opcode)
 	{
 	case LITERAL:
@@ -366,9 +368,7 @@ void do_dis(char *output_fn)
         return;
     }
 
-	#ifdef __VERBOSE__
-    printf("disassembling to file %s... ", output_fn);
-	#endif
+    TRACE("disassembling to file %s... ", output_fn);
     fprintf(output_fp, "; memory-size: %ld bytes, (%08lx hex)\n;\n", memory_size, memory_size);
 	fflush(output_fp);
 	dis_vm(output_fp);
@@ -376,7 +376,5 @@ void do_dis(char *output_fn)
     fclose(output_fp);
     output_fp = NULL;
 
-	#ifdef __VERBOSE__
-    printf(" done.\n");
-	#endif
+    TRACE(" done.\n");
 }

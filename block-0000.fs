@@ -35,18 +35,49 @@
 VARIABLE (line)
 : LINE (line) @ ;
 
+\ ( xt flags -- )
+: DO-WORD 
+	STATE @ 
+	IF 
+		1
+	ELSE
+		2
+	THEN .S DROP ;
+
+\ ( n -- )
+: DO-NUMBER 
+	STATE @ 
+	IF 
+		1
+	ELSE
+		2
+	THEN .S DROP ;
+
+\ ( c-str -- )
+: PARSE-WORD
+	DUP IS-WORD? .s 
+	IF 
+		DROP
+		DO-WORD .s
+		LEAVE
+	THEN
+	DUP IS_NUMBER?
+	IF
+		DROP
+		DO-NUMBER .S
+		LEAVE
+	THEN
+	S" Unknown word: " COUNT TYPE
+	COUNT TYPE ;
+
 \ (  -- )
 : EXECUTE-LINE
 	BEGIN
 		LINE
-		GET-WORD (line) ! CR .s 
+		GET-WORD (line) ! 
+		CR .s \ DEBUG
 		IF 
-			FIND-WORD .s 
-			IF 
-				EXECUTE-WORD .s
-			ELSE
-				DROP
-			THEN
+			PARSE-WORD
 		THEN
 	AGAIN ;
 

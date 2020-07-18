@@ -3,7 +3,13 @@
 
 #define MEM_SZ_KB 16
 #define __CHECKSTACKS__ 1
-// #define __VERBOSE__ 1
+#define __VERBOSE__ 1
+
+#ifdef __VERBOSE__
+	#define TRACE(...) printf(__VA_ARGS__)
+#else
+	#define TRACE(...)
+#endif
 
 // ************************************************************************************************
 // The VM's instruction set
@@ -99,6 +105,7 @@ typedef struct {
 #define IS_INLINE    0x02
 #define IS_COMPILE   0x04
 #define IS_HIDDEN    0x10
+#define IS_PRIVATE   0x99
 
 typedef struct {
 	CELL next, XT;
