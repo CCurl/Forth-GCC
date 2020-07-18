@@ -98,6 +98,7 @@ OPCODE_T theOpcodes[] = {
 		, { ".LOAD.",           DYNAMIC,            "LOAD",             prim_LOAD,           IS_INLINE }
 		, { ".<none>.",         DYNAMIC,            "GET-LINE",         prim_GETLINE,        IS_INLINE }
 		, { ".<none>.",         DYNAMIC,            "EXECUTE-LINE",     prim_PARSELINE,      IS_INLINE }
+		, { ".<none>.",         DYNAMIC,            "EXECUTE-WORD",     prim_EXECUTEWORD,    IS_INLINE }
 		, { "",                 0,                  "",                 0,                   IS_INLINE }
  };
 
@@ -136,34 +137,41 @@ void CComma(BYTE num)
 	prim_CCOMMA();
 }
 
-CELL ExecuteXT(CELL XT)
+CELL ExecuteXT(DICT_T_NEW *dp)
 {
-	PC = XT;
-	isBYE = false;
-	isEmbedded = true;
-	CELL ret = cpu_loop();
+	if (isRunning)
+	{
+		printf("(ex-%s)", dp->name);
+		rpush(PC);
+		PC = dp->XT;
+	}
+	else
+	{
+		isBYE = false;
+		isEmbedded = true;
+		PC = dp->XT;
+		cpu_loop();
+	}
 
-	return ret;
+	return 0;
 }
 
-CELL FindWord(LPCTSTR word)
+DICT_T_NEW *FindWord(LPCTSTR word)
 {
-	int i = 0;
 	// printf("\nlooking for word [%s]", word);
-	CELL cur = LAST;
+	DICT_T_NEW *dp = (DICT_T_NEW *)LAST;
 	do
 	{
-		DICT_T_NEW *dp = (DICT_T_NEW *)(cur);
 		// printf("(%lx, [%s]==[%s]?)", cur, word, dp->name);
 		if (string_equals(word, dp->name))
 		{
-			return cur;
+			break;
 		}
 		// printf("next, %lx", dp->prev);
-		cur = dp->prev;
-	} while (cur > 0);
+		dp = (DICT_T_NEW *)dp->prev;
+	} while (dp != NULL);
 
-	return cur;
+	return dp;
 }
 
 BYTE GetFlags(CELL addr)
@@ -223,27 +231,27 @@ bool MakeNumber(LPCTSTR word, CELL *the_num)
 
 void DefineWord(LPCTSTR word, BYTE flags)
 {
+	// printf("defining word [%s]", word);
 	int len = strlen(word);
 	CELL newLAST = HERE;
+	DICT_T_NEW *dp = (DICT_T_NEW *)HERE;
+	DICT_T_NEW *last_dp = (DICT_T_NEW *)LAST;
 
-	// printf("Defining word [%s] at %04lx, LAST=%04lx\n", word, HERE, LAST);
-
-	// Doubly linked list
+	// doubly linked
 	if (LAST > 0)
 	{
-		CELL next = LAST + CELL_SZ;
-		SETCELL(next, newLAST);
+		last_dp->next = HERE;
 	}
 
-	Comma(LAST);	// prev
-	Comma(0);		// next
-	CComma(flags);
-	CComma(len);
-	for (int i = 0; i < len; i++)
-	{
-		CComma(word[i]);
-	}
-	CComma(0);
+	// setup new dict entry
+	dp->prev = LAST;
+	dp->next = 0;
+	dp->XT = HERE + (CELL_SZ*3) + 3 + len;
+	dp->flags = flags;
+	dp->len = len;
+	strcpy(dp->name, word);
+
+	HERE = dp->XT;
 	LAST = newLAST;
 }
 
@@ -539,11 +547,10 @@ char *ParseWord(char *word, char *line)
 		}
 	}
 
-	CELL wordAddr = FindWord(word);
-	if (wordAddr != 0)
+	DICT_T_NEW *dp = FindWord(word);
+	if (dp)
 	{
-		CELL xt = GetXT(wordAddr);
-		CELL flags = GetFlags(wordAddr);
+		CELL flags = dp->flags;
 		// printf("\nFORTH word (%s) at [%08lx]. STATE=%ld ...", word, wordAddr, STATE);
 		if (STATE == 1)
 		{
@@ -551,12 +558,12 @@ char *ParseWord(char *word, char *line)
 			if (flags & IS_IMMEDIATE)
 			{
 				// printf("Immediate at 0x%08lx ...", xt);
-				ExecuteXT(xt);
+				ExecuteXT(dp);
 			}
 			else if (flags & IS_INLINE)
 			{
 				// Skip the DICTP instruction
-				CELL addr = xt; // + 1 + CELL_SZ;
+				CELL addr = dp->XT; // + 1 + CELL_SZ;
 				// printf("inlining 0x%08lx ...", xt);
 
 				CELL addrRET = (CELL)vm_prims[RET];
@@ -572,14 +579,14 @@ char *ParseWord(char *word, char *line)
 			}
 			else
 			{
-				Comma((CELL)vm_prims[CALL]);
-				Comma(xt);
+				Comma((CELL)prim_CALL);
+				Comma(dp->XT);
 			}
 		}
 		else
 		{
 			// printf("executing it ...\n");
-			ExecuteXT(xt);
+			ExecuteXT(dp);
 		}
 		return line;
 	}
@@ -593,6 +600,10 @@ char *ParseWord(char *word, char *line)
 		if (STATE == 1) // Compiling
 		{
 			QLiteral();
+		}
+		else
+		{
+			printf("(push(%d))", num);
 		}
 		return line;
 	}
@@ -752,19 +763,20 @@ void do_compile()
 
 	push(0);
 	prim_LOAD();
+	// printf("done.\n");
 
-	CELL addr = FindWord("main");
-	if (addr == NULL)
+	DICT_T_NEW *dp = FindWord("main");
+	if (dp == NULL)
 	{
-		addr = FindWord("MAIN");
-		if (addr == NULL)
+		dp = FindWord("MAIN");
+		if (dp == NULL)
 		{
-			addr = LAST;
+			dp = (DICT_T_NEW *)LAST;
 		}
 	}
 
 	Store(0, (CELL)vm_prims[JMP]);
-	Store(4, GetXT(addr));
+	Store(4, dp->XT);
 }
 
 // *********************************************************************
@@ -865,6 +877,7 @@ int main (int argc, char **argv)
 
 	if (run_vm && _ALL_OK)
 	{
+		printf("running ...\n");
 		PC = (CELL)the_memory;
 		isBYE = false;
 		isEmbedded = true;

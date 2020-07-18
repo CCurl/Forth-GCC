@@ -2,7 +2,7 @@
 : BL #32 ; INLINE
 : SPACE BL EMIT ; INLINE
 : CR #13 EMIT #10 EMIT ;
-: . (.) SPACE ;
+: . (.) SPACE 'a' emit ;
 
 : ?COMPILING STATE @ ;   INLINE
 
@@ -12,9 +12,9 @@
 
 : LEAVE ?COMPILING IF RET THEN ;    IMMEDIATE
 
-: BEGIN ?COMPILING IF HERE DUP . THEN ;    IMMEDIATE
+: BEGIN ?COMPILING IF HERE THEN ;    IMMEDIATE
 : AGAIN ?COMPILING IF JMP   , THEN ;    IMMEDIATE
-: WHILE ?COMPILING IF DUP . JMPNZ , THEN ;    IMMEDIATE
+: WHILE ?COMPILING IF JMPNZ , THEN ;    IMMEDIATE
 : UNTIL ?COMPILING IF JMPZ  , THEN ;    IMMEDIATE
 \ .QUIT
 
@@ -42,8 +42,11 @@
     AGAIN ;
 
 : user-line HERE 100 + 0 OVER GET-LINE DROP ;
-: main hello ok user-line 1+ EXECUTE-LINE 555 . ok BYE ;
-hello 
+: main hello
+	BEGIN
+		ok user-line 1+ EXECUTE-LINE
+	AGAIN ;
+ 
 : count-to 
 	S" counting to " COUNT TYPE
 	GETTICK
@@ -57,5 +60,4 @@ hello
 
 1 LOAD
 \ 2 LOAD
-
-'a' DUP .S . SPACE EMIT '!' EMIT CR
+\ 'a' DUP .S . SPACE EMIT '!' EMIT CR

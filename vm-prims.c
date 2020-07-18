@@ -19,16 +19,11 @@ void (*vm_prims[257])();
 
 CELL arg1, arg2, arg3;
 
-extern CELL *RSP, rdepth;		// the return stack pointer
-extern CELL *DSP, depth;  		// the data stack pointer
-extern CELL TOS; 				// the top of stack
-extern CELL PC;					// The program counter
 extern CELL *rsp_init;
 extern CELL *dsp_init;
 
 extern CELL BASE, HERE, LAST, STATE;
 
-extern bool isBYE;
 extern BYTE the_memory[];
 extern int __DEBUG__;
 extern int _QUIT_HIT;
@@ -43,24 +38,24 @@ extern int string_rtrim(char *);
 
 inline void push(CELL val) 
 { 
-	++depth;
 	*(++DSP) = TOS;
 	TOS = val;
+	++depth;
 }
 
 inline CELL pop()
 {
-	--depth;
 	 CELL val = TOS; 
 	 TOS = *(DSP--); 
+	--depth;
 	 return val; 
 }
 
 // The return stack starts at (MEM_SZ) and grows downwards towards the data stack
 void rpush(CELL val)
 {
-	++rdepth;
 	*(--RSP) = (CELL)(val);
+	++rdepth;
 }
 
 CELL rpop()
@@ -71,24 +66,32 @@ CELL rpop()
 
 void checkStacks()
 {
-	isBYE = 1;
+	bool isOK = true;
 	if (depth < 0)
 	{
-		printf(" stack underflow! (at PC=0x%04lx)", PC-1);
+		printf(" stack underflow! (at PC=0x%08lx)", PC-CELL_SZ);
+		isOK = false;
 	}
 	if (rdepth < 0)
 	{
-		printf(" return stack underflow! (at PC=0x%04lx)", PC-1);
+		printf(" return stack underflow! (at PC=0x%08lx)", PC-CELL_SZ);
+		isOK = false;
 	}
 	if (depth > DSTACK_SZ)
 	{
-		printf(" stack overflow! (at PC=0x%04lx)", PC-1);
+		printf(" stack overflow! (at PC=0x%08lx)", PC-CELL_SZ);
+		isOK = false;
 	}
 	if (rdepth > RSTACK_SZ)
 	{
-		printf(" return stack overflow! (at PC=0x%04lx)", PC-1);
+		printf(" return stack overflow! (at PC=0x%08lx)", PC-CELL_SZ);
+		isOK = false;
 	}
-	isBYE = 0;
+
+	if (! isOK)
+		isBYE = isEmbedded;
+	else
+		PC = (CELL)the_memory;
 }
 
 // Unknown - Doeswhat
@@ -213,10 +216,11 @@ void prim_CALL()
 // RET - Doeswhat
 void prim_RET()
 {
+	checkStacks();
 	// Empty return stack means done when embedded
-	if ((RSP >= rsp_init) && (isEmbedded))
+	if ((rdepth == 0) && (isEmbedded))
 	{
-		trace("RET embedded BYE\n");
+		// printf("RET-embedded-BYE\n");
 		isBYE = true;
 		PC = 0;
 	}
@@ -262,7 +266,11 @@ void prim_CSTORE()
 void prim_ADD()
 {
 	arg1 = pop();
-	TOS += arg1;
+	arg2 = pop();
+	printf("add %d+%d", arg1, arg2);
+	// TOS += arg1;
+	push(arg1+arg2);
+	printf("=%d, depth=%d\n", TOS, depth);
 }
 
 // SUB - Doeswhat
@@ -462,7 +470,7 @@ void prim_RFETCH()
 		push(*RSP);
 		return;
 	}
-	printf(" the return stack is empty! (at PC=0x%04lx)", PC-1);
+	printf(" the return stack is empty! (at PC=0x%08lx)", PC-4);
 	reset_vm();
 }
 
@@ -653,16 +661,20 @@ void prim_BRANCHBNZ()
 // SHIFTRIGHT - Shifts TOS right <x> bits
 void prim_DBGDOT()
 {
-	arg1 = pop();
+	arg1 = TOS;
 	if (BASE == 10)
+	{
 		printf("%d", arg1);
+	}
 	else if (BASE == 0x10)
+	{
 		printf("%x", arg1);
+	}
 	else
 	{
-		printf("base(%d, %d)", BASE, arg1);
+		printf("%d-in-base-%d", arg1, BASE);
 	}
-	
+	prim_DROP();
 }
 
 // SHIFTRIGHT - Shifts TOS right <x> bits
@@ -822,12 +834,22 @@ void prim_PARSELINE()
 		if (strlen(word) == 0)
 		{
 			// printf("-EOL-");
+			// prim_DBGDOTS();
 			return;
 		}
 
-		// printf("-%s-", word);
 		line = ParseWord(word, line);
+		// printf("(%d,%s)", strlen(word), word);
+		if (line == NULL)
+			return;
 	}
+}
+
+void prim_EXECUTEWORD()
+{
+	printf("(ew-%08lx,", PC);
+	PC = pop();
+	printf("%08lx)", PC);
 }
 
 void prim_GETLINE()
@@ -852,12 +874,12 @@ void prim_GETLINE()
 	}
 	else
 	{
-		printf("(get-line)");
+		// printf("(get-line)");
 		char *l = buf+1;
 		size_t num = getline(&l, &buf_sz, stdin);
 		string_rtrim(l);
 		buf[0] = (BYTE)strlen(l);
-		printf("(HERE=%lx,buf=%lx,len=%d)", HERE, buf, buf[0]);
+		// printf("(HERE=%lx,buf=%lx,len=%d)", HERE, buf, buf[0]);
 		push(0);
 	}
 }

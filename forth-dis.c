@@ -279,6 +279,13 @@ CELL dis_dict(FILE *write_to, CELL dict_addr)
 	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
 	addr += CELL_SZ;
 
+	// Next
+	sprintf(bytes, "%08lx:", addr);
+	dis_rangeCell(addr, addr, bytes);
+	sprintf(desc, "XT: %08lx", dp->XT);
+	fprintf(write_to, "%-32s ; %s\n", bytes, desc);
+	addr += CELL_SZ;
+
 	// Flags, len
 	sprintf(bytes, "%08lx: %02x %02x", addr, dp->flags, dp->len);
 	sprintf(desc, "Flags: %02x, Len: %d", dp->flags, dp->len);

@@ -18,8 +18,10 @@ extern CELL TOS; // The top of the stack
 
 extern bool isEmbedded;
 extern bool isBYE;
+extern bool isRunning;
 extern BYTE the_memory[];
 extern long memory_size;
+extern int depth, rdepth;
 extern OPCODE_T theOpcodes[];
 extern void (*vm_prims[])();
 extern void init_vm_vectors();
@@ -113,3 +115,4 @@ extern void prim_CCOMMA();
 extern void prim_QCOMMA();
 extern void prim_PARSELINE();
 extern void prim_GETLINE();
+extern void prim_EXECUTEWORD();

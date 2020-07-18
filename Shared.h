@@ -110,6 +110,7 @@ typedef struct {
 typedef struct {
 	CELL prev;
 	CELL next;
+	CELL XT;
 	BYTE flags;
 	BYTE len;
 	char name[64];

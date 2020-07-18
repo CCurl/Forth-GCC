@@ -12,15 +12,18 @@ long memory_size = 0;
 CELL PC = 0;		// The "program counter"
 CELL IR = 0;		// The "instruction register"
 
-CELL *RSP = NULL, rdepth = 0;	// the return stack
-CELL *DSP = NULL, depth = 0;	// the data stack
-CELL TOS = 0;					// The top element on the stack
+CELL *RSP = NULL;	// the return stack
+CELL *DSP = NULL;	// the data stack
+CELL TOS = 0;		// The top element on the stack
+int depth  = 0;
+int rdepth = 0;
 
 CELL *dsp_init = NULL;
 CELL *rsp_init = NULL;
 
 bool isEmbedded = false;
 bool isBYE = false;
+bool isRunning = false;
 
 int _QUIT_HIT = 0;
 
@@ -81,6 +84,7 @@ void init_vm(int vm_size)
 CELL cpu_loop()
 {
 	isBYE = false;
+	isRunning = true;
 	debug("Running (PC=%04lx) ... ", PC);
 
 	void (*vm_prim)();
@@ -98,6 +102,7 @@ CELL cpu_loop()
 		if (isBYE)
 		{
 			debug("done. PC=%04lx\n", PC);
+			isRunning = false;
 			return 1;
 		}
 	}
