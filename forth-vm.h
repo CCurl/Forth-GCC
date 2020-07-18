@@ -38,6 +38,7 @@ extern void reset_vm();
 extern CELL cpu_step();
 extern CELL cpu_loop();
 extern CELL GetXT(CELL);
+extern DICT_T_NEW *FindWord(char *);
 
 
 
@@ -116,3 +117,5 @@ extern void prim_QCOMMA();
 extern void prim_PARSELINE();
 extern void prim_GETLINE();
 extern void prim_EXECUTEWORD();
+extern void prim_GETWORD();
+extern void prim_FINDWORD();

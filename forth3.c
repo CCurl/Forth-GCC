@@ -99,6 +99,8 @@ OPCODE_T theOpcodes[] = {
 		, { ".<none>.",         DYNAMIC,            "GET-LINE",         prim_GETLINE,        IS_INLINE }
 		, { ".<none>.",         DYNAMIC,            "EXECUTE-LINE",     prim_PARSELINE,      IS_INLINE }
 		, { ".<none>.",         DYNAMIC,            "EXECUTE-WORD",     prim_EXECUTEWORD,    IS_INLINE }
+		, { ".<none>.",         DYNAMIC,            "GET-WORD",         prim_GETWORD,        IS_INLINE }
+		, { ".<none>.",         DYNAMIC,            "FIND-WORD",        prim_FINDWORD,       IS_INLINE }
 		, { "",                 0,                  "",                 0,                   IS_INLINE }
  };
 
@@ -141,7 +143,7 @@ CELL ExecuteXT(DICT_T_NEW *dp)
 {
 	if (isRunning)
 	{
-		printf("(ex-%s)", dp->name);
+		// printf("(ex-%s)", dp->name);
 		rpush(PC);
 		PC = dp->XT;
 	}
@@ -601,10 +603,10 @@ char *ParseWord(char *word, char *line)
 		{
 			QLiteral();
 		}
-		else
-		{
-			printf("(push(%d))", num);
-		}
+		// else
+		// {
+		// 	printf("(push(%d))", num);
+		// }
 		return line;
 	}
 
@@ -877,7 +879,7 @@ int main (int argc, char **argv)
 
 	if (run_vm && _ALL_OK)
 	{
-		printf("running ...\n");
+		// printf("running ...\n");
 		PC = (CELL)the_memory;
 		isBYE = false;
 		isEmbedded = true;

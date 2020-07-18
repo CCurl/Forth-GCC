@@ -266,11 +266,9 @@ void prim_CSTORE()
 void prim_ADD()
 {
 	arg1 = pop();
-	arg2 = pop();
-	printf("add %d+%d", arg1, arg2);
-	// TOS += arg1;
-	push(arg1+arg2);
-	printf("=%d, depth=%d\n", TOS, depth);
+	// printf("(%d+%d", arg1, arg2);
+	TOS += arg1;
+	/// printf("=%d, depth=%d)", TOS, depth);
 }
 
 // SUB - Doeswhat
@@ -852,6 +850,9 @@ void prim_EXECUTEWORD()
 	printf("%08lx)", PC);
 }
 
+// ( n1 a1 -- bool )
+// n1: FILE-PTR
+// a1: buf
 void prim_GETLINE()
 {
 	char *buf = (char *)pop();
@@ -865,11 +866,11 @@ void prim_GETLINE()
 		if (chars == fgets(chars, buf_sz, fp))
 		{
 			*buf = (BYTE)strlen(chars);
-			push(0);
+			push(-1);
 		}
 		else
 		{
-			push(-1);
+			push(0);
 		}
 	}
 	else
@@ -880,6 +881,57 @@ void prim_GETLINE()
 		string_rtrim(l);
 		buf[0] = (BYTE)strlen(l);
 		// printf("(HERE=%lx,buf=%lx,len=%d)", HERE, buf, buf[0]);
+		push(-1);
+	}
+}
+
+// ( a1 -- a2 a3 a4 )
+// a1: line
+// a2: word
+// a3: len
+// a4: new-line
+void prim_GETWORD()
+{
+	static char word[66];
+	char *line = (char *) pop();
+	BYTE len = 0;
+
+    // Skip beginning WS
+    while ((*line) && ((*line) <= ' '))
+    {
+        line++;
+    }
+
+    // Copy chars up to ' ', EOL, or 1st non-printable char
+	len = 0;
+    while (((*line) > ' ') && (len < 64))
+	{
+		word[++len] = *(line++);
+	}
+	word[0] = len;
+
+	push((CELL)word);
+	push((CELL)len);
+	push((CELL)line);
+}
+
+// if found:     ( a1 -- xt flags true )
+// if not found: ( a1 -- a1 false )
+// a1: word
+// a4: len
+void prim_FINDWORD()
+{
+	char *word = (char *) pop();
+	DICT_T_NEW *dp = (DICT_T_NEW *)FindWord(word+1);
+	if (dp)
+	{
+		push(dp->XT);
+		push(dp->flags);
+		push(-1);
+	}
+	else
+	{
+		push((CELL)word);
 		push(0);
 	}
 }

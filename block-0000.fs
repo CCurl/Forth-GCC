@@ -2,7 +2,7 @@
 : BL #32 ; INLINE
 : SPACE BL EMIT ; INLINE
 : CR #13 EMIT #10 EMIT ;
-: . (.) SPACE 'a' emit ;
+: . (.) SPACE ;
 
 : ?COMPILING STATE @ ;   INLINE
 
@@ -30,21 +30,36 @@
 
 : TRUE -1 ; INLINE
 
-: ok SPACE S" OK " COUNT TYPE .S CR ;
+: EXECUTE-WORD DROP >R ;
+
+VARIABLE (line)
+: LINE (line) @ ;
+
+\ (  -- )
+: EXECUTE-LINE
+	BEGIN
+		LINE
+		GET-WORD (line) ! CR .s 
+		IF 
+			FIND-WORD .s 
+			IF 
+				EXECUTE-WORD .s
+			ELSE
+				DROP
+			THEN
+		THEN
+	AGAIN ;
+
+: ok SPACE .S S"  ok. " COUNT TYPE ;
 : hello S" Hello." COUNT TYPE ;
 
-: REPL
-    BEGIN
-        ok
-        GET-LINE
-        EXECUTE-LINE
-        BYE
-    AGAIN ;
-
-: user-line HERE 100 + 0 OVER GET-LINE DROP ;
 : main hello
 	BEGIN
-		ok user-line 1+ EXECUTE-LINE
+		ok 
+		HERE $0100 + (line) !
+		0 LINE 1-
+		GET-LINE DROP
+		LINE EXECUTE-LINE
 	AGAIN ;
  
 : count-to 
