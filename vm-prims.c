@@ -1,5 +1,6 @@
 #include <winbase.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <memory.h>
 #include <conio.h>
 #include "Shared.h"
@@ -773,7 +774,8 @@ void prim_Unknown()
 {
     printf("Unknown instruction at addr: 0x%04lx, (0x%02x)", PC-1, IR);
     reset_vm();
-	// isBYE = true;
+	isBYE = true;
+	exit(0);
 }
 
 void init_vm_vectors()

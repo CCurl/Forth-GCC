@@ -82,19 +82,25 @@ typedef char *String;
 
 typedef struct {
 	char *asm_instr;
-	BYTE opcode;
+	CELL opcode;
 	char *forth_prim;
+	void (*func)();
+	BYTE flags;
 } OPCODE_T;
+
 
 // flags is a bit field:
 #define IS_IMMEDIATE 0x01
 #define IS_INLINE    0x02
 #define IS_HIDDEN    0x04
+#define IS_COMPILE   0x04
+#define IS_PRIVATE   0x99		// This one is not really a flag
 
 typedef struct {
-	CELL next, XT;
-	BYTE flags;
-	BYTE len;
+	CELL next;
+	// CELL next, prev;			// Future
+	CELL XT;
+	BYTE flags, len;
 	char name[30];
 } DICT_T;
 

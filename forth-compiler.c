@@ -27,71 +27,86 @@ CELL ADDR_MEM_SZ   = 0x24;
 extern int _QUIT_HIT;
 
 OPCODE_T theOpcodes[] = {
-       { ".LITERAL.", 1, "LITERAL" },
-       { ".FETCH.", 2, "FETCH" },
-       { ".STORE.", 3, "STORE" },
-       { ".SWAP.", 4, "SWAP" },
-       { ".DROP.", 5, "DROP" },
-       { ".DUP.", 6, "DUP" },
-       { ".SLITERAL.", 7, "SLITERAL" },
-       { ".JMP.", 8, "JMP" },
-       { ".JMPZ.", 9, "JMPZ" },
-       { ".JMPNZ.", 10, "JMPNZ" },
-       { ".CALL.", 11, "CALL" },
-       { ".RET.", 12, "RET" },
-       { ".OR.", 13, "OR" },
-       { ".CLITERAL.", 14, "CLITERAL" },
-       { ".CFETCH.", 15, "CFETCH" },
-       { ".CSTORE.", 16, "CSTORE" },
-       { ".ADD.", 17, "ADD" },
-       { ".SUB.", 18, "SUB" },
-       { ".MUL.", 19, "MUL" },
-       { ".DIV.", 20, "DIV" },
-       { ".LT.", 21, "LT" },
-       { ".EQ.", 22, "EQ" },
-       { ".GT.", 23, "GT" },
-       { ".DICTP.", 24, "DICTP" },
-       { ".EMIT.", 25, "EMIT" },
-       { ".OVER.", 26, "OVER" },
-       { ".COMPARE.", 27, "COMPARE" },
-       { ".FOPEN.", 28, "FOPEN" },
-       { ".FREAD.", 29, "FREAD" },
-       { ".FREADLINE.", 30, "FREADLINE" },
-       { ".FWRITE.", 31, "FWRITE" },
-       { ".FCLOSE.", 32, "FCLOSE" },
-       { ".DTOR.", 33, "DTOR" },
-       { ".RTOD.", 34, "RTOD" },
-       { ".LOGLEVEL.", 35, "LOGLEVEL" },
-       { ".AND.", 36, "AND" },
-       { ".PICK.", 37, "PICK" },
-       { ".DEPTH.", 38, "DEPTH" },
-       { ".GETCH.", 39, "GETCH" },
-       { ".COMPAREI.", 40, "COMPAREI" },
-       { ".SLASHMOD.", 41, "SLASHMOD" },
-       { ".NOT.", 42, "NOT" },
-       { ".RFETCH.", 43, "RFETCH" },
-       { ".INC.", 44, "INC" },
-       { ".RDEPTH.", 45, "RDEPTH" },
-       { ".DEC.", 46, "DEC" },
-       { ".GETTICK.", 47, "GETTICK" },
-       { ".SHIFTLEFT.", 48, "SHIFTLEFT" },
-       { ".SHIFTRIGHT.", 49, "SHIFTRIGHT" },
-       { ".PLUSSTORE.", 50, "PLUSSTORE" },
-       { ".BRANCHF.",   90, "BRANCHF" },
-       { ".BRANCHB.",   91, "BRANCHB" },
-       { ".BRANCHFZ.",  92, "BRANCHFZ" },
-       { ".BRANCHBZ.",  93, "BRANCHBZ" },
-       { ".BRANCHFNZ.", 94, "BRANCHFNZ" },
-       { ".BRANCHBNZ.", 95, "BRANCHBNZ" },
-       { ".NOP.", 252, "NOP" },
-       { ".BREAK.", 253, "BREAK" },
-       { ".RESET.", 254, "RESET" },
-       { ".BYE.", 255, "BYE" },
-	   { NULL, 0, NULL },
-       { ".DBGDOT.", 100, "DBGDOT" },
-       { ".DBGDOTS.", 101, "DBGDOTS" },
+		  { "LITERAL",        LITERAL,            "LITERAL",          prim_LITERAL,        IS_COMPILE }
+		, { ".FETCH.",          FETCH,              "@",                prim_FETCH,          IS_INLINE }
+		, { ".STORE.",          STORE,              "!",                prim_STORE,          IS_INLINE }
+		, { "SWAP",           SWAP,               "SWAP",             prim_SWAP,           IS_INLINE }
+		, { "DROP",           DROP,               "DROP",             prim_DROP,           IS_INLINE }
+		, { "DUP",            DUP,                "DUP",              prim_DUP,            IS_INLINE }
+		, { "SLITERAL",       SLITERAL,           "SLITERAL",         prim_SLITERAL,       IS_COMPILE }
+		, { "JMP",            JMP,                "JMP",              prim_JMP,            IS_COMPILE }
+		, { "JMPZ",           JMPZ,               "JMPZ",             prim_JMPZ,           IS_COMPILE }
+		, { "JMPNZ",          JMPNZ,              "JMPNZ",            prim_JMPNZ,          IS_COMPILE }
+		, { "CALL",           CALL,               "CALL",             prim_CALL,           IS_COMPILE }
+		, { "RET",            RET,                ";",                prim_RET,            IS_IMMEDIATE }
+		, { "RET",            RET,                "RET",              prim_RET,            IS_COMPILE }
+		, { "OR",             OR,                 "OR",               prim_OR,             IS_INLINE }
+		, { "CLITERAL",       CLITERAL,           "CLITERAL",         prim_CLITERAL,       IS_COMPILE }
+		, { "CFETCH",         CFETCH,             "C@",               prim_CFETCH,         IS_INLINE }
+		, { ".CSTORE.",         CSTORE,             "C!",               prim_CSTORE,         IS_INLINE }
+		, { ".ADD.",            ADD,                "+",                prim_ADD,            IS_INLINE }
+		, { "SUB",            SUB,                "-",                prim_SUB,            IS_INLINE }
+		, { "MUL",            MUL,                "*",                prim_MUL,            IS_INLINE }
+		, { "DIV",            DIV,                "/",                prim_DIV,            IS_INLINE }
+		, { "LT",             LT,                 "<",                prim_LT,             IS_INLINE }
+		, { "EQ",             EQ,                 "=",                prim_EQ,             IS_INLINE }
+		, { "GT",             GT,                 ">",                prim_GT,             IS_INLINE }
+		, { "DICTP",          DICTP,              "DICTP",            prim_DICTP,          IS_INLINE }
+		, { "EMIT",           EMIT,               "EMIT",             prim_EMIT,           IS_INLINE }
+		, { "OVER",           OVER,               "OVER",             prim_OVER,           IS_INLINE }
+		, { "COMPARE",        COMPARE,            "COMPARE",          prim_COMPARE,        IS_INLINE }
+		, { "FOPEN",          FOPEN,              "FOPEN",            prim_FOPEN,          IS_INLINE }
+		, { "FREAD",          FREAD,              "FREAD",            prim_FREAD,          IS_INLINE }
+		, { "FREADLINE",      FREADLINE,          "FREADLINE",        prim_FREADLINE,      IS_INLINE }
+		, { "FWRITE",         FWRITE,             "FWRITE",           prim_FWRITE,         IS_INLINE }
+		, { "FCLOSE",         FCLOSE,             "FCLOSE",           prim_FCLOSE,         IS_INLINE }
+		, { "DTOR",           DTOR,               ">R",               prim_DTOR,           IS_INLINE }
+		, { "RTOD",           RTOD,               "R>",               prim_RTOD,           IS_INLINE }
+		, { "LOGLEVEL",       LOGLEVEL,           "LOGLEVEL",         prim_LOGLEVEL,       IS_INLINE }
+		, { "AND",            AND,                "AND",              prim_AND,            IS_INLINE }
+		, { "PICK",           PICK,               "PICK",             prim_PICK,           IS_INLINE }
+		, { "DEPTH",          DEPTH,              "DEPTH",            prim_DEPTH,          IS_INLINE }
+		, { "GETCH",          GETCH,              "GETCH",            prim_GETCH,          IS_INLINE }
+		, { "COMPAREI",       COMPAREI,           "COMPAREI",         prim_COMPAREI,       IS_INLINE }
+		, { "SLASHMOD",       SLASHMOD,           "/MOD",             prim_SLASHMOD,       IS_INLINE }
+		, { "NOT",            NOT,                "NOT",              prim_NOT,            IS_INLINE }
+		, { "RFETCH",         RFETCH,             "RFETCH",           prim_RFETCH,         IS_INLINE }
+		, { ".INC.",            INC,                "1+",               prim_INC,            IS_INLINE }
+		, { "RDEPTH",         RDEPTH,             "RDEPTH",           prim_RDEPTH,         IS_INLINE }
+		, { "DEC",            DEC,                "1-",               prim_DEC,            IS_INLINE }
+		, { "GETTICK",        GETTICK,            "GETTICK",          prim_GETTICK,        IS_INLINE }
+		, { "SHIFTLEFT",      SHIFTLEFT,          "<<",               prim_SHIFTLEFT,      IS_INLINE }
+		, { "SHIFTRIGHT",     SHIFTRIGHT,         ">>",               prim_SHIFTRIGHT,     IS_INLINE }
+		, { "PLUSSTORE",      PLUSSTORE,          "PLUSSTORE",        prim_PLUSSTORE,      IS_INLINE }
+		, { "BRANCHF",        BRANCHF,            "BRANCHF",          prim_BRANCHF,        IS_COMPILE }
+		, { "BRANCHFZ",       BRANCHFZ,           "BRANCHFZ",         prim_BRANCHFZ,       IS_COMPILE }
+		, { "BRANCHFNZ",      BRANCHFNZ,          "BRANCHFNZ",        prim_BRANCHFNZ,      IS_COMPILE }
+		, { "BRANCHB",        BRANCHB,            "BRANCHB",          prim_BRANCHB,        IS_COMPILE }
+		, { "BRANCHBZ",       BRANCHBZ,           "BRANCHBZ",         prim_BRANCHBZ,       IS_COMPILE }
+		, { "BRANCHBNZ",      BRANCHBNZ,          "BRANCHBNZ",        prim_BRANCHBNZ,      IS_COMPILE }
+		// , { "DBGDOT",         DBGDOT,             "(.)",              prim_DBGDOT,         IS_INLINE }
+		// , { "DBGDOTS",        DBGDOTS,            ".S",               prim_DBGDOTS,        IS_INLINE }
+		, { ".NOP.",            NOP,                "NOP",              prim_NOP,            IS_INLINE }
+		, { "BREAK",          BREAK,              "BREAK",            prim_BREAK,          IS_INLINE }
+		, { "RESET",          RESET,              "RESET",            prim_RESET,          IS_INLINE }
+		, { "BYE",            BYE,                "BYE",              prim_BYE,            IS_INLINE }
+		// , { "INLINE",         INLINE,             "INLINE",           prim_INLINE,         IS_INLINE }
+		// , { "IMMEDIATE",      IMMEDIATE,          "IMMEDIATE",        prim_IMMEDIATE,      IS_INLINE }
+		// , { "CREATE",         CREATE,             "CREATE",           prim_CREATE,         IS_INLINE }
+		// , { "VARIABLE",       VARIABLE,           "VARIABLE",         prim_VARIABLE,       IS_INLINE }
+		// , { "COMMA",          COMMA,              ",",                prim_COMMA,          IS_INLINE }
+		// , { "CCOMMA",         CCOMMA,             "C,",               prim_CCOMMA,         IS_INLINE }
+		// , { "QCOMMA",         QCOMMA,             "?,",               prim_QCOMMA,         IS_INLINE }
+		// , { "LOAD",           LOAD,               "LOAD",             prim_LOAD,           IS_INLINE }
+		// , { "<none>",         GETLINE,            "GET-LINE",         prim_GETLINE,        IS_INLINE }
+		// , { "<none>",         PARSELINE,          "EXECUTE-LINE",     prim_PARSELINE,      IS_INLINE }
+		// , { "<none>",         EXECUTEWORD,        "EXECUTE-WORD",     prim_EXECUTEWORD,    IS_INLINE }
+		// , { "<none>",         GETWORD,            "GET-WORD",         prim_GETWORD,        IS_INLINE }
+		// , { "<none>",         ISWORD,             "IS-WORD?",         prim_ISWORD,         IS_INLINE }
+		// , { "<none>",         ISNUMBER,           "IS-NUMBER?",       prim_ISNUMBER,       IS_INLINE }
+		// , { "<none>",         DOCOL,              "(do-col)",         prim_DOCOL,          IS_PRIVATE }
+		, { "",               0,                  "",                 0,                   IS_INLINE }
  };
-
 
 /*
 NB build this in somehow to enable usage of VT100 ECSAPE sequences to control the screen
@@ -372,7 +387,7 @@ char *ParseWord(char *word, char *line)
 {
 	CELL val;
 
-	trace("Parse(): word=[%s], HERE=%04lx, LAST=%04lx, STATE=%ld\n", word, HERE, LAST, STATE);
+	printf("Parse(): word=[%s], HERE=%04lx, LAST=%04lx, STATE=%ld\n", word, HERE, LAST, STATE);
 
 	if (string_equals(word, ".QUIT"))
 	{
