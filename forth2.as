@@ -825,12 +825,22 @@ f_PLUSSTORE:
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
-s_OPENBLOCK:
+; Implementation of # ...
+; i.e. : # BASE @ /MOD SWAP '0' + ;
+;   input:
+;     - eax = BASE
+;     - ecx = end of buffer for char
+;   output:
+;     -  eax: unchanged
+;     - ecx: ecx-1
+s_NumToText:
                 push ecx
-                m_push 10
+                push eax
+                m_push eax
                 call s_SLASHMOD
                 call s_SWAP
                 add ebx, '0'
+                pop eax
                 pop ecx
                 mov [ecx], bl
                 dec ecx
@@ -843,10 +853,11 @@ f_OPENBLOCK:
                 ; TODO: replace the "0000" in "block-0000.fs" with block #
                 mov ecx, blockFile
                 add ecx, 9
-                call s_OPENBLOCK
-                call s_OPENBLOCK
-                call s_OPENBLOCK
-                call s_OPENBLOCK
+                mov eax, 10
+                call s_NumToText
+                call s_NumToText
+                call s_NumToText
+                call s_NumToText
                 m_drop
 
                 ; save these
