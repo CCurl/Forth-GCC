@@ -825,6 +825,49 @@ f_PLUSSTORE:
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
+s_OPENBLOCK:
+                push ecx
+                m_push 10
+                call s_SLASHMOD
+                call s_SWAP
+                add ebx, '0'
+                pop ecx
+                mov [ecx], bl
+                dec eax
+                m_drop
+                ret
+
+; -------------------------------------------------------------------------------------
+; f_OPENBLOCK
+f_OPENBLOCK:
+                ; TODO: replace the "0000" in "block-0000.fs" with block #
+                mov ecx, blockFile
+                add ecx, 9
+                call s_OPENBLOCK
+                call s_OPENBLOCK
+                ;call s_OPENBLOCK
+                ;call s_OPENBLOCK
+                m_drop
+
+                ; save these
+                push edx
+                push edi
+
+                push openModeRT
+                push blockFile
+                call [fopen]
+                pop ecx
+                pop ecx
+                m_push eax
+                m_push eax
+
+                ; restore these
+                pop edi
+                pop edx
+                
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
 ; BRANCHF
 f_BRANCHF:
                 movzx eax, BYTE [esi]
@@ -939,17 +982,17 @@ fileSize dd ?
 theMemory dd ?
 rDepth dd 0
 rStackPtr dd 0
+
 tmpBuf1 db  16 dup (0)          ; Buffer for data stack
 dStack  dd 256 dup (0)
-
 tmpBuf2 db  16 dup (0)          ; Buffer between stacks
-
 rStack  dd 256 dup (0)
 tmpBuf3 db  16 dup (0)          ; Buffer for return stack
 
 stopHere db 'stop here!', 0
 dsUnderFlow db '(Stack underflow!)', 0
 dsOverFlow  db '(Stack overflow!)', 0
+blockFile   db 'block-0003.fs', 0
 
 ; -------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------
@@ -1005,7 +1048,7 @@ dd f_GETTICK            ; Hex: 2F (47)
 dd f_SHIFTLEFT          ; Hex: 30 (48)
 dd f_SHIFTRIGHT         ; Hex: 31 (49)
 dd f_PLUSSTORE          ; Hex: 32 (50)
-dd f_UnknownOpcode      ; Hex: 33 (51)
+dd f_OPENBLOCK          ; Hex: 33 (51)
 dd f_UnknownOpcode      ; Hex: 34 (52)
 dd f_UnknownOpcode      ; Hex: 35 (53)
 dd f_UnknownOpcode      ; Hex: 36 (54)
@@ -1222,6 +1265,7 @@ unknownOpcode db 'unknown opcode! 0x%02X at 0x%04lx', 13, 10, 0
 divByZero db 'cannot divide by 0.', 0
 printBye db 'Bye', 0
 openModeRB db 'rb', 0
+openModeRT db 'rt', 0
 
 ; -------------------------------------------------------------------------------------
 section '.idata' data readable import

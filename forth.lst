@@ -13,12 +13,12 @@
 0040: 18 eb ff 00 00             ; DICTP (HERE) (ffeb)
 0045: 01 4b 00 00 00             ; LITERAL 75 (0x004b)
 004a: 0c                         ; RET
-004b: 60 14 00 00                ; dw 0x1460
+004b: 67 14 00 00                ; dw 0x1467
 ;
 004f: 18 da ff 00 00             ; DICTP (LAST) (ffda)
 0054: 01 5a 00 00 00             ; LITERAL 90 (0x005a)
 0059: 0c                         ; RET
-005a: 9b f0 00 00                ; dw 0xf09b
+005a: 8e f0 00 00                ; dw 0xf08e
 ;
 005e: 18 cb ff 00 00             ; DICTP BASE (ffcb)
 0063: 01 69 00 00 00             ; LITERAL 105 (0x0069)
@@ -28,7 +28,7 @@
 006d: 18 bb ff 00 00             ; DICTP STATE (ffbb)
 0072: 01 78 00 00 00             ; LITERAL 120 (0x0078)
 0077: 0c                         ; RET
-0078: 63 00 00 00                ; dw 0x0063
+0078: 00 00 00 00                ; dw 0x0000
 ;
 007c: 18 a8 ff 00 00             ; DICTP (MEM_SZ) (ffa8)
 0081: 01 87 00 00 00             ; LITERAL 135 (0x0087)
@@ -2337,7 +2337,15 @@
 145a: 0b 2d 01 00 00             ; CALL , (012d)
 145f: 0c                         ; RET
 ;
+1460: 18 8e f0 00 00             ; DICTP oo (f08e)
+1465: 33                         ; RESET
+1466: 0c                         ; RET
+;
 ; End of code, Dictionary:
+;
+f08e: 9b f0 00 00                ; oo - (next: f09b VARIABLE)
+f092: 60 14 00 00 00             ; XT=1460, flags=00
+f097: 02 6f 6f 00                ; 2, oo
 ;
 f09b: ae f0 00 00                ; VARIABLE - (next: f0ae sys-info)
 f09f: 34 14 00 00 00             ; XT=1434, flags=00
