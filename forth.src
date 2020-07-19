@@ -86,6 +86,7 @@
 : <<		[  48 C, ] ; .INLINE.	\ SHIFTLEFT  ( n1 n2 -- n3 )
 : >>		[  49 C, ] ; .INLINE.	\ SHIFTRIGHT ( n1 n2 -- n3 )
 : +!        [  50 C, ] ; .INLINE.   \ ( n addr -- )
+: OPEN-BLOCK [  51 C, ] ; .INLINE.   \ ( n -- fp bool )
 : BRANCHF      90 C,   ;
 : BRANCHFZ     91 C,   ;
 : BRANCHFNZ    92 C,   ; 
@@ -123,7 +124,6 @@
 : WHILE ?COMPILING IF BRANCHBNZ HERE SWAP - C, THEN ;    IMMEDIATE
 : UNTIL ?COMPILING IF BRANCHBZ  HERE SWAP - C, THEN ;    IMMEDIATE
 : LEAVE ?COMPILING IF RET     THEN ;    IMMEDIATE
-
 
 : MEM_SZ (MEM_SZ) @ ;
 
@@ -641,14 +641,12 @@ DECIMAL
 	LAST CELL + @ (HERE) ! 
 	LAST @ (LAST) ! ;
 
-: resetState ?COMPILING 
-	IF ForgetLast THEN 
-	STATE OFF
-	DECIMAL
-	INPUT-FP @ ?DUP IF 
-		FCLOSE
-		0 INPUT-FP !
-	THEN ;
+: close-input INPUT-FP @ FCLOSE 0 INPUT-FP ! ;
+
+: resetState 
+	?COMPILING IF ForgetLast THEN 
+	DECIMAL STATE OFF
+	close-input ;
 
 : ALLOT HERE + (HERE) ! ;
 
@@ -674,14 +672,10 @@ DECIMAL
 	FREADLINE \ ( addr sz fp -- num-read )
 	Pad SWAP
 	\ Pad CT CR \ DEBUG
-;
+	;
 
-: load 0 0 FOPEN 		\ ( filename -- ) 
-	0= IF
-		S" Cannot open file." CT 
-		LEAVE
-	THEN
-	INPUT-FP !
+: load-sub 		\ (  -- ) 
+	\ S" [loading]" CT .S
 	BEGIN
 		INPUT-FP @ file-getLine
 		IF
@@ -690,11 +684,40 @@ DECIMAL
 			executeInput
 		ELSE
 			DROP
-			INPUT-FP @ FCLOSE
-			0 INPUT-FP !
+			close-input
 			LEAVE
 		THEN
 	AGAIN ;
+
+: load-file \ ( filename -- ) 
+	close-input
+	0 0 FOPEN
+	0= IF
+		S" Cannot open file." CT 
+		DROP LEAVE
+	THEN
+	INPUT-FP !
+	load-sub ;
+
+: LOAD  		\ ( block# -- ) 
+	INPUT-FP @ >R \ close-input 
+	OPEN-BLOCK
+	IF
+		INPUT-FP ! load-sub
+		close-input R> INPUT-FP !
+	ELSE
+		S" Cannot open block file." CT 
+		DROP
+		R> INPUT-FP !
+	THEN ;
+
+\ ( n1 n2 -- )
+: THRU SWAP
+    BEGIN
+        2DUP < IF 2DROP LEAVE THEN
+		DUP -ROT
+		>R >R LOAD R> R> 1+
+    AGAIN ;
 
 \ ******************************************************************************************
 : STR.EMPTY 0 OVER ! ; INLINE		\ ( addr -- addr )
@@ -748,8 +771,6 @@ DECIMAL
 		C,
 	AGAIN ; IMMEDIATE
 
-: ll S" loads.fs" load ;
-
 : sys-info
 	.(MEM_SZ) 44 EMIT BL
 	.(HERE)   44 EMIT BL 
@@ -757,6 +778,8 @@ DECIMAL
 	.FREE CR ;
 
 : VARIABLE  CREATE-NAME HERE 2 + CELL + LITERAL , RET 0 , ;
+
+\ 1 LOAD
 
 \ --------------------------------------------------------------------------------
 sys-info

@@ -654,6 +654,15 @@ void prim_PLUSSTORE()
 	SETAT(arg2, arg3);
 }
 
+void prim_OPENBLOCK()
+{
+	char fn[64];
+	arg1 = pop();
+	sprintf(fn, "block-%04d.fs", arg1);
+	FILE *fp = fopen(fn, "rt");
+	push((CELL)fp);
+	push(TOS ? -1 : 0);
+}
 
 void prim_BRANCHF()
 {
@@ -833,6 +842,7 @@ void init_vm_vectors()
 	vm_prims[48] = prim_SHIFTLEFT;
 	vm_prims[49] = prim_SHIFTRIGHT;
 	vm_prims[50] = prim_PLUSSTORE;
+	vm_prims[51] = prim_OPENBLOCK;
 
 	vm_prims[90] = prim_BRANCHF;
 	vm_prims[91] = prim_BRANCHFZ;
