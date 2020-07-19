@@ -833,7 +833,7 @@ s_OPENBLOCK:
                 add ebx, '0'
                 pop ecx
                 mov [ecx], bl
-                dec eax
+                dec ecx
                 m_drop
                 ret
 
@@ -845,8 +845,8 @@ f_OPENBLOCK:
                 add ecx, 9
                 call s_OPENBLOCK
                 call s_OPENBLOCK
-                ;call s_OPENBLOCK
-                ;call s_OPENBLOCK
+                call s_OPENBLOCK
+                call s_OPENBLOCK
                 m_drop
 
                 ; save these
@@ -1048,7 +1048,7 @@ dd f_GETTICK            ; Hex: 2F (47)
 dd f_SHIFTLEFT          ; Hex: 30 (48)
 dd f_SHIFTRIGHT         ; Hex: 31 (49)
 dd f_PLUSSTORE          ; Hex: 32 (50)
-dd f_OPENBLOCK          ; Hex: 33 (51)
+dd f_OPENBLOCK          ; Hex: 33 (51)  ;***************************************************
 dd f_UnknownOpcode      ; Hex: 34 (52)
 dd f_UnknownOpcode      ; Hex: 35 (53)
 dd f_UnknownOpcode      ; Hex: 36 (54)
