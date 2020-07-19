@@ -700,13 +700,15 @@ DECIMAL
 	load-sub ;
 
 : LOAD  		\ ( block# -- ) 
-	close-input 
+	INPUT-FP @ >R \ close-input 
 	OPEN-BLOCK
 	IF
-		INPUT-FP ! load-sub 
+		INPUT-FP ! load-sub
+		close-input R> INPUT-FP !
 	ELSE
 		S" Cannot open block file." CT 
 		DROP
+		R> INPUT-FP !
 	THEN ;
 
 \ ( n1 n2 -- )
@@ -769,8 +771,6 @@ DECIMAL
 		C,
 	AGAIN ; IMMEDIATE
 
-: ll S" loads.fs" load-file ;
-
 : sys-info
 	.(MEM_SZ) 44 EMIT BL
 	.(HERE)   44 EMIT BL 
@@ -778,6 +778,8 @@ DECIMAL
 	.FREE CR ;
 
 : VARIABLE  CREATE-NAME HERE 2 + CELL + LITERAL , RET 0 , ;
+
+\ 1 LOAD
 
 \ --------------------------------------------------------------------------------
 sys-info
