@@ -1,6 +1,14 @@
 #ifndef __FORTH_SHARED__
 #define __FORTH_SHARED__
 
+// #define __VERBOSE__ 1
+
+#ifdef __VERBOSE__
+	#define TRACE(...) printf(__VA_ARGS__)
+#else
+	#define TRACE(...)
+#endif
+
 // ************************************************************************************************
 // The VM's instruction set
 // ************************************************************************************************
@@ -54,6 +62,7 @@
 #define SHIFTLEFT  48   // 30
 #define SHIFTRIGHT 49   // 31
 #define PLUSSTORE  50   // 32
+#define OPENBLOCK  51   // 33
 // unused 51-89
 #define BRANCHF    90   // 5A
 #define BRANCHFZ   91   // 5B
@@ -62,8 +71,8 @@
 #define BRANCHBZ   94   // 5E
 #define BRANCHBNZ  95   // 5F
 // unused 96-99
-//#define DBGDOT    100
-//#define DBGDOTS   101
+#define DBGDOT    100
+#define DBGDOTS   101
 // unused 102-251
 #define NOP       252	// FC
 #define BREAK     253	// FD
@@ -84,6 +93,8 @@ typedef struct {
 	char *asm_instr;
 	BYTE opcode;
 	char *forth_prim;
+	void (*func)();
+	CELL flags;
 } OPCODE_T;
 
 // flags is a bit field:

@@ -211,3 +211,5 @@ decimal 64 ps stk-init
     OVER 1- C! 1- ;
 
 : include get-next-word zcount >C-STR load-file ;
+
+: help cr 9999 load ;

@@ -1,6 +1,7 @@
 @echo off
 
 if "--%1%--" == "--fc--" goto make-fc
+if "--%1%--" == "--all--" goto make-all
 if "--%1%--" == "--fd--" goto make-fd
 if "--%1%--" == "--fa--" goto make-fa
 if "--%1%--" == "--fi--" goto make-fi
@@ -29,6 +30,16 @@ strip -o %output%.exe -g -S -d -X tmp.exe
 del tmp.exe
 if "--%2%--" == "--1--" forth-compiler
 goto done
+
+:make-all
+call make fc 1
+call make fd 1
+call make forth
+call make f2
+
+if "--%2%--" NEQ "----" forth
+goto done
+
 
 :make-nc
 set output=newfc
