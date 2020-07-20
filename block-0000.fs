@@ -1,14 +1,15 @@
-" .block 0." count type
+" Minimum word set." count type
 
 \ these are the minimun words that 
 \ are needed to have a functioning forth system
 
+\ main
 \ mainlooop
 \ getline
 \     getch
 \ executeInput
 \ resetState
-\ ForgetLast
+/     ForgetLast
 \ Define-Word
 \ CREATE-NAME
 \ getoneword

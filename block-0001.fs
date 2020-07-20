@@ -79,6 +79,8 @@ variable tl tl !
        " cannot open file!" CT RESET
    THEN ;
 
+: save " user.bin" img-save ;
+
 \ ------------------------------------------------------------------------------------
 \ A stack is comprised of 3 parts, [stack-pointer] [stack-top-pointer] [stack-data]
 \ The stack "bottom" is the first CELL after the (stack-top) pointer

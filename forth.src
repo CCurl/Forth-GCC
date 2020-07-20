@@ -656,6 +656,12 @@ DECIMAL
 : FREE LAST HERE - ;
 : .FREE FREE (.) S"  bytes free." CT ;
 
+: sys-info
+	.(MEM_SZ) 44 EMIT BL
+	.(HERE)   44 EMIT BL 
+	.(LAST)   44 EMIT BL
+	.FREE CR ;
+
 : mainLoop 
 	resetState 
 	BEGIN 
@@ -664,7 +670,11 @@ DECIMAL
 		executeInput BL 
 	AGAIN ;
 
-: main STATE @ 99 = IF STATE OFF S" Hello." CT THEN mainLoop ;
+: main STATE @ 99 = 
+	IF 
+		sys-info
+		STATE OFF S" Hello." CT 
+	THEN mainLoop ;
 
 \ ------------------------------------------------------------------------------------
 : file-getLine		\ ( fp -- addr num-read )
@@ -770,12 +780,6 @@ DECIMAL
 		THEN
 		C,
 	AGAIN ; IMMEDIATE
-
-: sys-info
-	.(MEM_SZ) 44 EMIT BL
-	.(HERE)   44 EMIT BL 
-	.(LAST)   44 EMIT BL
-	.FREE CR ;
 
 : VARIABLE  CREATE-NAME HERE 2 + CELL + LITERAL , RET 0 , ;
 
