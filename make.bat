@@ -37,7 +37,7 @@ call make fd 1
 call make forth
 call make f2
 
-if "--%2%--" NEQ "----" forth
+if "--%2%--" NEQ "----" forth2 forth.bin
 goto done
 
 

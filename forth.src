@@ -664,9 +664,9 @@ DECIMAL
 : .FREE FREE (.) S"  bytes free." CT ;
 
 : sys-info
-	.(MEM_SZ) 44 EMIT BL
-	.(HERE)   44 EMIT BL 
-	.(LAST)   44 EMIT BL
+	.(MEM_SZ) ',' EMIT BL
+	.(HERE)   ',' EMIT BL 
+	.(LAST)   ',' EMIT BL
 	.FREE CR ;
 
 : mainLoop 

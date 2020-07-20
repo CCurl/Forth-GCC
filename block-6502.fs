@@ -12,6 +12,8 @@ variable tl tl !
 variable th th !
 : forget-6502 tl @ (last) ! th @ (here) ! ;
 
+CR " Block 6502: 6502 simulator benchmark" COUNT TYPE
+
 hex
 
 variable rom $0800 allot
@@ -123,7 +125,7 @@ variable bp
         init-vm $1000 6502emu 1- dup 
     while drop ;
 
-: do-bench start-timer bench6502 elapsed ;
+: do-bench start-timer bench6502 CR elapsed ;
  decimal
  do-bench
  
