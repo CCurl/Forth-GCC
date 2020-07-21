@@ -37,7 +37,7 @@ call make fd 1
 call make forth
 call make f2
 
-if "--%2%--" NEQ "----" forth
+if "--%2%--" NEQ "----" .\forth
 goto done
 
 
@@ -87,7 +87,7 @@ goto done
 :make-fb
 call forth-compiler
 call forth-dis
-if "--%2%--" NEQ "----" forth
+if "--%2%--" NEQ "----" .\forth
 goto done
 
 :make-ex

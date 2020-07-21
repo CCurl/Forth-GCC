@@ -787,6 +787,51 @@ sys-info
 : lx 10 .lastx ;
 : ss 55 LOAD ;
 
+\ ************************************
+\ ** Machine Forth stuff
+\ ************************************
+.VARIABLE. addr 
+: >a addr ! ;
+: a  addr @ ;
+
+:  @@ a  @ ;	: c@@ a C@ ;
+:  !! a  ! ;    : c!! a C! ;
+
+:  @+   @@  a CELL + >a ;
+:  !+   !!  a CELL + >a ;
+: c@+  c@@  a 1+     >a ;
+: c!+  c!!  a 1+     >a ;
+
+:  @-   @@  a CELL - >a ;
+:  !-   !!  a CELL - >a ;
+: c@-  c@@  a 1-     >a ;
+: c!-  c!!  a 1-     >a ;
+
+\ ************************************
+.VARIABLE. tmp
+: t  tmp @ ; 	: >t tmp ! ;
+: t>a t >a ; 	: a>t a >t ;
+
+\ ************************************
+\ A circular stack
+: sz  #8 ;  INLINE		\ stk buf size
+: m  #31 ;  INLINE     	\ wrap-around mask
+
+.VARIABLE. stk sz CELLS ALLOT
+.VARIABLE. sr
+
+: s+ sr @ CELL + m AND sr ! ;
+: s- sr @ CELL - m AND sr ! ;
+
+: sp stk sr @ + ;
+
+: >s s+ sp ! ;
+: s> sp @ s-  ;
+
+\ ************************************
+\ ** Machine Forth stuff (end)
+\ ************************************
+
 \ This is so that forth-dis behaves as it should
 HEX
 	CELL   08 !

@@ -27,69 +27,33 @@ CELL ADDR_MEM_SZ   = 0x24;
 extern int _QUIT_HIT;
 
 OPCODE_T theOpcodes[] = {
-          { ".LITERAL.",          LITERAL,          "LITERAL",          prim_LITERAL,        0 }
-        , { ".FETCH.",            FETCH,            "FETCH",            prim_FETCH,          IS_INLINE }
-        , { ".STORE.",            STORE,            "STORE",            prim_STORE,          IS_INLINE }
-        , { ".SWAP.",             SWAP,             "SWAP",             prim_SWAP,           IS_INLINE }
-        , { ".DROP.",             DROP,             "DROP",             prim_DROP,           IS_INLINE }
-        , { ".DUP.",              DUP,              "DUP",              prim_DUP,            IS_INLINE }
-        , { ".SLITERAL.",         SLITERAL,         "SLITERAL",         prim_SLITERAL,       IS_INLINE }
-        , { ".JMP.",              JMP,              "JMP",              prim_JMP,            0 }
-        , { ".JMPZ.",             JMPZ,             "JMPZ",             prim_JMPZ,           0 }
-        , { ".JMPNZ.",            JMPNZ,            "JMPNZ",            prim_JMPNZ,          0 }
-        , { ".CALL.",             CALL,             "CALL",             prim_CALL,           0 }
-        , { ".RET.",              RET,              "RET",              prim_RET,            0 }
-        , { ".OR.",               OR,               "OR",               prim_OR,             IS_INLINE }
-        , { ".CLITERAL.",         CLITERAL,         "CLITERAL",         prim_CLITERAL,       IS_INLINE }
-        , { ".CFETCH.",           CFETCH,           "CFETCH",           prim_CFETCH,         IS_INLINE }
-        , { ".CSTORE.",           CSTORE,           "CSTORE",           prim_CSTORE,         IS_INLINE }
-        , { ".ADD.",              ADD,              "ADD",              prim_ADD,            IS_INLINE }
-        , { ".SUB.",              SUB,              "SUB",              prim_SUB,            IS_INLINE }
-        , { ".MUL.",              MUL,              "MUL",              prim_MUL,            IS_INLINE }
-        , { ".DIV.",              DIV,              "DIV",              prim_DIV,            IS_INLINE }
-        , { ".LT.",               LT,               "LT",               prim_LT,             IS_INLINE }
-        , { ".EQ.",               EQ,               "EQ",               prim_EQ,             IS_INLINE }
-        , { ".GT.",               GT,               "GT",               prim_GT,             IS_INLINE }
-        , { ".DICTP.",            DICTP,            "DICTP",            prim_DICTP,          IS_INLINE }
-        , { ".EMIT.",             EMIT,             "EMIT",             prim_EMIT,           IS_INLINE }
-        , { ".OVER.",             OVER,             "OVER",             prim_OVER,           IS_INLINE }
-        , { ".COMPARE.",          COMPARE,          "COMPARE",          prim_COMPARE,        IS_INLINE }
-        , { ".FOPEN.",            FOPEN,            "FOPEN",            prim_FOPEN,          IS_INLINE }
-        , { ".FREAD.",            FREAD,            "FREAD",            prim_FREAD,          IS_INLINE }
-        , { ".FREADLINE.",        FREADLINE,        "FREADLINE",        prim_FREADLINE,      IS_INLINE }
-        , { ".FWRITE.",           FWRITE,           "FWRITE",           prim_FWRITE,         IS_INLINE }
-        , { ".FCLOSE.",           FCLOSE,           "FCLOSE",           prim_FCLOSE,         IS_INLINE }
-        , { ".DTOR.",             DTOR,             "DTOR",             prim_DTOR,           IS_INLINE }
-        , { ".RTOD.",             RTOD,             "RTOD",             prim_RTOD,           IS_INLINE }
-        , { ".LOGLEVEL.",         LOGLEVEL,         "LOGLEVEL",         prim_LOGLEVEL,       IS_INLINE }
-        , { ".AND.",              AND,              "AND",              prim_AND,            IS_INLINE }
-        , { ".PICK.",             PICK,             "PICK",             prim_PICK,           IS_INLINE }
-        , { ".DEPTH.",            DEPTH,            "DEPTH",            prim_DEPTH,          IS_INLINE }
-        , { ".GETCH.",            GETCH,            "GETCH",            prim_GETCH,          IS_INLINE }
-        , { ".COMPAREI.",         COMPAREI,         "COMPAREI",         prim_COMPAREI,       IS_INLINE }
-        , { ".SLASHMOD.",         SLASHMOD,         "SLASHMOD",         prim_SLASHMOD,       IS_INLINE }
-        , { ".NOT.",              NOT,              "NOT",              prim_NOT,            IS_INLINE }
-        , { ".RFETCH.",           RFETCH,           "RFETCH",           prim_RFETCH,         IS_INLINE }
-        , { ".INC.",              INC,              "INC",              prim_INC,            IS_INLINE }
-        , { ".RDEPTH.",           RDEPTH,           "RDEPTH",           prim_RDEPTH,         IS_INLINE }
-        , { ".DEC.",              DEC,              "DEC",              prim_DEC,            IS_INLINE }
-        , { ".GETTICK.",          GETTICK,          "GETTICK",          prim_GETTICK,        IS_INLINE }
-        , { ".SHIFTLEFT.",        SHIFTLEFT,        "SHIFTLEFT",        prim_SHIFTLEFT,      IS_INLINE }
-        , { ".SHIFTRIGHT.",       SHIFTRIGHT,       "SHIFTRIGHT",       prim_SHIFTRIGHT,     IS_INLINE }
-        , { ".PLUSSTORE.",        PLUSSTORE,        "PLUSSTORE",        prim_PLUSSTORE,      IS_INLINE }
-        , { ".OPENBLOCK.",        OPENBLOCK,        "OPENBLOCK",        prim_OPENBLOCK,      IS_INLINE }
-        , { ".BRANCHF.",          BRANCHF,          "BRANCHF",          prim_BRANCHF,        0 }
-        , { ".BRANCHFZ.",         BRANCHFZ,         "BRANCHFZ",         prim_BRANCHFZ,       0 }
-        , { ".BRANCHFNZ.",        BRANCHFNZ,        "BRANCHFNZ",        prim_BRANCHFNZ,      0 }
-        , { ".BRANCHB.",          BRANCHB,          "BRANCHB",          prim_BRANCHB,        0 }
-        , { ".BRANCHBZ.",         BRANCHBZ,         "BRANCHBZ",         prim_BRANCHBZ,       0 }
-        , { ".BRANCHBNZ.",        BRANCHBNZ,        "BRANCHBNZ",        prim_BRANCHBNZ,      0 }
-        , { ".DBGDOT.",           DBGDOT,           "DBGDOT",           prim_DBGDOT,         IS_INLINE }
-        , { ".DBGDOTS.",          DBGDOTS,          "DBGDOTS",          prim_DBGDOTS,        IS_INLINE }
-        , { ".NOP.",              NOP,              "NOP",              prim_NOP,            IS_INLINE }
-        , { ".BREAK.",            BREAK,            "BREAK",            prim_BREAK,          IS_INLINE }
-        , { ".RESET.",            RESET,            "RESET",            prim_RESET,          IS_INLINE }
-        , { ".BYE.",              BYE,              "BYE",              prim_BYE,            IS_INLINE }
+          { "a",          LITERAL,          "LITERAL",          prim_LITERAL,        0 }
+        , { "@",    FETCH,            "FETCH",            prim_FETCH,          IS_INLINE }
+        , { "!",    STORE,            "STORE",            prim_STORE,          IS_INLINE }
+        , { "drop",             DROP,             "DROP",             prim_DROP,           IS_INLINE }
+        , { "dup",              DUP,              "DUP",              prim_DUP,            IS_INLINE }
+        , { "a!",         SLITERAL,         "SLITERAL",         prim_SLITERAL,       IS_INLINE }
+        , { "jump",              JMP,              "JMP",              prim_JMP,            0 }
+        , { ";",              RET,              "RET",              prim_RET,            0 }
+        , { "+",              ADD,              "ADD",              prim_ADD,            IS_INLINE }
+        , { "@+",            DICTP,            "DICTP",            prim_DICTP,          IS_INLINE }
+        , { "!+",             EMIT,             "EMIT",             prim_EMIT,           IS_INLINE }
+        , { "+*",             EMIT,             "EMIT",             prim_EMIT,           IS_INLINE }
+        , { "over",             OVER,             "OVER",             prim_OVER,           IS_INLINE }
+        , { "until",          COMPARE,          "COMPARE",          prim_COMPARE,        IS_INLINE }
+        , { "-until",          COMPARE,          "COMPARE",          prim_COMPARE,        IS_INLINE }
+        , { "invert",            FOPEN,            "FOPEN",            prim_FOPEN,          IS_INLINE }
+        , { "T=0",        FREADLINE,        "FREADLINE",        prim_FREADLINE,      IS_INLINE }
+        , { "C=0",           FWRITE,           "FWRITE",           prim_FWRITE,         IS_INLINE }
+        , { "(:)",           FCLOSE,           "FCLOSE",           prim_FCLOSE,         IS_INLINE }
+        , { ">r",             DTOR,             "DTOR",             prim_DTOR,           IS_INLINE }
+        , { "r>",             RTOD,             "RTOD",             prim_RTOD,           IS_INLINE }
+        , { "and",              AND,              "AND",              prim_AND,            IS_INLINE }
+        , { "xor",             XOR,             "PICK",             prim_PICK,           IS_INLINE }
+        , { "2*",        SHIFTLEFT,        "SHIFTLEFT",        prim_SHIFTLEFT,      IS_INLINE }
+        , { "2/",       SHIFTRIGHT,       "SHIFTRIGHT",       prim_SHIFTRIGHT,     IS_INLINE }
+        , { "nop",              NOP,              "NOP",              prim_NOP,            IS_INLINE }
+        , { "bye",              BYE,              "BYE",              prim_BYE,            IS_INLINE }
         , { NULL,                 0,                 "",                0,                   IS_INLINE }
  };
 
@@ -196,7 +160,7 @@ DICT_T *FindWord(LPCTSTR word)
 	DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
 	while (dp->next > 0)
 	{
-		if (string_equals(word, dp->name))
+		if (string_equals_nocase(word, dp->name))
 		{
 			return dp;
 		}

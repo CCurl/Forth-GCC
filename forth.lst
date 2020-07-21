@@ -6,19 +6,19 @@
 ;
 0005: 00 00 00
 0008: 00000004 00000000
-0010: 00001475 0000f081 0000000a 00000000
+0010: 0000167d 0000eefe 0000000a 00000000
 0020: 00000000 00010000 00000000 00000000
 0030: 00000000 00000000 00000000 00000000
 ;
 0040: 18 eb ff 00 00             ; DICTP (HERE) (ffeb)
 0045: 01 4b 00 00 00             ; LITERAL 75 (0x004b)
 004a: 0c                         ; RET
-004b: 75 14 00 00                ; dw 0x1475
+004b: 7d 16 00 00                ; dw 0x167d
 ;
 004f: 18 da ff 00 00             ; DICTP (LAST) (ffda)
 0054: 01 5a 00 00 00             ; LITERAL 90 (0x005a)
 0059: 0c                         ; RET
-005a: 81 f0 00 00                ; dw 0xf081
+005a: fe ee 00 00                ; dw 0xeefe
 ;
 005e: 18 cb ff 00 00             ; DICTP BASE (ffcb)
 0063: 01 69 00 00 00             ; LITERAL 105 (0x0069)
@@ -2346,7 +2346,342 @@
 146f: 0b 82 12 00 00             ; CALL LOAD (1282)
 1474: 0c                         ; RET
 ;
+1475: 18 72 f0 00 00             ; DICTP addr (f072)
+147a: 01 80 14 00 00             ; LITERAL 5248 (1480)
+147f: 0c                         ; RET
+1480: 00                         ; RESET
+1481: 00                         ; RESET
+1482: 00                         ; RESET
+1483: 00                         ; RESET
+1484: 18 65 f0 00 00             ; DICTP >a (f065)
+1489: 0b 75 14 00 00             ; CALL addr (1475)
+148e: 03                         ; STORE
+148f: 0c                         ; RET
+;
+1490: 18 59 f0 00 00             ; DICTP a (f059)
+1495: 0b 75 14 00 00             ; CALL addr (1475)
+149a: 02                         ; FETCH
+149b: 0c                         ; RET
+;
+149c: 18 4c f0 00 00             ; DICTP @@ (f04c)
+14a1: 0b 90 14 00 00             ; CALL a (1490)
+14a6: 02                         ; FETCH
+14a7: 0c                         ; RET
+;
+14a8: 18 3e f0 00 00             ; DICTP c@@ (f03e)
+14ad: 0b 90 14 00 00             ; CALL a (1490)
+14b2: 0f                         ; CFETCH
+14b3: 0c                         ; RET
+;
+14b4: 18 31 f0 00 00             ; DICTP !! (f031)
+14b9: 0b 90 14 00 00             ; CALL a (1490)
+14be: 03                         ; STORE
+14bf: 0c                         ; RET
+;
+14c0: 18 23 f0 00 00             ; DICTP c!! (f023)
+14c5: 0b 90 14 00 00             ; CALL a (1490)
+14ca: 10                         ; CSTORE
+14cb: 0c                         ; RET
+;
+14cc: 18 16 f0 00 00             ; DICTP @+ (f016)
+14d1: 0b 9c 14 00 00             ; CALL @@ (149c)
+14d6: 0b 90 14 00 00             ; CALL a (1490)
+14db: 0e 04                      ; CLITERAL 4
+14dd: 11                         ; ADD
+14de: 0b 84 14 00 00             ; CALL >a (1484)
+14e3: 0c                         ; RET
+;
+14e4: 18 09 f0 00 00             ; DICTP !+ (f009)
+14e9: 0b b4 14 00 00             ; CALL !! (14b4)
+14ee: 0b 90 14 00 00             ; CALL a (1490)
+14f3: 0e 04                      ; CLITERAL 4
+14f5: 11                         ; ADD
+14f6: 0b 84 14 00 00             ; CALL >a (1484)
+14fb: 0c                         ; RET
+;
+14fc: 18 fb ef 00 00             ; DICTP c@+ (effb)
+1501: 0b a8 14 00 00             ; CALL c@@ (14a8)
+1506: 0b 90 14 00 00             ; CALL a (1490)
+150b: 2c                         ; INC
+150c: 0b 84 14 00 00             ; CALL >a (1484)
+1511: 0c                         ; RET
+;
+1512: 18 ed ef 00 00             ; DICTP c!+ (efed)
+1517: 0b c0 14 00 00             ; CALL c!! (14c0)
+151c: 0b 90 14 00 00             ; CALL a (1490)
+1521: 2c                         ; INC
+1522: 0b 84 14 00 00             ; CALL >a (1484)
+1527: 0c                         ; RET
+;
+1528: 18 e0 ef 00 00             ; DICTP @- (efe0)
+152d: 0b 9c 14 00 00             ; CALL @@ (149c)
+1532: 0b 90 14 00 00             ; CALL a (1490)
+1537: 0e 04                      ; CLITERAL 4
+1539: 12                         ; SUB
+153a: 0b 84 14 00 00             ; CALL >a (1484)
+153f: 0c                         ; RET
+;
+1540: 18 d3 ef 00 00             ; DICTP !- (efd3)
+1545: 0b b4 14 00 00             ; CALL !! (14b4)
+154a: 0b 90 14 00 00             ; CALL a (1490)
+154f: 0e 04                      ; CLITERAL 4
+1551: 12                         ; SUB
+1552: 0b 84 14 00 00             ; CALL >a (1484)
+1557: 0c                         ; RET
+;
+1558: 18 c5 ef 00 00             ; DICTP c@- (efc5)
+155d: 0b a8 14 00 00             ; CALL c@@ (14a8)
+1562: 0b 90 14 00 00             ; CALL a (1490)
+1567: 2e                         ; DEC
+1568: 0b 84 14 00 00             ; CALL >a (1484)
+156d: 0c                         ; RET
+;
+156e: 18 b7 ef 00 00             ; DICTP c!- (efb7)
+1573: 0b c0 14 00 00             ; CALL c!! (14c0)
+1578: 0b 90 14 00 00             ; CALL a (1490)
+157d: 2e                         ; DEC
+157e: 0b 84 14 00 00             ; CALL >a (1484)
+1583: 0c                         ; RET
+;
+1584: 18 a8 ef 00 00             ; DICTP temp (efa8)
+1589: 01 8f 15 00 00             ; LITERAL 5519 (158f)
+158e: 0c                         ; RET
+158f: 00                         ; RESET
+1590: 00                         ; RESET
+1591: 00                         ; RESET
+1592: 00                         ; RESET
+1593: 18 9c ef 00 00             ; DICTP t (ef9c)
+1598: 0b 84 15 00 00             ; CALL temp (1584)
+159d: 02                         ; FETCH
+159e: 0c                         ; RET
+;
+159f: 18 8f ef 00 00             ; DICTP >t (ef8f)
+15a4: 0b 84 15 00 00             ; CALL temp (1584)
+15a9: 03                         ; STORE
+15aa: 0c                         ; RET
+;
+15ab: 18 81 ef 00 00             ; DICTP t>a (ef81)
+15b0: 0b 93 15 00 00             ; CALL t (1593)
+15b5: 0b 84 14 00 00             ; CALL >a (1484)
+15ba: 0c                         ; RET
+;
+15bb: 18 73 ef 00 00             ; DICTP a>t (ef73)
+15c0: 0b 90 14 00 00             ; CALL a (1490)
+15c5: 0b 9f 15 00 00             ; CALL >t (159f)
+15ca: 0c                         ; RET
+;
+15cb: 18 66 ef 00 00             ; DICTP sz (ef66)
+15d0: 0e 08                      ; CLITERAL 8
+15d2: 0c                         ; RET
+;
+15d3: 18 5a ef 00 00             ; DICTP m (ef5a)
+15d8: 0e 1f                      ; CLITERAL 31
+15da: 0c                         ; RET
+;
+15db: 18 4c ef 00 00             ; DICTP stk (ef4c)
+15e0: 01 e6 15 00 00             ; LITERAL 5606 (15e6)
+15e5: 0c                         ; RET
+15e6: 00                         ; RESET
+15e7: 00                         ; RESET
+15e8: 00                         ; RESET
+15e9: 00                         ; RESET
+15ea: 00                         ; RESET
+15eb: 00                         ; RESET
+15ec: 00                         ; RESET
+15ed: 00                         ; RESET
+15ee: 00                         ; RESET
+15ef: 00                         ; RESET
+15f0: 00                         ; RESET
+15f1: 00                         ; RESET
+15f2: 00                         ; RESET
+15f3: 00                         ; RESET
+15f4: 00                         ; RESET
+15f5: 00                         ; RESET
+15f6: 00                         ; RESET
+15f7: 00                         ; RESET
+15f8: 00                         ; RESET
+15f9: 00                         ; RESET
+15fa: 00                         ; RESET
+15fb: 00                         ; RESET
+15fc: 00                         ; RESET
+15fd: 00                         ; RESET
+15fe: 00                         ; RESET
+15ff: 00                         ; RESET
+1600: 00                         ; RESET
+1601: 00                         ; RESET
+1602: 00                         ; RESET
+1603: 00                         ; RESET
+1604: 00                         ; RESET
+1605: 00                         ; RESET
+1606: 00                         ; RESET
+1607: 00                         ; RESET
+1608: 00                         ; RESET
+1609: 00                         ; RESET
+160a: 18 3f ef 00 00             ; DICTP sr (ef3f)
+160f: 01 15 16 00 00             ; LITERAL 5653 (1615)
+1614: 0c                         ; RET
+1615: 00                         ; RESET
+1616: 00                         ; RESET
+1617: 00                         ; RESET
+1618: 00                         ; RESET
+1619: 18 32 ef 00 00             ; DICTP s+ (ef32)
+161e: 0b 0a 16 00 00             ; CALL sr (160a)
+1623: 02                         ; FETCH
+1624: 0e 04                      ; CLITERAL 4
+1626: 11                         ; ADD
+1627: 0e 1f                      ; CLITERAL 31
+1629: 24                         ; AND
+162a: 0b 0a 16 00 00             ; CALL sr (160a)
+162f: 03                         ; STORE
+1630: 0c                         ; RET
+;
+1631: 18 25 ef 00 00             ; DICTP s- (ef25)
+1636: 0b 0a 16 00 00             ; CALL sr (160a)
+163b: 02                         ; FETCH
+163c: 0e 04                      ; CLITERAL 4
+163e: 12                         ; SUB
+163f: 0e 1f                      ; CLITERAL 31
+1641: 24                         ; AND
+1642: 0b 0a 16 00 00             ; CALL sr (160a)
+1647: 03                         ; STORE
+1648: 0c                         ; RET
+;
+1649: 18 18 ef 00 00             ; DICTP sp (ef18)
+164e: 0b db 15 00 00             ; CALL stk (15db)
+1653: 0b 0a 16 00 00             ; CALL sr (160a)
+1658: 02                         ; FETCH
+1659: 11                         ; ADD
+165a: 0c                         ; RET
+;
+165b: 18 0b ef 00 00             ; DICTP >s (ef0b)
+1660: 0b 19 16 00 00             ; CALL s+ (1619)
+1665: 0b 49 16 00 00             ; CALL sp (1649)
+166a: 03                         ; STORE
+166b: 0c                         ; RET
+;
+166c: 18 fe ee 00 00             ; DICTP s> (eefe)
+1671: 0b 49 16 00 00             ; CALL sp (1649)
+1676: 02                         ; FETCH
+1677: 0b 31 16 00 00             ; CALL s- (1631)
+167c: 0c                         ; RET
+;
 ; End of code, Dictionary:
+;
+eefe: 0b ef 00 00                ; s> - (next: ef0b >s)
+ef02: 6c 16 00 00 00             ; XT=166c, flags=00
+ef07: 02 73 3e 00                ; 2, s>
+;
+ef0b: 18 ef 00 00                ; >s - (next: ef18 sp)
+ef0f: 5b 16 00 00 00             ; XT=165b, flags=00
+ef14: 02 3e 73 00                ; 2, >s
+;
+ef18: 25 ef 00 00                ; sp - (next: ef25 s-)
+ef1c: 49 16 00 00 00             ; XT=1649, flags=00
+ef21: 02 73 70 00                ; 2, sp
+;
+ef25: 32 ef 00 00                ; s- - (next: ef32 s+)
+ef29: 31 16 00 00 00             ; XT=1631, flags=00
+ef2e: 02 73 2d 00                ; 2, s-
+;
+ef32: 3f ef 00 00                ; s+ - (next: ef3f sr)
+ef36: 19 16 00 00 00             ; XT=1619, flags=00
+ef3b: 02 73 2b 00                ; 2, s+
+;
+ef3f: 4c ef 00 00                ; sr - (next: ef4c stk)
+ef43: 0a 16 00 00 00             ; XT=160a, flags=00
+ef48: 02 73 72 00                ; 2, sr
+;
+ef4c: 5a ef 00 00                ; stk - (next: ef5a m)
+ef50: db 15 00 00 00             ; XT=15db, flags=00
+ef55: 03 73 74 6b 00             ; 3, stk
+;
+ef5a: 66 ef 00 00                ; m - (next: ef66 sz)
+ef5e: d3 15 00 00 02             ; XT=15d3, flags=02
+ef63: 01 6d 00                   ; 1, m
+;
+ef66: 73 ef 00 00                ; sz - (next: ef73 a>t)
+ef6a: cb 15 00 00 02             ; XT=15cb, flags=02
+ef6f: 02 73 7a 00                ; 2, sz
+;
+ef73: 81 ef 00 00                ; a>t - (next: ef81 t>a)
+ef77: bb 15 00 00 00             ; XT=15bb, flags=00
+ef7c: 03 61 3e 74 00             ; 3, a>t
+;
+ef81: 8f ef 00 00                ; t>a - (next: ef8f >t)
+ef85: ab 15 00 00 00             ; XT=15ab, flags=00
+ef8a: 03 74 3e 61 00             ; 3, t>a
+;
+ef8f: 9c ef 00 00                ; >t - (next: ef9c t)
+ef93: 9f 15 00 00 00             ; XT=159f, flags=00
+ef98: 02 3e 74 00                ; 2, >t
+;
+ef9c: a8 ef 00 00                ; t - (next: efa8 temp)
+efa0: 93 15 00 00 00             ; XT=1593, flags=00
+efa5: 01 74 00                   ; 1, t
+;
+efa8: b7 ef 00 00                ; temp - (next: efb7 c!-)
+efac: 84 15 00 00 00             ; XT=1584, flags=00
+efb1: 04 74 65 6d 70 00          ; 4, temp
+;
+efb7: c5 ef 00 00                ; c!- - (next: efc5 c@-)
+efbb: 6e 15 00 00 00             ; XT=156e, flags=00
+efc0: 03 63 21 2d 00             ; 3, c!-
+;
+efc5: d3 ef 00 00                ; c@- - (next: efd3 !-)
+efc9: 58 15 00 00 00             ; XT=1558, flags=00
+efce: 03 63 40 2d 00             ; 3, c@-
+;
+efd3: e0 ef 00 00                ; !- - (next: efe0 @-)
+efd7: 40 15 00 00 00             ; XT=1540, flags=00
+efdc: 02 21 2d 00                ; 2, !-
+;
+efe0: ed ef 00 00                ; @- - (next: efed c!+)
+efe4: 28 15 00 00 00             ; XT=1528, flags=00
+efe9: 02 40 2d 00                ; 2, @-
+;
+efed: fb ef 00 00                ; c!+ - (next: effb c@+)
+eff1: 12 15 00 00 00             ; XT=1512, flags=00
+eff6: 03 63 21 2b 00             ; 3, c!+
+;
+effb: 09 f0 00 00                ; c@+ - (next: f009 !+)
+efff: fc 14 00 00 00             ; XT=14fc, flags=00
+f004: 03 63 40 2b 00             ; 3, c@+
+;
+f009: 16 f0 00 00                ; !+ - (next: f016 @+)
+f00d: e4 14 00 00 00             ; XT=14e4, flags=00
+f012: 02 21 2b 00                ; 2, !+
+;
+f016: 23 f0 00 00                ; @+ - (next: f023 c!!)
+f01a: cc 14 00 00 00             ; XT=14cc, flags=00
+f01f: 02 40 2b 00                ; 2, @+
+;
+f023: 31 f0 00 00                ; c!! - (next: f031 !!)
+f027: c0 14 00 00 00             ; XT=14c0, flags=00
+f02c: 03 63 21 21 00             ; 3, c!!
+;
+f031: 3e f0 00 00                ; !! - (next: f03e c@@)
+f035: b4 14 00 00 00             ; XT=14b4, flags=00
+f03a: 02 21 21 00                ; 2, !!
+;
+f03e: 4c f0 00 00                ; c@@ - (next: f04c @@)
+f042: a8 14 00 00 00             ; XT=14a8, flags=00
+f047: 03 63 40 40 00             ; 3, c@@
+;
+f04c: 59 f0 00 00                ; @@ - (next: f059 a)
+f050: 9c 14 00 00 00             ; XT=149c, flags=00
+f055: 02 40 40 00                ; 2, @@
+;
+f059: 65 f0 00 00                ; a - (next: f065 >a)
+f05d: 90 14 00 00 00             ; XT=1490, flags=00
+f062: 01 61 00                   ; 1, a
+;
+f065: 72 f0 00 00                ; >a - (next: f072 addr)
+f069: 84 14 00 00 00             ; XT=1484, flags=00
+f06e: 02 3e 61 00                ; 2, >a
+;
+f072: 81 f0 00 00                ; addr - (next: f081 ss)
+f076: 75 14 00 00 00             ; XT=1475, flags=00
+f07b: 04 61 64 64 72 00          ; 4, addr
 ;
 f081: 8e f0 00 00                ; ss - (next: f08e lx)
 f085: 68 14 00 00 00             ; XT=1468, flags=00

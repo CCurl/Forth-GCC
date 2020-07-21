@@ -25,6 +25,7 @@
 #define CALL       11	// 0B
 #define RET        12	// 0C
 #define OR         13	// 0D
+#define XOR        13	// 0D
 #define CLITERAL   14	// 0E
 #define CFETCH     15	// 0F
 #define CSTORE     16	// 10
