@@ -645,7 +645,7 @@ DECIMAL
 
 : resetState 
 	?COMPILING IF ForgetLast THEN 
-	DECIMAL STATE OFF
+	STATE OFF
 	close-input ;
 
 : ALLOT HERE + (HERE) ! ;
@@ -783,6 +783,9 @@ DECIMAL
 
 \ --------------------------------------------------------------------------------
 sys-info
+
+: lx 10 .lastx ;
+: ss 55 LOAD ;
 
 \ This is so that forth-dis behaves as it should
 HEX
