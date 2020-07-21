@@ -63,6 +63,7 @@
 #define SHIFTRIGHT 49   // 31
 #define PLUSSTORE  50   // 32
 #define OPENBLOCK  51   // 33
+#define XOR        52   // 34
 // unused 51-89
 #define BRANCHF    90   // 5A
 #define BRANCHFZ   91   // 5B

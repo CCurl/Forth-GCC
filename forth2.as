@@ -718,6 +718,13 @@ f_AND:
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
+; XOR
+f_XOR:
+            m_pop eax
+            xor ebx, eax
+            m_NEXT
+
+; -------------------------------------------------------------------------------------
 ; NOT ( n1 -- n2 )
 f_NOT:
             test ebx, ebx
@@ -813,6 +820,62 @@ f_SHIFTLEFT:
 f_SHIFTRIGHT:
                 m_pop ecx
                 shr ebx, cl
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
+; set the value of the address register
+; : a! reg-addr ! ;
+f_A_SET:
+                mov [addressRegister], ebx
+                m_drop
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
+; get the value of the address register
+; : a reg-addr @ ;
+F_A:
+                m_push [addressRegister]
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
+; fetch the value at (a) and increment a by 4
+; : @+ a @ a 4 + a! ;
+f_A_AT_PLUS:
+                mov eax, [addressRegister]
+                m_push [eax+edx]
+                add [addressRegister], 4
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
+; cfetch the value at (a) and increment a by 1
+; : @+ a @ a 1 + a! ;
+f_A_AT_CPLUS:
+                mov eax, [addressRegister]
+                movzx ecx, BYTE [eax+edx]
+                m_push ecx 
+                inc [addressRegister]
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
+; -------------------------------------------------------------------------------------
+; -------------------------------------------------------------------------------------
+f_A_STORE_PLUS:
+; set the value at [a] and increment a by 4
+; : @+ a ! a 4 + a! ;
+                mov eax, [addressRegister]
+                mov [eax+edx], ebx
+                add eax [addressRegister], 4
+                m_drop
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
+f_A_CSTORE_PLUS:
+; set the value at [a] and increment a by 1
+; : @+ a ! a 4 + a! ;
+                mov eax, [addressRegister]
+                mov [eax+edx], bl
+                inc [addressRegister]
+                m_drop
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -993,6 +1056,7 @@ fileSize dd ?
 theMemory dd ?
 rDepth dd 0
 rStackPtr dd 0
+addressRegister dd 0
 
 tmpBuf1 db  16 dup (0)          ; Buffer for data stack
 dStack  dd 256 dup (0)
@@ -1059,15 +1123,16 @@ dd f_GETTICK            ; Hex: 2F (47)
 dd f_SHIFTLEFT          ; Hex: 30 (48)
 dd f_SHIFTRIGHT         ; Hex: 31 (49)
 dd f_PLUSSTORE          ; Hex: 32 (50)
-dd f_OPENBLOCK          ; Hex: 33 (51)  ;***************************************************
-dd f_UnknownOpcode      ; Hex: 34 (52)
-dd f_UnknownOpcode      ; Hex: 35 (53)
-dd f_UnknownOpcode      ; Hex: 36 (54)
-dd f_UnknownOpcode      ; Hex: 37 (55)
-dd f_UnknownOpcode      ; Hex: 38 (56)
-dd f_UnknownOpcode      ; Hex: 39 (57)
-dd f_UnknownOpcode      ; Hex: 3A (58)
-dd f_UnknownOpcode      ; Hex: 3B (59)
+dd f_OPENBLOCK          ; Hex: 33 (51)
+dd f_XOR                ; Hex: 34 (52)
+dd f_A_SET              ; Hex: 35 (53)
+dd F_A                  ; Hex: 36 (53)
+dd f_A_AT_PLUS          ; Hex: 37 (54)
+dd f_A_AT_CPLUS         ; Hex: 38 (55)
+dd f_A_STORE_PLUS       ; Hex: 39 (56)
+dd f_A_CSTORE_PLUS      ; Hex: 3A (58)
+
+dd f_UnknownOpcode      ; Hex: 3B (59)  ;***************************************************
 dd f_UnknownOpcode      ; Hex: 3C (60)
 dd f_UnknownOpcode      ; Hex: 3D (61)
 dd f_UnknownOpcode      ; Hex: 3E (62)
@@ -1098,12 +1163,14 @@ dd f_UnknownOpcode      ; Hex: 56 (86)
 dd f_UnknownOpcode      ; Hex: 57 (87)
 dd f_UnknownOpcode      ; Hex: 58 (88)
 dd f_UnknownOpcode      ; Hex: 59 (89)
+
 dd f_BRANCHF            ; Hex: 5A (90)
 dd f_BRANCHFZ           ; Hex: 5B (91)
 dd f_BRANCHFNZ          ; Hex: 5C (92)
 dd f_BRANCHB            ; Hex: 5D (93)
 dd f_BRANCHBZ           ; Hex: 5E (94)
 dd f_BRANCHBNZ          ; Hex: 5F (95)
+
 dd f_UnknownOpcode      ; Hex: 60 (96)
 dd f_UnknownOpcode      ; Hex: 61 (97)
 dd f_UnknownOpcode      ; Hex: 62 (98)

@@ -70,6 +70,7 @@ extern void prim_DTOR();
 extern void prim_RTOD();
 extern void prim_LOGLEVEL();
 extern void prim_AND();
+extern void prim_XOR();
 extern void prim_PICK();
 extern void prim_DEPTH();
 extern void prim_GETCH();

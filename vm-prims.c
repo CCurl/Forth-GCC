@@ -540,8 +540,14 @@ void prim_LOGLEVEL()
 // AND - Doeswhat
 void prim_AND()
 {
+}
+
+// XOR - Doeswhat
+void prim_XOR()
+{
 		arg1 = pop();
-		TOS = (TOS & arg1);
+		TOS = (TOS ^ arg1);
+		TRACE("XOR");
 }
 
 // PICK - Doeswhat
@@ -549,7 +555,6 @@ void prim_PICK()
 {
 	arg1 = TOS;
 	TOS = *(DSP - (arg1));
-	trace("PICK\n");
 }
 
 // DEPTH - Doeswhat
@@ -843,6 +848,7 @@ void init_vm_vectors()
 	vm_prims[49] = prim_SHIFTRIGHT;
 	vm_prims[50] = prim_PLUSSTORE;
 	vm_prims[51] = prim_OPENBLOCK;
+	vm_prims[52] = prim_XOR;
 
 	vm_prims[90] = prim_BRANCHF;
 	vm_prims[91] = prim_BRANCHFZ;

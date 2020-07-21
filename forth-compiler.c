@@ -78,6 +78,7 @@ OPCODE_T theOpcodes[] = {
         , { ".SHIFTRIGHT.",       SHIFTRIGHT,       "SHIFTRIGHT",       prim_SHIFTRIGHT,     IS_INLINE }
         , { ".PLUSSTORE.",        PLUSSTORE,        "PLUSSTORE",        prim_PLUSSTORE,      IS_INLINE }
         , { ".OPENBLOCK.",        OPENBLOCK,        "OPENBLOCK",        prim_OPENBLOCK,      IS_INLINE }
+        , { ".XOR.",              XOR,              "XOR",              prim_XOR,            IS_INLINE }
         , { ".BRANCHF.",          BRANCHF,          "BRANCHF",          prim_BRANCHF,        0 }
         , { ".BRANCHFZ.",         BRANCHFZ,         "BRANCHFZ",         prim_BRANCHFZ,       0 }
         , { ".BRANCHFNZ.",        BRANCHFNZ,        "BRANCHFNZ",        prim_BRANCHFNZ,      0 }

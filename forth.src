@@ -87,6 +87,13 @@
 : >>		[  49 C, ] ; .INLINE.	\ SHIFTRIGHT ( n1 n2 -- n3 )
 : +!        [  50 C, ] ; .INLINE.   \ ( n addr -- )
 : OPEN-BLOCK [  51 C, ] ; .INLINE.   \ ( n -- fp bool )
+: XOR       [  52 C, ] ; .INLINE.
+: a!        [  53 C, ] ; .INLINE.
+: a         [  54 C, ] ; .INLINE.
+: @+        [  55 C, ] ; .INLINE.
+: c@+       [  56 C, ] ; .INLINE.
+: !+        [  57 C, ] ; .INLINE.
+: c!+       [  58 C, ] ; .INLINE.
 : BRANCHF      90 C,   ;
 : BRANCHFZ     91 C,   ;
 : BRANCHFNZ    92 C,   ; 
@@ -105,10 +112,10 @@
 : FLAG_IMMEDIATE 1 ; INLINE
 : FLAG_INLINE    2 ; INLINE
 
-: HEX     16 BASE ! ;
-: DECIMAL 10 BASE ! ;
-: OCTAL    8 BASE ! ;
-: BINARY   2 BASE ! ;
+: HEX     $10 BASE ! ;
+: DECIMAL #10 BASE ! ;
+: OCTAL   #08 BASE ! ;
+: BINARY  %10 BASE ! ;
 
 : ON  1 SWAP ! ;
 : OFF 0 SWAP ! ;
@@ -645,7 +652,7 @@ DECIMAL
 
 : resetState 
 	?COMPILING IF ForgetLast THEN 
-	DECIMAL STATE OFF
+	0 STATE !
 	close-input ;
 
 : ALLOT HERE + (HERE) ! ;
@@ -805,5 +812,3 @@ DECIMAL
 \ CELL ADDR_BASE     = 0x18;
 \ CELL ADDR_STATE    = 0x20;
 \ CELL ADDR_MEM_SZ   = 0x24;
-
-: oo OPEN-BLOCK ;

@@ -215,3 +215,5 @@ decimal 64 ps stk-init
 : include get-next-word zcount >C-STR load-file ;
 
 : help cr 9999 load ;
+: lx $10 .lastx ;
+: ll 3 load ;
