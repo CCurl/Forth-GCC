@@ -1,7 +1,8 @@
- #include <stdio.h>
-// #include <string.h>
+#include <stdio.h>
+#include <string.h>
+#include <winbase.h>
 // #include <stdarg.h>
-// #include <stdlib.h>
+#include <stdlib.h>
 // #include <ctype.h>
 // #include "forth-vm.h"
 // #include "Shared.h"
@@ -12,147 +13,206 @@ char input_fn[256];
 char output_fn[256];
 FILE *input_fp = NULL;
 FILE *output_fp = NULL;
-int mem_size_KB = 1024;
 
 typedef unsigned long CELL;
 typedef unsigned char BYTE;
 
 CELL HERE, LAST, STATE;
 CELL BASE = 10;
+#define CELL_SZ 4
 
 // inpsired by these:
 // http://www.ultratechnology.com/mfp21.htm#source
 // http://www.ultratechnology.com/aha.htm
 
 // ------------------------------------------------------------
-BYTE *PC;
-CELL *a;
-
-// This has a circular stack - no over/under-flow
-// NB : t is the top of the stack
-CELL t, s, s1, s2, s3, s4, s5;
+CELL PC;
+CELL addr;
 CELL tmp;
+CELL MEM_SZ;
 
-// circular return stack too
-CELL *r0, *r1, *r2, *r3;
+// This has very small circular stacks - no over/under-flow!
+// - the top of data stack is always dstk[0]
+// - the top of return stack is always rstk[0]
+
+#define SS 6
+#define SSEND SS-1
+CELL dstk[SS];
+CELL rstk[SS];
+
+BYTE *the_memory = NULL;
+
+void (*prims[32])();
 
 extern int _QUIT_HIT;
 
 // ------------------------------------------------------------
-void dup()
+void dumpStack()
 {
-	s5 = s4;
-	s4 = s3;
-	s3 = s2;
-	s2 = s1;
-	s1 = s;
-	s  = t;
-}
-
-void drop()
-{
-	s4 = s5;
-	s3 = s4;
-	s2 = s3;
-	s1 = s2;
-	s  = s1;
-	t  = s;
-}
-
-void drop2()
-{
-	s3 = s5;
-	s2 = s4;
-	s1 = s3;
-	s  = s2;
-	t  = s1;
+	printf("( ");
+	for (int i = 0; i < SS; i++)
+		printf("%d ", dstk[i]);
+	printf(")");
 }
 
 // ------------------------------------------------------------
-void rdup()
+void push(CELL x)
 {
-	r3 = r2;
-	r2 = r1;
-	r1 = r2;
-	r0 = r1;
-}
+	// printf(" push(%d),", x);
+	// int i = SSEND;
 
-void rdrop()
-{
-	r2 = r3;
-	r1 = r2;
-	r0 = r1;
+	int i = SSEND;
+
+	while (i > 0)
+	{
+		// printf(".%d.%d.", i, dstk[i]);
+		dstk[i] = dstk[i-1];
+		--i;
+	}
+
+	dstk[0] = x;
+
+	// dumpStack();
 }
 
 // ------------------------------------------------------------
-void a_()
+CELL pop()
 {
-	push(*a);
+	// printf(" %d=pop(),", dstk[0]);
+	tmp = dstk[0];
+	int i = 0;
+
+	while (i < SSEND)
+	{
+		// printf(".%d.%d.", i, dstk[i]);
+		dstk[i] = dstk[i+1];
+		++i;
+	}
+
+	dstk[SSEND] = tmp;
+	// dumpStack();
+	return tmp;
+}
+
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+
+
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// NB: top of return stack is always rstk[0]
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+void rpush(CELL x)
+{
+	for (int i = SS-1; i > 0; i--)
+		rstk[i] = rstk[i-1];
+
+	rstk[0] = x;
+}
+
+// ------------------------------------------------------------
+CELL rpop()
+{
+	tmp = rstk[0];
+
+	for (int i = 0; i < SS-1; i++)
+		rstk[i] = rstk[i+1];
+
+	rstk[SS-1] = tmp;
+	return tmp;
+}
+
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+void a()
+{
+	push(addr);
 }
 
 // ------------------------------------------------------------
 void fetch()
 {
-	a = (CELL *)t;
-	t = *a;
+	printf("\nfetch from %08lx, ", dstk[0]);
+	addr = dstk[0];
+	dstk[0] = *(CELL *)addr;
+	printf("val is %08lx", dstk[0]);
+}
+
+// ------------------------------------------------------------
+void dup()
+{
+	tmp = dstk[0];
+	push(tmp);
+}
+
+// ------------------------------------------------------------
+void drop()
+{
+	tmp = pop(0);
 }
 
 // ------------------------------------------------------------
 void store()
 {
-	a = (CELL *)t;
-	*a = s;
-	drop2();
+	addr = pop();
+	*(CELL *)addr = pop();
 }
 
 // ------------------------------------------------------------
 void seta()
 {
-	a = (CELL *)t;
-	drop();
+	addr = pop();
 }
 
 // ------------------------------------------------------------
-void jump(CELL addr)
+void jump()
 {
-	PC = (CELL *)addr;
+	PC = *(CELL *)PC;
 }
 
 // ------------------------------------------------------------
-void call(CELL addr)
+void call()
 {
-	rdup();
-    r0 = PC;
-	PC = (CELL *)addr;
+    rpush(PC);
+	PC = *(CELL *)PC;
 }
 
 // ------------------------------------------------------------
 void ret()
 {
-	PC = r0;
-    rdrop();
+	PC = rpop();
 }
 
 // ------------------------------------------------------------
 void add()
 {
-	tmp = t;
-	drop();
-	t += tmp;
+	tmp = pop();
+	dstk[0] += tmp;
 }
 
 // ------------------------------------------------------------
 void at_plus()
 {
-	dup();
-    t = (CELL)*(a++);
+    push(*(CELL *)(addr++));
 }
 
 // ------------------------------------------------------------
 void store_plus()
 {
-	*(a++) = t;
-	drop();
+	*(CELL *)(addr++) = pop();
 }
 
 // ------------------------------------------------------------
@@ -165,12 +225,16 @@ void plus_star()
 // ------------------------------------------------------------
 void over()
 {
-	dup();
-	t = s1;
+	push(dstk[1]);
 }
 
 // ------------------------------------------------------------
 void until()
+{
+	// WHAT TO DO HERE
+}
+
+void until_neg()
 {
 	// WHAT TO DO HERE
 }
@@ -184,7 +248,7 @@ void minus_until()
 // ------------------------------------------------------------
 void invert()
 {
-	t = -t;
+	dstk[0] = -dstk[0];
 }
 
 // ------------------------------------------------------------
@@ -208,45 +272,39 @@ void p_colon()
 // ------------------------------------------------------------
 void dtor()
 {
-	rdup();
-    r0 = t;
-	drop();
+	rpush(pop());
 }
 
 // ------------------------------------------------------------
 void rtod()
 {
-	dup();
-    t = r0;
-	rdrop();
+	push(rpop());
 }
 
 // ------------------------------------------------------------
 void and()
 {
-	tmp = t;
-	drop();
-	t = t & tmp;
+	tmp = pop();
+	dstk[0] &= tmp;
 }
 
 // ------------------------------------------------------------
 void xor()
 {
-	tmp = t;
-	drop();
-	t = t ^ tmp;
+	tmp = pop();
+	dstk[0] ^= tmp;
 }
 
 // ------------------------------------------------------------
 void times2()
 {
-	t = t << 1;
+	dstk[0] = dstk[0] << 1;
 }
 
 // ------------------------------------------------------------
 void divide2()
 {
-	t = t >> 1;
+	dstk[0] = dstk[0] >> 1;
 }
 
 // ------------------------------------------------------------
@@ -262,36 +320,48 @@ void bye()
 
 
 
+typedef struct {
+	char *asm_instr;
+	BYTE opcode;
+	void (*func)();
+} OPCODE_T;
+
+enum {
+	NOP = 0, A, FETCH, STORE, DROP, DUP, SETA,
+	JUMP, RET, ADD, AT_PLUS, STORE_PLUS, PLUS_STAR, 
+	OVER, UNTIL, UNTIL_NEG, INVERT, T_EQ_0, C_EQ_0,
+	p_COLON, DTOR, RTOD, AND, XOR, TIMES2, DIVIDE2, BYE,
+} OPCODES;
 
 OPCODE_T theOpcodes[] = {   
-		  { "a",       ADDR,        prim_ADDR,     }
-        , { "@",       FETCH,       prim_FETCH     }
-        , { "!",       STORE,       prim_STORE     }
-        , { "drop",    DROP,        prim_DROP      }
-        , { "dup",     DUP,         prim_DUP       }
-        , { "a!",      ASTORE,      prim_ASTORE    }
-        , { "jump",    JMP,         prim_JMP       }
-        , { ";",       RET,         prim_RET       }
-        , { "+",       ADD,         prim_ADD       }
-        , { "@+",      ATPLUS,      prim_ATPLUS    }
-        , { "!+",      STOREPLUS,   prim_STOREPLUS }
-        , { "+*",      PLUSSTAR,    prim_PLUSSTAR  }
-        , { "over",    OVER,        prim_OVER      }
-        , { "until",   UNTIL,       prim_UNTIL     }
-        , { "-until",  UNTILNEG,    prim_UNTILNEG  }
-        , { "invert",  INVERT,      prim_INVERT    }
-        , { "T=0",     TEQ0,        prim_TEQ0      }
-        , { "C=0",     CEQ0,        prim_CEQ0      }
-        , { "(:)",     PCOLON,      prim_PCOLON    }
-        , { ">r",      DTOR,        prim_DTOR      }
-        , { "r>",      RTOD,        prim_RTOD      }
-        , { "and",     AND,         prim_AND       }
-        , { "xor",     XOR,         prim_XOR       }
-        , { "2*",      TIMES2,      prim_TIMES2    }
-        , { "2/",      DIVIDE2,     prim_DIVIDE2   }
-        , { "nop",     NOP,         prim_NOP       }
-        , { "bye",     BYE,         prim_BYE       }
-        , { NULL,      0,           0              }
+          { "nop",     NOP,         nop       }
+		, { "a",       A,        a,     }
+        , { "@",       FETCH,       fetch     }
+        , { "!",       STORE,       store     }
+        , { "drop",    DROP,        drop      }
+        , { "dup",     DUP,         dup       }
+        , { "a!",      SETA,      seta    }
+        , { "jump",    JUMP,         jump       }
+        , { ";",       RET,         ret       }
+        , { "+",       ADD,         add       }
+        , { "@+",      AT_PLUS,      at_plus    }
+        , { "!+",      STORE_PLUS,   store_plus }
+        , { "+*",      PLUS_STAR,    plus_star  }
+        , { "over",    OVER,        over      }
+        , { "until",   UNTIL,       until     }
+        , { "-until",  UNTIL_NEG,    until_neg  }
+        , { "invert",  INVERT,      invert    }
+        , { "T=0",     T_EQ_0,        t_eq_0      }
+        , { "C=0",     C_EQ_0,        c_eq_0      }
+        , { "(:)",     p_COLON,      p_colon    }
+        , { ">r",      DTOR,        dtor      }
+        , { "r>",      RTOD,        rtod      }
+        , { "and",     AND,         and       }
+        , { "xor",     XOR,         xor       }
+        , { "2*",      TIMES2,      times2    }
+        , { "2/",      DIVIDE2,     divide2   }
+        , { "bye",     BYE,         bye       }
+        , { NULL,      0,          NULL              }
  };
 
 
@@ -305,166 +375,37 @@ NB build this in somehow to enable usage of VT100 ECSAPE sequences to control th
 	SetConsoleMode(hOut, dwMode);
 */
 
-// ------------------------------------------------------------------------------------------
-void Store(CELL loc, CELL num)
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+
+void set_byte(CELL tgt, BYTE val)
 {
-	//trace("storing %4lx to %04lx", num, loc);
-	*(CELL *)(&the_memory[loc]) = num;
+	*(BYTE *)(tgt) = val;
 }
 
-void CStore(CELL loc, BYTE num)
+void set_cell(CELL tgt, CELL val)
 {
-	//trace("storing %d to %04lx", num, loc);
-	the_memory[loc] = num;
+	*(CELL *)(tgt) = val;
 }
 
-CELL Fetch(CELL loc)
+void CComma(BYTE val)
 {
-	return *(CELL *)(&the_memory[loc]);
+	set_byte(HERE++, val);
 }
 
-CELL CFetch(CELL loc)
+void Comma(CELL val)
 {
-	return (CELL)the_memory[loc];
-}
-
-void Comma(CELL num)
-{
-	if ((0 <= HERE) && (HERE < LAST))
-	{
-		// printf(" , %04lx (%04lx)", num, HERE);
-		Store(HERE, num);
-		HERE += CELL_SZ;
-	}
-	else
-	{
-		printf("Comma(%04lx): out of memory!\n", num);
-		printf("HERE = %04lx, LAST = %04lx\n", HERE, LAST);
-		exit(0);
-	}
-}
-
-void CComma(BYTE num)
-{
-	if (HERE < LAST)
-	{
-		// printf(" C, %02lx (%04lx)", num, HERE);
-		the_memory[HERE] = num;
-		HERE += 1;
-	}
-	else
-	{
-		printf("CComma(%02x): out of memory!\n", (int)num);
-		printf("HERE = %04lx, LAST = %04lx\n", HERE, LAST);
-		exit(0);
-	}
-}
-
-void SyncMem(bool isSet)
-{
-	if (isSet)
-	{
-		Store(ADDR_LAST,  LAST);
-		Store(ADDR_HERE,  HERE);
-		Store(ADDR_BASE,  BASE);
-		Store(ADDR_STATE, STATE);
-		Store(ADDR_MEM_SZ, MEM_SZ);
-	}
-	else
-	{
-		LAST  = Fetch(ADDR_LAST);
-		HERE  = Fetch(ADDR_HERE);
-		BASE  = Fetch(ADDR_BASE);
-		STATE = Fetch(ADDR_STATE);
-	}
-}
-
-CELL ExecuteXT(CELL XT)
-{
-	SyncMem(true);
-	PC = XT;
-	isBYE = false;
-	isEmbedded = true;
-	CELL ret = cpu_loop();
-	SyncMem(false);
-
-	return ret;
-}
-
-DICT_T *FindWord(LPCTSTR word)
-{
-	TRACE(" looking for word [%s]\n", word);
-	DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
-	while (dp->next > 0)
-	{
-		if (string_equals_nocase(word, dp->name))
-		{
-			return dp;
-		}
-		TRACE("[next=%04lx]", dp->next);
-		dp = (DICT_T *)(&the_memory[dp->next]);
-	}
-
-	return 0;
-}
-
-bool MakeNumber(LPCTSTR word, CELL *the_num)
-{
-	TRACE("(MakeNumber-%s)", word);
-	bool is_neg = false;
-	char *w = word;
-	CELL my_num = 0;
-	char *possible_chars = "0123456789abcdef";
-	char valid_chars[24];
-	strncpy(valid_chars, possible_chars, BASE);
-
-	// One leading minus sign is OK
-	if (*w == '-')
-	{
-		is_neg = true;
-		w++;
-	}
-
-	while (*w)
-	{
-		char ch = *(w++);
-		ch = tolower(ch);
-		char *pos = strchr(valid_chars, ch);
-		if (pos == 0)
-		{
-			return false;
-		}
-		CELL digit = (CELL)(pos - valid_chars);
-		my_num = (my_num * BASE) + digit;
-	}
-
-	if (is_neg)
-	{
-		my_num = -my_num;
-	}
-    *the_num = my_num;
-	return true;
-}
-
-void DefineWord(LPCTSTR word, BYTE flags)
-{
-	CELL curLAST = LAST;
-	LAST -= ((CELL_SZ*2) + 3 + string_len(word));
-	TRACE("\nDefining word [%s] at %04lx, HERE=%04lx", word, LAST, HERE);
-
-	DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
-	dp->next = curLAST;
-	dp->XT = HERE;
-	dp->flags = flags;
-	dp->len = string_len(word);
-	strcpy(dp->name, word);
-	SyncMem(true);
-	TRACE(" ... done\n");
+	push(val);
+	push(HERE);
+	store();
+	HERE += CELL_SZ;
 }
 
 // Returns a pointer to the first char after the first word in the line
 // NB: this is NOT a counted string
-char *GetWord(char *line, char *word)
+char *getword(char *line, char *word)
 {
     char *cp = word;
 
@@ -479,537 +420,120 @@ char *GetWord(char *line, char *word)
 	{
 		*(cp++) = *(line++);
 	}
-	*cp = NULL;
+	*cp = 0;
 
     return line;
 }
 
-bool parseBinary(char *word, CELL *val)
+char *parseword(char *line, char *word)
 {
-	CELL ret = 0;
-	char *cp = word+1;
-
-	if (strlen(word) == 1) 
+	if (word[0] == '\\')
 	{
-		return false;
-	}
-
-	while (*cp)
-	{
-		ret = (ret << 1);
-		char c = toupper(*cp);
-		if (('0' <= c) && (c <= '1'))
-		{
-			ret += (c - '0');
-		}
-		else
-		{
-			return false;
-		}
-		++cp;
-	}
-	*val = ret;
-	return true;
-}
-
-bool parseDecimal(char *word, CELL *val)
-{
-	CELL ret = 0;
-	char *cp = word+1;
-
-	if (strlen(word) == 1) 
-	{
-		return false;
-	}
-
-	while (*cp)
-	{
-		ret = (ret * 10);
-		char c = toupper(*cp);
-		if (('0' <= c) && (c <= '9'))
-		{
-			ret += (c - '0');
-		}
-		else
-		{
-			return false;
-		}
-		++cp;
-	}
-	*val = ret;
-	return true;
-}
-
-bool parseHex(char *word, CELL *val)
-{
-	CELL ret = 0;
-	char *cp = word+1;
-
-	if (strlen(word) == 1) 
-	{
-		return false;
-	}
-
-	while (*cp)
-	{
-		ret = (ret << 4);
-		char c = toupper(*cp);
-		if (('0' <= c) && (c <= '9'))
-		{
-			ret += (c - '0');
-		}
-		else if (('A' <= c) && (c <= 'F'))
-		{
-			ret += (c - 'A');
-			ret += 10;
-		}
-		else
-		{
-			return false;
-		}
-		++cp;
-	}
-	*val = ret;
-	return true;
-}
-
-char *ParseWord(char *word, char *line)
-{
-	CELL val;
-
-	TRACE("[pw-%s]", word);
-	// TRACE("Parse(): word=[%s], HERE=%04lx, LAST=%04lx, STATE=%ld\n", word, HERE, LAST, STATE);
-
-	if (string_equals(word, ".QUIT"))
-	{
-		_QUIT_HIT = 1;
+		*line = 0;
 		return line;
 	}
-
-	TRACE("[pw-1]");
-	if ((STATE < 0) || (STATE > 2))
+	if (strcmpi(word, ":") == 0)
 	{
-		printf("STATE (%ld) is messed up!\n", STATE);
-		STATE = 0;
-	}
-
-	TRACE("[pw-2]");
-	if (string_equals(word, ":"))
-	{
-		line = GetWord(line, word);
-		DefineWord(word, 0);
-		CComma(DICTP);
-		Comma(LAST);
-		STATE = 1;
-
+		line = getword(line, word);
+		printf("-define-%s-", word);
 		return line;
 	}
-
-	TRACE("[pw-3]");
-	if (string_equals(word, ".VARIABLE."))
+	if (strcmpi(word, "jump") == 0)
 	{
-		trace("\n");
-		line = GetWord(line, word);
-		DefineWord(word, 0);
-		CComma(DICTP);
-		Comma(LAST);
-		CComma(LITERAL);
-		Comma(HERE + 5);
-		CComma(RET);
-
-		if (strcmp(word, "(HERE)") == 0)
-			ADDR_HERE = HERE;
-
-		if (strcmp(word, "(LAST)") == 0)
-			ADDR_LAST = HERE;
-
-		if (strcmp(word, "BASE") == 0)
-			ADDR_BASE = HERE;
-
-		if (strcmp(word, "STATE") == 0)
-			ADDR_STATE = HERE;
-
-		if (strcmp(word, "(MEM_SZ)") == 0)
-			ADDR_MEM_SZ = HERE;
-
-		Comma(0);
-		SyncMem(true);
+		line = getword(line, word);
+		CComma(JUMP);
+		Comma(0xFFFFFFFF);
+		printf("-jump:%s-", word);
 		return line;
 	}
-
-	TRACE("[pw-4]");
-	// Character literal? e.g. - 'X'
-	if ((strlen(word) == 3) && (word[0] == '\'') && (word[2] == '\''))
+	if (strcmpi(word, "t=0") == 0)
 	{
-		val = word[1];
-		if (STATE == 0)
-		{
-			push(val);
-		}
-		else
-		{
-			CComma(CLITERAL);
-			CComma(val);
-		}
+		CComma(T_EQ_0);
+		Comma(0xFFFFFFFF);
+		printf("-%s-", word);
 		return line;
 	}
-
-	TRACE("[pw-5]");
-	// HEX words look like this: $<hex-number>
-	if ((word[0] == '$') && (parseHex(word, &val)))
+	if (strcmpi(word, "c=0") == 0)
 	{
-		if (STATE == 0)
-		{
-			push(val);
-		}
-		else
-		{
-			if (val < 256)
-			{
-				CComma(CLITERAL);
-				CComma(val);
-			}
-			else
-			{
-				CComma(LITERAL);
-				Comma(val);
-			}
-			
-		}
+		CComma(C_EQ_0);
+		Comma(0xFFFFFFFF);
+		printf("-%s-", word);
 		return line;
 	}
-
-	TRACE("[pw-6]");
-	// DECIMAL words look like this: #<decimal-number>
-	if ((word[0] == '#') && (parseDecimal(word, &val)))
-	{
-		if (STATE == 0)
-		{
-			push(val);
-		}
-		else
-		{
-			if (val < 256)
-			{
-				CComma(CLITERAL);
-				CComma(val);
-			}
-			else
-			{
-				CComma(LITERAL);
-				Comma(val);
-			}
-			
-		}
-		return line;
-	}
-
-	TRACE("[pw-7]");
-	// BINARY words look like this: %<binary-number>
-	if ((word[0] == '%') && (parseBinary(word, &val)))
-	{
-		if (STATE == 0)
-		{
-			push(val);
-		}
-		else
-		{
-			if (val < 256)
-			{
-				CComma(CLITERAL);
-				CComma(val);
-			}
-			else
-			{
-				CComma(LITERAL);
-				Comma(val);
-			}
-			
-		}
-		return line;
-	}
-
-	// if (strcmp(word, ".CSTORE.") == 0)
-	// {
-	// 	CComma(CSTORE);
-	// 	return line;
-	// }
-
-	// if (strcmp(word, ".ADD.") == 0)
-	// {
-	// 	CComma(ADD);
-	// 	return line;
-	// }
-
-	// if (strcmp(word, ".INC.") == 0)
-	// {
-	// 	CComma(INC);
-	// 	return line;
-	// }
-
-	// if (strcmp(word, ".NOP.") == 0)
-	// {
-	// 	CComma(NOP);
-	// 	return line;
-	// }
-
-	if (strcmp(word, ".INLINE.") == 0)
-	{
-		DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
-		dp->flags |= IS_INLINE;
-		return line;
-	}
-
-	if (strcmp(word, ".IMMEDIATE.") == 0)
-	{
-		DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
-		dp->flags |= IS_IMMEDIATE;
-		return line;
-	}
-
-	TRACE("[here]");
-	// "Assembler" words
 	for (int i = 0; ; i++)
 	{
-		TRACE(" %d", i);
-		OPCODE_T *op = &(theOpcodes[i]);
-		if (op->asm_instr == NULL)
+		OPCODE_T op = theOpcodes[i];
+		if (op.asm_instr == NULL)
 		{
 			break;
 		}
-
-		// TRACE("[%s] == [%s]?\n", word, op->asm_instr);
-		if (strcmp(word, op->asm_instr) == 0)
+		// printf(".%s|%s?=%d.", word, op.asm_instr, strcmpi(word, op.asm_instr));
+		if (strcmpi(word, op.asm_instr) == 0)
 		{
-			CComma(op->opcode);
-			return line;
-		}
-
-	}
-
-	TRACE("[here]");
-	// These words are only for : definitions
-	if (STATE == 1)
-	{
-		if (string_equals(word, ";"))
-		{
-			CComma(RET);
-			STATE = 0;
-			return line;
-		}
-
-		if (strcmp(word, ".IF") == 0)
-		{
-			CComma(JMPZ);
-			push(HERE);
-			Comma(0);
-			return line;
-		}
-
-		if (strcmp(word, ".THEN") == 0)
-		{
-			CELL tmp = pop();
-			Store(tmp, HERE);
-			return line;
-		}
-
-		if (string_equals(word, "S\""))
-		{
-			CComma(SLITERAL);
-			int count = 0;
-			bool done = false;
-			line += 1;
-			CELL cur_here = HERE++;
-			BYTE ch;
-			while ((!done) && (!string_isEmpty(line)))
-			{
-				ch = *(line++);
-				if (ch == '\"')
-				{
-					done = true;
-				}
-				else
-				{
-					CComma(ch);
-					count++;
-				}
-			}
-			CComma(0);
-			CStore(cur_here, count);
+			printf(" (%s->%d)", word, op.opcode);
+			CComma(op.opcode);
 			return line;
 		}
 	}
-
-	DICT_T *dp = FindWord(word);
-	if (dp != NULL)
-	{
-		TRACE("FORTH word [%s]. STATE=%ld ... ", dp->name, STATE);
-		if (STATE == 1)
-		{
-			TRACE("compiling into current word\n", dp->name, dp->XT, STATE);
-			if (dp->flags & IS_IMMEDIATE)
-			{
-				// TRACE("executing 0x%04lx ...", dp->XT);
-				ExecuteXT(dp->XT);
-			}
-			else if (dp->flags & IS_INLINE)
-			{
-				// Skip the DICTP instruction
-				CELL addr = dp->XT + 1 + CELL_SZ;
-				TRACE("inlining 0x%04lx ...", dp->XT);
-
-				// Copy bytes until the first RET
-				while (true)
-				{
-					BYTE b = CFetch(addr++);
-					if (b == RET)
-					{
-						break;
-					}
-					CComma(b);
-				}
-			}
-			else
-			{
-				CComma(CALL);
-				Comma(dp->XT);
-			}
-		}
-		else
-		{
-			debug("executing it ...\n");
-			ExecuteXT(dp->XT);
-		}
-		return line;
-	}
-
-	TRACE(" not a word, Number?");
-
-	CELL num = 0;
-	if (MakeNumber(word, &num))
-	{
-		TRACE("IsNumber: %ld (%04lx), STATE=%ld\n", num, num, STATE);
-		if (STATE == 1) // Compiling
-		{
-			if ((0 <= num) && (num <= 0xFF))
-			{
-				CComma(CLITERAL);
-				CComma((BYTE)num);
-			}
-			else
-			{
-				CComma(LITERAL);
-				Comma(num);
-			}
-		}
-		else
-		{
-			push(num);
-			return line;
-		}
-		return line;
-	}
-
-	_QUIT_HIT = 1;
-	printf("ERROR: '%s'??\n", word);
+	printf(" ??%s??", word);
 	return line;
 }
 
-void ParseLine(char *line)
+void parse(char *line)
 {
-	char *source = line;
-	char word[128];
-
-	TRACE(", ParseLine('%s')", line);
-
-	// for debugging
-	// if (0x05c8 < HERE)
-	// {
-	// 	trace_on();
-	// }
-
-	// for debugging
-	// if (0x0680 < HERE)
-	// {
-	// 	debug_off();
-	// }
-
-	while (string_len(line) > 0)
+	char word[64];
+	// printf("%s", line);
+	line = getword(line, word);
+	while (word[0])
 	{
-		line = GetWord(line, word);
-		if (string_equals(word, "\\"))
-		{
-			return;
-		}
-
-		if (string_len(word) == 0)
-		{
-			return;
-		}
-
-		line = ParseWord(word, line);
+		line = parseword(line, word);
+		line = getword(line, word);
 	}
 }
 
-
-void CompilerInit()
+void doTest()
 {
-	init_vm(MEM_SZ);
-	the_memory[0] = RET;
-	isEmbedded = true;
+	CELL stop = 1000*1000*50;
+	CELL start = GetTickCount();
 
-	HERE = 0x0040;
-	// LAST = MEM_SZ - STACKS_SZ - CELL_SZ;
-	LAST = MEM_SZ - CELL_SZ;
-	STATE = 0;
-
-	Store(LAST, 0);
-	Store(ADDR_CELL, CELL_SZ);
-	Store(ADDR_BASE, BASE);
+	printf("Initial: ");
+	dumpStack();
+	printf(", push() ...");
+	for (CELL i = 1; i <= stop; i++)
+	{
+		push(i);
+	}
+	// dumpStack();
+	printf(" pop()");
+	for (CELL i = 0; i < stop; i++)
+	{
+		tmp = pop();
+		// printf("%d ", pop());
+	}
+	CELL end = GetTickCount();
+	CELL tt = end - start;
+	printf("\n");
+	dumpStack();
+	printf(" %d.%d seconds\n", tt/1000, tt%1000);
 }
 
-void Compile(FILE *fp_in)
+void compile()
 {
-	int line_no = 0;
-	char buf[128];
-	char line[128];
-
-    while (fgets(buf, sizeof(buf), fp_in) == buf)
-    {
-		string_rtrim(buf);
-        ++line_no;
-		TRACE("\n(%d) HERE = 0x%04lx", line_no, HERE);
-        strcpy(line, buf);
-        ParseLine(buf);
-		if (_QUIT_HIT == 1)
+	doTest();
+	for (int i = 0; ; i++)
+	{
+		OPCODE_T op = theOpcodes[i];
+		if (op.asm_instr == NULL)
 		{
-			printf("QUIT hit on line %d: %s\n", line_no, line);
 			break;
 		}
-    }
-    fclose(fp_in);
-
-	DICT_T *dp = FindWord("main");
-	if (dp == NULL)
-	{
-		dp = FindWord("MAIN");
-		if (dp == NULL)
-		{
-			dp = (DICT_T *)&the_memory[LAST];
-		}
+		prims[op.opcode] = op.func;
 	}
 
-	CStore(0, JMP);
-	Store(1, dp->XT);
+	HERE = (CELL)the_memory;
+	CComma(JUMP);
+	Comma(0xEEEEEEEE);
 
-	SyncMem(true);
-}
-
-void do_compile()
-{
-    printf("compiling from %s...\n", input_fn);
-	CompilerInit();
-	// return;
 
     input_fp = fopen(input_fn, "rt");
     if (!input_fp)
@@ -1018,8 +542,12 @@ void do_compile()
         exit(1);
     }
 
-	Compile(input_fp);
-	Store(ADDR_BASE, 10);
+	char buf[256];
+	while (fgets(buf, 256, input_fp) == buf)
+	{
+		parse(buf);
+	}
+
     fclose(input_fp);
     input_fp = NULL;
 }
@@ -1027,8 +555,6 @@ void do_compile()
 // *********************************************************************
 void write_output_file()
 {
-    printf("writing output file %s ... ", output_fn);
-
     output_fp = fopen(output_fn, "wb");
     if (!output_fp)
     {
@@ -1039,74 +565,19 @@ void write_output_file()
 	int num = fwrite(the_memory, 1, MEM_SZ, output_fp);
     fclose(output_fp);
     output_fp = NULL;
-    printf("%d bytes written.\n", num);
-}
-
-// *********************************************************************
-void process_arg(char *arg)
-{
-    if (*arg == 'i')
-    {
-        arg = arg+2;
-        strcpy(input_fn, arg);
-    }
-    else if (*arg == 'o')
-    {
-        arg = arg+2;
-        strcpy(output_fn, arg);
-    }
-    else if (*arg == 'm')
-    {
-        arg = arg+2;
-        mem_size_KB = atoi(arg);
-    }
-    else if (*arg == 't')
-    {
-		trace_on();
-		printf("log level set to trace.\n");
-    }
-    else if (*arg == 'd')
-    {
-		debug_on();
-		printf("log level set to debug.\n");
-    }
-    else if (*arg == '?')
-    {
-        printf("usage: forth-compiler [args]\n");
-        printf("  -i:inputFile (full or relative path)\n");
-        printf("      default inputFile is forth.src\n");
-        printf("  -o:outputFile (full or relative path)\n");
-        printf("      default outputFile is forth.bin\n");
-        printf("  -m:<KB> - Memory size in KB\n");
-        printf("      default value is 64\n");
-        printf("  -t (set log level to trace)\n");
-        printf("  -d (set log level to debug)\n");
-        printf("  -? (prints this message)\n");
-		exit(0);
-    }
-    else
-    {
-        printf("unknown arg '-%s'\n", arg);
-    }
+    printf("\n%s, %d bytes written.\n", output_fn, num);
 }
 
 int main (int argc, char **argv)
 {
-    strcpy(input_fn, "forth.src");
-    strcpy(output_fn, "forth.bin");
-	debug_off();
+    strcpy(input_fn, "mfc.src");
+    strcpy(output_fn, "mfc.bin");
 
-    for (int i = 1; i < argc; i++)
-    {
-        char *cp = argv[i];
-        if (*cp == '-')
-        {
-            process_arg(++cp);
-        }
-    }
+	MEM_SZ = 2*1024;
+	the_memory = malloc(MEM_SZ);
+	memset(the_memory, 0, MEM_SZ);
 
-	MEM_SZ = mem_size_KB * 1024;
-    do_compile();
+    compile();
 	write_output_file();
 
     return 0;

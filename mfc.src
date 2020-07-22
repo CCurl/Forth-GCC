@@ -1,0 +1,61 @@
+\ TEST
+
+: name
+
+ nop  
+ a    
+ @    
+ !    
+ drop 
+ dup  
+ a!   
+ jump (xxx)
+ ;    
+ +    
+ @+   
+ !+   
+ +*   
+ over 
+ until 
+ -until
+ invert
+ T=0  
+ C=0  
+ (:)  
+ >r   
+ r>   
+ and  
+ xor  
+ 2*   
+ 2/   
+ bye  
+
+
+ NOP  
+ A    
+ @    
+ !    
+ DROP 
+ DUP  
+ A!   
+ JUMP (XXX)
+ ;    
+ +    
+ @+   
+ !+   
+ +*   
+ OVER 
+ UNTIL 
+ -UNTIL
+ INVERT
+ T=0  
+ C=0  
+ (:)  
+ >R   
+ R>   
+ AND  
+ XOR  
+ 2*   
+ 2/   
+ BYE  
+ 

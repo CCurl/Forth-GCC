@@ -10,7 +10,7 @@ if "--%1%--" == "--ex--" goto make-ex
 if "--%1%--" == "--forth--" goto make-forth
 if "--%1%--" == "--nc--" goto make-nc
 if "--%1%--" == "--nd--" goto make-nd
-if "--%1%--" == "--aa--" goto make-aa
+if "--%1%--" == "--mfc--" goto make-mfc
 if "--%1%--" == "--st--" goto make-st
 if "--%1%--" == "--br--" goto make-br
 if "--%1%--" == "--f2--" goto make-f2
@@ -97,13 +97,13 @@ if "--%2%--" == "----" goto done
 forth -i:ex.bin
 goto done
 
-:make-aa
-set output=Forth-STC-dis
-set c-files=%output%.c Forth-STC-opcodes.c %output%-opcode.c forth-vm.c vm-prims.c logger.c
+:make-mfc
+set output=mfc
+set c-files=%output%.c
 echo gcc -g -o %output% %c-files%
 gcc -g -o %output% %c-files%
 if "--%2%--" == "----" goto done
-Forth-STC-dis -i:forth.bin -o:Forth-STC-Words.inc
+mfc
 goto done
 
 REM Gen and build a subroutine-threaded version in ASSEMBLER
