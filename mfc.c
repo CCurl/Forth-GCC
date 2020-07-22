@@ -20,6 +20,10 @@ typedef unsigned char BYTE;
 CELL HERE, LAST, STATE;
 CELL BASE = 10;
 
+// inpsired by these:
+// http://www.ultratechnology.com/mfp21.htm#source
+// http://www.ultratechnology.com/aha.htm
+
 // ------------------------------------------------------------
 BYTE *PC;
 CELL *a;
