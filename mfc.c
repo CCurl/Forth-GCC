@@ -24,37 +24,267 @@ CELL ADDR_BASE     = 0x18;
 CELL ADDR_STATE    = 0x20;
 CELL ADDR_MEM_SZ   = 0x24;
 
+#define STKSZ 16
+CELL *SP, *EOS;
+CELL stack[STKSZ];
+CELL *EOS = &stack[STKSZ-1];
+CELL *reg_a, reg_t, reg_c;
+
 extern int _QUIT_HIT;
 
-OPCODE_T theOpcodes[] = {
-          { "a",          LITERAL,          "LITERAL",          prim_LITERAL,        0 }
-        , { "@",    FETCH,            "FETCH",            prim_FETCH,          IS_INLINE }
-        , { "!",    STORE,            "STORE",            prim_STORE,          IS_INLINE }
-        , { "drop",             DROP,             "DROP",             prim_DROP,           IS_INLINE }
-        , { "dup",              DUP,              "DUP",              prim_DUP,            IS_INLINE }
-        , { "a!",         SLITERAL,         "SLITERAL",         prim_SLITERAL,       IS_INLINE }
-        , { "jump",              JMP,              "JMP",              prim_JMP,            0 }
-        , { ";",              RET,              "RET",              prim_RET,            0 }
-        , { "+",              ADD,              "ADD",              prim_ADD,            IS_INLINE }
-        , { "@+",            DICTP,            "DICTP",            prim_DICTP,          IS_INLINE }
-        , { "!+",             EMIT,             "EMIT",             prim_EMIT,           IS_INLINE }
-        , { "+*",             EMIT,             "EMIT",             prim_EMIT,           IS_INLINE }
-        , { "over",             OVER,             "OVER",             prim_OVER,           IS_INLINE }
-        , { "until",          COMPARE,          "COMPARE",          prim_COMPARE,        IS_INLINE }
-        , { "-until",          COMPARE,          "COMPARE",          prim_COMPARE,        IS_INLINE }
-        , { "invert",            FOPEN,            "FOPEN",            prim_FOPEN,          IS_INLINE }
-        , { "T=0",        FREADLINE,        "FREADLINE",        prim_FREADLINE,      IS_INLINE }
-        , { "C=0",           FWRITE,           "FWRITE",           prim_FWRITE,         IS_INLINE }
-        , { "(:)",           FCLOSE,           "FCLOSE",           prim_FCLOSE,         IS_INLINE }
-        , { ">r",             DTOR,             "DTOR",             prim_DTOR,           IS_INLINE }
-        , { "r>",             RTOD,             "RTOD",             prim_RTOD,           IS_INLINE }
-        , { "and",              AND,              "AND",              prim_AND,            IS_INLINE }
-        , { "xor",             XOR,             "PICK",             prim_PICK,           IS_INLINE }
-        , { "2*",        SHIFTLEFT,        "SHIFTLEFT",        prim_SHIFTLEFT,      IS_INLINE }
-        , { "2/",       SHIFTRIGHT,       "SHIFTRIGHT",       prim_SHIFTRIGHT,     IS_INLINE }
-        , { "nop",              NOP,              "NOP",              prim_NOP,            IS_INLINE }
-        , { "bye",              BYE,              "BYE",              prim_BYE,            IS_INLINE }
-        , { NULL,                 0,                 "",                0,                   IS_INLINE }
+// This has a circular stack - no over/under-flow
+void push(CELL v)
+{
+	if (++SP > EOS)
+	{
+		SP = stack;
+	}
+	*(SP) = v;
+}
+
+CELL pop()
+{
+	CELL v = *(SP--);
+	if (SP < stack)
+	{
+		SP = EOS;
+	}
+	return v;
+}
+
+// ------------------------------------------------------------
+void prim_ADDR()
+{
+	push(*reg_a);
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_FETCH()
+{
+	reg_a = (CELL *)pop();
+	reg_t = *reg_a;
+	push(reg_t);
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_STORE()
+{
+	reg_a = (CELL *)pop();
+	reg_t = pop();
+	*reg_a = reg_t;
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_DROP()
+{
+	pop();
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_DUP()
+{
+	reg_t = *(CELL *)*SP;
+	push(reg_t);
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_ASTORE()
+{
+	reg_t = pop();
+	*reg_a = reg_t;
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_JMP()
+{
+	// WHAT TO DO HERE
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_RET()
+{
+	// WHAT TO DO HERE
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_ADD()
+{
+	reg_t = pop();
+	*SP = (*SP) + reg_t;
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_ATPLUS()
+{
+	push(*(reg_a++));
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_STOREPLUS()
+{
+	reg_t = pop();
+	*(reg_a++) = reg_t;
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_PLUSSTAR()
+{
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_OVER()
+{
+	CELL t1 = pop();
+	reg_t = *SP;
+	push(t1);
+	push(reg_t);
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_UNTIL()
+{
+	// WHAT TO DO HERE
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_UNTILNEG()
+{
+	// WHAT TO DO HERE
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_INVERT()
+{
+	reg_t = -(*SP);
+	push(reg_t);
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_TEQ0()
+{
+	push((reg_t == 0) ? 1 : 0);
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_CEQ0()
+{
+	push((reg_c == 0) ? 1 : 0);
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_PCOLON()
+{
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_DTOR()
+{
+	push(rpop());
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_RTOD()
+{
+	rpush(pop());
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_AND()
+{
+	reg_t = pop();
+	*SP &= (reg_t);
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_XOR()
+{
+	reg_t = pop();
+	*SP ^= (reg_t);
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_TIMES2()
+{
+	reg_t = *SP << 1;
+	*SP = reg_t;
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_DIVIDE2()
+{
+	reg_t = *SP >> 1;
+	*SP = reg_t;
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_NOP()
+{
+    return;
+}
+
+// ------------------------------------------------------------
+void prim_BYE()
+{
+    return;
+}
+
+
+
+
+OPCODE_T theOpcodes[] = {   
+		  { "a",       ADDR,        prim_ADDR,     }
+        , { "@",       FETCH,       prim_FETCH     }
+        , { "!",       STORE,       prim_STORE     }
+        , { "drop",    DROP,        prim_DROP      }
+        , { "dup",     DUP,         prim_DUP       }
+        , { "a!",      ASTORE,      prim_ASTORE    }
+        , { "jump",    JMP,         prim_JMP       }
+        , { ";",       RET,         prim_RET       }
+        , { "+",       ADD,         prim_ADD       }
+        , { "@+",      ATPLUS,      prim_ATPLUS    }
+        , { "!+",      STOREPLUS,   prim_STOREPLUS }
+        , { "+*",      PLUSSTAR,    prim_PLUSSTAR  }
+        , { "over",    OVER,        prim_OVER      }
+        , { "until",   UNTIL,       prim_UNTIL     }
+        , { "-until",  UNTILNEG,    prim_UNTILNEG  }
+        , { "invert",  INVERT,      prim_INVERT    }
+        , { "T=0",     TEQ0,        prim_TEQ0      }
+        , { "C=0",     CEQ0,        prim_CEQ0      }
+        , { "(:)",     PCOLON,      prim_PCOLON    }
+        , { ">r",      DTOR,        prim_DTOR      }
+        , { "r>",      RTOD,        prim_RTOD      }
+        , { "and",     AND,         prim_AND       }
+        , { "xor",     XOR,         prim_XOR       }
+        , { "2*",      TIMES2,      prim_TIMES2    }
+        , { "2/",      DIVIDE2,     prim_DIVIDE2   }
+        , { "nop",     NOP,         prim_NOP       }
+        , { "bye",     BYE,         prim_BYE       }
+        , { NULL,      0,           0              }
  };
 
 
