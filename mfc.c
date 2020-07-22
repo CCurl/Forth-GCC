@@ -1,256 +1,259 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include "forth-vm.h"
-#include "Shared.h"
-#include "logger.h"
-#include "string.h"
+ #include <stdio.h>
+// #include <string.h>
+// #include <stdarg.h>
+// #include <stdlib.h>
+// #include <ctype.h>
+// #include "forth-vm.h"
+// #include "Shared.h"
+// #include "logger.h"
+// #include "string.h"
 
 char input_fn[256];
 char output_fn[256];
 FILE *input_fp = NULL;
 FILE *output_fp = NULL;
-int mem_size_KB = 64;
+int mem_size_KB = 1024;
+
+typedef unsigned long CELL;
+typedef unsigned char BYTE;
 
 CELL HERE, LAST, STATE;
 CELL BASE = 10;
 
-CELL ADDR_CELL     = 0x08;
-CELL ADDR_HERE     = 0x10;
-CELL ADDR_LAST     = 0x14;
-CELL ADDR_BASE     = 0x18;
-CELL ADDR_STATE    = 0x20;
-CELL ADDR_MEM_SZ   = 0x24;
+// ------------------------------------------------------------
+BYTE *PC;
+CELL *a;
 
-#define STKSZ 16
-CELL *SP, *EOS;
-CELL stack[STKSZ];
-CELL *EOS = &stack[STKSZ-1];
-CELL *reg_a, reg_t, reg_c;
+// This has a circular stack - no over/under-flow
+// NB : t is the top of the stack
+CELL t, s, s1, s2, s3, s4, s5;
+CELL tmp;
+
+// circular return stack too
+CELL *r0, *r1, *r2, *r3;
 
 extern int _QUIT_HIT;
 
-// This has a circular stack - no over/under-flow
-void push(CELL v)
+// ------------------------------------------------------------
+void dup()
 {
-	if (++SP > EOS)
-	{
-		SP = stack;
-	}
-	*(SP) = v;
+	s5 = s4;
+	s4 = s3;
+	s3 = s2;
+	s2 = s1;
+	s1 = s;
+	s  = t;
 }
 
-CELL pop()
+void drop()
 {
-	CELL v = *(SP--);
-	if (SP < stack)
-	{
-		SP = EOS;
-	}
-	return v;
+	s4 = s5;
+	s3 = s4;
+	s2 = s3;
+	s1 = s2;
+	s  = s1;
+	t  = s;
+}
+
+void drop2()
+{
+	s3 = s5;
+	s2 = s4;
+	s1 = s3;
+	s  = s2;
+	t  = s1;
 }
 
 // ------------------------------------------------------------
-void prim_ADDR()
+void rdup()
 {
-	push(*reg_a);
-    return;
+	r3 = r2;
+	r2 = r1;
+	r1 = r2;
+	r0 = r1;
+}
+
+void rdrop()
+{
+	r2 = r3;
+	r1 = r2;
+	r0 = r1;
 }
 
 // ------------------------------------------------------------
-void prim_FETCH()
+void a_()
 {
-	reg_a = (CELL *)pop();
-	reg_t = *reg_a;
-	push(reg_t);
-    return;
+	push(*a);
 }
 
 // ------------------------------------------------------------
-void prim_STORE()
+void fetch()
 {
-	reg_a = (CELL *)pop();
-	reg_t = pop();
-	*reg_a = reg_t;
-    return;
+	a = (CELL *)t;
+	t = *a;
 }
 
 // ------------------------------------------------------------
-void prim_DROP()
+void store()
 {
-	pop();
-    return;
+	a = (CELL *)t;
+	*a = s;
+	drop2();
 }
 
 // ------------------------------------------------------------
-void prim_DUP()
+void seta()
 {
-	reg_t = *(CELL *)*SP;
-	push(reg_t);
-    return;
+	a = (CELL *)t;
+	drop();
 }
 
 // ------------------------------------------------------------
-void prim_ASTORE()
+void jump(CELL addr)
 {
-	reg_t = pop();
-	*reg_a = reg_t;
-    return;
+	PC = (CELL *)addr;
 }
 
 // ------------------------------------------------------------
-void prim_JMP()
+void call(CELL addr)
+{
+	rdup();
+    r0 = PC;
+	PC = (CELL *)addr;
+}
+
+// ------------------------------------------------------------
+void ret()
+{
+	PC = r0;
+    rdrop();
+}
+
+// ------------------------------------------------------------
+void add()
+{
+	tmp = t;
+	drop();
+	t += tmp;
+}
+
+// ------------------------------------------------------------
+void at_plus()
+{
+	dup();
+    t = (CELL)*(a++);
+}
+
+// ------------------------------------------------------------
+void store_plus()
+{
+	*(a++) = t;
+	drop();
+}
+
+// ------------------------------------------------------------
+void plus_star()
 {
 	// WHAT TO DO HERE
     return;
 }
 
 // ------------------------------------------------------------
-void prim_RET()
+void over()
+{
+	dup();
+	t = s1;
+}
+
+// ------------------------------------------------------------
+void until()
 {
 	// WHAT TO DO HERE
-    return;
 }
 
 // ------------------------------------------------------------
-void prim_ADD()
-{
-	reg_t = pop();
-	*SP = (*SP) + reg_t;
-    return;
-}
-
-// ------------------------------------------------------------
-void prim_ATPLUS()
-{
-	push(*(reg_a++));
-    return;
-}
-
-// ------------------------------------------------------------
-void prim_STOREPLUS()
-{
-	reg_t = pop();
-	*(reg_a++) = reg_t;
-    return;
-}
-
-// ------------------------------------------------------------
-void prim_PLUSSTAR()
-{
-    return;
-}
-
-// ------------------------------------------------------------
-void prim_OVER()
-{
-	CELL t1 = pop();
-	reg_t = *SP;
-	push(t1);
-	push(reg_t);
-    return;
-}
-
-// ------------------------------------------------------------
-void prim_UNTIL()
+void minus_until()
 {
 	// WHAT TO DO HERE
-    return;
 }
 
 // ------------------------------------------------------------
-void prim_UNTILNEG()
+void invert()
+{
+	t = -t;
+}
+
+// ------------------------------------------------------------
+void t_eq_0()
 {
 	// WHAT TO DO HERE
-    return;
 }
 
 // ------------------------------------------------------------
-void prim_INVERT()
+void c_eq_0()
 {
-	reg_t = -(*SP);
-	push(reg_t);
-    return;
+	// WHAT TO DO HERE
 }
 
 // ------------------------------------------------------------
-void prim_TEQ0()
+void p_colon()
 {
-	push((reg_t == 0) ? 1 : 0);
-    return;
+	// WHAT TO DO HERE
 }
 
 // ------------------------------------------------------------
-void prim_CEQ0()
+void dtor()
 {
-	push((reg_c == 0) ? 1 : 0);
-    return;
+	rdup();
+    r0 = t;
+	drop();
 }
 
 // ------------------------------------------------------------
-void prim_PCOLON()
+void rtod()
 {
-    return;
+	dup();
+    t = r0;
+	rdrop();
 }
 
 // ------------------------------------------------------------
-void prim_DTOR()
+void and()
 {
-	push(rpop());
-    return;
+	tmp = t;
+	drop();
+	t = t & tmp;
 }
 
 // ------------------------------------------------------------
-void prim_RTOD()
+void xor()
 {
-	rpush(pop());
-    return;
+	tmp = t;
+	drop();
+	t = t ^ tmp;
 }
 
 // ------------------------------------------------------------
-void prim_AND()
+void times2()
 {
-	reg_t = pop();
-	*SP &= (reg_t);
-    return;
+	t = t << 1;
 }
 
 // ------------------------------------------------------------
-void prim_XOR()
+void divide2()
 {
-	reg_t = pop();
-	*SP ^= (reg_t);
-    return;
+	t = t >> 1;
 }
 
 // ------------------------------------------------------------
-void prim_TIMES2()
+void nop()
 {
-	reg_t = *SP << 1;
-	*SP = reg_t;
-    return;
 }
 
 // ------------------------------------------------------------
-void prim_DIVIDE2()
+void bye()
 {
-	reg_t = *SP >> 1;
-	*SP = reg_t;
-    return;
-}
-
-// ------------------------------------------------------------
-void prim_NOP()
-{
-    return;
-}
-
-// ------------------------------------------------------------
-void prim_BYE()
-{
-    return;
+	exit(0);
 }
 
 
