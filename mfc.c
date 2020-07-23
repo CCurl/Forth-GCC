@@ -33,13 +33,22 @@ CELL tmp;
 CELL MEM_SZ;
 
 // This has very small circular stacks - no over/under-flow!
-// - the top of data stack is always dstk[0]
+// - the top of data stack is always TOS
 // - the top of return stack is always rstk[0]
 
-#define SS 6
-#define SSEND SS-1
-CELL dstk[SS];
-CELL rstk[SS];
+#define DSZ 64
+CELL dstk[DSZ];
+CELL *DSS = dstk;
+CELL *DSE = &(dstk[DSZ-1]);
+CELL *DSP = dstk;
+
+#define RSZ 64
+CELL rstk[RSZ];
+CELL *RSS = rstk;
+CELL *RSE = &(rstk[RSZ-1]);
+CELL *RSP = rstk;
+
+#define TOS (*DSP)
 
 typedef struct {
 	CELL xt;
@@ -51,96 +60,56 @@ BYTE *the_memory = NULL;
 ENTRY_T *the_dict = NULL;
 int num_words = 0;
 
-void (*prims[32])();
+void (*prims[64])();
 
 extern int _QUIT_HIT;
 
 // ------------------------------------------------------------
-void dumpStack()
-{
-	printf("( ");
-	for (int i = 0; i < SS; i++)
-		printf("%d ", dstk[i]);
-	printf(")");
-}
-
 // ------------------------------------------------------------
-void push(CELL x)
+// ------------------------------------------------------------
+void push(CELL v)
 {
-	// printf(" push(%d),", x);
-	// int i = SSEND;
-
-	int i = SSEND;
-
-	while (i > 0)
-	{
-		// printf(".%d.%d.", i, dstk[i]);
-		dstk[i] = dstk[i-1];
-		--i;
-	}
-
-	dstk[0] = x;
-
-	// dumpStack();
+	if (++DSP > DSE)
+		DSP = DSS;
+	*DSP = v; 
 }
 
 // ------------------------------------------------------------
 CELL pop()
 {
-	// printf(" %d=pop(),", dstk[0]);
-	tmp = dstk[0];
-	int i = 0;
+	CELL v = *DSP;
+	if (--DSP < DSS)
+		DSP = DSE;
+	return v;
+}
 
-	while (i < SSEND)
-	{
-		// printf(".%d.%d.", i, dstk[i]);
-		dstk[i] = dstk[i+1];
-		++i;
-	}
-
-	dstk[SSEND] = tmp;
-	// dumpStack();
-	return tmp;
+// ------------------------------------------------------------
+void dumpStack(int num)
+{
+	num = (num == 0) ? DSZ : num;
+	printf("( ");
+	for (int i = 0; i < num; i++)
+		printf("%d ", pop());
+	printf(")");
 }
 
 // ------------------------------------------------------------
 // ------------------------------------------------------------
 // ------------------------------------------------------------
-// ------------------------------------------------------------
-// ------------------------------------------------------------
-// ------------------------------------------------------------
-// ------------------------------------------------------------
-// ------------------------------------------------------------
-// ------------------------------------------------------------
-// ------------------------------------------------------------
-// ------------------------------------------------------------
-// ------------------------------------------------------------
-// ------------------------------------------------------------
-
-
-// ------------------------------------------------------------
-// ------------------------------------------------------------
-// NB: top of return stack is always rstk[0]
-// ------------------------------------------------------------
-// ------------------------------------------------------------
-void rpush(CELL x)
+void rpush(CELL v)
 {
-	for (int i = SS-1; i > 0; i--)
-		rstk[i] = rstk[i-1];
-
-	rstk[0] = x;
+	if (++RSP > RSE)
+		RSP = RSS;
+	*RSP = v; 
 }
 
 // ------------------------------------------------------------
 CELL rpop()
 {
-	tmp = rstk[0];
-
-	for (int i = 0; i < SS-1; i++)
-		rstk[i] = rstk[i+1];
-
-	rstk[SS-1] = tmp;
-	return tmp;
+	CELL v = *RSP;
+	if (--RSP < RSS)
+		RSP = RSE;
+	return v;
 }
 
 // ------------------------------------------------------------
@@ -154,16 +123,16 @@ void a()
 // ------------------------------------------------------------
 void fetch()
 {
-	printf("\nfetch from %08lx, ", dstk[0]);
-	addr = dstk[0];
-	dstk[0] = *(CELL *)addr;
-	printf("val is %08lx", dstk[0]);
+	printf("\nfetch from %08lx, ", TOS);
+	addr = TOS;
+	TOS = *(CELL *)addr;
+	printf("val is %08lx", TOS);
 }
 
 // ------------------------------------------------------------
 void dup()
 {
-	tmp = dstk[0];
+	tmp = TOS;
 	push(tmp);
 }
 
@@ -200,6 +169,12 @@ void call()
 }
 
 // ------------------------------------------------------------
+void emit()
+{
+    printf("%c", pop());
+}
+
+// ------------------------------------------------------------
 void ret()
 {
 	PC = rpop();
@@ -209,7 +184,28 @@ void ret()
 void add()
 {
 	tmp = pop();
-	dstk[0] += tmp;
+	TOS += tmp;
+}
+
+// ------------------------------------------------------------
+void sub()
+{
+	tmp = pop();
+	TOS -= tmp;
+}
+
+// ------------------------------------------------------------
+void mult()
+{
+	tmp = pop();
+	TOS *= tmp;
+}
+
+// ------------------------------------------------------------
+void mdiv()
+{
+	tmp = pop();
+	TOS /= tmp;
 }
 
 // ------------------------------------------------------------
@@ -257,13 +253,16 @@ void minus_until()
 // ------------------------------------------------------------
 void invert()
 {
-	dstk[0] = -dstk[0];
+	// WHAT TO DO HERE
 }
 
 // ------------------------------------------------------------
 void t_eq_0()
 {
-	// WHAT TO DO HERE
+	if (TOS == 0)
+		PC = *(CELL *)PC;
+	else
+		PC += CELL_SZ;
 }
 
 // ------------------------------------------------------------
@@ -294,26 +293,26 @@ void rtod()
 void and()
 {
 	tmp = pop();
-	dstk[0] &= tmp;
+	TOS &= tmp;
 }
 
 // ------------------------------------------------------------
 void xor()
 {
 	tmp = pop();
-	dstk[0] ^= tmp;
+	TOS ^= tmp;
 }
 
 // ------------------------------------------------------------
 void times2()
 {
-	dstk[0] = dstk[0] << 1;
+	TOS = TOS << 1;
 }
 
 // ------------------------------------------------------------
 void divide2()
 {
-	dstk[0] = dstk[0] >> 1;
+	TOS = TOS >> 1;
 }
 
 // ------------------------------------------------------------
@@ -335,42 +334,46 @@ typedef struct {
 } OPCODE_T;
 
 enum {
-	NOP = 0, A, FETCH, STORE, DROP, DUP, SETA,
-	JUMP, CALL, RET, ADD, AT_PLUS, STORE_PLUS, PLUS_STAR, 
+	NOP = 0, A, FETCH, STORE, DROP, DUP, SETA, EMIT,
+	JUMP, CALL, RET, ADD, SUB, MULT, DIV, AT_PLUS, STORE_PLUS, PLUS_STAR, 
 	OVER, UNTIL, UNTIL_NEG, INVERT, T_EQ_0, C_EQ_0,
 	p_COLON, DTOR, RTOD, AND, XOR, TIMES2, DIVIDE2, BYE,
 } OPCODES;
 
 OPCODE_T theOpcodes[] = {   
-          { "nop",     NOP,         nop       }
-		, { "a",       A,        a,     }
-        , { "@",       FETCH,       fetch     }
-        , { "!",       STORE,       store     }
-        , { "drop",    DROP,        drop      }
-        , { "dup",     DUP,         dup       }
-        , { "a!",      SETA,      seta    }
-        , { "jump",    JUMP,         jump       }
-		, { "call",    CALL,     call   }
-        , { ";",       RET,         ret       }
-        , { "+",       ADD,         add       }
-        , { "@+",      AT_PLUS,      at_plus    }
-        , { "!+",      STORE_PLUS,   store_plus }
-        , { "+*",      PLUS_STAR,    plus_star  }
-        , { "over",    OVER,        over      }
-        , { "until",   UNTIL,       until     }
-        , { "-until",  UNTIL_NEG,    until_neg  }
-        , { "invert",  INVERT,      invert    }
-        , { "T=0",     T_EQ_0,        t_eq_0      }
-        , { "C=0",     C_EQ_0,        c_eq_0      }
-        , { "(:)",     p_COLON,      p_colon    }
-        , { ">r",      DTOR,        dtor      }
-        , { "r>",      RTOD,        rtod      }
-        , { "and",     AND,         and       }
-        , { "xor",     XOR,         xor       }
-        , { "2*",      TIMES2,      times2    }
-        , { "2/",      DIVIDE2,     divide2   }
-        , { "bye",     BYE,         bye       }
-        , { NULL,      0,          NULL              }
+          { "nop",     NOP,         nop        }
+		, { "a",       A,           a,         }
+        , { "@",       FETCH,       fetch      }
+        , { "!",       STORE,       store      }
+        , { "drop",    DROP,        drop       }
+        , { "dup",     DUP,         dup        }
+        , { "a!",      SETA,        seta       }
+        , { "jump",    JUMP,        jump       }
+		, { "call",    CALL,        call       }
+		, { "emit",    EMIT,        emit       }
+        , { ";",       RET,         ret        }
+        , { "+",       ADD,         add        }
+        , { "-",       SUB,         sub        }
+		, { "*",       MULT,        mult       }
+        , { "/",       DIV,         mdiv       }
+        , { "@+",      AT_PLUS,     at_plus    }
+        , { "!+",      STORE_PLUS,  store_plus }
+        , { "+*",      PLUS_STAR,   plus_star  }
+        , { "over",    OVER,        over       }
+        , { "until",   UNTIL,       until      }
+        , { "-until",  UNTIL_NEG,   until_neg  }
+        , { "invert",  INVERT,      invert     }
+        , { "T=0",     T_EQ_0,      t_eq_0     }
+        , { "C=0",     C_EQ_0,      c_eq_0     }
+        , { "(:)",     p_COLON,     p_colon    }
+        , { ">r",      DTOR,        dtor       }
+        , { "r>",      RTOD,        rtod       }
+        , { "and",     AND,         and        }
+        , { "xor",     XOR,         xor        }
+        , { "2*",      TIMES2,      times2     }
+        , { "2/",      DIVIDE2,     divide2    }
+        , { "bye",     BYE,         bye        }
+        , { NULL,      0,           NULL              }
  };
 
 
@@ -547,47 +550,43 @@ void parse(char *line)
 
 void doTest()
 {
-	CELL stop = 1000*1000*50;
+	CELL stop = 1000*1000*250;
 	CELL start = GetTickCount();
 
-	printf("Initial: ");
-	dumpStack();
-	printf(", push() ...");
+	printf("Tests: push() ...");
 	for (CELL i = 1; i <= stop; i++)
 	{
 		push(i);
 	}
-	// dumpStack();
-	printf(" pop()");
+	printf(" pop() ... ");
 	for (CELL i = 0; i < stop; i++)
 	{
 		tmp = pop();
-		// printf("%d ", pop());
 	}
 	CELL end = GetTickCount();
 	CELL tt = end - start;
-	printf("\n");
-	dumpStack();
 	printf(" %d.%d seconds\n", tt/1000, tt%1000);
+	dumpStack(8); printf("\n");
 
-	Comma(0x22222222);
-	define_word("test0");
-	Comma(0x33333333);
-	define_word("test1");
-	Comma(0x44444444);
-	define_word("test2");
-	Comma(0x55555555);
-	define_word("test1");
+	Comma(0x22222222); define_word("test0");
+	Comma(0x33333333); define_word("test1");
+	Comma(0x44444444); define_word("test2");
+	Comma(0x55555555); define_word("test1");
 	dump_words();
-	ENTRY_T *ep = find_word("test0xx");
-	printf("\nfound? %lx", ep);
+
+	ENTRY_T *ep;
+	ep = find_word("test0"); printf("\n%lx", ep);
+	ep = find_word("test1"); printf(" %lx", ep);
+	ep = find_word("test3"); printf(" %lx", ep);
+	push(' '); emit();
+	push('O'); emit();
+	push('K'); emit();
+	push('\n'); emit();
 }
 
 void compile()
 {
-	printf("111 ");
 	HERE = (CELL)the_memory;
-	printf("222 , %lx", HERE);
 	CComma(JUMP);
 	Comma(0xEEEEEEEE);
 
@@ -601,7 +600,6 @@ void compile()
 		prims[op.opcode] = op.func;
 	}
 
-	printf("333 ");
 	doTest();
 	return;
 
@@ -617,6 +615,7 @@ void compile()
 	{
 		parse(buf);
 	}
+	set_cell((CELL)&the_memory[1], the_dict[num_words].xt);
 
     fclose(input_fp);
     input_fp = NULL;
