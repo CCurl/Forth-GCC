@@ -4,16 +4,11 @@
 // http://www.ultratechnology.com/aha.htm
 // ------------------------------------------------------------
 
+#include <windows.h> 
 #include <stdio.h>
-#include <string.h>
-#include <winbase.h>
-// #include <stdarg.h>
-#include <stdlib.h>
-// #include <ctype.h>
-// #include "forth-vm.h"
-// #include "Shared.h"
-// #include "logger.h"
-// #include "string.h"
+
+HANDLE hStdout, hStdin; 
+CONSOLE_SCREEN_BUFFER_INFO csbi; 
 
 char input_fn[256];
 char output_fn[256];
@@ -319,6 +314,33 @@ void divide2()
 }
 
 // ------------------------------------------------------------
+void cls()
+{
+	CELL dwConSize, sz;
+	COORD pos = { 0, 0};
+
+	GetConsoleScreenBufferInfo(hStdout, &csbi);
+	dwConSize = csbi.dwSize.X * csbi.dwSize.Y;
+	FillConsoleOutputCharacter( hStdout, ' ', dwConSize, pos, &sz );
+}
+
+// ------------------------------------------------------------
+void gotoRC()
+{
+	CELL col = pop();
+	CELL row = pop();
+//    if (GetConsoleScreenBufferInfo(hStdout, &csbi))
+//	{
+		COORD pos;
+		pos.Y = row;
+		pos.X = col;
+	    //csbi.dwCursorPosition.Y = row; 
+	    //csbi.dwCursorPosition.X = col; 
+    	SetConsoleCursorPosition(hStdout, pos);
+//s	}
+}
+
+// ------------------------------------------------------------
 void nop()
 {
 }
@@ -339,7 +361,7 @@ typedef struct {
 enum {
 	NOP = 0, A, FETCH, STORE, DROP, DUP, SETA, EMIT,
 	JUMP, CALL, RET, ADD, SUB, MULT, DIV, AT_PLUS, STORE_PLUS, PLUS_STAR, 
-	OVER, UNTIL, UNTIL_NEG, INVERT, T_EQ_0, C_EQ_0,
+	OVER, UNTIL, UNTIL_NEG, INVERT, T_EQ_0, C_EQ_0, GOTORC, CLS,
 	p_COLON, DTOR, RTOD, AND, XOR, TIMES2, DIVIDE2, BYE,
 } OPCODES;
 
@@ -355,6 +377,7 @@ OPCODE_T theOpcodes[] = {
 		, { "call",    CALL,        call       }
 		, { "emit",    EMIT,        emit       }
         , { ";",       RET,         ret        }
+        , { "ret",     RET,         ret        }
         , { "+",       ADD,         add        }
         , { "-",       SUB,         sub        }
 		, { "*",       MULT,        mult       }
@@ -366,6 +389,8 @@ OPCODE_T theOpcodes[] = {
         , { "until",   UNTIL,       until      }
         , { "-until",  UNTIL_NEG,   until_neg  }
         , { "invert",  INVERT,      invert     }
+        , { "gotoRC",  GOTORC,      gotoRC     }
+        , { "cls",     CLS,         cls        }
         , { "T=0",     T_EQ_0,      t_eq_0     }
         , { "C=0",     C_EQ_0,      c_eq_0     }
         , { "(:)",     p_COLON,     p_colon    }
@@ -498,6 +523,19 @@ char *parseword(char *line, char *word)
 		}
 		return line;
 	}
+	if (strcmpi(word, "if") == 0)
+	{
+		CComma(T_EQ_0);
+		push(HERE);
+		Comma(0xFFFFFFFF);
+		return line;
+	}
+	if (strcmpi(word, "then") == 0)
+	{
+		tmp = pop();
+		set_cell(tmp, HERE);
+		return line;
+	}
 	if (strcmpi(word, "jump") == 0)
 	{
 		line = getword(line, word);
@@ -527,10 +565,9 @@ char *parseword(char *line, char *word)
 		{
 			break;
 		}
-		// printf(".%s|%s?=%d.", word, op.asm_instr, strcmpi(word, op.asm_instr));
 		if (strcmpi(word, op.asm_instr) == 0)
 		{
-			printf(" (%s->%d)", word, op.opcode);
+			// printf("\n(%s->%02X)", word, op.opcode);
 			CComma(op.opcode);
 			return line;
 		}
@@ -553,6 +590,12 @@ void parse(char *line)
 
 void doTest()
 {
+	// push(5); dup(); gotoRC();
+	push(' '); emit();
+	push('O'); emit(); push('K'); emit();
+	push('\n'); emit();
+	printf("memory: 0x%08lX\n", the_memory);
+
 	CELL stop = 1000*1000*250;
 	CELL start = GetTickCount();
 
@@ -571,20 +614,16 @@ void doTest()
 	printf(" %d.%d seconds\n", tt/1000, tt%1000);
 	dumpStack(8); printf("\n");
 
-	Comma(0x22222222); define_word("test0");
-	Comma(0x33333333); define_word("test1");
-	Comma(0x44444444); define_word("test2");
-	Comma(0x55555555); define_word("test1");
-	dump_words();
+	//Comma(0x22222222); define_word("test0");
+	//Comma(0x33333333); define_word("test1");
+	//Comma(0x44444444); define_word("test2");
+	//Comma(0x55555555); define_word("test1");
+	//dump_words();
 
 	ENTRY_T *ep;
 	ep = find_word("test0"); printf("\n%lx", ep);
 	ep = find_word("test1"); printf(" %lx", ep);
 	ep = find_word("test3"); printf(" %lx", ep);
-	push(' '); emit();
-	push('O'); emit();
-	push('K'); emit();
-	push('\n'); emit();
 }
 
 void compile()
@@ -601,10 +640,11 @@ void compile()
 			break;
 		}
 		prims[op.opcode] = op.func;
+		printf("\n%02x, %-8s, %08lx", op.opcode, op.asm_instr, op.func);
 	}
 
 	doTest();
-	return;
+	// return;
 
     input_fp = fopen(input_fn, "rt");
     if (!input_fp)
@@ -673,7 +713,12 @@ void write_output_file()
 
 int main (int argc, char **argv)
 {
-    strcpy(input_fn, "mfc.src");
+    hStdin = GetStdHandle(STD_INPUT_HANDLE); 
+    hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	// cls();
+	
+	strcpy(input_fn, "mfc.src");
     strcpy(output_fn, "mfc.bin");
 
 	the_memory = malloc(MEM_SZ);
@@ -685,6 +730,8 @@ int main (int argc, char **argv)
 
     compile();
 	write_output_file();
+
+	dump_words();
 
     return 0;
 }

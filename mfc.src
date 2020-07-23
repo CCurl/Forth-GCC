@@ -1,20 +1,20 @@
 \ TEST
 
-: name
 
+ nop  nop  nop  nop  nop  nop  nop  nop  nop  nop  
+
+: name dup if ret then drop emit ;
+: name1 over name ;
+
+call ret
  nop  
  a    
- @    
- !    
- drop 
- dup  
+ @     !     drop  dup  over
  a!   
  jump (xxx)
  ;    
  + - * /
- @+   
- !+   
- +*   
+ @+    !+    +*   
  over 
  until 
  -until
@@ -24,10 +24,9 @@
  (:)  
  >r   
  r>   
- and  
- xor  
- 2*   
- 2/   
+ and   xor  
+ 2*    2/   
+ cls gotorc
  bye  
 
 
