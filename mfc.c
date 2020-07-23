@@ -17,9 +17,10 @@ FILE *output_fp = NULL;
 typedef unsigned long CELL;
 typedef unsigned char BYTE;
 
-CELL HERE, LAST, STATE;
+CELL HERE, STATE;
 CELL BASE = 10;
 #define CELL_SZ 4
+#define MAX_WORDS 2048
 
 // inpsired by these:
 // http://www.ultratechnology.com/mfp21.htm#source
@@ -40,7 +41,15 @@ CELL MEM_SZ;
 CELL dstk[SS];
 CELL rstk[SS];
 
+typedef struct {
+	CELL xt;
+	BYTE flags;
+	char name[30];
+} ENTRY_T;
+
 BYTE *the_memory = NULL;
+ENTRY_T *the_dict = NULL;
+int num_words = 0;
 
 void (*prims[32])();
 
@@ -318,8 +327,7 @@ void bye()
 	exit(0);
 }
 
-
-
+// ------------------------------------------------------------
 typedef struct {
 	char *asm_instr;
 	BYTE opcode;
@@ -328,7 +336,7 @@ typedef struct {
 
 enum {
 	NOP = 0, A, FETCH, STORE, DROP, DUP, SETA,
-	JUMP, RET, ADD, AT_PLUS, STORE_PLUS, PLUS_STAR, 
+	JUMP, CALL, RET, ADD, AT_PLUS, STORE_PLUS, PLUS_STAR, 
 	OVER, UNTIL, UNTIL_NEG, INVERT, T_EQ_0, C_EQ_0,
 	p_COLON, DTOR, RTOD, AND, XOR, TIMES2, DIVIDE2, BYE,
 } OPCODES;
@@ -342,6 +350,7 @@ OPCODE_T theOpcodes[] = {
         , { "dup",     DUP,         dup       }
         , { "a!",      SETA,      seta    }
         , { "jump",    JUMP,         jump       }
+		, { "call",    CALL,     call   }
         , { ";",       RET,         ret       }
         , { "+",       ADD,         add       }
         , { "@+",      AT_PLUS,      at_plus    }
@@ -403,6 +412,48 @@ void Comma(CELL val)
 	HERE += CELL_SZ;
 }
 
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+void define_word(char *word)
+{
+	printf("\ndefine_word(%s, %d)", word, num_words+1);
+	ENTRY_T *ep = (ENTRY_T *)&(the_dict[++num_words]);
+	int maxLen = sizeof(ep->name)-1;
+	if (strlen(word) > maxLen)
+		word[maxLen] = (char)0;
+
+	ep->xt = HERE;
+	ep->flags = 0;
+	strcpy(ep->name, word);
+}
+
+ENTRY_T *find_word(char *word)
+{
+	for (int i = num_words; i > 0; i--)
+	{
+		ENTRY_T *ep = (ENTRY_T *)&(the_dict[i]);
+		if (strcmpi(word, ep->name) == 0)
+		{
+			return ep;
+		}
+	}
+	return NULL;
+}
+
+void dump_words()
+{
+	for (int i = num_words; i > 0; i--)
+	{
+		ENTRY_T *ep = (ENTRY_T *)&(the_dict[i]);
+		printf("\n%4d, %08lx, %08lx, %02x, %s", i, ep, ep->xt, ep->flags, ep->name);
+	}
+}
+
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+
 // Returns a pointer to the first char after the first word in the line
 // NB: this is NOT a counted string
 char *getword(char *line, char *word)
@@ -435,7 +486,10 @@ char *parseword(char *line, char *word)
 	if (strcmpi(word, ":") == 0)
 	{
 		line = getword(line, word);
-		printf("-define-%s-", word);
+		if (strlen(word) > 0)
+		{
+			define_word(word);
+		}
 		return line;
 	}
 	if (strcmpi(word, "jump") == 0)
@@ -515,11 +569,28 @@ void doTest()
 	printf("\n");
 	dumpStack();
 	printf(" %d.%d seconds\n", tt/1000, tt%1000);
+
+	Comma(0x22222222);
+	define_word("test0");
+	Comma(0x33333333);
+	define_word("test1");
+	Comma(0x44444444);
+	define_word("test2");
+	Comma(0x55555555);
+	define_word("test1");
+	dump_words();
+	ENTRY_T *ep = find_word("test0xx");
+	printf("\nfound? %lx", ep);
 }
 
 void compile()
 {
-	doTest();
+	printf("111 ");
+	HERE = (CELL)the_memory;
+	printf("222 , %lx", HERE);
+	CComma(JUMP);
+	Comma(0xEEEEEEEE);
+
 	for (int i = 0; ; i++)
 	{
 		OPCODE_T op = theOpcodes[i];
@@ -530,10 +601,9 @@ void compile()
 		prims[op.opcode] = op.func;
 	}
 
-	HERE = (CELL)the_memory;
-	CComma(JUMP);
-	Comma(0xEEEEEEEE);
-
+	printf("333 ");
+	doTest();
+	return;
 
     input_fp = fopen(input_fn, "rt");
     if (!input_fp)
@@ -550,6 +620,37 @@ void compile()
 
     fclose(input_fp);
     input_fp = NULL;
+}
+
+// *********************************************************************
+void run_program(CELL start)
+{
+	CELL IR;
+	int callDepth = 0;
+	PC = start;
+	void (*func)();
+
+	while (1)
+	{
+		IR = the_memory[PC];
+		if (IR == CALL)
+		{
+			++callDepth;
+		}
+		if (IR == RET)
+		{
+			if (--callDepth < 1 )
+				return;
+		}
+		PC += CELL_SZ;
+		if ((IR >= NOP) && (IR <= BYE))
+			prims[IR]();
+		else
+		{
+			printf("-invalid opcode %d at 0x%08lx-", IR, PC);
+			return;
+		}
+	}
 }
 
 // *********************************************************************
@@ -573,9 +674,13 @@ int main (int argc, char **argv)
     strcpy(input_fn, "mfc.src");
     strcpy(output_fn, "mfc.bin");
 
-	MEM_SZ = 2*1024;
+	MEM_SZ = 1024*4;
 	the_memory = malloc(MEM_SZ);
 	memset(the_memory, 0, MEM_SZ);
+
+	CELL dict_sz = MAX_WORDS * sizeof(ENTRY_T);
+	the_dict = malloc(dict_sz);
+	memset(the_dict, 0, dict_sz);
 
     compile();
 	write_output_file();
