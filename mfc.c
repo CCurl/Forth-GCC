@@ -1,3 +1,9 @@
+// ------------------------------------------------------------
+// inpsired by these:
+// http://www.ultratechnology.com/mfp21.htm#source
+// http://www.ultratechnology.com/aha.htm
+// ------------------------------------------------------------
+
 #include <stdio.h>
 #include <string.h>
 #include <winbase.h>
@@ -20,21 +26,16 @@ typedef unsigned char BYTE;
 CELL HERE, STATE;
 CELL BASE = 10;
 #define CELL_SZ 4
-#define MAX_WORDS 2048
-
-// inpsired by these:
-// http://www.ultratechnology.com/mfp21.htm#source
-// http://www.ultratechnology.com/aha.htm
 
 // ------------------------------------------------------------
 CELL PC;
 CELL addr;
 CELL tmp;
-CELL MEM_SZ;
+CELL MEM_SZ = (1024*4);
 
-// This has very small circular stacks - no over/under-flow!
-// - the top of data stack is always TOS
-// - the top of return stack is always rstk[0]
+// Circular stacks - no over/under-flow!
+// - the top of data stack is TOS
+// - the top of return stack is TOSR
 
 #define DSZ 64
 CELL dstk[DSZ];
@@ -48,8 +49,10 @@ CELL *RSS = rstk;
 CELL *RSE = &(rstk[RSZ-1]);
 CELL *RSP = rstk;
 
-#define TOS (*DSP)
+#define TOS  (*DSP)
+#define TOSR (*RSP)
 
+#define MAX_WORDS 2048
 typedef struct {
 	CELL xt;
 	BYTE flags;
@@ -673,7 +676,6 @@ int main (int argc, char **argv)
     strcpy(input_fn, "mfc.src");
     strcpy(output_fn, "mfc.bin");
 
-	MEM_SZ = 1024*4;
 	the_memory = malloc(MEM_SZ);
 	memset(the_memory, 0, MEM_SZ);
 
