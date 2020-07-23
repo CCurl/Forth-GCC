@@ -1,60 +1,6 @@
 \ TEST
 
-
- nop  nop  nop  nop  nop  nop  nop  nop  nop  nop  
-
-: name dup if ret then drop emit ;
-: name1 over name ;
-
-call ret
- nop  
- a    
- @     !     drop  dup  over
- a!   
- jump (xxx)
- ;    
- + - * /
- @+    !+    +*   
- over 
- until 
- -until
- invert
- T=0  
- C=0  
- (:)  
- >r   
- r>   
- and   xor  
- 2*    2/   
- cls gotorc
- bye  
-
-
- NOP  
- A    
- @    
- !    
- DROP 
- DUP  
- A!   
- JUMP (XXX)
- ;    
- +    
- @+   
- !+   
- +*   
- OVER 
- UNTIL 
- -UNTIL
- INVERT
- T=0  
- C=0  
- (:)  
- >R   
- R>   
- AND  
- XOR  
- 2*   
- 2/   
- BYE  
- 
+: space 32 emit ;
+: ok space 'o' emit 'k' emit ;
+: name dup if 1+ then emit ;
+: main ok bye ;
