@@ -63,6 +63,8 @@
 #define SHIFTRIGHT 49   // 31
 #define PLUSSTORE  50   // 32
 #define OPENBLOCK  51   // 33
+#define XOR  52   // 33
+#define COM  53   // 33
 // unused 51-89
 #define BRANCHF    90   // 5A
 #define BRANCHFZ   91   // 5B
@@ -84,8 +86,7 @@
 // ************************************************************************************************
 
 typedef unsigned char BYTE;
-typedef long CELL;				// Use long for a 32-bit implementation, short for a 16-bit
-// #define CELL long;				// Use long for a 32-bit implementation, short for a 16-bit
+typedef unsigned long CELL;				// Use long for a 32-bit implementation, short for a 16-bit
 typedef int bool;
 typedef char *String;
 
@@ -93,7 +94,6 @@ typedef struct {
 	char *asm_instr;
 	BYTE opcode;
 	char *forth_prim;
-	void (*func)();
 	CELL flags;
 } OPCODE_T;
 
@@ -103,10 +103,9 @@ typedef struct {
 #define IS_HIDDEN    0x04
 
 typedef struct {
-	CELL next, XT;
+	CELL XT;
 	BYTE flags;
-	BYTE len;
-	char name[30];
+	char name[31];
 } DICT_T;
 
 #undef NULL
@@ -133,8 +132,6 @@ extern int MEM_SZ;
 
 #define GETAT(loc) *(CELL *)(&the_memory[loc])
 #define SETAT(loc, val) *(CELL *)(&the_memory[loc]) = val
-
-#define _T(x) x
 
 #define true 1
 #define false 0

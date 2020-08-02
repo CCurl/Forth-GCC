@@ -45,15 +45,9 @@ goto done
 set output=newfc
 set c-files=newfc.c 
 set c-files=%c-files% forth-vm.c
-set c-files=%c-files% vm-prims.c
-set c-files=%c-files% logger.c
-echo making %output% ...
-echo gcc -g -o %output% %c-files%
-rem gcc -g -o %output% %c-files%
-gcc -g -o tmp %c-files%
-strip -o %output%.exe -g -S -d -X tmp.exe
-del tmp.exe
-if "--%2%--" == "--1--" newfc -d
+echo gcc -g -Ofast -o newfc %c-files%
+gcc -g -Ofast -o newfc %c-files%
+if "--%2%--" == "--1--" newfc
 goto done
 
 :make-forth

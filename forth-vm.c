@@ -10,7 +10,7 @@
 CELL PC = 0;		// The "program counter"
 BYTE IR = 0;		// The "instruction register"
 
-#define MEM_SZ 8*1024
+#define MEM_SZ 1024*64
 BYTE the_memory[MEM_SZ];
 
 CELL BASE = 10, STATE = 0;
@@ -69,7 +69,7 @@ CELL rpop()
 void run_program(CELL start)
 {
 	int call_depth = 1;
-	PC = start;
+	PC = (start == 0) ? (CELL)the_memory : start ;
 
 	TRACE("Running (PC=%04lx) ... ", PC);
 	while (true)
@@ -143,44 +143,80 @@ void run_program(CELL start)
 				break;
 
 			case OR:
+				reg1 = pop();
+				TOS = TOS | reg1;
+				break;
+
+			case AND:
+				reg1 = pop();
+				TOS = TOS & reg1;
+				break;
+
+			case XOR:
+				reg1 = pop();
+				TOS = TOS ^ reg1;
+				break;
+
+			case COM:
+				TOS = ~TOS;
 				break;
 
 			case CLITERAL:
+				reg1 = BYTE_AT(PC);
+				PC += 1;
+				push(reg1);
 				break;
 
 			case CFETCH:
+				TOS = BYTE_AT(TOS);
 				break;
 
 			case CSTORE:
+				reg1 = pop();
+				reg2 = pop();
+				BYTE_AT(reg1) = (BYTE)reg2;
 				break;
 
 			case ADD:
+				reg1 = pop();
+				TOS = TOS + reg1;
 				break;
 
 			case SUB:
+				reg1 = pop();
+				TOS = TOS - reg1;
 				break;
 
 			case MUL:
+				reg1 = pop();
+				TOS = TOS * reg1;
 				break;
 
 			case DIV:
+				reg1 = pop();
+				TOS = TOS / reg1;
 				break;
 
 			case LT:
+				reg1 = pop();
+				TOS = (TOS < reg1) ? 0xFFFFFFFF : 0;
 				break;
 
 			case EQ:
+				reg1 = pop();
+				TOS = (TOS == reg1) ? 0xFFFFFFFF : 0;
 				break;
 
 			case GT:
+				reg1 = pop();
+				TOS = (TOS > reg1) ? 0xFFFFFFFF : 0;
 				break;
 
 			case DICTP:
 				break;
 
 			case EMIT:
-				reg1 = pop();
-				printf("%c", (BYTE)reg1);
+				putchar((BYTE)pop());
 				break;
 
 			case OVER:
@@ -215,9 +251,6 @@ void run_program(CELL start)
 				break;
 
 			case LOGLEVEL:
-				break;
-
-			case AND:
 				break;
 
 			case PICK:
@@ -299,11 +332,13 @@ void run_program(CELL start)
 				break;
 
 			case BYE:
-				break;
+				return;
 
+			default:
+				puts("unknown instruction");
+				return;
 		}
 	}
-	return 0;
 }
 
 

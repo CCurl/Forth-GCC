@@ -16,7 +16,7 @@ extern BYTE IR;		// The "instruction register"
 // extern CELL *rsp_init;
 extern CELL reg1, reg2, reg3;
 
-extern BYTE *the_memory;
+extern BYTE the_memory[];
 extern long memory_size;
 
 extern CELL BASE, STATE;
