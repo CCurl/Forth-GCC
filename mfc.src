@@ -1,6 +1,7 @@
 \ TEST
 
-: space 32 emit ;
+: space $20 drop #32 drop %00100000 drop 32 emit ;
 : ok space 'o' emit 'k' emit ;
 : name dup if 1+ then emit ;
-: main ok bye ;
+: test 1000 1000 * 500 * begin 1- if drop ret then again ;
+: main ok test ok ;

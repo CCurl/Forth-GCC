@@ -9,7 +9,7 @@
 
 #include <windows.h> 
 #include <stdio.h>
-
+#include <ctype.h>
 
 HANDLE hStdout, hStdin;
 CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -31,6 +31,7 @@ CELL PC;
 CELL addr;
 CELL tmp;
 CELL MEM_SZ = (1024 * 4);
+int call_depth = 0;
 
 // Circular stacks - no over/under-flow!
 // - the top of data stack is TOS
@@ -65,7 +66,7 @@ int num_words = 0;
 void (*prims[64])();
 
 int _QUIT_HIT;
-int all_ok = 0;
+int all_ok = 1;
 
 #ifndef __VS19__
 void strcpy_s(char* dst, CELL num, const char* src)
@@ -166,7 +167,7 @@ void drop()
 void store()
 {
 	addr = pop();
- 	*(CELL*)addr = pop();
+	*(CELL*)addr = pop();
 }
 
 // ------------------------------------------------------------
@@ -184,8 +185,11 @@ void jmp()
 // ------------------------------------------------------------
 void call()
 {
+	CELL tmp = *(CELL*)PC;
+	PC += CELL_SZ;
 	rpush(PC);
-	PC = *(CELL*)PC;
+	PC = tmp;
+	++call_depth;
 }
 
 // ------------------------------------------------------------
@@ -197,6 +201,7 @@ void emit()
 // ------------------------------------------------------------
 void ret()
 {
+	--call_depth;
 	PC = rpop();
 }
 
@@ -279,7 +284,7 @@ void invert()
 // ------------------------------------------------------------
 void t_eq_0()
 {
-	if (TOS == 0)
+	if (TOS != 0)
 		PC = *(CELL*)PC;
 	else
 		PC += CELL_SZ;
@@ -288,7 +293,10 @@ void t_eq_0()
 // ------------------------------------------------------------
 void c_eq_0()
 {
-	// WHAT TO DO HERE
+	if (TOS == 0)
+		PC = *(CELL*)PC;
+	else
+		PC += CELL_SZ;
 }
 
 // ------------------------------------------------------------
@@ -370,7 +378,7 @@ void nop()
 // ------------------------------------------------------------
 void bye()
 {
-	exit(0);
+	call_depth = 0;
 }
 
 // ------------------------------------------------------------
@@ -466,19 +474,19 @@ NB build this in somehow to enable usage of VT100 ECSAPE sequences to control th
 void run_word(CELL start)
 {
 	CELL IR, OLD_PC = PC;
-	int callDepth = 1;
+	call_depth = 1;
 	PC = start;
 
 	while (1)
 	{
-		IR = *(BYTE *)(PC++);
+		IR = *(BYTE*)(PC++);
 		if (IR == CALL)
 		{
-			++callDepth;
+			++call_depth;
 		}
 		if (IR == RET)
 		{
-			if (--callDepth < 1)
+			if (--call_depth < 1)
 			{
 				PC = OLD_PC;
 				return;
@@ -501,7 +509,7 @@ void run_word(CELL start)
 void run_program(CELL start)
 {
 	CELL IR;
-	int callDepth = 0;
+	call_depth = 1;
 	PC = start;
 
 	while (1)
@@ -513,9 +521,12 @@ void run_program(CELL start)
 		}
 		else
 		{
-			printf("-unknown opcode %d at 0x%08lx-", IR, PC);
+			printf("-unknown opcode %02x at 0x%08lx-", IR, PC - 1);
 			return;
 		}
+
+		if (call_depth < 1)
+			return;
 	}
 }
 
@@ -609,11 +620,69 @@ char* getword(char* line, char* word)
 	return line;
 }
 
-int is_number(char *word, CELL *value)
+int is_number(char* word, long* the_num, int base)
 {
-	*value = 100;
+	int is_neg = 0;
+	char* w = word;
+	long my_num = 0;
+	const char* possible_chars = "0123456789abcdef";
+	char valid_chars[24];
+
+	if ((word[0] == '\'') && (word[2] == '\'') && (word[3] == (char)0))
+	{
+		*the_num = word[1];
+		return 1;
+	}
+
+	if (*w == '%')
+	{
+		base = 2;
+		++w;
+	}
+
+	if (*w == '#')
+	{
+		base = 10;
+		++w;
+	}
+
+	if (*w == '$')
+	{
+		base = 16;
+		++w;
+	}
+
+	strcpy_s(valid_chars, sizeof(valid_chars), possible_chars);
+	valid_chars[base] = (char)0;
+
+	// One leading minus sign is OK
+	if ((base == 10) && (*w == '-'))
+	{
+		is_neg = 1;
+		w++;
+	}
+
+	while (*w)
+	{
+		char ch = *(w++);
+		ch = tolower(ch);
+		char* pos = strchr(valid_chars, ch);
+		if (pos == 0)
+		{
+			return 0;
+		}
+		CELL digit = (CELL)(pos - valid_chars);
+		my_num = (my_num * base) + digit;
+	}
+
+	if (is_neg)
+	{
+		my_num = -my_num;
+	}
+	*the_num = my_num;
 	return 1;
 }
+
 
 char* parseword(char* line, char* word)
 {
@@ -653,7 +722,6 @@ char* parseword(char* line, char* word)
 	if (_stricmp(word, "begin") == 0)
 	{
 		push(HERE);
-		Comma(0xFFFFFFFF);
 		return line;
 	}
 	if (_stricmp(word, "again") == 0)
@@ -664,7 +732,7 @@ char* parseword(char* line, char* word)
 	}
 	if (_stricmp(word, "jmp") == 0)
 	{
-		printf("-jmp:%08lx-", TOS);
+		// printf("-jmp:%08lx-", TOS);
 		CComma(JMP);
 		Comma(pop());
 		return line;
@@ -701,9 +769,10 @@ char* parseword(char* line, char* word)
 		return line;
 	}
 
-	if (is_number(word, &tmp))
+	long num = 0;
+	if (is_number(word, &num, BASE))
 	{
-		push(tmp);
+		push((CELL)num);
 		if (STATE == 1)
 		{
 			CComma(LIT);
@@ -735,7 +804,8 @@ void doTest()
 	push('\n'); emit();
 	printf("memory: 0x%08lX\n", (CELL)the_memory);
 
-	CELL stop = 1000 * 1000 * 500;
+	// CELL stop = 1000 * 1000 * 500;
+	CELL stop = 1000 * 1000 * 50;
 	CELL start = GetTickCount();
 
 	printf("Tests: push() ...");
@@ -824,8 +894,6 @@ int main(int argc, char** argv)
 	hStdin = GetStdHandle(STD_INPUT_HANDLE);
 	hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	// cls();
-
 	strcpy_s(input_fn, sizeof(input_fn), "mfc.src");
 	strcpy_s(output_fn, sizeof(output_fn), "mfc.bin");
 
@@ -838,11 +906,15 @@ int main(int argc, char** argv)
 
 	compile();
 	write_output_file();
-	if (all_ok)
-		run_program((CELL )the_memory);
-
 	dump_words();
 	printf("\n");
+
+	CELL st = GetTickCount();
+	if (all_ok)
+		run_program((CELL)the_memory);
+	CELL ee = GetTickCount();
+	CELL tt = ee - st;
+	printf(" %d.%03d seconds\n", tt / 1000, tt % 1000);
 
 	return 0;
 }
