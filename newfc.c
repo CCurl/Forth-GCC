@@ -62,8 +62,20 @@ char *get_word(char *stream, char *word)
 char *parse_word(char *word, char *stream)
 {
 	if ((word[0] == '\\') && (StrLen(word) == 1))
+	{
+		while (*stream > (char)31)
+			++stream;
 		return stream;
-	printf("-%s-", word);
+	}
+
+	if ((word[0] == '(') && (StrLen(word) == 1))
+	{
+		while (*stream != ')')
+			++stream;
+		return ++stream;
+	}
+
+	printf(" %s", word);
 	return stream;
 }
 
@@ -71,7 +83,7 @@ char *parse_word(char *word, char *stream)
 void do_compile(char *stream)
 {
 	char word[64];
-	printf("\ncontents: %08lx, sz: %ld", stream);
+	printf("\ncontents: %08lx", stream);
 	while (true)
 	{
 		stream = get_word(stream, word);
