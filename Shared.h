@@ -9,6 +9,8 @@
 	#define TRACE(...)
 #endif
 
+#define MEM_SZ (1024*64)
+
 // ************************************************************************************************
 // The VM's instruction set
 // ************************************************************************************************
@@ -65,6 +67,7 @@
 #define OPENBLOCK  51   // 33
 #define XOR  52   // 33
 #define COM  53   // 33
+#define BYE       63	// FF
 // unused 51-89
 #define BRANCHF    90   // 5A
 #define BRANCHFZ   91   // 5B
@@ -79,7 +82,6 @@
 #define NOP       252	// FC
 #define BREAK     253	// FD
 #define RESET     254	// FE
-#define BYE       255	// FF
 
 // ************************************************************************************************
 // ************************************************************************************************
@@ -128,7 +130,6 @@ extern CELL ADDR_MEM_SZ;   // 0x24
 
 #define ONE_KB (1024)
 #define ONE_MB (ONE_KB * ONE_KB)
-extern int MEM_SZ;
 
 #define GETAT(loc) *(CELL *)(&the_memory[loc])
 #define SETAT(loc, val) *(CELL *)(&the_memory[loc]) = val

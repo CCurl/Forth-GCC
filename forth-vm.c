@@ -10,7 +10,6 @@
 CELL PC = 0;		// The "program counter"
 BYTE IR = 0;		// The "instruction register"
 
-#define MEM_SZ 1024*64
 BYTE the_memory[MEM_SZ];
 
 CELL BASE = 10, STATE = 0;
@@ -74,10 +73,10 @@ void run_program(CELL start)
 	TRACE("Running (PC=%04lx) ... ", PC);
 	while (true)
 	{
-        // trace("PC=%04lx, IR=%d - ", PC, (int)the_memory[PC]);
-        IR = the_memory[PC++];
+        IR = BYTE_AT(PC++);
+        printf("(PC=%08lx, IR=%d)", PC-1, IR);
 
-		switch(IR%64)
+		switch(IR)
 		{
 			case LITERAL:
 				reg1 = CELL_AT(PC);
@@ -335,7 +334,7 @@ void run_program(CELL start)
 				return;
 
 			default:
-				puts("unknown instruction");
+				printf("unknown instruction [%d] at [%08lx]", IR, PC);
 				return;
 		}
 	}

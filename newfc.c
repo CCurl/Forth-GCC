@@ -5,6 +5,9 @@
 
 char base_fn[32];
 
+#define COMMA(val)  (*(CELL *)HERE = (CELL)val); HERE += 4
+#define CCOMMA(val) (*(BYTE *)HERE = (BYTE)val); HERE += 1
+
 // ---------------------------------------------------------------------
 void StrCpy(char *dst, char *src) 
 {
@@ -59,6 +62,12 @@ char *get_word(char *stream, char *word)
 }
 
 // ---------------------------------------------------------------------
+DICT_T *define_word(char *word)
+{
+	return NULL;
+}
+
+// ---------------------------------------------------------------------
 char *parse_word(char *word, char *stream)
 {
 	if ((word[0] == '\\') && (StrLen(word) == 1))
@@ -75,7 +84,7 @@ char *parse_word(char *word, char *stream)
 		return ++stream;
 	}
 
-	printf(" %s", word);
+	// printf(" %s", word);
 	return stream;
 }
 
@@ -96,7 +105,23 @@ void do_compile(char *stream)
 }
 
 // ---------------------------------------------------------------------
-void write_output() {}
+void write_output() 
+{
+	char fn[64];
+	FILE *fp;
+
+	StrCpy(fn, base_fn);
+	StrCat(fn, ".out");
+	fp = fopen(fn, "wb");
+	if (!fp)
+	{
+		printf("\nUnable to open '%s'", fn);
+		return;
+	}
+
+	fwrite(the_memory, 1, MEM_SZ, fp);
+	fclose(fp);
+}
 
 // ---------------------------------------------------------------------
 void parse_arg(char *arg) {}
@@ -110,7 +135,9 @@ int main (int argc, char **argv)
 	StrCpy(base_fn, "forth");
 	HERE = (CELL)the_memory;
 
-	printf("HERE: %08lx, memory: %08lx", &HERE, the_memory);
+	printf("HERE: %08lx, memory: %08lx-%08lx", &HERE, &the_memory[MEM_SZ-1]);
+
+	the_memory[MEM_SZ-1] = 'x';
 
     for (int i = 1; i < argc; i++)
     {
@@ -136,6 +163,9 @@ int main (int argc, char **argv)
 	fseek(fp, 0, SEEK_SET);
 	fread(contents, sz, 1, fp);
 	fclose(fp);
+
+	HERE = (CELL)the_memory;
+	CCOMMA(BYE);
 
 	do_compile(contents);
 	write_output();
