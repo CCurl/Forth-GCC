@@ -39,7 +39,6 @@ OPCODE_T opcodes[] = {
         , { ".COMPARE.",          COMPARE,          "COMPARE",          IS_INLINE }
         , { ".DTOR.",             DTOR,             ">r",             IS_INLINE }
         , { ".RTOD.",             RTOD,             "r>",             IS_INLINE }
-        , { ".LOGLEVEL.",         LOGLEVEL,         "LOGLEVEL",         IS_INLINE }
         , { ".AND.",              AND,              "AND",              IS_INLINE }
         , { ".GETCH.",            GETCH,            "GETCH",            IS_INLINE }
         , { ".COMPAREI.",         COMPAREI,         "COMPAREI",         IS_INLINE }
@@ -49,17 +48,24 @@ OPCODE_T opcodes[] = {
         , { ".INC.",              INC,              "1+",              IS_INLINE }
         , { ".DEC.",              DEC,              "1-",              IS_INLINE }
         , { ".GETTICK.",          GETTICK,          "GETTICK",          IS_INLINE }
-        , { ".SHIFTLEFT.",        SHIFTLEFT,        "<<",        IS_INLINE }
-        , { ".SHIFTRIGHT.",       SHIFTRIGHT,       ">>",       IS_INLINE }
+        , { ".SHIFTLEFT.",        SHIFTLEFT,        "2*",        IS_INLINE }
+        , { ".SHIFTRIGHT.",       SHIFTRIGHT,       "2/",       IS_INLINE }
         , { ".PLUSSTORE.",        PLUSSTORE,        "+!",        IS_INLINE }
         , { ".OPENBLOCK.",        OPENBLOCK,        "open-block",        IS_INLINE }
         , { ".CLOSEBLOCK.",       CLOSEBLOCK,       "close-block",        IS_INLINE }
         , { ".DBGDOT.",           DOT,              "(.)",           IS_INLINE }
         , { ".HA.",               HA,               "(h)",            IS_INLINE }
+        , { ".BA.",               BA,               "base",            IS_INLINE }
+        , { ".SA.",               SA,               "state",            IS_INLINE }
+        , { ".LA.",               LA,               "last",            IS_INLINE }
         , { ".COMMA.",            COMMA,            ",",            IS_INLINE }
         , { ".CCOMMA.",           CCOMMA,           "c,",            IS_INLINE }
         , { ".IMMEDIATE.",        IMMEDIATE,        "immediate",            0 }
         , { ".INLINE.",           INLINE,           "inline",            0 }
+        , { ".OVER.",             TOSRC,            ">src",             IS_INLINE }
+        , { ".OVER.",             SRC,             	"src",             IS_INLINE }
+        , { ".OVER.",             TODST,            ">dst",             IS_INLINE }
+        , { ".OVER.",             DST,              "dst",             IS_INLINE }
         , { ".BYE.",              BYE,              "BYE",              IS_INLINE }
 		, { 0,0,0,0 }
 };
@@ -124,6 +130,7 @@ DICT_T *define_word(char *word)
 	DICT_T *e = (&the_words[++num_words]);
 	e->flags = 0;
 	e->XT = HERE;
+	e->len = StrLen(word);
 	StrCpy(e->name, word);
 	return e;
 }
@@ -364,7 +371,7 @@ void write_output()
 	for (int i = num_words; i > 0; i--)
 	{
 		DICT_T *e = &the_words[i];
-		fprintf(fp, "%4d: %02x %08lx %s\n", i, e->flags, e->XT, e->name);
+		fprintf(fp, "%4d: %02x %08lx %d %s\n", i, e->flags, e->XT, e->len, e->name);
 	}
 
 	fprintf(fp, "\nOpcodes:\n------------------------\n");
@@ -401,7 +408,7 @@ int main (int argc, char **argv)
 	FILE *fp;
 
 	StrCpy(bin_file, "");
-	StrCpy(base_fn, "newfc");
+	StrCpy(base_fn, "mforth");
 	HERE = (CELL)the_memory;
 
 	// printf("&HERE: %08lx, memory: %08lx-%08lx", &HERE, &the_memory[0], &the_memory[MEM_SZ-1]);

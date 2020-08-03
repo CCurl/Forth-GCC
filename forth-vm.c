@@ -222,9 +222,6 @@ void run_program(CELL start)
 				TOS = (TOS > reg1) ? 0xFFFFFFFF : 0;
 				break;
 
-			case DICTP:
-				break;
-
 			case EMIT:
 				putchar((BYTE)pop());
 				break;
@@ -240,12 +237,11 @@ void run_program(CELL start)
 				break;
 
 			case DTOR:
+				rpush(pop());
 				break;
 
 			case RTOD:
-				break;
-
-			case LOGLEVEL:
+				push(rpop());
 				break;
 
 			case GETCH:
@@ -258,24 +254,30 @@ void run_program(CELL start)
 				break;
 
 			case NOT:
+				TOS = TOS ? 0 : -1 ;
 				break;
 
 			case RFETCH:
+				push(*RSP);
 				break;
 
 			case INC:
+				TOS += 1;
 				break;
 
 			case DEC:
+				TOS -= 1;
 				break;
 
 			case GETTICK:
 				break;
 
 			case SHIFTLEFT:
+				TOS *= 2;
 				break;
 
 			case SHIFTRIGHT:
+				TOS /= 2;
 				break;
 
 			case PLUSSTORE:
@@ -308,6 +310,34 @@ void run_program(CELL start)
 			case HA:
 				push((CELL)&HERE);
 				break;
+
+			case BA:
+				push((CELL)&BASE);
+				break;
+
+			case SA:
+				push((CELL)&STATE);
+				break;
+
+			case LA:
+				push((CELL)&the_words[num_words]);
+				break;
+
+			case TOSRC:
+				src = pop();
+				return;
+
+			case SRC:
+				push(src);
+				return;
+
+			case TODST:
+				dst = pop();
+				return;
+
+			case DST:
+				push(dst);
+				return;
 
 			case BYE:
 				return;

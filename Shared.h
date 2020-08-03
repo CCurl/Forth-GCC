@@ -9,7 +9,7 @@
 	#define TRACE(...)
 #endif
 
-#define MEM_SZ (1024*64)
+#define MEM_SZ (1024*16)
 #define MAX_WORDS 2000
 
 // ************************************************************************************************
@@ -21,12 +21,14 @@ enum {
 	SWAP, DROP, DUP, 
 	SLITERAL,  EMIT, 
 	JMP, JMPZ, JMPNZ, CALL, RET, 
-	OR, ADD, SUB, MUL, DIV, LT, EQ, GT, DICTP,
+	OR, ADD, SUB, MUL, DIV, LT, EQ, GT,
 	OVER, COMPARE, COMPAREI, OPENBLOCK, CLOSEBLOCK, 
-	DTOR, RTOD, LOGLEVEL, AND, GETCH,
+	DTOR, RTOD, AND, GETCH,
 	SLASHMOD, NOT, RFETCH, INC, DEC, GETTICK, 
 	SHIFTLEFT, SHIFTRIGHT, PLUSSTORE, XOR, COM,
-	DOT, HA, CCOMMA, COMMA, IMMEDIATE, INLINE,
+	DOT, HA, BA, SA, LA,
+	CCOMMA, COMMA, IMMEDIATE, INLINE,
+	TOSRC, SRC, TODST, DST,
 	BYE = 63
 } OPCODES;
 
@@ -54,7 +56,8 @@ typedef struct {
 typedef struct {
 	CELL XT;
 	BYTE flags;
-	char name[31];
+	BYTE len;
+	char name[30];
 } DICT_T;
 
 #undef NULL

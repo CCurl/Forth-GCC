@@ -2,13 +2,13 @@
 
 if "--%1%--" == "--fc--" goto make-fc
 if "--%1%--" == "--all--" goto make-all
+if "--%1%--" == "--mf--" goto make-mf
 if "--%1%--" == "--fd--" goto make-fd
 if "--%1%--" == "--fa--" goto make-fa
 if "--%1%--" == "--fi--" goto make-fi
 if "--%1%--" == "--fb--" goto make-fb
 if "--%1%--" == "--ex--" goto make-ex
 if "--%1%--" == "--forth--" goto make-forth
-if "--%1%--" == "--nc--" goto make-nc
 if "--%1%--" == "--nd--" goto make-nd
 if "--%1%--" == "--aa--" goto make-aa
 if "--%1%--" == "--st--" goto make-st
@@ -41,13 +41,13 @@ if "--%2%--" NEQ "----" forth
 goto done
 
 
-:make-nc
-set output=newfc
-set c-files=newfc.c 
+:make-mf
+set output=mforth
+set c-files=mforth.c 
 set c-files=%c-files% forth-vm.c
-echo gcc -g -Ofast -o newfc %c-files%
-gcc -g -Ofast -o newfc %c-files%
-if "--%2%--" == "--1--" newfc
+echo gcc -Ofast -o %output% %c-files%
+gcc -Ofast -o %output% %c-files%
+if "--%2%--" == "--1--" mforth
 goto done
 
 :make-forth
