@@ -7,15 +7,12 @@
 // ------------------------------------------------------------------------------------------
 // The VM
 // ------------------------------------------------------------------------------------------
-CELL PC = 0;		// The "program counter"
-BYTE IR = 0;		// The "instruction register"
-
 BYTE the_memory[MEM_SZ];
+DICT_T the_words[MAX_WORDS];
 
 CELL BASE = 10, STATE = 0;
 CELL HERE, LAST;
 CELL reg1, reg2, src, dst;
-DICT_T the_words[MAX_WORDS];
 int num_words = 0;
 
 // ---------------------------------------------------------------------
@@ -70,16 +67,19 @@ CELL rpop()
 void run_program(CELL start)
 {
 	int call_depth = 1;
-	PC = (start == 0) ? (CELL)the_memory : start ;
+	CELL PC = (start == 0) ? (CELL)the_memory : start ;
 
-	printf("Running (PC=%04lx) ... ", PC);
+	// printf("Running (PC=%04lx) ... ", PC);
 	while (true)
 	{
-        IR = BYTE_AT(PC++);
+        BYTE IR = BYTE_AT(PC++);
         // printf("(PC=%08lx, IR=%d)", PC-1, IR);
 
 		switch(IR)
 		{
+			case NOP:
+				break;
+
 			case LITERAL:
 				reg1 = CELL_AT(PC);
 				PC += CELL_SZ;
@@ -239,21 +239,6 @@ void run_program(CELL start)
 			case COMPARE:
 				break;
 
-			case FOPEN:
-				break;
-
-			case FREAD:
-				break;
-
-			case FREADLINE:
-				break;
-
-			case FWRITE:
-				break;
-
-			case FCLOSE:
-				break;
-
 			case DTOR:
 				break;
 
@@ -261,12 +246,6 @@ void run_program(CELL start)
 				break;
 
 			case LOGLEVEL:
-				break;
-
-			case PICK:
-				break;
-
-			case DEPTH:
 				break;
 
 			case GETCH:
@@ -287,9 +266,6 @@ void run_program(CELL start)
 			case INC:
 				break;
 
-			case RDEPTH:
-				break;
-
 			case DEC:
 				break;
 
@@ -308,13 +284,29 @@ void run_program(CELL start)
 			case OPENBLOCK:
 				break;
 
-			case DBGDOT:
+			case CLOSEBLOCK:
 				break;
 
-			case DBGDOTS:
+			case INLINE:
+				the_words[num_words].flags |= IS_INLINE;
 				break;
 
-			case RESET:
+			case IMMEDIATE:
+				the_words[num_words].flags |= IS_IMMEDIATE;
+				break;
+
+			case DOT:
+				reg1 = pop();
+				if (BASE == 10)
+					printf("%d", reg1);
+				else if (BASE == 0x10)
+					printf("%x", reg1);
+				else
+					printf("(%d in base %d)", reg1, BASE);
+				break;
+
+			case HA:
+				push((CELL)&HERE);
 				break;
 
 			case BYE:

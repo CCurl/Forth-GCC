@@ -1,4 +1,16 @@
-dw bl $0d2002 ,
-: space bl emit ;
-: ok space 'O' emit 'k' emit #13 emit #10 emit ;
-: test $456 drop ok ;
+(h) @ 5 - 
+dw the-memory $1 c, , $10 c,
+: here (h) @ ; inline
+$1 c, here 0 , $10 c, dw tst-var $1 c, , $10 c,
+: cell 4 ; inline
+: bl $20 ; inline : space bl emit ; inline
+: cr #13 emit #10 emit ; inline
+: . (.) space ; inline
+: h, here ! here 4 + (h) ! ; 
+: hc, here c! here 1+ (h) ! ;
+
+: ok space 'O' emit 'k' emit cr ;
+: test #5566 tst-var ! tst-var @ . ;
+: main test ok ;
+
+the-memory . here dup . the-memory - .

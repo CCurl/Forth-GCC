@@ -5,14 +5,63 @@
 #include "forth-vm.h"
 
 char base_fn[32];
+char bin_file[32];
 
 OPCODE_T opcodes[] = {
-	{ "nop", NOP, "nop", 0 },
-	{ "emit", EMIT, "emit", 0 },
-	{ "drop", DROP, "drop", 0 },
-	{ "comma", COMMA, ",", 0 },
-	{ "ccomma", CCOMMA, "c,", 0 },
-	{ 0, 0, 0, 0 },
+          { ".NOP.",              NOP,              "nop",              IS_INLINE }
+        , { ".LITERAL.",          LITERAL,          "LITERAL",          0 }
+        , { ".CLITERAL.",         CLITERAL,         "CLITERAL",         IS_INLINE }
+        , { ".FETCH.",            FETCH,            "@",            IS_INLINE }
+        , { ".STORE.",            STORE,            "!",            IS_INLINE }
+        , { ".CFETCH.",           CFETCH,           "c@",           IS_INLINE }
+        , { ".CSTORE.",           CSTORE,           "c!",           IS_INLINE }
+        , { ".SWAP.",             SWAP,             "SWAP",             IS_INLINE }
+        , { ".DROP.",             DROP,             "DROP",             IS_INLINE }
+        , { ".DUP.",              DUP,              "DUP",              IS_INLINE }
+        , { ".SLITERAL.",         SLITERAL,         "SLITERAL",         IS_INLINE }
+        , { ".EMIT.",             EMIT,             "emit",             IS_INLINE }
+        , { ".JMP.",              JMP,              "JMP",              0 }
+        , { ".JMPZ.",             JMPZ,             "JMPZ",             0 }
+        , { ".JMPNZ.",            JMPNZ,            "JMPNZ",            0 }
+        , { ".CALL.",             CALL,             "CALL",             0 }
+        , { ".RET.",              RET,              "RET",              0 }
+        , { ".OR.",               OR,               "OR",               IS_INLINE }
+        , { ".XOR.",              XOR,              "XOR",               IS_INLINE }
+        , { ".COM.",              COM,              "COM",               IS_INLINE }
+        , { ".ADD.",              ADD,              "+",              IS_INLINE }
+        , { ".SUB.",              SUB,              "-",              IS_INLINE }
+        , { ".MUL.",              MUL,              "*",              IS_INLINE }
+        , { ".DIV.",              DIV,              "/",              IS_INLINE }
+        , { ".LT.",               LT,               "<",               IS_INLINE }
+        , { ".EQ.",               EQ,               "=",               IS_INLINE }
+        , { ".GT.",               GT,               ">",               IS_INLINE }
+        , { ".OVER.",             OVER,             "over",             IS_INLINE }
+        , { ".COMPARE.",          COMPARE,          "COMPARE",          IS_INLINE }
+        , { ".DTOR.",             DTOR,             ">r",             IS_INLINE }
+        , { ".RTOD.",             RTOD,             "r>",             IS_INLINE }
+        , { ".LOGLEVEL.",         LOGLEVEL,         "LOGLEVEL",         IS_INLINE }
+        , { ".AND.",              AND,              "AND",              IS_INLINE }
+        , { ".GETCH.",            GETCH,            "GETCH",            IS_INLINE }
+        , { ".COMPAREI.",         COMPAREI,         "COMPAREI",         IS_INLINE }
+        , { ".SLASHMOD.",         SLASHMOD,         "SLASHMOD",         IS_INLINE }
+        , { ".NOT.",              NOT,              "NOT",              IS_INLINE }
+        , { ".RFETCH.",           RFETCH,           "RFETCH",           IS_INLINE }
+        , { ".INC.",              INC,              "1+",              IS_INLINE }
+        , { ".DEC.",              DEC,              "1-",              IS_INLINE }
+        , { ".GETTICK.",          GETTICK,          "GETTICK",          IS_INLINE }
+        , { ".SHIFTLEFT.",        SHIFTLEFT,        "<<",        IS_INLINE }
+        , { ".SHIFTRIGHT.",       SHIFTRIGHT,       ">>",       IS_INLINE }
+        , { ".PLUSSTORE.",        PLUSSTORE,        "+!",        IS_INLINE }
+        , { ".OPENBLOCK.",        OPENBLOCK,        "open-block",        IS_INLINE }
+        , { ".CLOSEBLOCK.",       CLOSEBLOCK,       "close-block",        IS_INLINE }
+        , { ".DBGDOT.",           DOT,              "(.)",           IS_INLINE }
+        , { ".HA.",               HA,               "(h)",            IS_INLINE }
+        , { ".COMMA.",            COMMA,            ",",            IS_INLINE }
+        , { ".CCOMMA.",           CCOMMA,           "c,",            IS_INLINE }
+        , { ".IMMEDIATE.",        IMMEDIATE,        "immediate",            0 }
+        , { ".INLINE.",           INLINE,           "inline",            0 }
+        , { ".BYE.",              BYE,              "BYE",              IS_INLINE }
+		, { 0,0,0,0 }
 };
 
 // ---------------------------------------------------------------------
@@ -71,7 +120,7 @@ char *get_word(char *stream, char *word)
 // ---------------------------------------------------------------------
 DICT_T *define_word(char *word)
 {
-	printf("\ndefining word [%s] at %08lx", word, HERE);
+	// printf("\ndefining word [%s] at %08lx", word, HERE);
 	DICT_T *e = (&the_words[++num_words]);
 	e->flags = 0;
 	e->XT = HERE;
@@ -166,18 +215,34 @@ bool is_number(char *word, CELL *num)
 // ---------------------------------------------------------------------
 char *parse_word(char *word, char *stream)
 {
-	if ((word[0] == '\\') && (StrLen(word) == 1))
+	// printf("-%s-", word);
+	if ((*word == '\\') && (*(word+1) == 0))
 	{
 		while (*stream > (char)31)
 			++stream;
 		return stream;
 	}
 
-	if ((word[0] == '(') && (StrLen(word) == 1))
+	if ((*word == '(') && (*(word+1) == 0))
 	{
 		while (*stream != ')')
 			++stream;
 		return ++stream;
+	}
+
+	if ((*word == ':') && (*(word+1) == 0))
+	{
+		stream = get_word(stream, word);
+		define_word(word);
+		STATE = 1;
+		return stream;
+	}
+
+	if ((*word == ';') && (*(word+1) == 0))
+	{
+		ccomma(RET);
+		STATE = 0;
+		return stream;
 	}
 
 	if (strcmpi(word, "dw") == 0)
@@ -187,32 +252,17 @@ char *parse_word(char *word, char *stream)
 		return stream;
 	}
 
-	if ((word[0] == ':') && (StrLen(word) == 1))
-	{
-		stream = get_word(stream, word);
-		define_word(word);
-		STATE = 1;
-		return stream;
-	}
-
-	if ((word[0] == ';') && (StrLen(word) == 1))
-	{
-		ccomma(RET);
-		STATE = 0;
-		return stream;
-	}
-
 	DICT_T *ep = find_word(word);
 	if (ep)
 	{
-		if ((STATE == 1) && (ep->flags != IS_IMMEDIATE))
+		if ((STATE == 0) || (ep->flags & IS_IMMEDIATE))
 		{
-			ccomma(CALL);
-			comma(ep->XT);
+			run_program(ep->XT);
 		}
 		else
 		{
-			run_program(ep->XT);
+			ccomma(CALL);
+			comma(ep->XT);
 		}
 		
 		return stream;
@@ -222,15 +272,15 @@ char *parse_word(char *word, char *stream)
 	if (op)
 	{
 		// printf("op:%s,%d", op->forth_prim, op->opcode);
-		if ((STATE == 1) && (op->flags != IS_IMMEDIATE))
-		{
-			ccomma(op->opcode);
-		}
-		else
+		if ((STATE == 0) || (op->flags & IS_IMMEDIATE))
 		{
 			BYTE_AT(HERE + 0x0100) = op->opcode;
 			BYTE_AT(HERE + 0x0101) = RET;
 			run_program(HERE + 0x0100);
+		}
+		else
+		{
+			ccomma(op->opcode);
 		}
 		
 		return stream;
@@ -266,7 +316,7 @@ char *parse_word(char *word, char *stream)
 void do_compile(char *stream)
 {
 	char word[64];
-	printf("\ncontents: %08lx", stream);
+	// printf("\ncontents: %08lx", stream);
 	while (true)
 	{
 		stream = get_word(stream, word);
@@ -288,7 +338,7 @@ void write_output()
 	FILE *fp;
 
 	StrCpy(fn, base_fn);
-	StrCat(fn, ".out");
+	StrCat(fn, ".bin");
 	fp = fopen(fn, "wb");
 	if (!fp)
 	{
@@ -299,7 +349,34 @@ void write_output()
 	fwrite(the_memory, 1, MEM_SZ, fp);
 	fclose(fp);
 
-	printf("\n%d words", num_words);
+	// printf("\n%d words", num_words);
+
+	StrCpy(fn, base_fn);
+	StrCat(fn, ".txt");
+	fp = fopen(fn, "wt");
+	if (!fp)
+	{
+		printf("\nUnable to open '%s'", fn);
+		return;
+	}
+
+	fprintf(fp, "Words:\n-------------------------------\n");
+	for (int i = num_words; i > 0; i--)
+	{
+		DICT_T *e = &the_words[i];
+		fprintf(fp, "%4d: %02x %08lx %s\n", i, e->flags, e->XT, e->name);
+	}
+
+	fprintf(fp, "\nOpcodes:\n------------------------\n");
+	for (int i = 0; ; i++)
+	{
+		OPCODE_T *op = &opcodes[i];
+		if (op->forth_prim == NULL)
+			break;
+		fprintf(fp, "#%02d ($%02x): %s\n", op->opcode, op->opcode, op->forth_prim);
+	}
+
+	fclose(fp);
 }
 
 // ---------------------------------------------------------------------
@@ -310,6 +387,11 @@ void parse_arg(char *arg)
 	{
 		StrCpy(base_fn, arg+2);
 	}
+	// -r:binFile
+	if (*arg == 'r')
+	{
+		StrCpy(bin_file, arg+2);
+	}
 }
 
 // ---------------------------------------------------------------------
@@ -318,10 +400,11 @@ int main (int argc, char **argv)
 	char fn[64];
 	FILE *fp;
 
+	StrCpy(bin_file, "");
 	StrCpy(base_fn, "newfc");
 	HERE = (CELL)the_memory;
 
-	printf("&HERE: %08lx, memory: %08lx-%08lx", &HERE, &the_memory[0], &the_memory[MEM_SZ-1]);
+	// printf("&HERE: %08lx, memory: %08lx-%08lx", &HERE, &the_memory[0], &the_memory[MEM_SZ-1]);
 
 	the_memory[MEM_SZ-1] = 'x';
 
@@ -334,6 +417,22 @@ int main (int argc, char **argv)
         }
     }
 
+	// run existing bin file?
+	if (bin_file[0] != (char)0)
+	{
+		fp = fopen(bin_file, "rb");
+		if (!fp)
+		{
+			printf("\nUnable to open '%s'", bin_file);
+			return 1;
+		}
+		fread(the_memory, MEM_SZ, 1, fp);
+		fclose(fp);
+		fp = NULL;
+		run_program((CELL)the_memory);
+		return 0;
+	}
+
 	StrCpy(fn, base_fn);
 	StrCat(fn, ".src");
 	fp = fopen(fn, "rt");
@@ -345,7 +444,8 @@ int main (int argc, char **argv)
 
 	fseek(fp, 0, SEEK_END);
 	long sz = ftell(fp);
-	char *contents = (char *)malloc(sz);
+	char *contents = (char *)malloc(sz+4);
+	memset(contents, 0, sz+4);
 	fseek(fp, 0, SEEK_SET);
 	fread(contents, sz, 1, fp);
 	fclose(fp);
@@ -353,7 +453,7 @@ int main (int argc, char **argv)
 	HERE = (CELL)the_memory;
 	ccomma(BYE);
 	comma(0);
-	printf(" HERE now: %08lx", HERE);
+	// printf(" HERE now: %08lx", HERE);
 
 	BASE = 10;
 
