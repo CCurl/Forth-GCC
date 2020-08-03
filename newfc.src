@@ -1,0 +1,2 @@
+: ok $20 emit 'O' emit 'k' emit #13 emit #10 emit ;
+: test $456 drop ok ;

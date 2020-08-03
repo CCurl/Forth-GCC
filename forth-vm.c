@@ -15,6 +15,8 @@ BYTE the_memory[MEM_SZ];
 CELL BASE = 10, STATE = 0;
 CELL HERE, LAST;
 CELL reg1, reg2, src, dst;
+DICT_T the_words[MAX_WORDS];
+int num_words = 0;
 
 // ---------------------------------------------------------------------
 // ---------------------------------------------------------------------
@@ -70,11 +72,11 @@ void run_program(CELL start)
 	int call_depth = 1;
 	PC = (start == 0) ? (CELL)the_memory : start ;
 
-	TRACE("Running (PC=%04lx) ... ", PC);
+	printf("Running (PC=%04lx) ... ", PC);
 	while (true)
 	{
         IR = BYTE_AT(PC++);
-        printf("(PC=%08lx, IR=%d)", PC-1, IR);
+        // printf("(PC=%08lx, IR=%d)", PC-1, IR);
 
 		switch(IR)
 		{
@@ -139,6 +141,7 @@ void run_program(CELL start)
 			case RET:
 				if ((--call_depth) < 1)
 					return;
+				PC = rpop();
 				break;
 
 			case OR:

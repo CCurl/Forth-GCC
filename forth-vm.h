@@ -28,3 +28,6 @@ extern CELL pop();
 extern void rpush(CELL);
 extern CELL rpop();
 extern void run_program(CELL);
+
+extern DICT_T the_words[];
+extern int num_words;
