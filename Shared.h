@@ -16,14 +16,15 @@
 // The VM's instruction set
 // ************************************************************************************************
 enum {
-	LITERAL, FETCH, STORE, SWAP, DROP, DUP, SLITERAL, 
-	JMP, JMPZ, JMPNZ, CALL, RET, OR, CLITERAL, CFETCH, 
-	CSTORE, ADD, SUB, MUL, DIV, LT, EQ, GT, DICTP, EMIT, 
+	NOP = 0, LITERAL, CLITERAL, FETCH, STORE, SWAP, DROP, DUP, 
+	SLITERAL, JMP, JMPZ, JMPNZ, CALL, RET, OR, CFETCH, CSTORE, 
+	ADD, SUB, MUL, DIV, LT, EQ, GT, DICTP, EMIT, 
 	OVER, COMPARE, FOPEN, FREAD, FREADLINE, FWRITE, FCLOSE, 
 	DTOR, RTOD, LOGLEVEL, AND, PICK, DEPTH, GETCH, COMPAREI, 
 	SLASHMOD, NOT, RFETCH, INC, RDEPTH, DEC, GETTICK, 
-	SHIFTLEFT, SHIFTRIGHT, PLUSSTORE, OPENBLOCK, XOR, COM, BYE
-}
+	SHIFTLEFT, SHIFTRIGHT, PLUSSTORE, OPENBLOCK, XOR, COM,
+	RESET, DBGDOT, DBGDOTS, CCOMMA, COMMA, BYE
+} OPCODES;
 
 // ************************************************************************************************
 // ************************************************************************************************
@@ -75,6 +76,9 @@ extern CELL ADDR_MEM_SZ;   // 0x24
 
 #define GETAT(loc) *(CELL *)(&the_memory[loc])
 #define SETAT(loc, val) *(CELL *)(&the_memory[loc]) = val
+
+#define comma(val)  (*(CELL *)HERE = (CELL)val); HERE += 4
+#define ccomma(val) (*(BYTE *)HERE = (BYTE)val); HERE += 1
 
 #define true 1
 #define false 0

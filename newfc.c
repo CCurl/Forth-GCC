@@ -6,9 +6,6 @@
 
 char base_fn[32];
 
-#define COMMA(val)  (*(CELL *)HERE = (CELL)val); HERE += 4
-#define CCOMMA(val) (*(BYTE *)HERE = (BYTE)val); HERE += 1
-
 OPCODE_T opcodes[] = {
 	{ "nop", NOP, "nop", 0 },
 	{ "emit", EMIT, "emit", 0 },
@@ -183,6 +180,13 @@ char *parse_word(char *word, char *stream)
 		return ++stream;
 	}
 
+	if (strcmpi(word, "dw") == 0)
+	{
+		stream = get_word(stream, word);
+		define_word(word);
+		return stream;
+	}
+
 	if ((word[0] == ':') && (StrLen(word) == 1))
 	{
 		stream = get_word(stream, word);
@@ -193,7 +197,7 @@ char *parse_word(char *word, char *stream)
 
 	if ((word[0] == ';') && (StrLen(word) == 1))
 	{
-		CCOMMA(RET);
+		ccomma(RET);
 		STATE = 0;
 		return stream;
 	}
@@ -203,8 +207,8 @@ char *parse_word(char *word, char *stream)
 	{
 		if ((STATE == 1) && (ep->flags != IS_IMMEDIATE))
 		{
-			CCOMMA(CALL);
-			COMMA(ep->XT);
+			ccomma(CALL);
+			comma(ep->XT);
 		}
 		else
 		{
@@ -220,7 +224,7 @@ char *parse_word(char *word, char *stream)
 		// printf("op:%s,%d", op->forth_prim, op->opcode);
 		if ((STATE == 1) && (op->flags != IS_IMMEDIATE))
 		{
-			CCOMMA(op->opcode);
+			ccomma(op->opcode);
 		}
 		else
 		{
@@ -239,8 +243,16 @@ char *parse_word(char *word, char *stream)
 		push(the_num);
 		if (STATE == 1)
 		{
-			CCOMMA(LITERAL);
-			COMMA(pop());
+			if ((0 <= the_num) && (the_num < 0x0100))
+			{
+				ccomma(CLITERAL);
+				ccomma(pop());
+			}
+			else
+			{
+				ccomma(LITERAL);
+				comma(pop());
+			}
 		}
 		return stream;
 	}
@@ -293,9 +305,10 @@ void write_output()
 // ---------------------------------------------------------------------
 void parse_arg(char *arg) 
 {
-	if (*arg == '')
+	// -b:baseFn
+	if (*arg == 'b')
 	{
-
+		StrCpy(base_fn, arg+2);
 	}
 }
 
@@ -338,8 +351,8 @@ int main (int argc, char **argv)
 	fclose(fp);
 
 	HERE = (CELL)the_memory;
-	CCOMMA(BYE);
-	COMMA(0);
+	ccomma(BYE);
+	comma(0);
 	printf(" HERE now: %08lx", HERE);
 
 	BASE = 10;

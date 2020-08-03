@@ -1,2 +1,4 @@
-: ok $20 emit 'O' emit 'k' emit #13 emit #10 emit ;
+dw bl $0d2002 ,
+: space bl emit ;
+: ok space 'O' emit 'k' emit #13 emit #10 emit ;
 : test $456 drop ok ;
