@@ -1,3 +1,4 @@
+#include <winbase.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -251,6 +252,10 @@ void run_program(CELL start)
 				break;
 
 			case SLASHMOD:
+				reg1 = pop();
+				reg2 = pop();
+				push(reg2%reg1);
+				push(reg2/reg1);
 				break;
 
 			case NOT:
@@ -270,6 +275,7 @@ void run_program(CELL start)
 				break;
 
 			case GETTICK:
+				push((CELL)GetTickCount());
 				break;
 
 			case SHIFTLEFT:
@@ -281,12 +287,23 @@ void run_program(CELL start)
 				break;
 
 			case PLUSSTORE:
+				reg1 = pop();
+				reg2 = pop();
+				CELL_AT(reg1) += reg2;
 				break;
 
 			case OPENBLOCK:
+				reg1 = 0;
+				// StrCpy(fn, "block-");
+				// StrCat(fn, "");
+				// StrCat(fn, ".txt");
+				// fopen(fn, "rt");
+				push(reg1);
 				break;
 
 			case CLOSEBLOCK:
+				reg1 = pop();
+				fclose(reg1);
 				break;
 
 			case INLINE:
@@ -325,19 +342,19 @@ void run_program(CELL start)
 
 			case TOSRC:
 				src = pop();
-				return;
+				break;
 
 			case SRC:
 				push(src);
-				return;
+				break;
 
 			case TODST:
 				dst = pop();
-				return;
+				break;
 
 			case DST:
 				push(dst);
-				return;
+				break;
 
 			case BYE:
 				return;
