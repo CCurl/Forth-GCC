@@ -5,7 +5,7 @@
 #include "forth-vm.h"
 
 char base_fn[32];
-char bin_file[32];
+bool run_saved = false;
 
 OPCODE_T opcodes[] = {
           { ".NOP.",              NOP,              "nop",              IS_INLINE }
@@ -338,6 +338,43 @@ void do_compile(char *stream)
 	SETAT(1, the_words[num_words].XT);
 }
 
+bool open_file(char *fn, char *mode, FILE **pfp)
+{
+	*pfp = NULL;
+	FILE *fp = fopen(fn, mode);
+	if (!fp)
+	{
+		printf("\nUnable to open '%s'", fn);
+		return false;
+	}
+	*pfp = fp;
+	return true;
+}
+
+// ---------------------------------------------------------------------
+bool read_binaries() 
+{
+	char fn[64];
+	StrCpy(fn, base_fn);
+	StrCat(fn, ".bin");
+	FILE *fp = NULL;
+	if (!open_file(fn, "rb", &fp))
+		return false;
+	fread(the_memory, MEM_SZ, 1, fp);
+	fclose(fp);
+
+	StrCpy(fn, base_fn);
+	StrCat(fn, ".inf");
+	if (!open_file(fn, "rb", &fp))
+		return false;
+	fread(&HERE, sizeof(CELL), 1, fp);
+	fread(&num_words, sizeof(num_words), 1, fp);
+	int num = fread(the_words, sizeof(DICT_T), MAX_WORDS, fp);
+	fclose(fp);
+
+	return true;
+}
+
 // ---------------------------------------------------------------------
 void write_output() 
 {
@@ -346,12 +383,8 @@ void write_output()
 
 	StrCpy(fn, base_fn);
 	StrCat(fn, ".bin");
-	fp = fopen(fn, "wb");
-	if (!fp)
-	{
-		printf("\nUnable to open '%s'", fn);
+	if (!open_file(fn, "wb", &fp))
 		return;
-	}
 
 	fwrite(the_memory, 1, MEM_SZ, fp);
 	fclose(fp);
@@ -360,12 +393,8 @@ void write_output()
 
 	StrCpy(fn, base_fn);
 	StrCat(fn, ".txt");
-	fp = fopen(fn, "wt");
-	if (!fp)
-	{
-		printf("\nUnable to open '%s'", fn);
+	if (!open_file(fn, "wt", &fp))
 		return;
-	}
 
 	fprintf(fp, "Words:\n-------------------------------\n");
 	for (int i = num_words; i > 0; i--)
@@ -384,8 +413,15 @@ void write_output()
 	}
 
 	fclose(fp);
+	StrCpy(fn, base_fn);
+	StrCat(fn, ".inf");
+	if (!open_file(fn, "wb", &fp))
+		return;
+	fwrite(&HERE, sizeof(CELL), 1, fp);
+	fwrite(&num_words, sizeof(num_words), 1, fp);
+	fwrite(the_words, sizeof(DICT_T), num_words+4, fp);
+	fclose(fp);
 }
-
 // ---------------------------------------------------------------------
 void parse_arg(char *arg) 
 {
@@ -396,9 +432,7 @@ void parse_arg(char *arg)
 	}
 	// -r:binFile
 	if (*arg == 'r')
-	{
-		StrCpy(bin_file, arg+2);
-	}
+		run_saved = true;
 }
 
 // ---------------------------------------------------------------------
@@ -407,7 +441,7 @@ int main (int argc, char **argv)
 	char fn[64];
 	FILE *fp;
 
-	StrCpy(bin_file, "");
+	StrCpy(base_fn, "");
 	StrCpy(base_fn, "mforth");
 	HERE = (CELL)the_memory;
 
@@ -425,29 +459,21 @@ int main (int argc, char **argv)
     }
 
 	// run existing bin file?
-	if (bin_file[0] != (char)0)
+	if (run_saved)
 	{
-		fp = fopen(bin_file, "rb");
-		if (!fp)
+		if (read_binaries())
 		{
-			printf("\nUnable to open '%s'", bin_file);
-			return 1;
+			run_program((CELL)the_memory);
+			return 0;
 		}
-		fread(the_memory, MEM_SZ, 1, fp);
-		fclose(fp);
-		fp = NULL;
-		run_program((CELL)the_memory);
-		return 0;
+		else
+			return 1;
 	}
 
 	StrCpy(fn, base_fn);
 	StrCat(fn, ".src");
-	fp = fopen(fn, "rt");
-	if (!fp)
-	{
-		printf("\nUnable to open '%s'", fn);
+	if (!open_file(fn, "rt", &fp))
 		return 1;
-	}
 
 	fseek(fp, 0, SEEK_END);
 	long sz = ftell(fp);
