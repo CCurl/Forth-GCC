@@ -1,7 +1,7 @@
 #ifndef __FORTH_SHARED__
 #define __FORTH_SHARED__
 
-// #define __VERBOSE__ 1
+#define __VERBOSE__ 1
 
 #ifdef __VERBOSE__
 	#define TRACE(...) printf(__VA_ARGS__)
@@ -93,7 +93,6 @@ typedef struct {
 	char *asm_instr;
 	BYTE opcode;
 	char *forth_prim;
-	void (*func)();
 	CELL flags;
 } OPCODE_T;
 
@@ -113,12 +112,8 @@ typedef struct {
 #define NULL (0)
 #define CELL_SZ (sizeof(CELL))
 
-#define DSTACK_SZ (CELL_SZ * 64)
-#define RSTACK_SZ (CELL_SZ * 64)
-#define STACKS_SZ (DSTACK_SZ + RSTACK_SZ)
-
-#define STACK_BUF_CELLS 2
-#define STACK_BUF_SZ (STACK_BUF_CELLS * CELL_SZ)
+#define DSTACK_SZ 64
+#define RSTACK_SZ 64
 
 extern CELL ADDR_CELL;     // 0x08
 extern CELL ADDR_HERE;     // 0x10
@@ -133,6 +128,7 @@ extern int MEM_SZ;
 
 #define GETAT(loc) *(CELL *)(&the_memory[loc])
 #define SETAT(loc, val) *(CELL *)(&the_memory[loc]) = val
+#define SETBYTE(loc, val) *(BYTE *)(&the_memory[loc]) = val
 
 #define _T(x) x
 

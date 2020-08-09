@@ -11,7 +11,8 @@ char input_fn[64];
 char output_fn[64];
 FILE *input_fp = NULL;
 FILE *output_fp = NULL;
-
+CELL PC;
+BYTE IR;
 
 CELL ADDR_CELL     = 0x08;
 CELL ADDR_HERE     = 0x10;
@@ -761,8 +762,6 @@ void do_dis()
 
     printf("disassembling to file %s... ", output_fn);
     fprintf(output_fp, "; memory-size: %ld bytes, (%04lx hex)\n", memory_size, memory_size);
-    fprintf(output_fp, "; data-stack: %04lx, grows up\n", memory_size - STACKS_SZ);
-    fprintf(output_fp, "; return-stack: %04lx, grows down\n;\n", memory_size - CELL_SZ);
 	dis_vm(output_fp);
 
     fclose(output_fp);

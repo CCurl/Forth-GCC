@@ -1,6 +1,8 @@
+#include <winbase.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <conio.h>
 #include "forth-vm.h"
 
 // ------------------------------------------------------------------------------------------
@@ -9,15 +11,16 @@
 BYTE *the_memory;
 long memory_size = 0;
 
-CELL PC = 0;		// The "program counter"
-BYTE IR = 0;		// The "instruction register"
+CELL dStack[DSTACK_SZ];
+CELL rStack[RSTACK_SZ];
 
-CELL *RSP = NULL, rdepth = 0;	// the return stack
-CELL *DSP = NULL, depth = 0;	// the data stack
+CELL depth = 0;	// the data stack
+CELL *DSP = dStack, *DSS = dStack, *DSE = &(dStack[DSTACK_SZ-1]);
+
+CELL rdepth = 0;	// the return stack
+CELL *RSP = rStack, *RSS = rStack, *RSE = &(rStack[RSTACK_SZ-1]);
+
 CELL TOS = 0;					// The top element on the stack
-
-CELL *dsp_init = NULL;
-CELL *rsp_init = NULL;
 
 bool isEmbedded = false;
 bool isBYE = false;
@@ -25,16 +28,12 @@ bool isBYE = false;
 int _QUIT_HIT = 0;
 int MEM_SZ = 0;
 
-CELL dStack[256];
-CELL rStack[256];
+CELL arg1, arg2, arg3;
 
 static inline CELL GETTOS() { return TOS; }
 static inline CELL GET2ND() { return *(DSP); }
 static inline void SETTOS(CELL val) { TOS = (val); }
 static inline void SET2ND(CELL val) { *(DSP) = (val); }
-
-void init_vm_vectors();
-extern void (*vm_prims[])();
 
 // ------------------------------------------------------------------------------------------
 void create_vm()
@@ -57,131 +56,79 @@ void destroy_vm()
 }
 
 // ------------------------------------------------------------------------------------------
-void reset_vm()
-{
-	//dsp_init = (CELL *)&the_memory[memory_size - STACKS_SZ];
-	//rsp_init = (CELL *)&the_memory[memory_size - CELL_SZ];
-	dsp_init = dStack;
-	rsp_init = rStack;
-	RSP = rsp_init;
-	DSP = dsp_init;
-	PC = 0;
-	depth = 0;
-	rdepth = 0;
-}
-
-// ------------------------------------------------------------------------------------------
 void init_vm(int vm_size)
 {
 	memory_size = vm_size > 0 ? vm_size : MEM_SZ;
 
-	init_vm_vectors();
 	create_vm();
-	reset_vm();
 	SETAT(ADDR_MEM_SZ, memory_size);
 }
 
 // ------------------------------------------------------------------------------------------
 void push(CELL val)
 {
-	// trace(" push(%ld, DSP=0x%08lx) ", val, DSP);
-	if (depth < 64)
-	{
-		++depth;
-		*(++DSP) = TOS;
-		TOS = val;
-		return;
-	}
-	overflow();
+	++depth;
+	if (++DSP > DSE) DSP = DSS;
+	*(DSP) = TOS;
+	TOS = val;
 }
 
 CELL pop()
 {
-	if (depth > 0)
-	{
-		CELL ret = TOS;
-		--depth;
-		TOS = *(DSP--);
-		return ret;
-	}
-	underflow();
-	return 0;
+	CELL val = TOS;
+	--depth;
+	TOS = (*DSP);
+	if (--DSP < DSS) DSP = DSE;
+	return val;
 }
 
 // ------------------------------------------------------------------------------------------
 void rpush(CELL val)
 {
-	if (rdepth  < 64)
-	{
-		++rdepth;
-		*(--RSP) = (CELL)(val);
-		return;
-	}
-
-	printf(" return stack overflow!");
-	reset_vm();
-	// _QUIT_HIT = 1;
-	// isBYE = 1;
+	// printf("(rsp=%lx", RSP);
+	if (++RSP > RSE) RSP = RSS;
+	*(RSP) = val;
+	// printf(",%lx),", RSP);
+	++rdepth;
 }
 
 CELL rpop()
 {
-	if (rdepth > 0)
-	{
-		--rdepth;
-		return *(RSP++);
-	}
-	printf(" return stack underflow! (at PC=0x%04lx)", PC-1);
-	reset_vm();
-	// _QUIT_HIT = 1;
-	// isBYE = 1;
-	return PC;
+	// printf("(rsp=%lx", RSP);
+	CELL val = *(RSP);
+	if (++RSP < RSS) RSP = RSE;
+	// printf(",%lx),", RSP);
+	--rdepth;
+	return val;
 }
 
 // ------------------------------------------------------------------------------------------
 // Where all the work is done
 // ------------------------------------------------------------------------------------------
-CELL cpu_loop()
-{
-	isBYE = false;
-	debug("Running (PC=%04lx) ... ", PC);
-	while (true)
-	{
-        // trace("PC=%04lx, IR=%d - ", PC, (int)the_memory[PC]);
-        IR = the_memory[PC++];
-        vm_prims[IR]();
-
-		if (isBYE)
-		{
-			debug("done. PC=%04lx\n", PC);
-			return 1;
-		}
-	}
-	return 0;
-}
-
-// ------------------------------------------------------------------------------------------
-// Where all the work is done
-// ------------------------------------------------------------------------------------------
-CELL run(CELL start)
+void cpu_loop(CELL start)
 {
 	CELL PC = start;
 	BYTE IR;
 	int call_depth = 1;
 
 	isBYE = false;
-	debug("Running (PC=%04lx) ... ", PC);
+	TRACE("Running ... ");
 	while (true)
 	{
 		IR = the_memory[PC++];
+		TRACE("(PC=%04lx, IR=%d)", PC-1, IR);
 		switch (IR)
 		{
 		case LITERAL:
 			arg1 = GETAT(PC);
+			TRACE("-LIT #%d ($%lx)-", arg1, arg1);
+			push(arg1);
 			PC += CELL_SZ;
 			break;
 		case FETCH:
+			TRACE("-FETCH ($%lx", TOS);
 			TOS = GETAT(TOS);
+			TRACE(",$%lx)-", TOS);
 			break;
 		case STORE:
 			arg2 = pop();
@@ -237,6 +184,7 @@ CELL run(CELL start)
 			break;
 		case CLITERAL:
 			arg1 = the_memory[PC];
+			push(arg1);
 			PC += 1;
 			break;
 		case CFETCH:
@@ -277,126 +225,254 @@ CELL run(CELL start)
 			TOS = (TOS > arg1) ? -1 : 0 ;
 			break;
 		case DICTP:
-			//TODO
+			PC += CELL_SZ;
 			break;
 		case EMIT:
-			//TODO
+			arg1 = pop();
+			putchar(arg1);
 			break;
 		case OVER:
 			arg1 = GET2ND();
 			push(arg1);
 			break;
 		case COMPARE:
-			//TODO
+			arg2 = pop();
+			arg1 = pop();
+			{
+				char *cp1 = (char *)&the_memory[arg1];
+				char *cp2 = (char *)&the_memory[arg2];
+				arg3 = strcmp(cp1, cp2) ? 0 : 1;
+				push(arg3);
+			}
 			break;
 		case FOPEN:
-			//TODO
+			arg3 = pop();   // type: 0 => text, 1 => binary
+			arg2 = pop();   // mode: 0 => read, 1 => write
+			arg1 = pop();   // name
+			{
+				char *fileName = (char *)&the_memory[arg1 + 1];
+				char mode[4];
+				sprintf(mode, "%c%c", (arg2 == 0) ? 'r' : 'w', (arg3 == 0) ? 't' : 'b');
+				trace("FOPEN %s, %s\n", fileName, mode);
+				FILE *fp = fopen(fileName, mode);
+				arg1 = (CELL) fp;
+				push(arg1);
+				push(fp != NULL ? 1 : 0);
+			}
 			break;
 		case FREAD:
-			//TODO
+			arg3 = pop();
+			arg2 = pop();
+			arg1 = pop();
+			{
+				BYTE *pBuf = (BYTE *)&the_memory[arg1 + 1];
+				int num = fread(pBuf, sizeof(BYTE), arg2, (arg3 == 0) ? stdin : (FILE *)arg3);
+				push(num);
+			}
 			break;
 		case FREADLINE:
-			//TODO
+			arg3 = pop();		// FP - 0 means STDIN
+			arg2 = pop();		// max-sz
+			arg1 = pop();		// to-addr - NB: this is a COUNTED and NULL-TERMINATED string!
+			{
+				char *tgt = (char *)&the_memory[arg1];
+				FILE *fp = arg3 ? (FILE *)arg3 : stdin;
+				char *pBuf = tgt;
+				if (fgets((pBuf+1), arg2, fp) != (pBuf+1))
+				{
+					trace("<EOF>\n");
+					*(pBuf) = 0;
+					*(pBuf+1) = (char)0;
+					push(0);
+					return;
+				}
+				arg2 = (CELL)strlen(pBuf+1);
+				// Strip off the trailing newline if there
+				if ((arg2 > 0) && (pBuf[arg2] == '\n'))
+				{
+					pBuf[arg2--] = (char)NULL;
+				}
+				*(pBuf) = (char)(arg2);
+				push((arg2 > 0) ? arg2 : 1);
+				trace("%d: [%s]\n", (int)pBuf[0], pBuf+1);
+			}
 			break;
 		case FWRITE:
-			//TODO
+			arg3 = pop();
+			arg2 = pop();
+			arg1 = pop();
+			{
+				BYTE *pBuf = (BYTE *)&the_memory[arg1];
+				int num = fwrite(pBuf, sizeof(BYTE), arg2, arg3 == 0 ? stdin : (FILE *)arg3);
+				push(num);
+			}
 			break;
 		case FCLOSE:
-			//TODO
+			arg1 = pop();
+			if (arg1 != 0)
+				fclose((FILE *)arg1);
 			break;
 		case DTOR:
-			//TODO
+			rpush(pop());
 			break;
 		case RTOD:
-			//TODO
+			push(rpop());
 			break;
 		case LOGLEVEL:
-			//TODO
+			arg1 = pop();
 			break;
 		case AND:
 			arg1 = pop();
 			TOS &= arg1;
 			break;
 		case PICK:
-			//TODO
+			arg1 = TOS;
+			TOS = *(DSP - (arg1));
 			break;
 		case DEPTH:
-			//TODO
+			push(depth);
 			break;
 		case GETCH:
-			//TODO
+			push(getch());
 			break;
 		case COMPAREI:
-			//TODO
+			arg2 = pop();
+			arg1 = pop();
+			{
+				char *cp1 = (char *)&the_memory[arg1];
+				char *cp2 = (char *)&the_memory[arg2];
+				arg3 = _strcmpi(cp1, cp2) ? 0 : 1;
+				push(arg3);
+			}
 			break;
 		case SLASHMOD:
-			//TODO
+			arg1 = GET2ND();
+			arg2 = GETTOS();
+			SET2ND(arg1%arg2);		// remainder
+			SETTOS(arg1/arg2);		// quotient
 			break;
 		case NOT:
-			//TODO
+			TOS = TOS == 0 ? -1 : 0;
 			break;
 		case RFETCH:
-			//TODO
+			push(*RSP);
 			break;
 		case INC:
-			//TODO
+			++TOS;
 			break;
 		case RDEPTH:
-			//TODO
+			push(rdepth);
 			break;
 		case DEC:
-			//TODO
+			--TOS;
 			break;
 		case GETTICK:
-			//TODO
+			arg1 = GetTickCount();
+			push(arg1);
 			break;
 		case SHIFTLEFT:
-			//TODO
+		arg1 = pop();
+		TOS = TOS << (arg1 & 0x1F);
 			break;
 		case SHIFTRIGHT:
-			//TODO
+			arg1 = pop();
+			TOS = TOS >> (arg1 & 0x1F);
 			break;
 		case PLUSSTORE:
-			//TODO
+			arg2 = pop();
+			arg1 = pop();
+			arg3 = GETAT(arg2);
+			SETAT(arg2, arg3+arg1);
 			break;
 		case OPENBLOCK:
-			//TODO
+			{ 
+				char fn[64];
+				arg1 = pop();
+				sprintf(fn, "block-%04d.fs", arg1);
+				FILE *fp = fopen(fn, "rt");
+				push((CELL)fp);
+				push(TOS ? -1 : 0);
+			}
 			break;
 		case BRANCHF:
-			//TODO
+			arg1 = the_memory[PC];
+			PC += arg1;
 			break;
 		case BRANCHFZ:
-			//TODO
+			arg1 = pop();
+			if (arg1 == 0)
+			{
+				arg1 = the_memory[PC];
+				PC += arg1;
+			}
+			else
+			{
+				PC++;
+			}
 			break;
 		case BRANCHFNZ:
-			//TODO
+			arg1 = pop();
+			if (arg1 != 0)
+			{
+				arg1 = the_memory[PC];
+				PC += arg1;
+			}
+			else
+			{
+				PC++;
+			}
 			break;
 		case BRANCHB:
-			//TODO
+			arg1 = the_memory[PC];
+			PC -= arg1;
 			break;
 		case BRANCHBZ:
-			//TODO
+			arg1 = pop();
+			if (arg1 == 0)
+			{
+				arg1 = the_memory[PC];
+				PC -= arg1;
+			}
+			else
+			{
+				PC++;
+			}
 			break;
 		case BRANCHBNZ:
-			//TODO
+			arg1 = pop();
+			if (arg1 != 0)
+			{
+				arg1 = the_memory[PC];
+				PC -= arg1;
+			}
+			else
+			{
+				PC++;
+			}
 			break;
 		case DBGDOT:
-			//TODO
+			arg1 = pop();
+			printf("[%d] ", arg1);
 			break;
 		case DBGDOTS:
-			//TODO
+			printf("(%d)[", depth);
+			for (int i = 0; i < depth; i++)
+			{
+				printf("(%d)",i);
+				push(i);
+				pop();
+			}
+			printf("]");
 			break;
 		case NOP:
-			//TODO
 			break;
 		case BREAK:
 			//TODO
 			break;
 		case RESET:
-			//TODO
+			PC = 0;
 			break;
 		case BYE:
-			//TODO
 			return;
 		default:
 			break;

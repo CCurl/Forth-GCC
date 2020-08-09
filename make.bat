@@ -20,7 +20,6 @@ goto unknown
 set output=forth-compiler
 set c-files=forth-compiler.c 
 set c-files=%c-files% forth-vm.c
-set c-files=%c-files% vm-prims.c
 set c-files=%c-files% logger.c
 echo making %output% ...
 echo gcc -g -o %output% %c-files%
@@ -61,7 +60,6 @@ goto done
 set output=forth
 set c-files=forth.c
 set c-files=%c-files% forth-vm.c
-set c-files=%c-files% vm-prims.c
 set c-files=%c-files% logger.c
 echo making %output% ...
 echo gcc -Ofast -o %output% %c-files%
@@ -73,7 +71,6 @@ goto done
 set output=forth-dis
 set c-files=forth-dis.c 
 set c-files=%c-files% forth-vm.c
-set c-files=%c-files% vm-prims.c
 set c-files=%c-files% logger.c
 echo making %output% ...
 echo gcc -g -o %output% %c-files%

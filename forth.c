@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 
 	if (load_vm())
     {
-		cpu_loop();
+		cpu_loop(0);
 	}
 
     return 0;
