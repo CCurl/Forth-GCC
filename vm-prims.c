@@ -438,5 +438,3 @@ void prim_RESET()
 {
 	reset_vm();
 }
-
-}
