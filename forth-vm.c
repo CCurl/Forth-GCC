@@ -165,163 +165,242 @@ CELL cpu_loop()
 // ------------------------------------------------------------------------------------------
 CELL run(CELL start)
 {
-	CELL xPC = start;
-	BYTE xIR;
+	CELL PC = start;
+	BYTE IR;
 	int call_depth = 1;
 
 	isBYE = false;
 	debug("Running (PC=%04lx) ... ", PC);
 	while (true)
 	{
-		xIR = the_memory[xPC++];
-		switch (xIR)
+		IR = the_memory[PC++];
+		switch (IR)
 		{
-		case NOP:
-			break;
-		
 		case LITERAL:
-			arg1 = GETAT(xPC);
-			xPC += CELL_SZ;
+			arg1 = GETAT(PC);
+			PC += CELL_SZ;
 			break;
-		
-		case CLITERAL:
-			arg1 = GETAT(xPC);
-			xPC += 1;
-			break;
-		
-		case DUP:
-			push(TOS);
-			break;
-		
-		case SWAP:
-			arg1 = GET2ND();
-			SET2ND(TOS);
-			TOS = arg1;
-			break;
-		
-		case DROP:
-			pop();
-			break;
-		
-		case OVER:
-			arg1 = GET2ND();
-			push(arg1);
-			break;
-		
 		case FETCH:
 			TOS = GETAT(TOS);
 			break;
-		
-		case CFETCH:
-			TOS = the_memory[TOS];
-			break;
-		
 		case STORE:
 			arg2 = pop();
 			arg1 = pop();
 			// printf("STORE (0x%04lx to 0x%04lx)\n", arg1, arg2);
 			SETAT(arg2, arg1);
 			break;
-		
+		case SWAP:
+			arg1 = GET2ND();
+			SET2ND(TOS);
+			TOS = arg1;
+			break;
+		case DROP:
+			pop();
+			break;
+		case DUP:
+			push(TOS);
+			break;
+		case SLITERAL:
+			arg1 = pop();
+			push(arg1);
+			break;
+		case JMP:
+			PC = GETAT(PC);
+			break;
+		case JMPZ:
+			arg1 = pop();
+			if (arg1)
+				PC += CELL_SZ;
+			else
+				PC = GETAT(PC);
+			break;
+		case JMPNZ:
+			arg1 = pop();
+			if (arg1)
+				PC = GETAT(PC);
+			else
+				PC += CELL_SZ;
+			break;
+		case CALL:
+			rpush(PC+CELL_SZ);
+			PC = GETAT(PC);
+			++call_depth;
+			break;
+		case RET:
+			if (--call_depth < 1)		
+				return;
+			PC = rpop();
+			break;
+		case OR:
+			arg1 = pop();
+			TOS |= arg1;
+			break;
+		case CLITERAL:
+			arg1 = the_memory[PC];
+			PC += 1;
+			break;
+		case CFETCH:
+			TOS = the_memory[TOS];
+			break;
 		case CSTORE:
 			arg2 = pop();
 			arg1 = pop();
 			// printf("STORE (0x%04lx to 0x%04lx)\n", arg1, arg2);
 			the_memory[arg2] = (BYTE)arg1;
 			break;
-		
-		case LT:
-			arg1 = pop();
-			TOS = (TOS < arg1) ? 0 : -1 ;
-			break;
-		
-		case EQ:
-			arg1 = pop();
-			TOS = (TOS == arg1) ? 0 : -1 ;
-			break;
-		
-		case GT:
-			arg1 = pop();
-			TOS = (TOS > arg1) ? 0 : -1 ;
-			break;
-		
-		case JMP:
-			xPC = GETAT(xPC);
-			break;
-		
-		case JMPNZ:
-			arg1 = pop();
-			if (arg1)
-				xPC = GETAT(xPC);
-			else
-				xPC += CELL_SZ;
-			break;
-		
-		case JMPZ:
-			arg1 = pop();
-			if (arg1)
-				xPC += CELL_SZ;
-			else
-				xPC = GETAT(xPC);
-			break;
-		
-		case CALL:
-			rpush(xPC+CELL_SZ);
-			xPC = GETAT(xPC);
-			++call_depth;
-			break;
-		
-		case RET:
-			if (--call_depth < 1)		
-				return;
-			xPC = rpop();
-			break;
-		
-		case AND:
-			arg1 = pop();
-			TOS &= arg1;
-			break;
-		
-		case OR:
-			arg1 = pop();
-			TOS |= arg1;
-			break;
-		
 		case ADD:
 			arg1 = pop();
 			TOS += arg1;
 			break;
-		
 		case SUB:
 			arg1 = pop();
 			TOS -= arg1;
 			break;
-		
 		case MUL:
 			arg1 = pop();
 			TOS *= arg1;
 			break;
-		
 		case DIV:
 			arg1 = pop();
 			TOS /= arg1;
-			return;
-		
+			break;
+		case LT:
+			arg1 = pop();
+			TOS = (TOS < arg1) ? -1 : 0 ;
+			break;
+		case EQ:
+			arg1 = pop();
+			TOS = (TOS == arg1) ? -1 : 0 ;
+			break;
+		case GT:
+			arg1 = pop();
+			TOS = (TOS > arg1) ? -1 : 0 ;
+			break;
+		case DICTP:
+			//TODO
+			break;
+		case EMIT:
+			//TODO
+			break;
+		case OVER:
+			arg1 = GET2ND();
+			push(arg1);
+			break;
+		case COMPARE:
+			//TODO
+			break;
+		case FOPEN:
+			//TODO
+			break;
+		case FREAD:
+			//TODO
+			break;
+		case FREADLINE:
+			//TODO
+			break;
+		case FWRITE:
+			//TODO
+			break;
+		case FCLOSE:
+			//TODO
+			break;
+		case DTOR:
+			//TODO
+			break;
+		case RTOD:
+			//TODO
+			break;
+		case LOGLEVEL:
+			//TODO
+			break;
+		case AND:
+			arg1 = pop();
+			TOS &= arg1;
+			break;
+		case PICK:
+			//TODO
+			break;
+		case DEPTH:
+			//TODO
+			break;
+		case GETCH:
+			//TODO
+			break;
+		case COMPAREI:
+			//TODO
+			break;
+		case SLASHMOD:
+			//TODO
+			break;
+		case NOT:
+			//TODO
+			break;
+		case RFETCH:
+			//TODO
+			break;
+		case INC:
+			//TODO
+			break;
+		case RDEPTH:
+			//TODO
+			break;
+		case DEC:
+			//TODO
+			break;
+		case GETTICK:
+			//TODO
+			break;
+		case SHIFTLEFT:
+			//TODO
+			break;
+		case SHIFTRIGHT:
+			//TODO
+			break;
+		case PLUSSTORE:
+			//TODO
+			break;
+		case OPENBLOCK:
+			//TODO
+			break;
+		case BRANCHF:
+			//TODO
+			break;
+		case BRANCHFZ:
+			//TODO
+			break;
+		case BRANCHFNZ:
+			//TODO
+			break;
+		case BRANCHB:
+			//TODO
+			break;
+		case BRANCHBZ:
+			//TODO
+			break;
+		case BRANCHBNZ:
+			//TODO
+			break;
+		case DBGDOT:
+			//TODO
+			break;
+		case DBGDOTS:
+			//TODO
+			break;
+		case NOP:
+			//TODO
+			break;
+		case BREAK:
+			//TODO
+			break;
+		case RESET:
+			//TODO
+			break;
 		case BYE:
+			//TODO
 			return;
-		
 		default:
 			break;
 		}
-        // trace("PC=%04lx, IR=%d - ", PC, (int)the_memory[PC]);
-        IR = the_memory[PC++];
-        vm_prims[IR]();
-
-		if (isBYE)
-		{
-			debug("done. PC=%04lx\n", PC);
-			return 1;
-		}
 	}
-	return 0;
+	return;
 }
