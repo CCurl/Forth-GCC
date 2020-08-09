@@ -63,10 +63,8 @@ set c-files=%c-files% forth-vm.c
 set c-files=%c-files% vm-prims.c
 set c-files=%c-files% logger.c
 echo making %output% ...
-echo gcc -g -o %output% %c-files%
-gcc -g -o tmp %c-files%
-strip -o %output%.exe -g -S -d -X tmp.exe
-del tmp.exe
+echo gcc -Ofast -o %output% %c-files%
+gcc -Ofast -o %output% %c-files%
 if "--%2%--" == "--1--" forth
 goto done
 
