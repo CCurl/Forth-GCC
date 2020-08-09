@@ -25,9 +25,10 @@ set c-files=%c-files% logger.c
 echo making %output% ...
 echo gcc -g -o %output% %c-files%
 rem gcc -g -o %output% %c-files%
-gcc -g -o tmp %c-files%
-strip -o %output%.exe -g -S -d -X tmp.exe
-del tmp.exe
+rem gcc -g -o tmp %c-files%
+gcc -Ofast %c-files%
+rem strip -o %output%.exe -g -S -d -X tmp.exe
+rem del tmp.exe
 if "--%2%--" == "--1--" forth-compiler
 goto done
 
@@ -64,9 +65,9 @@ set c-files=%c-files% vm-prims.c
 set c-files=%c-files% logger.c
 echo making %output% ...
 echo gcc -g -o %output% %c-files%
-gcc -g -o tmp %c-files%
-strip -o %output%.exe -g -S -d -X tmp.exe
-del tmp.exe
+gcc -Ofast -o %output% %c-files%
+rem strip -o %output%.exe -g -S -d -X tmp.exe
+rem del tmp.exe
 if "--%2%--" == "--1--" forth
 goto done
 

@@ -832,7 +832,7 @@ f_PLUSSTORE:
 ;     - eax = BASE
 ;     - ecx = end of buffer for char
 ;   output:
-;     -  eax: unchanged
+;     - eax: unchanged
 ;     - ecx: ecx-1
 s_NumToText:
                 push ecx
