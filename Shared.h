@@ -1,7 +1,7 @@
 #ifndef __FORTH_SHARED__
 #define __FORTH_SHARED__
 
-#define __VERBOSE__ 1
+// #define __VERBOSE__ 1
 
 #ifdef __VERBOSE__
 	#define TRACE(...) printf(__VA_ARGS__)
@@ -129,6 +129,7 @@ extern int MEM_SZ;
 #define GETAT(loc) *(CELL *)(&the_memory[loc])
 #define SETAT(loc, val) *(CELL *)(&the_memory[loc]) = val
 #define SETBYTE(loc, val) *(BYTE *)(&the_memory[loc]) = val
+#define BYTEAT(loc) (the_memory[loc])
 
 #define _T(x) x
 

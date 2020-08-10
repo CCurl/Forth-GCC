@@ -3,19 +3,19 @@
 ;
 0005: 00 00 00
 0008: 00000004 00000000
-0010: 00001460 0000f09b 0000000a 00000000
+0010: 00001480 0000f076 0000000a 00000000
 0020: 00000000 00010000 00000000 00000000
 0030: 00000000 00000000 00000000 00000000
 ;
 0040: 18 eb ff 00 00             ; DICTP (HERE) (ffeb)
 0045: 01 4b 00 00 00             ; LITERAL 75 (0x004b)
 004a: 0c                         ; RET
-004b: 60 14 00 00                ; dw 0x1460
+004b: 80 14 00 00                ; dw 0x1480
 ;
 004f: 18 da ff 00 00             ; DICTP (LAST) (ffda)
 0054: 01 5a 00 00 00             ; LITERAL 90 (0x005a)
 0059: 0c                         ; RET
-005a: 9b f0 00 00                ; dw 0xf09b
+005a: 76 f0 00 00                ; dw 0xf076
 ;
 005e: 18 cb ff 00 00             ; DICTP BASE (ffcb)
 0063: 01 69 00 00 00             ; LITERAL 105 (0x0069)
@@ -2334,7 +2334,32 @@
 145a: 0b 2d 01 00 00             ; CALL , (012d)
 145f: 0c                         ; RET
 ;
+1460: 18 86 f0 00 00             ; DICTP bench-loop (f086)
+1465: 2e                         ; DEC
+1466: 06                         ; DUP
+1467: 5f 03                      ; BRANCHBNZ 3 (1465)
+1469: 05                         ; DROP
+146a: 0c                         ; RET
+;
+146b: 18 76 f0 00 00             ; DICTP bench (f076)
+1470: 2f                         ; GETTICK
+1471: 04                         ; SWAP
+1472: 0b 60 14 00 00             ; CALL bench-loop (1460)
+1477: 2f                         ; GETTICK
+1478: 04                         ; SWAP
+1479: 12                         ; SUB
+147a: 0b 45 0a 00 00             ; CALL . (0a45)
+147f: 0c                         ; RET
+;
 ; End of code, Dictionary:
+;
+f076: 86 f0 00 00                ; bench - (next: f086 bench-loop)
+f07a: 6b 14 00 00 00             ; XT=146b, flags=00
+f07f: 05 62 65 6e 63 68 00       ; 5, bench
+;
+f086: 9b f0 00 00                ; bench-loop - (next: f09b VARIABLE)
+f08a: 60 14 00 00 00             ; XT=1460, flags=00
+f08f: 0a 62 65 6e 63 68 2d 6c 6f 6f 70 00 ; 10, bench-loop
 ;
 f09b: ae f0 00 00                ; VARIABLE - (next: f0ae sys-info)
 f09f: 34 14 00 00 00             ; XT=1434, flags=00

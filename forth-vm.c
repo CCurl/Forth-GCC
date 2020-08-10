@@ -96,7 +96,7 @@ CELL rpop()
 {
 	// printf("(rsp=%lx", RSP);
 	CELL val = *(RSP);
-	if (++RSP < RSS) RSP = RSE;
+	if (--RSP < RSS) RSP = RSE;
 	// printf(",%lx),", RSP);
 	--rdepth;
 	return val;
@@ -116,7 +116,7 @@ void cpu_loop(CELL start)
 	while (true)
 	{
 		IR = the_memory[PC++];
-		TRACE("(PC=%04lx, IR=%d)", PC-1, IR);
+		TRACE("\n(PC=%04lx, IR=%d)", PC-1, IR);
 		switch (IR)
 		{
 		case LITERAL:
@@ -133,28 +133,35 @@ void cpu_loop(CELL start)
 		case STORE:
 			arg2 = pop();
 			arg1 = pop();
-			// printf("STORE (0x%04lx to 0x%04lx)\n", arg1, arg2);
+			TRACE("-STORE $%lx<-#%ld-", arg2, arg1);
 			SETAT(arg2, arg1);
 			break;
 		case SWAP:
 			arg1 = GET2ND();
+			TRACE("-SWAP #%d,#%d-", arg1, TOS);
 			SET2ND(TOS);
 			TOS = arg1;
 			break;
 		case DROP:
+			TRACE("-DROP-");
 			pop();
 			break;
 		case DUP:
+			TRACE("-DUP-");
 			push(TOS);
 			break;
 		case SLITERAL:
-			arg1 = pop();
-			push(arg1);
+			TRACE("-SLIT %d,%s-", BYTEAT(PC), (char *)(&the_memory[PC+1]));
+			push(PC);
+			PC += BYTEAT(PC);
+			PC += 2;
 			break;
 		case JMP:
 			PC = GETAT(PC);
+			TRACE("-JMP to %lx-", PC);
 			break;
 		case JMPZ:
+			TRACE("-JMPZ to %lx-", GETAT(PC));
 			arg1 = pop();
 			if (arg1)
 				PC += CELL_SZ;
@@ -162,6 +169,7 @@ void cpu_loop(CELL start)
 				PC = GETAT(PC);
 			break;
 		case JMPNZ:
+			TRACE("-JMPNZ to %lx-", GETAT(PC));
 			arg1 = pop();
 			if (arg1)
 				PC = GETAT(PC);
@@ -169,11 +177,13 @@ void cpu_loop(CELL start)
 				PC += CELL_SZ;
 			break;
 		case CALL:
+			TRACE("-CALL %lx-", GETAT(PC));
 			rpush(PC+CELL_SZ);
 			PC = GETAT(PC);
 			++call_depth;
 			break;
 		case RET:
+			TRACE("-RET-");
 			if (--call_depth < 1)		
 				return;
 			PC = rpop();
@@ -184,16 +194,19 @@ void cpu_loop(CELL start)
 			break;
 		case CLITERAL:
 			arg1 = the_memory[PC];
+			TRACE("-CLIT #%d-", arg1);
 			push(arg1);
 			PC += 1;
 			break;
 		case CFETCH:
+			TRACE("-CFETCH (%lx),", TOS);
 			TOS = the_memory[TOS];
+			TRACE("#%d-", TOS);
 			break;
 		case CSTORE:
 			arg2 = pop();
 			arg1 = pop();
-			// printf("STORE (0x%04lx to 0x%04lx)\n", arg1, arg2);
+			TRACE("-STORE %lx<-#%d-", arg2, arg1);
 			the_memory[arg2] = (BYTE)arg1;
 			break;
 		case ADD:
@@ -214,14 +227,17 @@ void cpu_loop(CELL start)
 			break;
 		case LT:
 			arg1 = pop();
+			TRACE("-LT %d<%d-", TOS, arg1);
 			TOS = (TOS < arg1) ? -1 : 0 ;
 			break;
 		case EQ:
 			arg1 = pop();
+			TRACE("-EQ %d==%d-", TOS, arg1);
 			TOS = (TOS == arg1) ? -1 : 0 ;
 			break;
 		case GT:
 			arg1 = pop();
+			TRACE("-GT %d>%d-", TOS, arg1);
 			TOS = (TOS > arg1) ? -1 : 0 ;
 			break;
 		case DICTP:
@@ -280,11 +296,11 @@ void cpu_loop(CELL start)
 				char *pBuf = tgt;
 				if (fgets((pBuf+1), arg2, fp) != (pBuf+1))
 				{
-					trace("<EOF>\n");
+					// printf("<EOF>\n");
 					*(pBuf) = 0;
 					*(pBuf+1) = (char)0;
 					push(0);
-					return;
+					break;
 				}
 				arg2 = (CELL)strlen(pBuf+1);
 				// Strip off the trailing newline if there
@@ -294,7 +310,7 @@ void cpu_loop(CELL start)
 				}
 				*(pBuf) = (char)(arg2);
 				push((arg2 > 0) ? arg2 : 1);
-				trace("%d: [%s]\n", (int)pBuf[0], pBuf+1);
+				// printf("%d: [%s]\n", (int)pBuf[0], pBuf+1);
 			}
 			break;
 		case FWRITE:
@@ -309,6 +325,7 @@ void cpu_loop(CELL start)
 			break;
 		case FCLOSE:
 			arg1 = pop();
+			// printf("(fclose %lx)", arg1);
 			if (arg1 != 0)
 				fclose((FILE *)arg1);
 			break;
@@ -467,11 +484,13 @@ void cpu_loop(CELL start)
 		case NOP:
 			break;
 		case BREAK:
-			//TODO
-			break;
+			return;
+			// break;
 		case RESET:
-			PC = 0;
-			break;
+			printf("-RESET ar %lx-", PC-1);
+			return;
+			// PC = 0;
+			// break;
 		case BYE:
 			return;
 		default:

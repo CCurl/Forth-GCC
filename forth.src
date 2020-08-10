@@ -395,6 +395,7 @@ DECIMAL
 	AGAIN
 ;
 
+
 : .(MEM_SZ) S" Memory: " CT MEM_SZ DUP HEX. S"  (" CT (.) S" )" CT ;
 : .(HERE)   S" HERE: "   CT HERE   DUP HEX. S"  (" CT (.) S" )" CT ;
 : .(LAST)   S" LAST: "   CT LAST   DUP HEX. S"  (" CT (.) S" )" CT ;
@@ -778,6 +779,9 @@ DECIMAL
 	.FREE CR ;
 
 : VARIABLE  CREATE-NAME HERE 2 + CELL + LITERAL , RET 0 , ;
+
+: bench-loop BEGIN 1- DUP WHILE DROP ;
+: bench GETTICK SWAP bench-loop GETTICK SWAP - . ;
 
 \ 1 LOAD
 
