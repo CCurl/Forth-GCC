@@ -204,7 +204,7 @@ void dis_rangeCell(CELL start, CELL end, char *bytes)
 	char x[8];
 	while (start <= end)
 	{
-		CELL val = GETAT(start);
+		CELL val = CELL_AT(start);
 		start += 4;
 		sprintf(x, " %08lx", (CELL)val);
 		strcat(bytes, x);
@@ -323,7 +323,7 @@ void dis_one()
 	switch (IR)
 	{
 	case LITERAL:
-		arg1 = GETAT(PC);
+		arg1 = CELL_AT(PC);
 		PC += CELL_SZ;
 		// push(arg1);
 		line = make_code(0, "m_push %ld", arg1);
@@ -340,7 +340,7 @@ void dis_one()
 
 	case FETCH:
 		// arg1 = GETTOS();
-		// arg2 = GETAT(arg1);
+		// arg2 = CELL_AT(arg1);
 		// SETTOS(arg2);
 		make_code(NULL, "call func_FETCH");
 		return;
@@ -393,8 +393,8 @@ void dis_one()
 		return;
 
 	case JMP:
-		// PC = GETAT(PC);
-		arg1 = GETAT(PC);
+		// PC = CELL_AT(PC);
+		arg1 = CELL_AT(PC);
 		PC += CELL_SZ;
 		line = set_tag(arg1, 0);
 		line = make_code(NULL, "jmp L%08lX", arg1);
@@ -404,13 +404,13 @@ void dis_one()
 	case JMPZ:
 		// if (pop() == 0)
 		// {
-		// 	PC = GETAT(PC);
+		// 	PC = CELL_AT(PC);
 		// }
 		// else
 		// {
 		// 	PC += CELL_SZ;
 		// }
-		arg1 = GETAT(PC);
+		arg1 = CELL_AT(PC);
 		PC += CELL_SZ;
 		line = set_tag(arg1, 0);
 		line = make_code(NULL, "m_pop eax");
@@ -424,13 +424,13 @@ void dis_one()
 		// arg1 = pop();
 		// if (arg1 != 0)
 		// {
-		// 	PC = GETAT(PC);
+		// 	PC = CELL_AT(PC);
 		// }
 		// else
 		// {
 		// 	PC += CELL_SZ;
 		// }
-		arg1 = GETAT(PC);
+		arg1 = CELL_AT(PC);
 		PC += CELL_SZ;
 		line = set_tag(arg1, 0);
 		line = make_code(NULL, "m_pop eax");
@@ -443,7 +443,7 @@ void dis_one()
 		// PC += CELL_SZ;
 		// rpush(PC);
 		// PC = arg1;
-		arg1 = GETAT(PC);
+		arg1 = CELL_AT(PC);
 		PC += CELL_SZ;
 		line = find_line(arg1);
 		if (line && (strlen(line->tag) > 0))
@@ -588,12 +588,12 @@ void dis_one()
 		return;
 
 	case DICTP:
-		// arg1 = GETAT(PC);
+		// arg1 = CELL_AT(PC);
 		// // PC += CELL_SZ;
 		// sprintf(line1, "# DICTP %s (%04lx)", &(the_memory[arg1+10]), arg1);
 		// dis_PC2(CELL_SZ, bytes);
 		{
-			arg1 = GETAT(PC);
+			arg1 = CELL_AT(PC);
 			PC += CELL_SZ;
 			DICT_T *dict = (DICT_T *)&the_memory[arg1];
 			line = make_comment(NULL, "WORD %s (%04lX)", dict->name, arg1);
@@ -987,7 +987,7 @@ void dis_dict(CELL dict_addr)
 // ------------------------------------------------------------------------------------------
 void dis_vm()
 {
-	int here = GETAT(ADDR_HERE);
+	int here = CELL_AT(ADDR_HERE);
 	char line[1024];
     int tagLen = 12;
     int codeLen = 24;
@@ -1027,11 +1027,11 @@ void dis_vm()
 	make_comment(NULL, "\n; End of code, Dictionary:\n;\n");
 
 	// Dictionary
-	PC = GETAT(ADDR_LAST);
+	PC = CELL_AT(ADDR_LAST);
 	while (PC > 0)
 	{
 		dis_dict(PC);
-		PC = GETAT(PC);
+		PC = CELL_AT(PC);
 	}
 }
 
@@ -1048,14 +1048,14 @@ void load_vm()
 
     fseek(input_fp, 0L, SEEK_END);
     long file_sz = ftell(input_fp);
-    debug("file_sz: %ld bytes, ", file_sz);
+    TRACE("file_sz: %ld bytes, ", file_sz);
     fseek(input_fp, 0L, SEEK_SET);
 
     memory_size = file_sz;
     init_vm(file_sz);
 
 	int num_read = fread(the_memory, 1, memory_size, input_fp);
-    debug("%ld bytes read\n", num_read);
+    TRACE("%ld bytes read\n", num_read);
 	fclose(input_fp);
 	input_fp = NULL;
 	printf(" done.\n");

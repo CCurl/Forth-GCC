@@ -61,7 +61,7 @@ void init_vm(int vm_size)
 	memory_size = vm_size > 0 ? vm_size : MEM_SZ;
 
 	create_vm();
-	SETAT(ADDR_MEM_SZ, memory_size);
+	CELL_AT(ADDR_MEM_SZ) = memory_size;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -120,21 +120,21 @@ void cpu_loop(CELL start)
 		switch (IR)
 		{
 		case LITERAL:
-			arg1 = GETAT(PC);
+			arg1 = CELL_AT(PC);
 			TRACE("-LIT #%d ($%lx)-", arg1, arg1);
 			push(arg1);
 			PC += CELL_SZ;
 			break;
 		case FETCH:
 			TRACE("-FETCH ($%lx", TOS);
-			TOS = GETAT(TOS);
+			TOS = CELL_AT(TOS);
 			TRACE(",$%lx)-", TOS);
 			break;
 		case STORE:
 			arg2 = pop();
 			arg1 = pop();
 			TRACE("-STORE $%lx<-#%ld-", arg2, arg1);
-			SETAT(arg2, arg1);
+			CELL_AT(arg2) = arg1;
 			break;
 		case SWAP:
 			arg1 = GET2ND();
@@ -151,35 +151,35 @@ void cpu_loop(CELL start)
 			push(TOS);
 			break;
 		case SLITERAL:
-			TRACE("-SLIT %d,%s-", BYTEAT(PC), (char *)(&the_memory[PC+1]));
+			TRACE("-SLIT %d,%s-", BYTE_AT(PC), (char *)(&the_memory[PC+1]));
 			push(PC);
-			PC += BYTEAT(PC);
+			PC += BYTE_AT(PC);
 			PC += 2;
 			break;
 		case JMP:
-			PC = GETAT(PC);
+			PC = CELL_AT(PC);
 			TRACE("-JMP to %lx-", PC);
 			break;
 		case JMPZ:
-			TRACE("-JMPZ to %lx-", GETAT(PC));
+			TRACE("-JMPZ to %lx-", CELL_AT(PC));
 			arg1 = pop();
 			if (arg1)
 				PC += CELL_SZ;
 			else
-				PC = GETAT(PC);
+				PC = CELL_AT(PC);
 			break;
 		case JMPNZ:
-			TRACE("-JMPNZ to %lx-", GETAT(PC));
+			TRACE("-JMPNZ to %lx-", CELL_AT(PC));
 			arg1 = pop();
 			if (arg1)
-				PC = GETAT(PC);
+				PC = CELL_AT(PC);
 			else
 				PC += CELL_SZ;
 			break;
 		case CALL:
-			TRACE("-CALL %lx-", GETAT(PC));
+			TRACE("-CALL %lx-", CELL_AT(PC));
 			rpush(PC+CELL_SZ);
-			PC = GETAT(PC);
+			PC = CELL_AT(PC);
 			++call_depth;
 			break;
 		case RET:
@@ -269,7 +269,7 @@ void cpu_loop(CELL start)
 				char *fileName = (char *)&the_memory[arg1 + 1];
 				char mode[4];
 				sprintf(mode, "%c%c", (arg2 == 0) ? 'r' : 'w', (arg3 == 0) ? 't' : 'b');
-				trace("FOPEN %s, %s\n", fileName, mode);
+				TRACE("FOPEN %s, %s\n", fileName, mode);
 				FILE *fp = fopen(fileName, mode);
 				arg1 = (CELL) fp;
 				push(arg1);
@@ -398,8 +398,8 @@ void cpu_loop(CELL start)
 		case PLUSSTORE:
 			arg2 = pop();
 			arg1 = pop();
-			arg3 = GETAT(arg2);
-			SETAT(arg2, arg3+arg1);
+			// arg3 = CELL_AT(arg2);
+			CELL_AT(arg2) += arg1;
 			break;
 		case OPENBLOCK:
 			{ 

@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Shared.h"
-#include "logger.h"
 #include "forth-vm.h"
 
 CELL ORG = 0x0040;
@@ -46,7 +45,7 @@ void dis_rangeCell(CELL start, CELL end, char *bytes)
 	char x[8];
 	while (start <= end)
 	{
-		CELL val = GETAT(start);
+		CELL val = CELL_AT(start);
 		start += 4;
 		sprintf(x, " %08lx", (CELL)val);
 		strcat(bytes, x);
@@ -78,7 +77,7 @@ CELL GetSysVarAddr(char *name)
 			printf("[%s] NOT FOUND!\n", name);
 			return 0;
 		}
-		CELL tmp = GETAT(addr+1);
+		CELL tmp = CELL_AT(addr+1);
 		DICT_T *dp = (DICT_T *)&the_memory[tmp];
 		// printf("0x%04lX, 0x%04lX, [%s] = [%s]?\n", addr, dp, name, dp->name);
 		if (strcmp(dp->name, name) == 0)
@@ -105,7 +104,7 @@ CELL dis_vars(FILE *write_to)
 		{
 			return addr;
 		}
-		CELL tmp = GETAT(addr+1);
+		CELL tmp = CELL_AT(addr+1);
 		CELL tmp2;
 		DICT_T *dp = (DICT_T *)&the_memory[tmp];
 
@@ -115,7 +114,7 @@ CELL dis_vars(FILE *write_to)
 		fprintf(write_to, "%-32s ; %s\n", bytes, desc);
 
 		tmp = addr+5;
-		tmp2 = GETAT(tmp+1);
+		tmp2 = CELL_AT(tmp+1);
 		sprintf(bytes, "%04lx:", tmp);
 		dis_start(tmp, 5, bytes);
 		sprintf(desc, "LITERAL %d (0x%04lx)", tmp2, tmp2);
@@ -128,7 +127,7 @@ CELL dis_vars(FILE *write_to)
 		fprintf(write_to, "%-32s ; %s\n", bytes, desc);
 
 		tmp = tmp+1;
-		tmp2 = GETAT(tmp);
+		tmp2 = CELL_AT(tmp);
 		sprintf(bytes, "%04lx:", tmp);
 		dis_start(tmp, 4, bytes);
 		sprintf(desc, "dw 0x%04lx", tmp2);
@@ -151,7 +150,7 @@ CELL dis_one(char *bytes, char *desc)
 	switch (IR)
 	{
 	case LITERAL:
-		arg1 = GETAT(PC);
+		arg1 = CELL_AT(PC);
 		dis_PC2(CELL_SZ, bytes);
 		sprintf(desc, "LITERAL %ld (%0lx)", arg1, arg1);
 		return CELL_SZ;
@@ -191,11 +190,11 @@ CELL dis_one(char *bytes, char *desc)
 		return 0;
 
 	case JMP:
-		arg1 = GETAT(PC);
+		arg1 = CELL_AT(PC);
 		sprintf(desc, "JMP %04lx", arg1);
 		if (the_memory[arg1] == DICTP)
 		{
-			arg2 = GETAT(arg1+1);
+			arg2 = CELL_AT(arg1+1);
 			DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
 			sprintf(desc, "JMP %s (%04lx)\n;", dp->name, arg1);
 		}
@@ -203,18 +202,18 @@ CELL dis_one(char *bytes, char *desc)
 		return CELL_SZ;
 
 	case JMPZ:
-		sprintf(desc, "JMPZ %04lx", GETAT(PC));
+		sprintf(desc, "JMPZ %04lx", CELL_AT(PC));
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
 
 	case JMPNZ:
-		sprintf(desc, "JMPNZ %04lx", GETAT(PC));
+		sprintf(desc, "JMPNZ %04lx", CELL_AT(PC));
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
 
 	case CALL:
-		arg1 = GETAT(PC);
-		arg2 = GETAT(arg1+1);
+		arg1 = CELL_AT(PC);
+		arg2 = CELL_AT(arg1+1);
 		DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
 		sprintf(desc, "CALL %s (%04lx)", dp->name, arg1);
 		dis_PC2(CELL_SZ, bytes);
@@ -290,7 +289,7 @@ CELL dis_one(char *bytes, char *desc)
 		return 0;
 
 	case DICTP:
-		arg1 = GETAT(PC);
+		arg1 = CELL_AT(PC);
 		sprintf(desc, "DICTP %s (%04lx)", &(the_memory[arg1+10]), arg1);
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
@@ -439,7 +438,7 @@ void dis_dict(FILE *write_to, CELL dict_addr)
 // ------------------------------------------------------------------------------------------
 void dis_vm(FILE *write_to)
 {
-	int here = GETAT(ADDR_HERE);
+	int here = CELL_AT(ADDR_HERE);
 	char bytes[128], desc[128];
 
 	// Initial JMP
@@ -480,12 +479,12 @@ void dis_vm(FILE *write_to)
 	fprintf(write_to, ";\n; End of code, Dictionary:\n;\n");
 
 	// Dictionary
-	PC = GETAT(ADDR_LAST);
+	PC = CELL_AT(ADDR_LAST);
 	while (PC > 0)
 	{
 		dis_dict(write_to, PC);
 		fflush(write_to);
-		PC = GETAT(PC);
+		PC = CELL_AT(PC);
 	}
 }
 
@@ -502,14 +501,14 @@ void load_vm()
 
     fseek(input_fp, 0L, SEEK_END);
     long file_sz = ftell(input_fp);
-    debug("file_sz: %ld bytes, ", file_sz);
+    TRACE("file_sz: %ld bytes, ", file_sz);
     fseek(input_fp, 0L, SEEK_SET);
 
     memory_size = file_sz;
     init_vm(file_sz);
 
 	int num_read = fread(the_memory, 1, memory_size, input_fp);
-    debug("%ld bytes read\n", num_read);
+    TRACE("%ld bytes read\n", num_read);
 	fclose(input_fp);
 	input_fp = NULL;
 
@@ -557,16 +556,6 @@ void process_arg(char *arg)
         arg = arg+2;
         strcpy(output_fn, arg);
     }
-    else if (*arg == 't') 
-    {
-		trace_on();
-		printf("log level set to trace.\n");
-    }
-    else if (*arg == 'd') 
-    {
-		debug_on();
-		printf("log level set to debug.\n");
-    }
     else if (*arg == '?') 
     {
         printf("usage: forth-compiler [args]\n");
@@ -574,8 +563,6 @@ void process_arg(char *arg)
         printf("      default inputFile is forth.bin\n");
         printf("  -o:outputFile (full or relative path)\n");
         printf("      default outputFile is forth.lst\n");
-        printf("  -t (set log level to trace)\n");
-        printf("  -d (set log level to debug)\n");
         printf("  -? (prints this message)\n");
 		exit(0);
     }
@@ -589,7 +576,6 @@ int main (int argc, char **argv)
 {
     strcpy(input_fn, "forth.bin");
 	strcpy(output_fn, "forth.lst");
-	debug_off();
 
     for (int i = 1; i < argc; i++)
     {

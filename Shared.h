@@ -120,12 +120,8 @@ extern CELL ADDR_MEM_SZ;   // 0x24
 #define ONE_MB (ONE_KB * ONE_KB)
 extern int MEM_SZ;
 
-#define GETAT(loc) *(CELL *)(&the_memory[loc])
-#define SETAT(loc, val) *(CELL *)(&the_memory[loc]) = val
-#define SETBYTE(loc, val) *(BYTE *)(&the_memory[loc]) = val
-#define BYTEAT(loc) (the_memory[loc])
-
-#define _T(x) x
+#define CELL_AT(loc) *(CELL *)(&the_memory[loc])
+#define BYTE_AT(loc) (the_memory[loc])
 
 #define true 1
 #define false 0

@@ -56,7 +56,7 @@ macro m_fromVmAddr reg
 }
 
 ; ------------------------------------------------------------------------------
-macro GETAT addr, tgt
+macro CELL_AT addr, tgt
 {
        mov tgt, [edx + addr]
 }

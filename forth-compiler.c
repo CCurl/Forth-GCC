@@ -5,7 +5,6 @@
 #include <ctype.h>
 #include "forth-vm.h"
 #include "Shared.h"
-#include "logger.h"
 #include "string.h"
 
 char input_fn[256];
@@ -101,13 +100,13 @@ NB build this in somehow to enable usage of VT100 ECSAPE sequences to control th
 // ------------------------------------------------------------------------------------------
 void Store(CELL loc, CELL num)
 {
-	//trace("storing %4lx to %04lx", num, loc);
+	//TRACE("storing %4lx to %04lx", num, loc);
 	*(CELL *)(&the_memory[loc]) = num;
 }
 
 void CStore(CELL loc, BYTE num)
 {
-	//trace("storing %d to %04lx", num, loc);
+	//TRACE("storing %d to %04lx", num, loc);
 	the_memory[loc] = num;
 }
 
@@ -397,7 +396,7 @@ char *ParseWord(char *word, char *line)
 	TRACE("[pw-3]");
 	if (string_equals(word, ".VARIABLE."))
 	{
-		trace("\n");
+		TRACE("\n");
 		line = GetWord(line, word);
 		DefineWord(word, 0);
 		CComma(DICTP);
@@ -865,8 +864,6 @@ void process_arg(char *arg)
         printf("      default outputFile is forth.bin\n");
         printf("  -m:<KB> - Memory size in KB\n");
         printf("      default value is 64\n");
-        printf("  -t (set log level to trace)\n");
-        printf("  -d (set log level to debug)\n");
         printf("  -? (prints this message)\n");
 		exit(0);
     }
@@ -880,7 +877,6 @@ int main (int argc, char **argv)
 {
     strcpy(input_fn, "forth.src");
     strcpy(output_fn, "forth.bin");
-	debug_off();
 
     for (int i = 1; i < argc; i++)
     {

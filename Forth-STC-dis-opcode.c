@@ -23,7 +23,7 @@ void dis_opcode(int opcode)
     switch (opcode)
     {
         case LITERAL:
-            arg1 = GETAT(PC);
+            arg1 = CELL_AT(PC);
             PC += CELL_SZ;
             line = make_codeU(NULL, "m_push %ld", arg1);
             // make_comment(line, "LITERAL");
@@ -60,7 +60,7 @@ void dis_opcode(int opcode)
             return;
 
         case JMP:
-            arg1 = GETAT(PC);
+            arg1 = CELL_AT(PC);
             PC += CELL_SZ;
             line = make_codeU(NULL, "jmp L%08lX", arg1);
             make_comment(line, "JMP");
@@ -68,7 +68,7 @@ void dis_opcode(int opcode)
             return;
 
         case JMPZ:
-            arg1 = GETAT(PC);
+            arg1 = CELL_AT(PC);
             PC += CELL_SZ;
             line = make_codeU(NULL, "m_pop eax");
             line = make_codeU(NULL, "cmp eax, 0");
@@ -78,7 +78,7 @@ void dis_opcode(int opcode)
             return;
 
         case JMPNZ:
-            arg1 = GETAT(PC);
+            arg1 = CELL_AT(PC);
             PC += CELL_SZ;
             line = make_codeU(NULL, "m_pop eax");
             line = make_codeU(NULL, "cmp eax, 0");
@@ -88,13 +88,13 @@ void dis_opcode(int opcode)
             return;
 
         case CALL:
-            arg1 = GETAT(PC);
+            arg1 = CELL_AT(PC);
             PC += CELL_SZ;
             line = make_codeU(NULL, "call L%08lX", arg1);
             make_comment(line, "CALL %04lX", arg1);
             if (the_memory[arg1] == DICTP)
             {
-                arg2 = GETAT(arg1+1);
+                arg2 = CELL_AT(arg1+1);
                 DICT_T *dict = (DICT_T *)&the_memory[arg2];
                 make_comment(line, "%s", dict->name);
             }
@@ -155,7 +155,7 @@ void dis_opcode(int opcode)
 
         case DICTP:
             arg2 = LAST_PC;
-            arg1 = GETAT(PC);
+            arg1 = CELL_AT(PC);
             PC += CELL_SZ;
             LAST_PC = 0;
             // return;
