@@ -697,18 +697,18 @@ f_RTOD:
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
+; COM
+f_COM:
+            not ebx
+            m_NEXT
+
+; -------------------------------------------------------------------------------------
 ; RFETCH - R@ ( -- n)
 f_RFETCH:
                 mov ecx, [rStackPtr]
                 mov eax, [ecx]
                 m_push eax
                 m_NEXT
-
-; -------------------------------------------------------------------------------------
-; LOGLEVEL
-f_LOGLEVEL:
-            ; TODO!
-            m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; AND
@@ -878,55 +878,6 @@ f_OPENBLOCK:
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
-; BRANCHF
-f_BRANCHF:
-                movzx eax, BYTE [esi]
-                add esi, eax
-                m_NEXT
-
-NOBRANCH:       inc esi
-                m_NEXT
-
-; -------------------------------------------------------------------------------------
-; BRANCHFZ
-f_BRANCHFZ:
-                m_pop ecx
-                test ecx, ecx
-                jz f_BRANCHF
-                jmp NOBRANCH
-
-; -------------------------------------------------------------------------------------
-; BRANCHFZ
-f_BRANCHFNZ:
-                m_pop ecx
-                test ecx, ecx
-                jnz f_BRANCHF
-                jmp NOBRANCH
-
-; -------------------------------------------------------------------------------------
-; BRANCHB
-f_BRANCHB:
-                movzx eax, BYTE [esi]
-                sub esi, eax
-                m_NEXT
-
-; -------------------------------------------------------------------------------------
-; BRANCHBZ
-f_BRANCHBZ:
-                m_pop ecx
-                test ecx, ecx
-                jz f_BRANCHB
-                jmp NOBRANCH
-
-; -------------------------------------------------------------------------------------
-; BRANCHBZ
-f_BRANCHBNZ:
-                m_pop ecx
-                test ecx, ecx
-                jnz f_BRANCHB
-                jmp NOBRANCH
-
-; -------------------------------------------------------------------------------------
 ; NOP
 f_NOP:
             m_NEXT
@@ -1044,7 +995,7 @@ dd f_FWRITE             ; Hex: 1F (31)
 dd f_FCLOSE             ; Hex: 20 (32)
 dd f_DTOR               ; Hex: 21 (33)
 dd f_RTOD               ; Hex: 22 (34)
-dd f_LOGLEVEL           ; Hex: 23 (35)
+dd f_COM                ; Hex: 23 (35)
 dd f_AND                ; Hex: 24 (36)
 dd f_PICK               ; Hex: 25 (37)
 dd f_DEPTH              ; Hex: 26 (38)
@@ -1099,12 +1050,12 @@ dd f_UnknownOpcode      ; Hex: 56 (86)
 dd f_UnknownOpcode      ; Hex: 57 (87)
 dd f_UnknownOpcode      ; Hex: 58 (88)
 dd f_UnknownOpcode      ; Hex: 59 (89)
-dd f_BRANCHF            ; Hex: 5A (90)
-dd f_BRANCHFZ           ; Hex: 5B (91)
-dd f_BRANCHFNZ          ; Hex: 5C (92)
-dd f_BRANCHB            ; Hex: 5D (93)
-dd f_BRANCHBZ           ; Hex: 5E (94)
-dd f_BRANCHBNZ          ; Hex: 5F (95)
+dd f_UnknownOpcode      ; Hex: 5A (90)
+dd f_UnknownOpcode      ; Hex: 5B (91)
+dd f_UnknownOpcode      ; Hex: 5C (92)
+dd f_UnknownOpcode      ; Hex: 5D (93)
+dd f_UnknownOpcode      ; Hex: 5E (94)
+dd f_UnknownOpcode      ; Hex: 5F (95)
 dd f_UnknownOpcode      ; Hex: 60 (96)
 dd f_UnknownOpcode      ; Hex: 61 (97)
 dd f_UnknownOpcode      ; Hex: 62 (98)

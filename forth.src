@@ -38,7 +38,6 @@
 
 : LITERAL	    1 C,   ;
 : @			[   2 C, ] ; .INLINE.
-.QUIT
 : !			[   3 C, ] ; .INLINE.
 : SWAP		[   4 C, ] ; .INLINE.
 : DROP		[   5 C, ] ; .INLINE.
@@ -71,7 +70,7 @@
 : FCLOSE	[  32 C, ] ; .INLINE.
 : >R		[  33 C, ] ; .INLINE.
 : R>		[  34 C, ] ; .INLINE.
-: LOGLEVEL	[  35 C, ] ; .INLINE.
+: COM       [  35 C, ] ; .INLINE.
 : AND		[  36 C, ] ; .INLINE.
 : PICK		[  37 C, ] ; .INLINE.
 : DEPTH		[  38 C, ] ; .INLINE.
@@ -84,22 +83,14 @@
 : RDEPTH	[  45 C, ] ; .INLINE.
 : DEC		[  46 C, ] ; .INLINE.
 : GETTICK	[  47 C, ] ; .INLINE.
-: <<		[  48 C, ] ; .INLINE.	\ SHIFTLEFT  ( n1 n2 -- n3 )
-: >>		[  49 C, ] ; .INLINE.	\ SHIFTRIGHT ( n1 n2 -- n3 )
+: LSHIFT    [  48 C, ] ; .INLINE.	\ SHIFTLEFT  ( n1 n2 -- n3 )
+: RSHIFT    [  49 C, ] ; .INLINE.	\ SHIFTRIGHT ( n1 n2 -- n3 )
 : +!        [  50 C, ] ; .INLINE.   \ ( n addr -- )
 : OPEN-BLOCK [  51 C, ] ; .INLINE.   \ ( n -- fp bool )
-: BRANCHF      90 C,   ;
-: BRANCHFZ     91 C,   ;
-: BRANCHFNZ    92 C,   ; 
-: BRANCHB      93 C,   ;
-: BRANCHBZ     94 C,   ;
-: BRANCHBNZ    95 C,   ; 
 : NOP		[ 252 C, ] ; .INLINE.
 : BREAK		[ 253 C, ] ; .INLINE.
 : RESET		[ 254 C, ] ; .INLINE.
 : BYE		[ 255 C, ] ; .INLINE.
-
-.QUIT
 
 : INLINE    LAST 2 CELL * + DUP C@ 2 OR SWAP C! ;
 : IMMEDIATE LAST 2 CELL * + DUP C@ 1 OR SWAP C! ;
@@ -118,22 +109,17 @@
 
 : ?COMPILING STATE @ ;
 
-: IF   ?COMPILING .IF BRANCHFZ HERE 0 C,                          .THEN ; IMMEDIATE
-: ELSE ?COMPILING .IF BRANCHF  HERE 0 C, SWAP HERE OVER - SWAP C! .THEN ; IMMEDIATE
-: THEN ?COMPILING .IF                         HERE OVER - SWAP C! .THEN ; IMMEDIATE
+: IF   ?COMPILING .IF JMPZ HERE 0 ,                   .THEN ; IMMEDIATE
+: ELSE ?COMPILING .IF JMP  HERE 0 , SWAP HERE  SWAP ! .THEN ; IMMEDIATE
+: THEN ?COMPILING .IF                    HERE  SWAP ! .THEN ; IMMEDIATE
 
-: BEGIN ?COMPILING IF           HERE           THEN ;    IMMEDIATE 
-: AGAIN ?COMPILING IF BRANCHB   HERE SWAP - C, THEN ;    IMMEDIATE
-: WHILE ?COMPILING IF BRANCHBNZ HERE SWAP - C, THEN ;    IMMEDIATE
-: UNTIL ?COMPILING IF BRANCHBZ  HERE SWAP - C, THEN ;    IMMEDIATE
+: BEGIN ?COMPILING IF HERE    THEN ;    IMMEDIATE 
+: AGAIN ?COMPILING IF JMP   , THEN ;    IMMEDIATE
+: WHILE ?COMPILING IF JMPNZ , THEN ;    IMMEDIATE
+: UNTIL ?COMPILING IF JMPZ  , THEN ;    IMMEDIATE
 : LEAVE ?COMPILING IF RET     THEN ;    IMMEDIATE
 
 : MEM_SZ (MEM_SZ) @ ;
-
-: TRACE-ON  2 LOGLEVEL ; INLINE
-: TRACE-OFF 0 LOGLEVEL ; INLINE
-: DEBUG-ON  1 LOGLEVEL ; INLINE
-: DEBUG-OFF 0 LOGLEVEL ; INLINE
 
 : R@ RFETCH ; INLINE
 : RDROP R> DROP   ; INLINE

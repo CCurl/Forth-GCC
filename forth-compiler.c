@@ -61,7 +61,7 @@ OPCODE_T theOpcodes[] = {
         , { ".FCLOSE.",           FCLOSE,           "FCLOSE",         IS_INLINE }
         , { ".DTOR.",             DTOR,             "DTOR",           IS_INLINE }
         , { ".RTOD.",             RTOD,             "RTOD",           IS_INLINE }
-        , { ".LOGLEVEL.",         LOGLEVEL,         "LOGLEVEL",       IS_INLINE }
+        , { ".COM.",              COM,              "COM",            IS_INLINE }
         , { ".AND.",              AND,              "AND",            IS_INLINE }
         , { ".PICK.",             PICK,             "PICK",           IS_INLINE }
         , { ".DEPTH.",            DEPTH,            "DEPTH",          IS_INLINE }
@@ -74,16 +74,10 @@ OPCODE_T theOpcodes[] = {
         , { ".RDEPTH.",           RDEPTH,           "RDEPTH",         IS_INLINE }
         , { ".DEC.",              DEC,              "DEC",            IS_INLINE }
         , { ".GETTICK.",          GETTICK,          "GETTICK",        IS_INLINE }
-        , { ".SHIFTLEFT.",        SHIFTLEFT,        "SHIFTLEFT",      IS_INLINE }
-        , { ".SHIFTRIGHT.",       SHIFTRIGHT,       "SHIFTRIGHT",     IS_INLINE }
+        , { ".SHIFTLEFT.",        SHIFTLEFT,        "LSHIFT",         IS_INLINE }
+        , { ".SHIFTRIGHT.",       SHIFTRIGHT,       "RSHIFT",         IS_INLINE }
         , { ".PLUSSTORE.",        PLUSSTORE,        "PLUSSTORE",      IS_INLINE }
         , { ".OPENBLOCK.",        OPENBLOCK,        "OPENBLOCK",      IS_INLINE }
-        , { ".BRANCHF.",          BRANCHF,          "BRANCHF",        0 }
-        , { ".BRANCHFZ.",         BRANCHFZ,         "BRANCHFZ",       0 }
-        , { ".BRANCHFNZ.",        BRANCHFNZ,        "BRANCHFNZ",      0 }
-        , { ".BRANCHB.",          BRANCHB,          "BRANCHB",        0 }
-        , { ".BRANCHBZ.",         BRANCHBZ,         "BRANCHBZ",       0 }
-        , { ".BRANCHBNZ.",        BRANCHBNZ,        "BRANCHBNZ",      0 }
         , { ".DBGDOT.",           DBGDOT,           "DBGDOT",         IS_INLINE }
         , { ".DBGDOTS.",          DBGDOTS,          "DBGDOTS",        IS_INLINE }
         , { ".NOP.",              NOP,              "NOP",            IS_INLINE }
@@ -175,7 +169,7 @@ void SyncMem(bool isSet)
 		HERE  = Fetch(ADDR_HERE);
 		BASE  = Fetch(ADDR_BASE);
 		STATE = Fetch(ADDR_STATE);
-		printf("-STATE=%d-", STATE);
+		TRACE("-STATE=%d-", STATE);
 	}
 }
 
@@ -245,7 +239,7 @@ void DefineWord(LPCTSTR word, BYTE flags)
 {
 	CELL curLAST = LAST;
 	LAST -= ((CELL_SZ*2) + 3 + string_len(word));
-	printf("\nDefining word [%s] at %04lx, HERE=%04lx", word, LAST, HERE);
+	TRACE("\nDefining word [%s] at %04lx, HERE=%04lx", word, LAST, HERE);
 
 	DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
 	dp->next = curLAST;
@@ -373,7 +367,7 @@ char *ParseWord(char *word, char *line)
 	CELL val;
 
 	TRACE("[pw-%s]", word);
-	printf("Parse(%s), HERE=%04lx, LAST=%04lx, STATE=%ld\n", word, HERE, LAST, STATE);
+	TRACE("Parse(%s), HERE=%04lx, LAST=%04lx, STATE=%ld\n", word, HERE, LAST, STATE);
 
 	if (string_equals(word, ".QUIT"))
 	{
@@ -424,7 +418,7 @@ char *ParseWord(char *word, char *line)
 		if (strcmp(word, "STATE") == 0)
 		{
 			ADDR_STATE = HERE;
-			printf("-ADDR_STATE: %04lx-", ADDR_STATE);
+			TRACE("-ADDR_STATE: %04lx-", ADDR_STATE);
 		}
 
 		if (strcmp(word, "(MEM_SZ)") == 0)
@@ -641,13 +635,13 @@ char *ParseWord(char *word, char *line)
 	DICT_T *dp = FindWord(word);
 	if (dp != NULL)
 	{
-		printf("FORTH word [%s]. STATE=%ld ... ", dp->name, STATE);
+		TRACE("FORTH word [%s]. STATE=%ld ... ", dp->name, STATE);
 		if (STATE == 1)
 		{
 			TRACE("compiling into current word\n", dp->name, dp->XT, STATE);
 			if (dp->flags & IS_IMMEDIATE)
 			{
-				printf("executing 0x%04lx ...", dp->XT);
+				TRACE("executing 0x%04lx ...", dp->XT);
 				SyncMem(true);
 				cpu_loop(dp->XT);
 				SyncMem(false);
@@ -677,7 +671,7 @@ char *ParseWord(char *word, char *line)
 		}
 		else
 		{
-			debug("executing it ...\n");
+			TRACE("executing it ...\n");
 			SyncMem(true);
 			cpu_loop(dp->XT);
 			SyncMem(false);
@@ -861,16 +855,6 @@ void process_arg(char *arg)
     {
         arg = arg+2;
         mem_size_KB = atoi(arg);
-    }
-    else if (*arg == 't')
-    {
-		trace_on();
-		printf("log level set to trace.\n");
-    }
-    else if (*arg == 'd')
-    {
-		debug_on();
-		printf("log level set to debug.\n");
     }
     else if (*arg == '?')
     {

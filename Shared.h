@@ -46,7 +46,7 @@
 #define FCLOSE     32	// 20  ( fp -- )
 #define DTOR       33	// 21  >R (Data To Return)
 #define RTOD       34	// 22  R> (Return To Data)
-#define LOGLEVEL   35	// 23
+#define COM        35	// 23
 #define AND        36	// 24
 #define PICK       37	// 25
 #define DEPTH      38	// 26
@@ -64,12 +64,6 @@
 #define PLUSSTORE  50   // 32
 #define OPENBLOCK  51   // 33
 // unused 51-89
-#define BRANCHF    90   // 5A
-#define BRANCHFZ   91   // 5B
-#define BRANCHFNZ  92   // 5C
-#define BRANCHB    93   // 5D
-#define BRANCHBZ   94   // 5E
-#define BRANCHBNZ  95   // 5F
 // unused 96-99
 #define DBGDOT    100
 #define DBGDOTS   101

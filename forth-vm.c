@@ -335,8 +335,8 @@ void cpu_loop(CELL start)
 		case RTOD:
 			push(rpop());
 			break;
-		case LOGLEVEL:
-			arg1 = pop();
+		case COM:
+			TOS = ~TOS;
 			break;
 		case AND:
 			arg1 = pop();
@@ -411,62 +411,6 @@ void cpu_loop(CELL start)
 				push(TOS ? -1 : 0);
 			}
 			break;
-		case BRANCHF:
-			arg1 = the_memory[PC];
-			PC += arg1;
-			break;
-		case BRANCHFZ:
-			arg1 = pop();
-			if (arg1 == 0)
-			{
-				arg1 = the_memory[PC];
-				PC += arg1;
-			}
-			else
-			{
-				PC++;
-			}
-			break;
-		case BRANCHFNZ:
-			arg1 = pop();
-			if (arg1 != 0)
-			{
-				arg1 = the_memory[PC];
-				PC += arg1;
-			}
-			else
-			{
-				PC++;
-			}
-			break;
-		case BRANCHB:
-			arg1 = the_memory[PC];
-			PC -= arg1;
-			break;
-		case BRANCHBZ:
-			arg1 = pop();
-			if (arg1 == 0)
-			{
-				arg1 = the_memory[PC];
-				PC -= arg1;
-			}
-			else
-			{
-				PC++;
-			}
-			break;
-		case BRANCHBNZ:
-			arg1 = pop();
-			if (arg1 != 0)
-			{
-				arg1 = the_memory[PC];
-				PC -= arg1;
-			}
-			else
-			{
-				PC++;
-			}
-			break;
 		case DBGDOT:
 			arg1 = pop();
 			printf("[%d] ", arg1);
@@ -484,13 +428,11 @@ void cpu_loop(CELL start)
 		case NOP:
 			break;
 		case BREAK:
-			return;
-			// break;
+			break;
 		case RESET:
 			printf("-RESET ar %lx-", PC-1);
-			return;
-			// PC = 0;
-			// break;
+			PC = 0;
+			break;
 		case BYE:
 			return;
 		default:
