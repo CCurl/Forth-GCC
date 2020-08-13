@@ -116,7 +116,7 @@ void cpu_loop(CELL start)
 	while (true)
 	{
 		IR = the_memory[PC++];
-		TRACE("\n(PC=%04lx, IR=%d)", PC-1, IR);
+		TRACE("(PC=%04lx, IR=%d)", PC-1, IR);
 		switch (IR)
 		{
 		case LITERAL:

@@ -175,6 +175,7 @@ void SyncMem(bool isSet)
 		HERE  = Fetch(ADDR_HERE);
 		BASE  = Fetch(ADDR_BASE);
 		STATE = Fetch(ADDR_STATE);
+		printf("-STATE=%d-", STATE);
 	}
 }
 
@@ -244,7 +245,7 @@ void DefineWord(LPCTSTR word, BYTE flags)
 {
 	CELL curLAST = LAST;
 	LAST -= ((CELL_SZ*2) + 3 + string_len(word));
-	TRACE("\nDefining word [%s] at %04lx, HERE=%04lx", word, LAST, HERE);
+	printf("\nDefining word [%s] at %04lx, HERE=%04lx", word, LAST, HERE);
 
 	DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
 	dp->next = curLAST;
@@ -372,7 +373,7 @@ char *ParseWord(char *word, char *line)
 	CELL val;
 
 	TRACE("[pw-%s]", word);
-	// TRACE("Parse(): word=[%s], HERE=%04lx, LAST=%04lx, STATE=%ld\n", word, HERE, LAST, STATE);
+	printf("Parse(%s), HERE=%04lx, LAST=%04lx, STATE=%ld\n", word, HERE, LAST, STATE);
 
 	if (string_equals(word, ".QUIT"))
 	{
@@ -421,7 +422,10 @@ char *ParseWord(char *word, char *line)
 			ADDR_BASE = HERE;
 
 		if (strcmp(word, "STATE") == 0)
+		{
 			ADDR_STATE = HERE;
+			printf("-ADDR_STATE: %04lx-", ADDR_STATE);
+		}
 
 		if (strcmp(word, "(MEM_SZ)") == 0)
 			ADDR_MEM_SZ = HERE;
@@ -637,14 +641,16 @@ char *ParseWord(char *word, char *line)
 	DICT_T *dp = FindWord(word);
 	if (dp != NULL)
 	{
-		TRACE("FORTH word [%s]. STATE=%ld ... ", dp->name, STATE);
+		printf("FORTH word [%s]. STATE=%ld ... ", dp->name, STATE);
 		if (STATE == 1)
 		{
 			TRACE("compiling into current word\n", dp->name, dp->XT, STATE);
 			if (dp->flags & IS_IMMEDIATE)
 			{
-				// TRACE("executing 0x%04lx ...", dp->XT);
+				printf("executing 0x%04lx ...", dp->XT);
+				SyncMem(true);
 				cpu_loop(dp->XT);
+				SyncMem(false);
 			}
 			else if (dp->flags & IS_INLINE)
 			{
@@ -672,7 +678,9 @@ char *ParseWord(char *word, char *line)
 		else
 		{
 			debug("executing it ...\n");
+			SyncMem(true);
 			cpu_loop(dp->XT);
+			SyncMem(false);
 		}
 		return line;
 	}

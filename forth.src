@@ -38,6 +38,7 @@
 
 : LITERAL	    1 C,   ;
 : @			[   2 C, ] ; .INLINE.
+.QUIT
 : !			[   3 C, ] ; .INLINE.
 : SWAP		[   4 C, ] ; .INLINE.
 : DROP		[   5 C, ] ; .INLINE.
@@ -97,6 +98,8 @@
 : BREAK		[ 253 C, ] ; .INLINE.
 : RESET		[ 254 C, ] ; .INLINE.
 : BYE		[ 255 C, ] ; .INLINE.
+
+.QUIT
 
 : INLINE    LAST 2 CELL * + DUP C@ 2 OR SWAP C! ;
 : IMMEDIATE LAST 2 CELL * + DUP C@ 1 OR SWAP C! ;
