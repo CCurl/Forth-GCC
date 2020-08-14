@@ -23,18 +23,18 @@
 .VARIABLE. T2			\ might use one or more of them, there is no
 .VARIABLE. T3			\ guarantee that the value won't change across words.
 
-.NOP. \ marks the end of the variables
+NOP \ marks the end of the variables
 
 : CELL 4 ; .INLINE.
 
-: HERE (HERE) .FETCH. ;
-: LAST (LAST) .FETCH. ;
+: HERE (HERE) FETCH ;
+: LAST (LAST) FETCH ;
 
-: C, HERE .CSTORE. HERE      .INC. (HERE) .STORE. ;
-: ,  HERE .STORE.  HERE CELL .ADD. (HERE) .STORE. ;
+: C, HERE CSTORE HERE      INC (HERE) STORE ;
+: ,  HERE STORE  HERE CELL ADD (HERE) STORE ;
 
-: [ 0 STATE .STORE. ; .IMMEDIATE.
-: ] 1 STATE .STORE. ; .IMMEDIATE.
+: [ 0 STATE STORE ; .IMMEDIATE.
+: ] 1 STATE STORE ; .IMMEDIATE.
 
 : LITERAL	    1 C,   ;
 : @			[   2 C, ] ; .INLINE.

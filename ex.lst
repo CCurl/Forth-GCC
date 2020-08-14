@@ -1,7 +1,4 @@
 ; memory-size: 3072 bytes, (0c00 hex)
-; data-stack: 0a00, grows up
-; return-stack: 0bfc, grows down
-;
 0000: 08 de 04 00 00             ; JMP main (04de)
 ;
 0005: 00 00 00

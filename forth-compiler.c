@@ -26,64 +26,64 @@ CELL ADDR_MEM_SZ   = 0x24;
 extern int _QUIT_HIT;
 
 OPCODE_T theOpcodes[] = {
-          { ".LITERAL.",          LITERAL,          "LITERAL",        0 }
-        , { ".FETCH.",            FETCH,            "FETCH",          IS_INLINE }
-        , { ".STORE.",            STORE,            "STORE",          IS_INLINE }
-        , { ".SWAP.",             SWAP,             "SWAP",           IS_INLINE }
-        , { ".DROP.",             DROP,             "DROP",           IS_INLINE }
-        , { ".DUP.",              DUP,              "DUP",            IS_INLINE }
-        , { ".SLITERAL.",         SLITERAL,         "SLITERAL",       IS_INLINE }
-        , { ".JMP.",              JMP,              "JMP",            0 }
-        , { ".JMPZ.",             JMPZ,             "JMPZ",           0 }
-        , { ".JMPNZ.",            JMPNZ,            "JMPNZ",          0 }
-        , { ".CALL.",             CALL,             "CALL",           0 }
-        , { ".RET.",              RET,              "RET",            0 }
-        , { ".OR.",               OR,               "OR",             IS_INLINE }
-        , { ".CLITERAL.",         CLITERAL,         "CLITERAL",       IS_INLINE }
-        , { ".CFETCH.",           CFETCH,           "CFETCH",         IS_INLINE }
-        , { ".CSTORE.",           CSTORE,           "CSTORE",         IS_INLINE }
-        , { ".ADD.",              ADD,              "ADD",            IS_INLINE }
-        , { ".SUB.",              SUB,              "SUB",            IS_INLINE }
-        , { ".MUL.",              MUL,              "MUL",            IS_INLINE }
-        , { ".DIV.",              DIV,              "DIV",            IS_INLINE }
-        , { ".LT.",               LT,               "LT",             IS_INLINE }
-        , { ".EQ.",               EQ,               "EQ",             IS_INLINE }
-        , { ".GT.",               GT,               "GT",             IS_INLINE }
-        , { ".DICTP.",            DICTP,            "DICTP",          IS_INLINE }
-        , { ".EMIT.",             EMIT,             "EMIT",           IS_INLINE }
-        , { ".OVER.",             OVER,             "OVER",           IS_INLINE }
-        , { ".COMPARE.",          COMPARE,          "COMPARE",        IS_INLINE }
-        , { ".FOPEN.",            FOPEN,            "FOPEN",          IS_INLINE }
-        , { ".FREAD.",            FREAD,            "FREAD",          IS_INLINE }
-        , { ".FREADLINE.",        FREADLINE,        "FREADLINE",      IS_INLINE }
-        , { ".FWRITE.",           FWRITE,           "FWRITE",         IS_INLINE }
-        , { ".FCLOSE.",           FCLOSE,           "FCLOSE",         IS_INLINE }
-        , { ".DTOR.",             DTOR,             "DTOR",           IS_INLINE }
-        , { ".RTOD.",             RTOD,             "RTOD",           IS_INLINE }
-        , { ".COM.",              COM,              "COM",            IS_INLINE }
-        , { ".AND.",              AND,              "AND",            IS_INLINE }
-        , { ".PICK.",             PICK,             "PICK",           IS_INLINE }
-        , { ".DEPTH.",            DEPTH,            "DEPTH",          IS_INLINE }
-        , { ".GETCH.",            GETCH,            "GETCH",          IS_INLINE }
-        , { ".COMPAREI.",         COMPAREI,         "COMPAREI",       IS_INLINE }
-        , { ".SLASHMOD.",         SLASHMOD,         "SLASHMOD",       IS_INLINE }
-        , { ".NOT.",              NOT,              "NOT",            IS_INLINE }
-        , { ".RFETCH.",           RFETCH,           "RFETCH",         IS_INLINE }
-        , { ".INC.",              INC,              "INC",            IS_INLINE }
-        , { ".RDEPTH.",           RDEPTH,           "RDEPTH",         IS_INLINE }
-        , { ".DEC.",              DEC,              "DEC",            IS_INLINE }
-        , { ".GETTICK.",          GETTICK,          "GETTICK",        IS_INLINE }
-        , { ".SHIFTLEFT.",        SHIFTLEFT,        "LSHIFT",         IS_INLINE }
-        , { ".SHIFTRIGHT.",       SHIFTRIGHT,       "RSHIFT",         IS_INLINE }
-        , { ".PLUSSTORE.",        PLUSSTORE,        "PLUSSTORE",      IS_INLINE }
-        , { ".OPENBLOCK.",        OPENBLOCK,        "OPENBLOCK",      IS_INLINE }
-        , { ".DBGDOT.",           DBGDOT,           "DBGDOT",         IS_INLINE }
-        , { ".DBGDOTS.",          DBGDOTS,          "DBGDOTS",        IS_INLINE }
-        , { ".NOP.",              NOP,              "NOP",            IS_INLINE }
-        , { ".BREAK.",            BREAK,            "BREAK",          IS_INLINE }
-        , { ".RESET.",            RESET,            "RESET",          IS_INLINE }
-        , { ".BYE.",              BYE,              "BYE",            IS_INLINE }
-        , { NULL,                 0,                 "",              IS_INLINE }
+          { "LITERAL",          LITERAL,          "LITERAL",        0 }
+        , { "FETCH",            FETCH,            "FETCH",          IS_INLINE }
+        , { "STORE",            STORE,            "STORE",          IS_INLINE }
+        , { "SWAP",             SWAP,             "SWAP",           IS_INLINE }
+        , { "DROP",             DROP,             "DROP",           IS_INLINE }
+        , { "DUP",              DUP,              "DUP",            IS_INLINE }
+        , { "SLITERAL",         SLITERAL,         "SLITERAL",       IS_INLINE }
+        , { "JMP",              JMP,              "JMP",            0 }
+        , { "JMPZ",             JMPZ,             "JMPZ",           0 }
+        , { "JMPNZ",            JMPNZ,            "JMPNZ",          0 }
+        , { "CALL",             CALL,             "CALL",           0 }
+        , { "RET",              RET,              "RET",            0 }
+        , { "OR",               OR,               "OR",             IS_INLINE }
+        , { "CLITERAL",         CLITERAL,         "CLITERAL",       IS_INLINE }
+        , { "CFETCH",           CFETCH,           "CFETCH",         IS_INLINE }
+        , { "CSTORE",           CSTORE,           "CSTORE",         IS_INLINE }
+        , { "ADD",              ADD,              "ADD",            IS_INLINE }
+        , { "SUB",              SUB,              "SUB",            IS_INLINE }
+        , { "MUL",              MUL,              "MUL",            IS_INLINE }
+        , { "DIV",              DIV,              "DIV",            IS_INLINE }
+        , { "LT",               LT,               "LT",             IS_INLINE }
+        , { "EQ",               EQ,               "EQ",             IS_INLINE }
+        , { "GT",               GT,               "GT",             IS_INLINE }
+        , { "DICTP",            DICTP,            "DICTP",          IS_INLINE }
+        , { "EMIT",             EMIT,             "EMIT",           IS_INLINE }
+        , { "OVER",             OVER,             "OVER",           IS_INLINE }
+        , { "COMPARE",          COMPARE,          "COMPARE",        IS_INLINE }
+        , { "FOPEN",            FOPEN,            "FOPEN",          IS_INLINE }
+        , { "FREAD",            FREAD,            "FREAD",          IS_INLINE }
+        , { "FREADLINE",        FREADLINE,        "FREADLINE",      IS_INLINE }
+        , { "FWRITE",           FWRITE,           "FWRITE",         IS_INLINE }
+        , { "FCLOSE",           FCLOSE,           "FCLOSE",         IS_INLINE }
+        , { "DTOR",             DTOR,             "DTOR",           IS_INLINE }
+        , { "RTOD",             RTOD,             "RTOD",           IS_INLINE }
+        , { "COM",              COM,              "COM",            IS_INLINE }
+        , { "AND",              AND,              "AND",            IS_INLINE }
+        , { "PICK",             PICK,             "PICK",           IS_INLINE }
+        , { "DEPTH",            DEPTH,            "DEPTH",          IS_INLINE }
+        , { "GETCH",            GETCH,            "GETCH",          IS_INLINE }
+        , { "COMPAREI",         COMPAREI,         "COMPAREI",       IS_INLINE }
+        , { "SLASHMOD",         SLASHMOD,         "SLASHMOD",       IS_INLINE }
+        , { "NOT",              NOT,              "NOT",            IS_INLINE }
+        , { "RFETCH",           RFETCH,           "RFETCH",         IS_INLINE }
+        , { "INC",              INC,              "INC",            IS_INLINE }
+        , { "RDEPTH",           RDEPTH,           "RDEPTH",         IS_INLINE }
+        , { "DEC",              DEC,              "DEC",            IS_INLINE }
+        , { "GETTICK",          GETTICK,          "GETTICK",        IS_INLINE }
+        , { "SHIFTLEFT",        SHIFTLEFT,        "LSHIFT",         IS_INLINE }
+        , { "SHIFTRIGHT",       SHIFTRIGHT,       "RSHIFT",         IS_INLINE }
+        , { "PLUSSTORE",        PLUSSTORE,        "PLUSSTORE",      IS_INLINE }
+        , { "OPENBLOCK",        OPENBLOCK,        "OPENBLOCK",      IS_INLINE }
+        , { "DBGDOT",           DBGDOT,           "DBGDOT",         IS_INLINE }
+        , { "DBGDOTS",          DBGDOTS,          "DBGDOTS",        IS_INLINE }
+        , { "NOP",              NOP,              "NOP",            IS_INLINE }
+        , { "BREAK",            BREAK,            "BREAK",          IS_INLINE }
+        , { "RESET",            RESET,            "RESET",          IS_INLINE }
+        , { "BYE",              BYE,              "BYE",            IS_INLINE }
+        , { NULL,               0,                 "",              IS_INLINE }
  };
 
 
@@ -199,15 +199,32 @@ DICT_T *FindWord(LPCTSTR word)
 bool MakeNumber(LPCTSTR word, CELL *the_num)
 {
 	TRACE("(MakeNumber-%s)", word);
+	CELL base = BASE;
 	bool is_neg = false;
 	char *w = word;
 	CELL my_num = 0;
 	char *possible_chars = "0123456789abcdef";
 	char valid_chars[24];
+
+	if (*w == '%') {
+		base = 2;
+		++w;
+	}
+
+	if (*w == '#') {
+		base = 10;
+		++w;
+	}
+
+	if (*w == '$') {
+		base = 16;
+		++w;
+	}
+
 	strncpy(valid_chars, possible_chars, BASE);
 
 	// One leading minus sign is OK
-	if (*w == '-')
+	if ((base == 10) && (*w == '-'))
 	{
 		is_neg = true;
 		w++;
@@ -223,7 +240,7 @@ bool MakeNumber(LPCTSTR word, CELL *the_num)
 			return false;
 		}
 		CELL digit = (CELL)(pos - valid_chars);
-		my_num = (my_num * BASE) + digit;
+		my_num = (my_num * base) + digit;
 	}
 
 	if (is_neg)
@@ -270,95 +287,6 @@ char *GetWord(char *line, char *word)
 	*cp = NULL;
 
     return line;
-}
-
-bool parseBinary(char *word, CELL *val)
-{
-	CELL ret = 0;
-	char *cp = word+1;
-
-	if (strlen(word) == 1) 
-	{
-		return false;
-	}
-
-	while (*cp)
-	{
-		ret = (ret << 1);
-		char c = toupper(*cp);
-		if (('0' <= c) && (c <= '1'))
-		{
-			ret += (c - '0');
-		}
-		else
-		{
-			return false;
-		}
-		++cp;
-	}
-	*val = ret;
-	return true;
-}
-
-bool parseDecimal(char *word, CELL *val)
-{
-	CELL ret = 0;
-	char *cp = word+1;
-
-	if (strlen(word) == 1) 
-	{
-		return false;
-	}
-
-	while (*cp)
-	{
-		ret = (ret * 10);
-		char c = toupper(*cp);
-		if (('0' <= c) && (c <= '9'))
-		{
-			ret += (c - '0');
-		}
-		else
-		{
-			return false;
-		}
-		++cp;
-	}
-	*val = ret;
-	return true;
-}
-
-bool parseHex(char *word, CELL *val)
-{
-	CELL ret = 0;
-	char *cp = word+1;
-
-	if (strlen(word) == 1) 
-	{
-		return false;
-	}
-
-	while (*cp)
-	{
-		ret = (ret << 4);
-		char c = toupper(*cp);
-		if (('0' <= c) && (c <= '9'))
-		{
-			ret += (c - '0');
-		}
-		else if (('A' <= c) && (c <= 'F'))
-		{
-			ret += (c - 'A');
-			ret += 10;
-		}
-		else
-		{
-			return false;
-		}
-		++cp;
-	}
-	*val = ret;
-	return true;
 }
 
 char *ParseWord(char *word, char *line)
@@ -445,81 +373,6 @@ char *ParseWord(char *word, char *line)
 		return line;
 	}
 
-	TRACE("[pw-5]");
-	// HEX words look like this: $<hex-number>
-	if ((word[0] == '$') && (parseHex(word, &val)))
-	{
-		if (STATE == 0)
-		{
-			push(val);
-		}
-		else
-		{
-			if (val < 256)
-			{
-				CComma(CLITERAL);
-				CComma(val);
-			}
-			else
-			{
-				CComma(LITERAL);
-				Comma(val);
-			}
-			
-		}
-		return line;
-	}
-
-	TRACE("[pw-6]");
-	// DECIMAL words look like this: #<decimal-number>
-	if ((word[0] == '#') && (parseDecimal(word, &val)))
-	{
-		if (STATE == 0)
-		{
-			push(val);
-		}
-		else
-		{
-			if (val < 256)
-			{
-				CComma(CLITERAL);
-				CComma(val);
-			}
-			else
-			{
-				CComma(LITERAL);
-				Comma(val);
-			}
-			
-		}
-		return line;
-	}
-
-	TRACE("[pw-7]");
-	// BINARY words look like this: %<binary-number>
-	if ((word[0] == '%') && (parseBinary(word, &val)))
-	{
-		if (STATE == 0)
-		{
-			push(val);
-		}
-		else
-		{
-			if (val < 256)
-			{
-				CComma(CLITERAL);
-				CComma(val);
-			}
-			else
-			{
-				CComma(LITERAL);
-				Comma(val);
-			}
-			
-		}
-		return line;
-	}
-
 	// if (strcmp(word, ".CSTORE.") == 0)
 	// {
 	// 	CComma(CSTORE);
@@ -558,77 +411,52 @@ char *ParseWord(char *word, char *line)
 		return line;
 	}
 
-	TRACE("[here]");
-	// "Assembler" words
-	for (int i = 0; ; i++)
+	if (string_equals(word, ";"))
 	{
-		TRACE(" %d", i);
-		OPCODE_T *op = &(theOpcodes[i]);
-		if (op->asm_instr == NULL)
-		{
-			break;
-		}
-
-		// TRACE("[%s] == [%s]?\n", word, op->asm_instr);
-		if (strcmp(word, op->asm_instr) == 0)
-		{
-			CComma(op->opcode);
-			return line;
-		}
-
+		CComma(RET);
+		STATE = 0;
+		return line;
 	}
 
-	TRACE("[here]");
-	// These words are only for : definitions
-	if (STATE == 1)
+	if (strcmp(word, ".IF") == 0)
 	{
-		if (string_equals(word, ";"))
-		{
-			CComma(RET);
-			STATE = 0;
-			return line;
-		}
+		CComma(JMPZ);
+		push(HERE);
+		Comma(0);
+		return line;
+	}
 
-		if (strcmp(word, ".IF") == 0)
-		{
-			CComma(JMPZ);
-			push(HERE);
-			Comma(0);
-			return line;
-		}
+	if (strcmp(word, ".THEN") == 0)
+	{
+		CELL tmp = pop();
+		Store(tmp, HERE);
+		return line;
+	}
 
-		if (strcmp(word, ".THEN") == 0)
+	if (string_equals(word, "S\""))
+	{
+		CComma(SLITERAL);
+		int count = 0;
+		bool done = false;
+		line += 1;
+		CELL cur_here = HERE++;
+		BYTE ch;
+		while ((!done) && (!string_isEmpty(line)))
 		{
-			CELL tmp = pop();
-			Store(tmp, HERE);
-			return line;
-		}
-
-		if (string_equals(word, "S\""))
-		{
-			CComma(SLITERAL);
-			int count = 0;
-			bool done = false;
-			line += 1;
-			CELL cur_here = HERE++;
-			BYTE ch;
-			while ((!done) && (!string_isEmpty(line)))
+			ch = *(line++);
+			if (ch == '\"')
 			{
-				ch = *(line++);
-				if (ch == '\"')
-				{
-					done = true;
-				}
-				else
-				{
-					CComma(ch);
-					count++;
-				}
+				done = true;
 			}
-			CComma(0);
-			CStore(cur_here, count);
-			return line;
+			else
+			{
+				CComma(ch);
+				count++;
+			}
 		}
+		CComma(0);
+		CStore(cur_here, count);
+		return line;
 	}
 
 	DICT_T *dp = FindWord(word);
@@ -678,7 +506,33 @@ char *ParseWord(char *word, char *line)
 		return line;
 	}
 
-	TRACE(" not a word, Number?");
+	// "Assembler" words
+	for (int i = 0; ; i++)
+	{
+		OPCODE_T *op = &(theOpcodes[i]);
+		if (op->asm_instr == NULL)
+		{
+			break;
+		}
+
+		if (strcmp(word, op->asm_instr) == 0)
+		{
+			if (STATE == 1) // Compiling
+			{
+				CComma(op->opcode);
+			}
+			else
+			{
+				CELL xt = HERE + 0x0100;
+				BYTE_AT(xt) = op->opcode;
+				BYTE_AT(xt+1) = RET;
+				SyncMem(true);
+				cpu_loop(xt);
+				SyncMem(false);
+			}
+			return line;
+		}
+	}
 
 	CELL num = 0;
 	if (MakeNumber(word, &num))
