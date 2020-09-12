@@ -7,8 +7,8 @@ variable tl tl !
 : forget-life tl @ (last) ! th @ (here) ! ;
 
 \ ------------- Game of life -------------
-: rows 52 ;
-: cols 62 ;
+: rows 50 ;
+: cols 100 ;
 
 variable grid
 rows cols * ALLOT
@@ -23,7 +23,7 @@ grid-0-fill
     \   2: no change
     \   3: come alive
     \  >3: die
-    DUP 2 = if DROP leave then
+    DUP 2 = if  DROP   leave then
     DUP 3 = if 2DROP 1 leave then
     2DROP 0 ;
 
@@ -57,7 +57,7 @@ grid-0-fill
     cell-sub
 
     DROP 
-    T2 @ SWAP cell-new-val 4 << T2 @ +
+    T2 @ SWAP cell-new-val 4 LSHIFT T2 @ +
     T1 @ C! ;
 
 : do-row cols 2-             \ ( r -- )
@@ -80,20 +80,21 @@ grid-0-fill
 
 : show-row                      \ ( r -- )
     1 cell-at
-    cols 2- CR
+    cols 2-
     BEGIN
         SWAP show-cell SWAP
         1- DUP
-    WHILE 2DROP ;
+    WHILE 2DROP CR ;
 
 : show-grid rows 2-             \ ( -- )
+    0 0 gotoxy
     BEGIN
         rows 2- OVER - 1+ show-row
         1- DUP
     WHILE DROP ;
 
 : cell-update                 \ ( addr1 -- addr2 )
-    DUP C@ 4 >> OVER C! 1+ ;
+    DUP C@ 4 RSHIFT OVER C! 1+ ;
 
 : update-grid
     grid grid-sz
@@ -104,11 +105,12 @@ grid-0-fill
 
 : one-cycle CR do-grid show-grid update-grid ;
 
-: slow-down 1000 1000 * * BEGIN 1- DUP WHILE DROP ;
+: slow-down 1000 * BEGIN 1- DUP WHILE DROP ;
 : st start-timer swap slow-down elapsed ;
+variable delay 1 delay !
 
 : life BEGIN
-    one-cycle DUP . 300 slow-down
+    one-cycle DUP . delay @ slow-down
     1- DUP WHILE DROP ;
 
 : set-cell cell-at 1 SWAP C! ;
@@ -116,7 +118,9 @@ grid-0-fill
 : cell? cell-at C@ . ;
 
 : reset-life GETTICK 5000 MOD DUP .
-    grid grid-sz CMOVE show-grid ;
+    grid grid-sz CMOVE ;
+
+: go reset-life 500 life ; go
 
 CR sys-info
 \ forget-life CR sys-info
