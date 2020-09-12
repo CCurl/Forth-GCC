@@ -86,7 +86,10 @@ OPCODE_T theOpcodes[] = {
         , { "SHIFTRIGHT",       SHIFTRIGHT,       "RSHIFT",         IS_INLINE }
         , { "PLUSSTORE",        PLUSSTORE,        "PLUSSTORE",      IS_INLINE }
         , { "OPENBLOCK",        OPENBLOCK,        "OPENBLOCK",      IS_INLINE }
+<<<<<<< HEAD
         , { "GOTOXY",           GOTOXY,           "GOTOXY",         IS_INLINE }
+=======
+>>>>>>> 0a8055f48cf95deb0afe00e5ddaa6e2cb5113fe0
         , { "DBGDOT",           DBGDOT,           "DBGDOT",         IS_INLINE }
         , { "DBGDOTS",          DBGDOTS,          "DBGDOTS",        IS_INLINE }
         , { "NOP",              NOP,              "NOP",            IS_INLINE }
