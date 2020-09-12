@@ -1,4 +1,5 @@
 #include <winbase.h>
+#include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,6 +30,7 @@ int _QUIT_HIT = 0;
 int MEM_SZ = 0;
 
 CELL arg1, arg2, arg3;
+HANDLE hStdin = NULL, hStdout = NULL;
 
 static inline CELL GETTOS() { return TOS; }
 static inline CELL GET2ND() { return *(DSP); }
@@ -409,6 +411,20 @@ void cpu_loop(CELL start)
 				FILE *fp = fopen(fn, "rt");
 				push((CELL)fp);
 				push(TOS ? -1 : 0);
+			}
+			break;
+		case GOTOXY:
+			{
+				if (hStdout == NULL) {
+					hStdin  = GetStdHandle(STD_INPUT_HANDLE);
+					hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+				}
+				COORD pos;
+				arg1 = pop();
+				arg2 = pop();
+				pos.Y = (short)arg2;
+				pos.X = (short)arg1;
+				SetConsoleCursorPosition(hStdout, pos);
 			}
 			break;
 		case DBGDOT:

@@ -63,8 +63,8 @@
 #define SHIFTRIGHT 49   // 31
 #define PLUSSTORE  50   // 32
 #define OPENBLOCK  51   // 33
-// unused 51-89
-// unused 96-99
+#define GOTOXY     52   // 34
+// unused 53-99
 #define DBGDOT    100
 #define DBGDOTS   101
 // unused 102-251
