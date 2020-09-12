@@ -1079,27 +1079,15 @@ f_OPENBLOCK:
 ; -------------------------------------------------------------------------------------
 ; f_GOTOXY ( X Y -- ) - top/left of screen is (0,0)
 f_GOTOXY:
-                m_pop eax
-                m_pop ecx
+                m_pop eax       ; Y
+                m_pop ecx       ; X
                 shl eax, 16
                 mov ax, cx
 
-                push edx         ; save these
-                push ebp
-                push edi
-                push esi
-                push ebx
-
+                push edx
                 push eax
                 push [STDOUT]
                 call [SetConsoleCursorPosition]
-                ; pop eax         ; arg1 (STDOUT)
-                ; pop eax         ; arg2 (POS)
-
-                pop ebx         ; get them back
-                pop esi
-                pop edi
-                pop ebp
                 pop edx
 
                 m_NEXT
@@ -1277,8 +1265,7 @@ cpuLoop:
         m_NEXT
 ; -------------------------------------------------------------------------------------
 KB = 1024
-MEG_001 = 1024*1024
-MEG_128 = MEG_001 * 128
+MB = KB*KB
 
-MEM: rb KB*64
+MEM: rb MB*64
 MEM_END:
