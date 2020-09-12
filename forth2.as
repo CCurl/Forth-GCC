@@ -25,23 +25,13 @@ format PE console
 include 'win32ax.inc'
 
 ; -------------------------------------------------------------------------------------
-section '.rdata' data readable
-printArgError db 'Error: Wrong number of arguments. Run file with "program.exe <file>"', 0
-printFileError db 'Error: File [%s] does not exist. Check spelling and try again.', 0
-unknownOpcode db 'unknown opcode! 0x%02X at 0x%04lx', 13, 10, 0
-divByZero db 'cannot divide by 0.', 0
-printBye db 'Bye', 0
-openModeRB db 'rb', 0
-openModeRT db 'rt', 0
-
-; -------------------------------------------------------------------------------------
 section '.idata' data readable import
 
 library kernel32, 'kernel32.dll', msvcrt, 'msvcrt.dll', conio, 'conio.dll'
 
 import kernel32, ExitProcess,'ExitProcess', GetFileAttributes, 'GetFileAttributesA' \
     , GetConsoleMode, 'GetConsoleMode', SetConsoleMode, 'SetConsoleMode', GetStdHandle, 'GetStdHandle' \
-    , GetTickCount, 'GetTickCount'
+    , GetTickCount, 'GetTickCount', SetConsoleCursorPosition, 'SetConsoleCursorPosition'
 
 import msvcrt, printf, 'printf', __getmainargs, '__getmainargs' \
     , fopen,'fopen', fclose, 'fclose', fseek, 'fseek', ftell, 'ftell' \
@@ -50,6 +40,13 @@ import msvcrt, printf, 'printf', __getmainargs, '__getmainargs' \
 
 ; -------------------------------------------------------------------------------------
 section '.bss' data readable writable executable
+
+printArgError db 'Error: Wrong number of arguments. Run file with "program.exe <file>"', 0
+printFileError db 'Error: File [%s] does not exist. Check spelling and try again.', 0
+unknownOpcode db 'unknown opcode! 0x%02X at 0x%04lx', 13, 10, 0
+divByZero db 'cannot divide by 0.', 0
+openModeRB db 'rb', 0
+openModeRT db 'rt', 0
 
 CELL_SIZE = 4
 STD_INPUT_HANDLE = -10
@@ -140,7 +137,7 @@ dd f_SHIFTLEFT          ; Hex: 30 (48)
 dd f_SHIFTRIGHT         ; Hex: 31 (49)
 dd f_PLUSSTORE          ; Hex: 32 (50)
 dd f_OPENBLOCK          ; Hex: 33 (51)
-dd f_UnknownOpcode      ; Hex: 34 (52)
+dd f_GOTOXY             ; Hex: 34 (52)
 dd f_UnknownOpcode      ; Hex: 35 (53)
 dd f_UnknownOpcode      ; Hex: 36 (54)
 dd f_UnknownOpcode      ; Hex: 37 (55)
@@ -1080,9 +1077,37 @@ f_OPENBLOCK:
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
+; f_GOTOXY ( X Y -- ) - top/left of screen is (0,0)
+f_GOTOXY:
+                m_pop eax
+                m_pop ecx
+                shl eax, 16
+                mov ax, cx
+
+                push edx         ; save these
+                push ebp
+                push edi
+                push esi
+                push ebx
+
+                push eax
+                push [STDOUT]
+                call [SetConsoleCursorPosition]
+                ; pop eax         ; arg1 (STDOUT)
+                ; pop eax         ; arg2 (POS)
+
+                pop ebx         ; get them back
+                pop esi
+                pop edi
+                pop ebp
+                pop edx
+
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
 ; NOP
 f_NOP:
-            m_NEXT
+                m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; BREAK
@@ -1095,10 +1120,6 @@ f_BREAK:
 ; -------------------------------------------------------------------------------------
 ; BYE
 f_BYE:
-            ; invoke printf, printBye
-            ; pop eax
-            ; mov esp, [InitialESP]
-
             push 0
             call [ExitProcess]
             pop eax
@@ -1224,10 +1245,10 @@ entry $
         mov esp, ebp
 
         ; TEST ,,,,
-        mov edi, MEM
-        mov ecx, 127 * MEG_001
-        cld
-        rep stosb
+        ; mov edi, MEM
+        ; mov ecx, 127 * MEG_001
+        ; cld
+        ; rep stosb
 
         ; Allocate memory for the file
         push [fileSize]
@@ -1255,8 +1276,9 @@ entry $
 cpuLoop:
         m_NEXT
 ; -------------------------------------------------------------------------------------
+KB = 1024
 MEG_001 = 1024*1024
 MEG_128 = MEG_001 * 128
 
-MEM: rb MEG_128
+MEM: rb KB*64
 MEM_END:
