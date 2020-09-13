@@ -2,7 +2,7 @@
 ;
 ; This is a program that implements a forth CPU/VM.
 ; The CPU's opcodes are identified by their order in the [jmpTable].
-; The VM's memory space is the allocated memory pointed to by [theMemory].
+; The VM's memory space is the reserved buffer at THE_MEMORY.
 ; When the "VM" starts up, the IP is set to point to memory address 0.
 ; This should be a JMP to the program's entry point.
 ;
@@ -13,9 +13,9 @@
 ; eax: Free to use
 ; ebx: the VM's TOS (top-of-stack)
 ; ecx: Free to use
-; edx: the start of the VM's address space
+; edx: Free to use
 ; esi: the VM's IP (instruction-pointer)
-; edi: the start of the opcode jump table
+; edi: the start of the VM's address space
 ; ebp: the VM's stack pointer
 ;
 ; **************************************************************************
@@ -65,7 +65,6 @@ InitialESP dd 0
 
 fileName dd ?
 fileSize dd ?
-theMemory dd ?
 rDepth dd 0
 rStackPtr dd 0
 tmpBuf1 db  16 dup (0)          ; Buffer for data stack
@@ -362,7 +361,7 @@ f_LITERAL:
 ; -------------------------------------------------------------------------------------
 ; FETCH
 f_FETCH:
-            add ebx, edx
+            add ebx, edi
             mov ebx, [ebx]
             m_NEXT
 
@@ -371,7 +370,7 @@ f_FETCH:
 f_STORE:
             m_pop ecx
             m_pop eax
-            add ecx, edx
+            add ecx, edi
             mov [ecx], eax
             m_NEXT
 
@@ -407,7 +406,7 @@ f_DUP:
 ; SLITERAL
 f_SLITERAL:
             mov eax, esi
-            sub eax, edx
+            sub eax, edi
             m_push eax
             xor eax, eax
             mov al, [esi]
@@ -420,7 +419,7 @@ f_SLITERAL:
 ; JMP
 f_JMP:
             mov esi, [esi]
-            add esi, edx
+            add esi, edi
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -446,10 +445,10 @@ f_JMPNZ:
 f_CALL:
             push dword [esi]
             add esi, CELL_SIZE
-            sub esi, edx
+            sub esi, edi
             m_rpush esi
             pop esi
-            add esi, edx
+            add esi, edi
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -480,7 +479,7 @@ csOF:       ; push dsOverFlow
 f_RET:
             call checkStack
             m_rpop esi
-            add esi, edx
+            add esi, edi
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -503,7 +502,7 @@ f_CLITERAL:
 ; CFETCH
 f_CFETCH:
             xor eax, eax
-            mov al, [ebx + edx]
+            mov al, [ebx + edi]
             m_setTOS eax
             m_NEXT
 
@@ -512,7 +511,7 @@ f_CFETCH:
 f_CSTORE:
             m_pop ecx
             m_pop eax
-            mov [ecx + edx], al
+            mov [ecx + edi], al
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -532,12 +531,12 @@ f_SUB:
 ; -------------------------------------------------------------------------------------
 ; MUL
 f_MUL:
-            push edx
+            push edi
             m_pop eax
-            xor edx, edx
+            xor edi, edi
             mul ebx
             m_setTOS eax
-            pop edx
+            pop edi
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -547,7 +546,7 @@ f_SLASHMOD:
 
 ; -------------------------------------------------------------------------------------
 s_SLASHMOD:
-           push edx
+           push edi
            m_pop ecx
            m_pop eax
            cmp ecx, 0
@@ -556,7 +555,7 @@ s_SLASHMOD:
            div ecx
            m_push edx          ; Remainder
            m_push eax          ; Quotient
-           pop edx
+           pop edi
            ret
 
 smDivBy0:
@@ -617,11 +616,11 @@ f_DICTP:
 ; EMIT
 f_EMIT:
             m_pop eax
-            push edx
+            push edi
             push eax
             call [putchar]
             pop eax
-            pop edx
+            pop edi
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -643,15 +642,15 @@ u2lR:           ret
 
 ; -------------------------------------------------------------------------------------
 ; do_STRCMP
-; Compare strings pointed to by esi and edi
+; Compare strings pointed to by esi and edx
 ; case sensitive: dl = 0
 ; case insensitive: dl != 0
 ; return in eax: -1 => eax<ecx, 0 => same, 1 eax>ecx
 do_STRCMP:
                 mov al, [esi]
-                mov ah, [edi]
+                mov ah, [edx]
 
-                test edx, edx
+                test edi, edi
                 jz cmp2
                 call u_ToLower
                 xchg al, ah
@@ -663,7 +662,7 @@ cmp2:           cmp ah, al
                 test ax, ax
                 jz cmpEQ
                 inc esi
-                inc edi
+                inc edx
                 jmp do_STRCMP
 
 cmpLT:          mov eax, -1
@@ -675,7 +674,7 @@ cmpEQ:          mov eax, 0
 
 ; -------------------------------------------------------------------------------------
 ; do_COMPARE
-; Compare strings pointed to by esi and edi
+; Compare strings pointed to by esi and edx
 ; case sensitive: dl = 0
 ; case insensitive: dl != 0
 ; return in eax: -1 => strings are equal, 0 => strings are NOT equal
@@ -692,19 +691,19 @@ cmpT:           mov eax, -1
 ; COMPARE
 f_COMPARE:
                 push esi
-                push edi
                 push edx
+                push edi
 
-                m_pop edi
-                add edi, edx
+                m_pop edx
+                add edx, edi
                 m_pop esi
-                add esi, edx
-                xor edx, edx
+                add esi, edi
+                xor edi, edi
                 call do_COMPARE
                 m_push eax
 
-                pop edx
                 pop edi
+                pop edx
                 pop esi
 
                 m_NEXT
@@ -717,34 +716,34 @@ f_FOPEN:
                 call s_SWAP
 
                 ; save these
-                push edx
                 push edi
+                push edx
 
-                mov edi, tmpBuf1
+                mov edx, tmpBuf1
 
                 m_pop ecx                       ; mode: 0 => read, 1 => write
                 mov al, 'r'
                 cmp ecx, 0
                 je fopen1
                 mov al, 'w'
-fopen1:         mov [edi], al
+fopen1:         mov [edx], al
 
                 m_pop ecx                       ; type: 0 => text, 1 => binary
                 mov al, 't'
                 cmp ecx, 0
                 je fopen2
                 mov al, 'b'
-fopen2:         inc edi
-                mov [edi], al
+fopen2:         inc edx
+                mov [edx], al
 
-                inc edi
-                mov [edi], byte 0
+                inc edx
+                mov [edx], byte 0
                 ; now [tmpBuf1] has the openMode for fopen()
 
                 ; now for the filename
                 m_pop eax
                 inc eax                         ; skip the count byte
-                add eax, edx
+                add eax, edi
 
                 ; function signature is fp = fopen(name, openMode);
                 push tmpBuf1
@@ -757,15 +756,15 @@ fopen2:         inc edi
                 m_push eax
 
                 ; restore these
-                pop edi
                 pop edx
+                pop edi
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; FREAD ( addr count fp -- num-read )
 f_FREAD:
                 ; save these
-                push edx
+                push edi
 
                 ; signature is: num-read = fread(addr, size, count, fp);
                 ; args for [fread]
@@ -775,7 +774,7 @@ f_FREAD:
                 push eax
                 push 1          ; size
                 m_pop eax       ; addr
-                add eax, edx
+                add eax, edi
                 push eax
                 call [fread]
                 m_push eax       ; EAX = return val (num-read)
@@ -786,7 +785,7 @@ f_FREAD:
                 pop eax
 
                 ; get these back
-                pop edx
+                pop edi
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -797,15 +796,15 @@ f_FREADLINE:
                 ; NB: the strring returned at addr should be counted
                 ;     and null-terminated
 
-                ; Save EDX
-                push edx
+                ; Save edi
+                push edi
 
                 m_pop eax       ; FP
                 push eax
                 m_pop eax       ; max
                 push eax
                 m_pop eax       ; addr
-                add eax, edx
+                add eax, edi
                 inc eax
                 push eax
                 call [fgets]    ; returns addr if OK, else NULL
@@ -832,21 +831,21 @@ rdlCX:          pop ecx         ; Make it a counted string
                 mov [ecx], al
 
 rdlX:           m_setTOS eax
-                ; Restore EDX
-                pop edx
+                ; Restore edi
+                pop edi
                 m_NEXT
 
 rdlEOF:         dec ecx
                 mov [ecx], word 0
                 m_setTOS 0
-                pop edx
+                pop edi
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; FWRITE: ( addr count fp -- num-written ) 
 f_FWRITE:
                 ; save these
-                push edx
+                push edi
 
                 ; signature is: num-written = fwrite(addr, size, count, fp);
                 ; args for [fread]
@@ -856,7 +855,7 @@ f_FWRITE:
                 push eax
                 push 1          ; size
                 m_pop eax       ; addr
-                add eax, edx
+                add eax, edi
                 push eax
                 call [fwrite]
                 m_push eax       ; EAX = return val (num-written)
@@ -867,18 +866,18 @@ f_FWRITE:
                 pop eax
 
                 ; get these back
-                pop edx
+                pop edi
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; FCLOSE
 f_FCLOSE:   ; ( fp -- )
             m_pop eax
-            push edx
+            push edi
             push eax
             call [fclose]
             pop eax
-            pop edx
+            pop edi
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -947,9 +946,9 @@ f_DEPTH:
 ; -------------------------------------------------------------------------------------
 ; GETCH
 f_GETCH:
-            push edx
+            push edi
             call [getch]
-            pop edx
+            pop edi
             cmp eax, 3
             je f_BYE
             m_push eax
@@ -959,19 +958,19 @@ f_GETCH:
 ; COMPAREI
 f_COMPAREI:
                 push esi
-                push edi
                 push edx
+                push edi
 
-                m_pop edi
+                m_pop edx
                 m_pop esi
-                add edi, edx
-                add esi, edx
-                mov edx, 1
+                add edx, edi
+                add esi, edi
+                mov edi, 1
                 call do_COMPARE
                 m_push eax
 
-                pop edx
                 pop edi
+                pop edx
                 pop esi
                 m_NEXT
 
@@ -996,10 +995,10 @@ f_DEC:
 ; -------------------------------------------------------------------------------------
 ; GETTICK
 f_GETTICK:
-                push edx
+                push edi
                 call [GetTickCount]
                 m_push eax
-                pop edx
+                pop edi
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -1019,8 +1018,8 @@ f_SHIFTRIGHT:
 f_PLUSSTORE:
                 m_pop eax
                 m_pop ecx
-                ; add eax, edx
-                add [eax+edx], ecx
+                ; add eax, edi
+                add [eax+edi], ecx
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -1059,8 +1058,8 @@ f_OPENBLOCK:
                 call s_NumToText
                 m_drop
                 
-                push edx        ; save these
-                push edi
+                push edi        ; save these
+                push edx
 
                 push openModeRT
                 push blockFile
@@ -1068,8 +1067,8 @@ f_OPENBLOCK:
                 pop ecx
                 pop ecx
 
-                pop edi         ; get them back
-                pop edx
+                pop edx         ; get them back
+                pop edi
 
                 m_push eax
                 m_push eax
@@ -1084,11 +1083,11 @@ f_GOTOXY:
                 shl eax, 16
                 mov ax, cx
 
-                push edx
+                push edi
                 push eax
                 push [STDOUT]
                 call [SetConsoleCursorPosition]
-                pop edx
+                pop edi
 
                 m_NEXT
 
@@ -1100,8 +1099,8 @@ f_NOP:
 ; -------------------------------------------------------------------------------------
 ; BREAK
 f_BREAK:
-            mov ecx, edi
-            sub ecx, edx
+            mov ecx, edx
+            sub ecx, edi
             int3
             m_NEXT
 
@@ -1115,7 +1114,7 @@ f_BYE:
 
 f_UnknownOpcode:
             mov eax, esi
-            sub eax, edx
+            sub eax, edi
             dec eax
             push eax
             push ecx
@@ -1141,21 +1140,17 @@ f_RESET:
 s_SYS_INIT:
             ; Return stack
             mov eax, rStack - CELL_SIZE
-            ; sub eax, CELL_SIZE
             mov [rStackPtr], eax
             mov [rDepth], 0
 
             ; Data stack
             mov ebp, dStack
 
-            ; opcode jump table
-            mov edi, jmpTable
-
-            ; edx = theMemory
-            mov edx, [theMemory]
+            ; edi = the VM's memory
+            mov edi, THE_MEMORY
 
             ; esi = IP/PC
-            mov esi, edx
+            mov esi, edi
             ret
 
 ; -------------------------------------------------------------------------------------
@@ -1232,23 +1227,11 @@ entry $
         call [fseek]
         mov esp, ebp
 
-        ; TEST ,,,,
-        ; mov edi, MEM
-        ; mov ecx, 127 * MEG_001
-        ; cld
-        ; rep stosb
-
-        ; Allocate memory for the file
-        push [fileSize]
-        call [malloc]
-        mov [theMemory], eax
-        mov esp, ebp
-
         ; Read the file into memory
         push [stream]
         push [fileSize]
         push 1
-        push [theMemory]
+        push THE_MEMORY
         call [fread]
         mov esp, ebp
 
@@ -1264,8 +1247,8 @@ entry $
 cpuLoop:
         m_NEXT
 ; -------------------------------------------------------------------------------------
-KB = 1024
-MB = KB*KB
+KILOBYTE = 1024
+MEGABYTE = KILOBYTE*KILOBYTE
 
-MEM: rb MB*64
+THE_MEMORY: rb MEGABYTE*128
 MEM_END:

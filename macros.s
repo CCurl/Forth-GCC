@@ -93,7 +93,7 @@ macro m_NEXT
        ; ret
        ; jmp cpuLoop
         movzx ecx, BYTE [esi]
-        mov eax, [edi+ecx*4]
+        mov eax, [jmpTable+ecx*4]
         inc esi
         jmp eax
 }
