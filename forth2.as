@@ -546,7 +546,6 @@ f_SLASHMOD:
 
 ; -------------------------------------------------------------------------------------
 s_SLASHMOD:
-           push edx
            m_pop ecx
            m_pop eax
            cmp ecx, 0
@@ -555,7 +554,6 @@ s_SLASHMOD:
            div ecx
            m_push edx          ; Remainder
            m_push eax          ; Quotient
-           pop edx
            ret
 
 smDivBy0:
@@ -615,12 +613,10 @@ f_DICTP:
 ; -------------------------------------------------------------------------------------
 ; EMIT
 f_EMIT:
-            m_pop eax
-            push ebx
-            push eax
+            push edi
             call [putchar]
             pop eax
-            pop ebx
+            m_drop
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -643,8 +639,8 @@ u2lR:           ret
 ; -------------------------------------------------------------------------------------
 ; do_STRCMP
 ; Compare strings pointed to by esi and edx
-; case sensitive: dl = 0
-; case insensitive: dl != 0
+; case sensitive: bl = 0
+; case insensitive: bl != 0
 ; return in eax: -1 => eax<ecx, 0 => same, 1 eax>ecx
 do_STRCMP:
                 mov al, [esi]
@@ -691,8 +687,6 @@ cmpT:           mov eax, -1
 ; COMPARE
 f_COMPARE:
                 push esi
-                push edx
-                push ebx
 
                 m_pop edx
                 add edx, THE_MEMORY
@@ -702,8 +696,6 @@ f_COMPARE:
                 call do_COMPARE
                 m_push eax
 
-                pop ebx
-                pop edx
                 pop esi
 
                 m_NEXT
