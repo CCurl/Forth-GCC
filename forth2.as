@@ -15,7 +15,7 @@
 ; ecx: Free to use
 ; edx: Free to use
 ; esi: the VM's IP (instruction-pointer)
-; edi: the start of the VM's address space
+; edi: Free to use
 ; ebp: the VM's stack pointer
 ;
 ; **************************************************************************
@@ -361,7 +361,7 @@ f_LITERAL:
 ; -------------------------------------------------------------------------------------
 ; FETCH
 f_FETCH:
-            add ebx, edi
+            add ebx, THE_MEMORY
             mov ebx, [ebx]
             m_NEXT
 
@@ -370,7 +370,7 @@ f_FETCH:
 f_STORE:
             m_pop ecx
             m_pop eax
-            add ecx, edi
+            add ecx, THE_MEMORY
             mov [ecx], eax
             m_NEXT
 
@@ -406,7 +406,7 @@ f_DUP:
 ; SLITERAL
 f_SLITERAL:
             mov eax, esi
-            sub eax, edi
+            sub eax, THE_MEMORY
             m_push eax
             xor eax, eax
             mov al, [esi]
@@ -419,7 +419,7 @@ f_SLITERAL:
 ; JMP
 f_JMP:
             mov esi, [esi]
-            add esi, edi
+            add esi, THE_MEMORY
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -445,10 +445,10 @@ f_JMPNZ:
 f_CALL:
             push dword [esi]
             add esi, CELL_SIZE
-            sub esi, edi
+            sub esi, THE_MEMORY
             m_rpush esi
             pop esi
-            add esi, edi
+            add esi, THE_MEMORY
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -479,7 +479,7 @@ csOF:       ; push dsOverFlow
 f_RET:
             call checkStack
             m_rpop esi
-            add esi, edi
+            add esi, THE_MEMORY
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -502,7 +502,7 @@ f_CLITERAL:
 ; CFETCH
 f_CFETCH:
             xor eax, eax
-            mov al, [ebx + edi]
+            mov al, [ebx + THE_MEMORY]
             m_setTOS eax
             m_NEXT
 
@@ -511,7 +511,7 @@ f_CFETCH:
 f_CSTORE:
             m_pop ecx
             m_pop eax
-            mov [ecx + edi], al
+            mov [ecx + THE_MEMORY], al
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -531,12 +531,12 @@ f_SUB:
 ; -------------------------------------------------------------------------------------
 ; MUL
 f_MUL:
-            push edi
+            push edx
             m_pop eax
-            xor edi, edi
+            xor edx, edx
             mul ebx
             m_setTOS eax
-            pop edi
+            pop edx
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -546,7 +546,7 @@ f_SLASHMOD:
 
 ; -------------------------------------------------------------------------------------
 s_SLASHMOD:
-           push edi
+           push edx
            m_pop ecx
            m_pop eax
            cmp ecx, 0
@@ -555,7 +555,7 @@ s_SLASHMOD:
            div ecx
            m_push edx          ; Remainder
            m_push eax          ; Quotient
-           pop edi
+           pop edx
            ret
 
 smDivBy0:
@@ -695,9 +695,9 @@ f_COMPARE:
                 push edi
 
                 m_pop edx
-                add edx, edi
+                add edx, THE_MEMORY
                 m_pop esi
-                add esi, edi
+                add esi, THE_MEMORY
                 xor edi, edi
                 call do_COMPARE
                 m_push eax
@@ -743,7 +743,7 @@ fopen2:         inc edx
                 ; now for the filename
                 m_pop eax
                 inc eax                         ; skip the count byte
-                add eax, edi
+                add eax, THE_MEMORY
 
                 ; function signature is fp = fopen(name, openMode);
                 push tmpBuf1
@@ -774,7 +774,7 @@ f_FREAD:
                 push eax
                 push 1          ; size
                 m_pop eax       ; addr
-                add eax, edi
+                add eax, THE_MEMORY
                 push eax
                 call [fread]
                 m_push eax       ; EAX = return val (num-read)
@@ -804,7 +804,7 @@ f_FREADLINE:
                 m_pop eax       ; max
                 push eax
                 m_pop eax       ; addr
-                add eax, edi
+                add eax, THE_MEMORY
                 inc eax
                 push eax
                 call [fgets]    ; returns addr if OK, else NULL
@@ -855,7 +855,7 @@ f_FWRITE:
                 push eax
                 push 1          ; size
                 m_pop eax       ; addr
-                add eax, edi
+                add eax, THE_MEMORY
                 push eax
                 call [fwrite]
                 m_push eax       ; EAX = return val (num-written)
@@ -963,8 +963,8 @@ f_COMPAREI:
 
                 m_pop edx
                 m_pop esi
-                add edx, edi
-                add esi, edi
+                add edx, THE_MEMORY
+                add esi, THE_MEMORY
                 mov edi, 1
                 call do_COMPARE
                 m_push eax
@@ -1019,7 +1019,7 @@ f_PLUSSTORE:
                 m_pop eax
                 m_pop ecx
                 ; add eax, edi
-                add [eax+edi], ecx
+                add [eax+THE_MEMORY], ecx
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -1100,7 +1100,7 @@ f_NOP:
 ; BREAK
 f_BREAK:
             mov ecx, edx
-            sub ecx, edi
+            sub ecx, THE_MEMORY
             int3
             m_NEXT
 
@@ -1114,7 +1114,7 @@ f_BYE:
 
 f_UnknownOpcode:
             mov eax, esi
-            sub eax, edi
+            sub eax, THE_MEMORY
             dec eax
             push eax
             push ecx
@@ -1146,11 +1146,8 @@ s_SYS_INIT:
             ; Data stack
             mov ebp, dStack
 
-            ; edi = the VM's memory
-            mov edi, THE_MEMORY
-
             ; esi = IP/PC
-            mov esi, edi
+            ; mov esi, edi
             ret
 
 ; -------------------------------------------------------------------------------------

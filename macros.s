@@ -90,8 +90,6 @@ macro m_rpop reg
 ; -------------------------------------------------------------------------------------
 macro m_NEXT
 {
-       ; ret
-       ; jmp cpuLoop
         movzx ecx, BYTE [esi]
         mov eax, [jmpTable+ecx*4]
         inc esi

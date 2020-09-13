@@ -120,7 +120,8 @@ variable delay 1 delay !
 : reset-life GETTICK 5000 MOD DUP .
     grid grid-sz CMOVE ;
 
-: go reset-life 500 life ; go
+: go 50 life ; 
+reset-life go
 
 CR sys-info
 \ forget-life CR sys-info
