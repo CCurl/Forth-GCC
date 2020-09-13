@@ -4,14 +4,14 @@
 
 macro m_setTOS val
 {
-       mov ebx, val
+       mov edi, val
 }
 
 macro m_push val
 {
        ; inc [dDepth]
        add ebp, CELL_SIZE
-       mov [ebp], ebx
+       mov [ebp], edi
        m_setTOS val
 }
 
@@ -28,13 +28,13 @@ macro m_set2ND val
 ; ------------------------------------------------------------------------------
 macro m_getTOS val
 {
-       mov val, ebx
+       mov val, edi
 }
 
 macro m_drop
 {
        ; dec [dDepth]
-       mov ebx, [ebp]
+       mov edi, [ebp]
        sub ebp, CELL_SIZE
 }
 

@@ -11,11 +11,11 @@
 ; **************************************************************************
 ;
 ; eax: Free to use
-; ebx: the VM's TOS (top-of-stack)
+; ebx: Free to use
 ; ecx: Free to use
 ; edx: Free to use
 ; esi: the VM's IP (instruction-pointer)
-; edi: Free to use
+; edi: the VM's TOS (top-of-stack)
 ; ebp: the VM's stack pointer
 ;
 ; **************************************************************************
@@ -361,8 +361,8 @@ f_LITERAL:
 ; -------------------------------------------------------------------------------------
 ; FETCH
 f_FETCH:
-            add ebx, THE_MEMORY
-            mov ebx, [ebx]
+            add edi, THE_MEMORY
+            mov edi, [edi]
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -378,7 +378,7 @@ f_STORE:
 ; SWAP
 f_SWAP:
             m_get2ND eax
-            m_set2ND ebx
+            m_set2ND edi
             m_setTOS eax
             m_NEXT
 
@@ -386,7 +386,7 @@ f_SWAP:
 ; SWAP
 s_SWAP:
             m_get2ND eax
-            m_set2ND ebx
+            m_set2ND edi
             m_setTOS eax
             ret
 
@@ -399,7 +399,7 @@ f_DROP:
 ; -------------------------------------------------------------------------------------
 ; DUP
 f_DUP:
-            m_push ebx
+            m_push edi
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -486,7 +486,7 @@ f_RET:
 ; OR
 f_OR:
             m_pop eax
-            or ebx, eax
+            or edi, eax
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -502,7 +502,7 @@ f_CLITERAL:
 ; CFETCH
 f_CFETCH:
             xor eax, eax
-            mov al, [ebx + THE_MEMORY]
+            mov al, [edi + THE_MEMORY]
             m_setTOS eax
             m_NEXT
 
@@ -518,14 +518,14 @@ f_CSTORE:
 ; ADD
 f_ADD:
             m_pop eax
-            add ebx, eax
+            add edi, eax
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; SUB
 f_SUB:
             m_pop eax
-            sub ebx, eax
+            sub edi, eax
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -534,7 +534,7 @@ f_MUL:
             push edx
             m_pop eax
             xor edx, edx
-            mul ebx
+            mul edi
             m_setTOS eax
             pop edx
             m_NEXT
@@ -581,7 +581,7 @@ f_MOD:
 ; LT
 f_LT:
             m_pop eax
-            cmp ebx, eax
+            cmp edi, eax
             jl eq_T
             jmp eq_F
 
@@ -589,7 +589,7 @@ f_LT:
 ; EQ
 f_EQ:
             m_pop eax
-            cmp ebx, eax
+            cmp edi, eax
             je eq_T
 
 eq_F:       m_setTOS 0
@@ -602,7 +602,7 @@ eq_T:       m_setTOS -1
 ; GT
 f_GT:
             m_pop eax
-            cmp ebx, eax
+            cmp edi, eax
             jg eq_T
             jmp eq_F
 
@@ -616,11 +616,11 @@ f_DICTP:
 ; EMIT
 f_EMIT:
             m_pop eax
-            push edi
+            push ebx
             push eax
             call [putchar]
             pop eax
-            pop edi
+            pop ebx
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -650,7 +650,7 @@ do_STRCMP:
                 mov al, [esi]
                 mov ah, [edx]
 
-                test edi, edi
+                test ebx, ebx
                 jz cmp2
                 call u_ToLower
                 xchg al, ah
@@ -692,17 +692,17 @@ cmpT:           mov eax, -1
 f_COMPARE:
                 push esi
                 push edx
-                push edi
+                push ebx
 
                 m_pop edx
                 add edx, THE_MEMORY
                 m_pop esi
                 add esi, THE_MEMORY
-                xor edi, edi
+                xor ebx, ebx
                 call do_COMPARE
                 m_push eax
 
-                pop edi
+                pop ebx
                 pop edx
                 pop esi
 
@@ -716,7 +716,7 @@ f_FOPEN:
                 call s_SWAP
 
                 ; save these
-                push edi
+                push ebx
                 push edx
 
                 mov edx, tmpBuf1
@@ -757,14 +757,14 @@ fopen2:         inc edx
 
                 ; restore these
                 pop edx
-                pop edi
+                pop ebx
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; FREAD ( addr count fp -- num-read )
 f_FREAD:
                 ; save these
-                push edi
+                push ebx
 
                 ; signature is: num-read = fread(addr, size, count, fp);
                 ; args for [fread]
@@ -785,7 +785,7 @@ f_FREAD:
                 pop eax
 
                 ; get these back
-                pop edi
+                pop ebx
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -796,8 +796,8 @@ f_FREADLINE:
                 ; NB: the strring returned at addr should be counted
                 ;     and null-terminated
 
-                ; Save edi
-                push edi
+                ; Save ebx
+                push ebx
 
                 m_pop eax       ; FP
                 push eax
@@ -831,21 +831,21 @@ rdlCX:          pop ecx         ; Make it a counted string
                 mov [ecx], al
 
 rdlX:           m_setTOS eax
-                ; Restore edi
-                pop edi
+                ; Restore ebx
+                pop ebx
                 m_NEXT
 
 rdlEOF:         dec ecx
                 mov [ecx], word 0
                 m_setTOS 0
-                pop edi
+                pop ebx
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; FWRITE: ( addr count fp -- num-written ) 
 f_FWRITE:
                 ; save these
-                push edi
+                push ebx
 
                 ; signature is: num-written = fwrite(addr, size, count, fp);
                 ; args for [fread]
@@ -866,18 +866,18 @@ f_FWRITE:
                 pop eax
 
                 ; get these back
-                pop edi
+                pop ebx
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; FCLOSE
 f_FCLOSE:   ; ( fp -- )
             m_pop eax
-            push edi
+            push ebx
             push eax
             call [fclose]
             pop eax
-            pop edi
+            pop ebx
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -897,7 +897,7 @@ f_RTOD:
 ; -------------------------------------------------------------------------------------
 ; COM
 f_COM:
-            not ebx
+            not edi
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -912,13 +912,13 @@ f_RFETCH:
 ; AND
 f_AND:
             m_pop eax
-            and ebx, eax
+            and edi, eax
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; NOT ( n1 -- n2 )
 f_NOT:
-            test ebx, ebx
+            test edi, edi
             jz eq_T
             jmp eq_F
 
@@ -946,9 +946,9 @@ f_DEPTH:
 ; -------------------------------------------------------------------------------------
 ; GETCH
 f_GETCH:
-            push edi
+            push ebx
             call [getch]
-            pop edi
+            pop ebx
             cmp eax, 3
             je f_BYE
             m_push eax
@@ -959,17 +959,17 @@ f_GETCH:
 f_COMPAREI:
                 push esi
                 push edx
-                push edi
+                push ebx
 
                 m_pop edx
                 m_pop esi
                 add edx, THE_MEMORY
                 add esi, THE_MEMORY
-                mov edi, 1
+                mov ebx, 1
                 call do_COMPARE
                 m_push eax
 
-                pop edi
+                pop ebx
                 pop edx
                 pop esi
                 m_NEXT
@@ -977,7 +977,7 @@ f_COMPAREI:
 ; -------------------------------------------------------------------------------------
 ; INC
 f_INC:
-            inc ebx
+            inc edi
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -989,28 +989,28 @@ f_RDEPTH:
 ; -------------------------------------------------------------------------------------
 ; DEC
 f_DEC:
-            dec ebx
+            dec edi
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; GETTICK
 f_GETTICK:
-                push edi
+                push ebx
                 call [GetTickCount]
                 m_push eax
-                pop edi
+                pop ebx
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
 f_SHIFTLEFT:
                 m_pop ecx
-                shl ebx, cl
+                shl edi, cl
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
 f_SHIFTRIGHT:
                 m_pop ecx
-                shr ebx, cl
+                shr edi, cl
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -1018,7 +1018,7 @@ f_SHIFTRIGHT:
 f_PLUSSTORE:
                 m_pop eax
                 m_pop ecx
-                ; add eax, edi
+                ; add eax, ebx
                 add [eax+THE_MEMORY], ecx
                 m_NEXT
 
@@ -1038,12 +1038,12 @@ s_NumToText:
                 m_push eax
                 call s_SLASHMOD
                 call s_SWAP
-                add ebx, '0'
+                add edi, '0'
                 pop eax
                 pop ecx
+                m_pop ebx
                 mov [ecx], bl
                 dec ecx
-                m_drop
                 ret
 ; -------------------------------------------------------------------------------------
 ; f_OPENBLOCK
@@ -1058,7 +1058,7 @@ f_OPENBLOCK:
                 call s_NumToText
                 m_drop
                 
-                push edi        ; save these
+                push ebx        ; save these
                 push edx
 
                 push openModeRT
@@ -1068,7 +1068,7 @@ f_OPENBLOCK:
                 pop ecx
 
                 pop edx         ; get them back
-                pop edi
+                pop ebx
 
                 m_push eax
                 m_push eax
@@ -1083,11 +1083,11 @@ f_GOTOXY:
                 shl eax, 16
                 mov ax, cx
 
-                push edi
+                push ebx
                 push eax
                 push [STDOUT]
                 call [SetConsoleCursorPosition]
-                pop edi
+                pop ebx
 
                 m_NEXT
 
@@ -1147,7 +1147,7 @@ s_SYS_INIT:
             mov ebp, dStack
 
             ; esi = IP/PC
-            ; mov esi, edi
+            mov esi, THE_MEMORY
             ret
 
 ; -------------------------------------------------------------------------------------
