@@ -29,6 +29,7 @@ bool isBYE = false;
 int _QUIT_HIT = 0;
 int MEM_SZ = 0;
 
+CELL src, dst;
 CELL arg1, arg2, arg3;
 HANDLE hStdin = NULL, hStdout = NULL;
 
@@ -427,6 +428,36 @@ void cpu_loop(CELL start)
 				SetConsoleCursorPosition(hStdout, pos);
 			}
 			break;
+		case TOSRC:
+			src = pop();
+			break;
+		case SRCQ:
+			push(src);
+			break;
+		case SRCP4:
+			push(CELL_AT(src));
+			src += 4;
+			break;
+		case SRCP1:
+			push(BYTE_AT(src));
+			++src;
+			break;
+		case TODST:
+			dst = pop();
+			break;
+		case DSTQ:
+			push(dst);
+			break;
+		case DSTP4:
+			arg1 = pop();
+			CELL_AT(dst) = arg1;
+			dst += 4;
+			break;
+		case DSTP1:
+			arg1 = pop();
+			BYTE_AT(dst) = arg1 & 0xFF;
+			dst += 1;
+			break;
 		case DBGDOT:
 			arg1 = pop();
 			printf("[%d] ", arg1);
@@ -446,12 +477,15 @@ void cpu_loop(CELL start)
 		case BREAK:
 			break;
 		case RESET:
-			printf("-RESET ar %lx-", PC-1);
+			printf("-RESET at $%04lX-", PC-1);
 			PC = 0;
+			DSP = dStack;
+			depth = 0;
 			break;
 		case BYE:
 			return;
 		default:
+			printf("-unknown inst %d at %lx-", IR, PC-1);
 			break;
 		}
 	}

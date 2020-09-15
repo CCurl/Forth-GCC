@@ -88,6 +88,14 @@
 : +!        [  50 C, ] ; .INLINE.   \ ( n addr -- )
 : OPEN-BLOCK [  51 C, ] ; .INLINE.   \ ( n -- fp bool )
 : GOTOXY    [  52 C, ] ; .INLINE.	\ ( x y -- )
+: >SRC      [ 53 C, ] ; .INLINE.
+: SRC?      [ 54 C, ] ; .INLINE.
+: SRC+      [ 55 C, ] ; .INLINE.
+: SRC+1     [ 56 C, ] ; .INLINE.
+: >DST      [ 57 C, ] ; .INLINE.
+: DST?      [ 58 C, ] ; .INLINE.
+: DST+      [ 59 C, ] ; .INLINE.
+: DST+1     [ 60 C, ] ; .INLINE.
 : NOP		[ 252 C, ] ; .INLINE.
 : BREAK		[ 253 C, ] ; .INLINE.
 : RESET		[ 254 C, ] ; .INLINE.

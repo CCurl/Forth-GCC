@@ -87,6 +87,14 @@ OPCODE_T theOpcodes[] = {
         , { "PLUSSTORE",        PLUSSTORE,        "PLUSSTORE",      IS_INLINE }
         , { "OPENBLOCK",        OPENBLOCK,        "OPENBLOCK",      IS_INLINE }
         , { "GOTOXY",           GOTOXY,           "GOTOXY",         IS_INLINE }
+		, { "TOSRC",            TOSRC,            ">SRC",           IS_INLINE }
+		, { "SRCQ",             SRCQ,             "SRC?",           IS_INLINE }
+		, { "SRCP4",            SRCP4,            "SRC+",           IS_INLINE }
+		, { "SRCP1",            SRCP1,            "SRC+1",          IS_INLINE }
+		, { "TODST",            TODST,            ">DST",           IS_INLINE }
+		, { "DSTQ",             DSTQ,             "DST?",           IS_INLINE }
+		, { "DSTP4",            DSTP4,            "DST+",           IS_INLINE }
+		, { "DSTP1",            DSTP1,            "DST+1",          IS_INLINE }
         , { "DBGDOT",           DBGDOT,           "DBGDOT",         IS_INLINE }
         , { "DBGDOTS",          DBGDOTS,          "DBGDOTS",        IS_INLINE }
         , { "NOP",              NOP,              "NOP",            IS_INLINE }

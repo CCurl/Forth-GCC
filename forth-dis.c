@@ -378,6 +378,42 @@ CELL dis_one(char *bytes, char *desc)
 		sprintf(desc, "PLUSSTORE");
 		return 0;
 
+	case GOTOXY:
+		sprintf(desc, "GOTOXY");
+		return 0;
+
+	case TOSRC:
+		sprintf(desc, "TOSRC");
+		return 0;
+
+	case SRCQ:
+		sprintf(desc, "SRCQ");
+		return 0;
+
+	case SRCP4:
+		sprintf(desc, "SRCP4");
+		return 0;
+
+	case SRCP1:
+		sprintf(desc, "SRCP1");
+		return 0;
+
+	case TODST:
+		sprintf(desc, "TODST");
+		return 0;
+
+	case DSTQ:
+		sprintf(desc, "DSTQ");
+		return 0;
+
+	case DSTP4:
+		sprintf(desc, "DSTP4");
+		return 0;
+
+	case DSTP1:
+		sprintf(desc, "DSTP1");
+		return 0;
+
 	case NOP:
 		sprintf(desc, "NOP");
 		return 0;
