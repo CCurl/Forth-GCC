@@ -60,6 +60,8 @@ stup dd ?
 
 STDIN dd ?
 STDOUT dd ?
+SRC dd ?
+DST dd ?
 stream dd ?
 InitialESP dd 0
 
@@ -137,14 +139,14 @@ dd f_SHIFTRIGHT         ; Hex: 31 (49)
 dd f_PLUSSTORE          ; Hex: 32 (50)
 dd f_OPENBLOCK          ; Hex: 33 (51)
 dd f_GOTOXY             ; Hex: 34 (52)
-dd f_UnknownOpcode      ; Hex: 35 (53)
-dd f_UnknownOpcode      ; Hex: 36 (54)
-dd f_UnknownOpcode      ; Hex: 37 (55)
-dd f_UnknownOpcode      ; Hex: 38 (56)
-dd f_UnknownOpcode      ; Hex: 39 (57)
-dd f_UnknownOpcode      ; Hex: 3A (58)
-dd f_UnknownOpcode      ; Hex: 3B (59)
-dd f_UnknownOpcode      ; Hex: 3C (60)
+dd f_TOSRC              ; Hex: 35 (53)
+dd f_SRCQ               ; Hex: 36 (54)
+dd f_SRCP4              ; Hex: 37 (55)
+dd f_SRCP1              ; Hex: 38 (56)
+dd f_TODST              ; Hex: 35 (57)
+dd f_DSTQ               ; Hex: 36 (58)
+dd f_DSTP4              ; Hex: 37 (59)
+dd f_DSTP1              ; Hex: 38 (60)
 dd f_UnknownOpcode      ; Hex: 3D (61)
 dd f_UnknownOpcode      ; Hex: 3E (62)
 dd f_UnknownOpcode      ; Hex: 3F (63)
@@ -1081,6 +1083,65 @@ f_GOTOXY:
                 call [SetConsoleCursorPosition]
                 pop ebx
 
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
+; TOSRC - >SRC
+f_TOSRC:
+                m_pop [SRC]
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
+; SRCQ - SRC?
+f_SRCQ:
+                m_push [SRC]
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
+; SRCP4 - SRC+
+f_SRCP4:
+                mov eax, [SRC]
+                m_push [THE_MEMORY+eax]
+                add [SRC], CELL_SIZE
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
+; SRCP4 - SRC+1
+f_SRCP1:
+                mov eax, [SRC]
+                movzx ebx, BYTE [THE_MEMORY+eax]
+                m_push ebx
+                inc [SRC]
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
+; TODST - >SRC
+f_TODST:
+                m_pop [DST]
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
+; DSTQ - SRC?
+f_DSTQ:
+                m_push [DST]
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
+; DST4 - DST+
+f_DSTP4:
+                mov eax, [DST]
+                m_pop ebx
+                mov [THE_MEMORY+eax], ebx
+                add [DST], CELL_SIZE
+                m_NEXT
+
+; -------------------------------------------------------------------------------------
+; DSTP1 - DST+1
+f_DSTP1:
+                mov eax, [DST]
+                m_pop ebx
+                mov BYTE [THE_MEMORY+eax], bl
+                inc [DST]
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
