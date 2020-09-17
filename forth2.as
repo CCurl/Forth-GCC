@@ -1,22 +1,22 @@
 ; **************************************************************************
 ;
 ; This is a program that implements a forth CPU/VM.
-; The CPU's opcodes are identified by their order in the [jmpTable].
+; The CPU's 'opcodes' are identified by their order in the [jmpTable].
 ; The VM's memory space is the reserved buffer at THE_MEMORY.
-; When the "VM" starts up, the IP is set to point to memory address 0.
+; When the 'VM' starts up, the PC/IP is set to point to memory address 0.
 ; This should be a JMP to the program's entry point.
 ;
 ; **************************************************************************
 ;                 x86 Register usage
 ; **************************************************************************
 ;
-; eax: Free to use
-; ebx: Free to use
-; ecx: Free to use
-; edx: Free to use
-; esi: the VM's IP (instruction-pointer)
-; edi: the VM's TOS (top-of-stack)
-; ebp: the VM's stack pointer
+REG1 equ eax         ; Free register #1
+REG2 equ ebx         ; Free register #2
+REG3 equ ecx         ; Free register #3
+REG4 equ edx         ; Free register #4
+TOS  equ edi         ; Top-Of-Stack
+PCIP equ esi         ; Program-Counter/Instruction-Pointer
+STKP equ ebp         ; Stack-Pointer
 ;
 ; **************************************************************************
 
@@ -355,32 +355,32 @@ include 'macros.s'
 ; -------------------------------------------------------------------------------------
 ; LITERAL (32-bit)
 f_LITERAL:
-            mov eax, [esi]
-            add esi, CELL_SIZE
+            mov eax, [PCIP]
+            add PCIP, CELL_SIZE
             m_push eax
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; FETCH
 f_FETCH:
-            add edi, THE_MEMORY
-            mov edi, [edi]
+            add TOS, THE_MEMORY
+            mov TOS, [TOS]
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; STORE
 f_STORE:
-            m_pop ecx
+            m_pop REG3
             m_pop eax
-            add ecx, THE_MEMORY
-            mov [ecx], eax
+            add REG3, THE_MEMORY
+            mov [REG3], eax
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; SWAP
 f_SWAP:
             m_get2ND eax
-            m_set2ND edi
+            m_set2ND TOS
             m_setTOS eax
             m_NEXT
 
@@ -388,7 +388,7 @@ f_SWAP:
 ; SWAP
 s_SWAP:
             m_get2ND eax
-            m_set2ND edi
+            m_set2ND TOS
             m_setTOS eax
             ret
 
@@ -401,27 +401,27 @@ f_DROP:
 ; -------------------------------------------------------------------------------------
 ; DUP
 f_DUP:
-            m_push edi
+            m_push TOS
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; SLITERAL
 f_SLITERAL:
-            mov eax, esi
+            mov eax, PCIP
             sub eax, THE_MEMORY
             m_push eax
             xor eax, eax
-            mov al, [esi]
-            add esi, eax
-            inc esi
-            inc esi
+            mov al, [PCIP]
+            add PCIP, eax
+            inc PCIP
+            inc PCIP
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; JMP
 f_JMP:
-            mov esi, [esi]
-            add esi, THE_MEMORY
+            mov PCIP, [PCIP]
+            add PCIP, THE_MEMORY
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -431,7 +431,7 @@ f_JMPZ:
             cmp eax, 0
             je f_JMP
             ; jmp noJMP
-noJMP:      add esi, CELL_SIZE
+noJMP:      add PCIP, CELL_SIZE
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -445,32 +445,32 @@ f_JMPNZ:
 ; -------------------------------------------------------------------------------------
 ; CALL
 f_CALL:
-            push dword [esi]
-            add esi, CELL_SIZE
-            sub esi, THE_MEMORY
-            m_rpush esi
-            pop esi
-            add esi, THE_MEMORY
+            push dword [PCIP]
+            add PCIP, CELL_SIZE
+            sub PCIP, THE_MEMORY
+            m_rpush PCIP
+            pop PCIP
+            add PCIP, THE_MEMORY
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 checkStack:
-            cmp ebp, dStack
+            cmp STKP, dStack
             jl csUF
-            cmp ebp, dstackE
+            cmp STKP, dstackE
             jge csOF
             ret
 
 csUF:       ; push dsUnderFlow
-            mov ebp, dstackE
-            sub ebp, CELL_SIZE
+            mov STKP, dstackE
+            sub STKP, CELL_SIZE
             ret
             ; call [printf]
             ; pop eax
             ; jmp f_RESET
 
 csOF:       ; push dsOverFlow
-            mov ebp, dStack
+            mov STKP, dStack
             ret
             ; call [printf]
             ; pop eax
@@ -480,54 +480,54 @@ csOF:       ; push dsOverFlow
 ; RET
 f_RET:
             call checkStack
-            m_rpop esi
-            add esi, THE_MEMORY
+            m_rpop PCIP
+            add PCIP, THE_MEMORY
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; OR
 f_OR:
             m_pop eax
-            or edi, eax
+            or TOS, eax
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; CLITERAL
 f_CLITERAL:
             xor eax, eax
-            mov al, [esi]
+            mov al, [PCIP]
             m_push eax
-            inc esi
+            inc PCIP
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; CFETCH
 f_CFETCH:
             xor eax, eax
-            mov al, [edi + THE_MEMORY]
+            mov al, [TOS + THE_MEMORY]
             m_setTOS eax
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; CSTORE
 f_CSTORE:
-            m_pop ecx
+            m_pop REG3
             m_pop eax
-            mov [ecx + THE_MEMORY], al
+            mov [REG3 + THE_MEMORY], al
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; ADD
 f_ADD:
             m_pop eax
-            add edi, eax
+            add TOS, eax
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; SUB
 f_SUB:
             m_pop eax
-            sub edi, eax
+            sub TOS, eax
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -536,7 +536,7 @@ f_MUL:
             push edx
             m_pop eax
             xor edx, edx
-            mul edi
+            mul TOS
             m_setTOS eax
             pop edx
             m_NEXT
@@ -548,12 +548,12 @@ f_SLASHMOD:
 
 ; -------------------------------------------------------------------------------------
 s_SLASHMOD:
-           m_pop ecx
+           m_pop REG3
            m_pop eax
-           cmp ecx, 0
+           cmp REG3, 0
            je smDivBy0
            xor edx, edx
-           div ecx
+           div REG3
            m_push edx          ; Remainder
            m_push eax          ; Quotient
            ret
@@ -581,7 +581,7 @@ f_MOD:
 ; LT
 f_LT:
             m_pop eax
-            cmp edi, eax
+            cmp TOS, eax
             jl eq_T
             jmp eq_F
 
@@ -589,7 +589,7 @@ f_LT:
 ; EQ
 f_EQ:
             m_pop eax
-            cmp edi, eax
+            cmp TOS, eax
             je eq_T
 
 eq_F:       m_setTOS 0
@@ -602,20 +602,20 @@ eq_T:       m_setTOS -1
 ; GT
 f_GT:
             m_pop eax
-            cmp edi, eax
+            cmp TOS, eax
             jg eq_T
             jmp eq_F
 
 ; -------------------------------------------------------------------------------------
 ; DICTP
 f_DICTP:
-            add esi, CELL_SIZE
+            add PCIP, CELL_SIZE
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; EMIT
 f_EMIT:
-            push edi
+            push TOS
             call [putchar]
             pop eax
             m_drop
@@ -640,15 +640,15 @@ u2lR:           ret
 
 ; -------------------------------------------------------------------------------------
 ; do_STRCMP
-; Compare strings pointed to by esi and edx
+; Compare strings pointed to by PCIP and REG4
 ; case sensitive: bl = 0
 ; case insensitive: bl != 0
-; return in eax: -1 => eax<ecx, 0 => same, 1 eax>ecx
+; return in eax: -1 => eax<REG3, 0 => same, 1 eax>REG3
 do_STRCMP:
-                mov al, [esi]
-                mov ah, [edx]
+                mov al, [PCIP]
+                mov ah, [REG4]
 
-                test ebx, ebx
+                test REG2, REG2
                 jz cmp2
                 call u_ToLower
                 xchg al, ah
@@ -659,8 +659,8 @@ cmp2:           cmp ah, al
                 jg cmpGT
                 test ax, ax
                 jz cmpEQ
-                inc esi
-                inc edx
+                inc PCIP
+                inc REG4
                 jmp do_STRCMP
 
 cmpLT:          mov eax, -1
@@ -672,7 +672,7 @@ cmpEQ:          mov eax, 0
 
 ; -------------------------------------------------------------------------------------
 ; do_COMPARE
-; Compare strings pointed to by esi and edx
+; Compare strings pointed to by PCIP and REG4
 ; case sensitive: dl = 0
 ; case insensitive: dl != 0
 ; return in eax: -1 => strings are equal, 0 => strings are NOT equal
@@ -688,17 +688,17 @@ cmpT:           mov eax, -1
 ; -------------------------------------------------------------------------------------
 ; COMPARE
 f_COMPARE:
-                push esi
+                push PCIP
 
-                m_pop edx
-                add edx, THE_MEMORY
-                m_pop esi
-                add esi, THE_MEMORY
-                xor ebx, ebx
+                m_pop REG4
+                add REG4, THE_MEMORY
+                m_pop PCIP
+                add PCIP, THE_MEMORY
+                xor REG2, REG2
                 call do_COMPARE
                 m_push eax
 
-                pop esi
+                pop PCIP
 
                 m_NEXT
 
@@ -710,28 +710,28 @@ f_FOPEN:
                 call s_SWAP
 
                 ; save these
-                push ebx
-                push edx
+                push REG2
+                push REG4
 
-                mov edx, tmpBuf1
+                mov REG4, tmpBuf1
 
-                m_pop ecx                       ; mode: 0 => read, 1 => write
+                m_pop REG3                       ; mode: 0 => read, 1 => write
                 mov al, 'r'
-                cmp ecx, 0
+                cmp REG3, 0
                 je fopen1
                 mov al, 'w'
-fopen1:         mov [edx], al
+fopen1:         mov [REG4], al
 
-                m_pop ecx                       ; type: 0 => text, 1 => binary
+                m_pop REG3                       ; type: 0 => text, 1 => binary
                 mov al, 't'
-                cmp ecx, 0
+                cmp REG3, 0
                 je fopen2
                 mov al, 'b'
-fopen2:         inc edx
-                mov [edx], al
+fopen2:         inc REG4
+                mov [REG4], al
 
-                inc edx
-                mov [edx], byte 0
+                inc REG4
+                mov [REG4], byte 0
                 ; now [tmpBuf1] has the openMode for fopen()
 
                 ; now for the filename
@@ -743,22 +743,22 @@ fopen2:         inc edx
                 push tmpBuf1
                 push eax
                 call [fopen]                    ; returns the FP in eax
-                pop ecx                         ; clean up the stack
-                pop ecx
+                pop REG3                         ; clean up the stack
+                pop REG3
 
                 m_push eax
                 m_push eax
 
                 ; restore these
-                pop edx
-                pop ebx
+                pop REG4
+                pop REG2
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; FREAD ( addr count fp -- num-read )
 f_FREAD:
                 ; save these
-                push ebx
+                push REG2
 
                 ; signature is: num-read = fread(addr, size, count, fp);
                 ; args for [fread]
@@ -779,7 +779,7 @@ f_FREAD:
                 pop eax
 
                 ; get these back
-                pop ebx
+                pop REG2
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -790,8 +790,8 @@ f_FREADLINE:
                 ; NB: the strring returned at addr should be counted
                 ;     and null-terminated
 
-                ; Save ebx
-                push ebx
+                ; Save REG2
+                push REG2
 
                 m_pop eax       ; FP
                 push eax
@@ -803,7 +803,7 @@ f_FREADLINE:
                 push eax
                 call [fgets]    ; returns addr if OK, else NULL
                 m_push eax
-                pop ecx         ; addr (+1)
+                pop REG3         ; addr (+1)
                 pop eax         ; max
                 pop eax         ; FP
 
@@ -811,35 +811,35 @@ f_FREADLINE:
                 test eax, eax
                 jz rdlEOF
 
-                push ecx        ; remember the original addr (+1)
+                push REG3        ; remember the original addr (+1)
                 xor eax, eax
-rdlC:           mov ah, [ecx]
+rdlC:           mov ah, [REG3]
                 cmp ah, 0
                 jz rdlCX
                 inc al          ; this is the length
-                inc ecx
+                inc REG3
                 jmp rdlC
                 
-rdlCX:          pop ecx         ; Make it a counted string
-                dec ecx
-                mov [ecx], al
+rdlCX:          pop REG3         ; Make it a counted string
+                dec REG3
+                mov [REG3], al
 
 rdlX:           m_setTOS eax
-                ; Restore ebx
-                pop ebx
+                ; Restore REG2
+                pop REG2
                 m_NEXT
 
-rdlEOF:         dec ecx
-                mov [ecx], word 0
+rdlEOF:         dec REG3
+                mov [REG3], word 0
                 m_setTOS 0
-                pop ebx
+                pop REG2
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; FWRITE: ( addr count fp -- num-written ) 
 f_FWRITE:
                 ; save these
-                push ebx
+                push REG2
 
                 ; signature is: num-written = fwrite(addr, size, count, fp);
                 ; args for [fread]
@@ -860,18 +860,18 @@ f_FWRITE:
                 pop eax
 
                 ; get these back
-                pop ebx
+                pop REG2
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; FCLOSE
 f_FCLOSE:   ; ( fp -- )
             m_pop eax
-            push ebx
+            push REG2
             push eax
             call [fclose]
             pop eax
-            pop ebx
+            pop REG2
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -891,14 +891,14 @@ f_RTOD:
 ; -------------------------------------------------------------------------------------
 ; COM
 f_COM:
-            not edi
+            not TOS
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; RFETCH - R@ ( -- n)
 f_RFETCH:
-                mov ecx, [rStackPtr]
-                mov eax, [ecx]
+                mov REG3, [rStackPtr]
+                mov eax, [REG3]
                 m_push eax
                 m_NEXT
 
@@ -906,13 +906,13 @@ f_RFETCH:
 ; AND
 f_AND:
             m_pop eax
-            and edi, eax
+            and TOS, eax
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; NOT ( n1 -- n2 )
 f_NOT:
-            test edi, edi
+            test TOS, TOS
             jz eq_T
             jmp eq_F
 
@@ -921,16 +921,16 @@ f_NOT:
 f_PICK:
             m_getTOS eax
             shl eax, 2
-            mov ecx, ebp
-            sub ecx, eax
-            mov eax, [ecx]
+            mov REG3, STKP
+            sub REG3, eax
+            mov eax, [REG3]
             m_setTOS eax
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; DEPTH
 f_DEPTH:
-            mov eax, ebp
+            mov eax, STKP
             sub eax, dStack
             shr eax, 2
 
@@ -940,9 +940,9 @@ f_DEPTH:
 ; -------------------------------------------------------------------------------------
 ; GETCH
 f_GETCH:
-            push ebx
+            push REG2
             call [getch]
-            pop ebx
+            pop REG2
             cmp eax, 3
             je f_BYE
             m_push eax
@@ -951,27 +951,27 @@ f_GETCH:
 ; -------------------------------------------------------------------------------------
 ; COMPAREI
 f_COMPAREI:
-                push esi
-                push edx
-                push ebx
+                push PCIP
+                push REG4
+                push REG2
 
-                m_pop edx
-                m_pop esi
-                add edx, THE_MEMORY
-                add esi, THE_MEMORY
-                mov ebx, 1
+                m_pop REG4
+                m_pop PCIP
+                add REG4, THE_MEMORY
+                add PCIP, THE_MEMORY
+                mov REG2, 1
                 call do_COMPARE
                 m_push eax
 
-                pop ebx
-                pop edx
-                pop esi
+                pop REG2
+                pop REG4
+                pop PCIP
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; INC
 f_INC:
-            inc edi
+            inc TOS
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -983,37 +983,37 @@ f_RDEPTH:
 ; -------------------------------------------------------------------------------------
 ; DEC
 f_DEC:
-            dec edi
+            dec TOS
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; GETTICK
 f_GETTICK:
-                push ebx
+                push REG2
                 call [GetTickCount]
                 m_push eax
-                pop ebx
+                pop REG2
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
 f_SHIFTLEFT:
-                m_pop ecx
-                shl edi, cl
+                m_pop REG3
+                shl TOS, cl
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
 f_SHIFTRIGHT:
-                m_pop ecx
-                shr edi, cl
+                m_pop REG3
+                shr TOS, cl
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
 ; PLUSSTORE
 f_PLUSSTORE:
                 m_pop eax
-                m_pop ecx
-                ; add eax, ebx
-                add [eax+THE_MEMORY], ecx
+                m_pop REG3
+                ; add eax, REG2
+                add [eax+THE_MEMORY], REG3
                 m_NEXT
 
 ; -------------------------------------------------------------------------------------
@@ -1022,29 +1022,29 @@ f_PLUSSTORE:
 ; i.e. : # BASE @ /MOD SWAP '0' + ;
 ;   input:
 ;     - eax = BASE
-;     - ecx = end of buffer for char
+;     - REG3 = end of buffer for char
 ;   output:
 ;     - eax: unchanged
-;     - ecx: ecx-1
+;     - REG3: REG3-1
 s_NumToText:
-                push ecx
+                push REG3
                 push eax
                 m_push eax
                 call s_SLASHMOD
                 call s_SWAP
-                add edi, '0'
+                add TOS, '0'
                 pop eax
-                pop ecx
-                m_pop ebx
-                mov [ecx], bl
-                dec ecx
+                pop REG3
+                m_pop REG2
+                mov [REG3], bl
+                dec REG3
                 ret
 ; -------------------------------------------------------------------------------------
 ; f_OPENBLOCK
 f_OPENBLOCK:
                 ; replace the "0000" in "block-0000.fs" with block #
-                mov ecx, blockFile
-                add ecx, 9
+                mov REG3, blockFile
+                add REG3, 9
                 mov eax, 10
                 call s_NumToText
                 call s_NumToText
@@ -1052,17 +1052,17 @@ f_OPENBLOCK:
                 call s_NumToText
                 m_drop
                 
-                push ebx        ; save these
-                push edx
+                push REG2        ; save these
+                push REG4
 
                 push openModeRT
                 push blockFile
                 call [fopen]
-                pop ecx
-                pop ecx
+                pop REG3
+                pop REG3
 
-                pop edx         ; get them back
-                pop ebx
+                pop REG4         ; get them back
+                pop REG2
 
                 m_push eax
                 m_push eax
@@ -1073,15 +1073,15 @@ f_OPENBLOCK:
 ; f_GOTOXY ( X Y -- ) - top/left of screen is (0,0)
 f_GOTOXY:
                 m_pop eax       ; Y
-                m_pop ecx       ; X
+                m_pop REG3       ; X
                 shl eax, 16
                 mov ax, cx
 
-                push ebx
+                push REG2
                 push eax
                 push [STDOUT]
                 call [SetConsoleCursorPosition]
-                pop ebx
+                pop REG2
 
                 m_NEXT
 
@@ -1109,8 +1109,8 @@ f_SRCP4:
 ; SRCP4 - SRC+1
 f_SRCP1:
                 mov eax, [SRC]
-                movzx ebx, BYTE [THE_MEMORY+eax]
-                m_push ebx
+                movzx REG2, BYTE [THE_MEMORY+eax]
+                m_push REG2
                 inc [SRC]
                 m_NEXT
 
@@ -1130,8 +1130,8 @@ f_DSTQ:
 ; DST4 - DST+
 f_DSTP4:
                 mov eax, [DST]
-                m_pop ebx
-                mov [THE_MEMORY+eax], ebx
+                m_pop REG2
+                mov [THE_MEMORY+eax], REG2
                 add [DST], CELL_SIZE
                 m_NEXT
 
@@ -1139,7 +1139,7 @@ f_DSTP4:
 ; DSTP1 - DST+1
 f_DSTP1:
                 mov eax, [DST]
-                m_pop ebx
+                m_pop REG2
                 mov BYTE [THE_MEMORY+eax], bl
                 inc [DST]
                 m_NEXT
@@ -1152,8 +1152,8 @@ f_NOP:
 ; -------------------------------------------------------------------------------------
 ; BREAK
 f_BREAK:
-            mov ecx, edx
-            sub ecx, THE_MEMORY
+            mov REG3, REG4
+            sub REG3, THE_MEMORY
             int3
             m_NEXT
 
@@ -1166,11 +1166,11 @@ f_BYE:
             m_NEXT
 
 f_UnknownOpcode:
-            mov eax, esi
+            mov eax, PCIP
             sub eax, THE_MEMORY
             dec eax
             push eax
-            push ecx
+            push REG3
             push unknownOpcode
             call [printf]
             pop eax
@@ -1197,10 +1197,10 @@ s_SYS_INIT:
             mov [rDepth], 0
 
             ; Data stack
-            mov ebp, dStack
+            mov STKP, dStack
 
-            ; esi = IP/PC
-            mov esi, THE_MEMORY
+            ; PCIP = IP/PC
+            mov PCIP, THE_MEMORY
             ret
 
 ; -------------------------------------------------------------------------------------
@@ -1218,25 +1218,25 @@ fileError:
 entry $
         ; To clean up the stack after calls
         mov [InitialESP], esp
-        mov ebp, esp
+        mov STKP, esp
 
         ; -10 = SDTIN, -11 = STDOUT, -12 = STDERR
         push STD_INPUT_HANDLE
         call [GetStdHandle]
         mov [STDIN], eax
-        mov esp, ebp
+        mov esp, STKP
 
         push STD_OUTPUT_HANDLE
         call [GetStdHandle]
         mov [STDOUT], eax
-        mov esp, ebp
+        mov esp, STKP
 
         invoke __getmainargs, argc, argv, env, 0, stup
-        mov esp, ebp
+        mov esp, STKP
         cmp [argc], 2
         jne argError
-        mov esi, [argv]
-        mov eax, [esi + 4]
+        mov PCIP, [argv]
+        mov eax, [PCIP + 4]
         mov [fileName], eax
 
         ; Ensure that the file is there        
@@ -1249,7 +1249,7 @@ entry $
         push openModeRB
         push [fileName]
         call [fopen]
-        mov esp, ebp
+        mov esp, STKP
         mov [stream], eax
 
         ; Read in the file ...
@@ -1262,20 +1262,20 @@ entry $
         push 0
         push [stream]
         call [fseek]
-        mov esp, ebp
+        mov esp, STKP
 
         ; Get the file size
         push [stream]
         call [ftell]
         mov [fileSize], eax
-        mov esp, ebp
+        mov esp, STKP
 
         ; Reset the file position pointer to beginning of the file
         push 0
         push 0
         push [stream]
         call [fseek]
-        mov esp, ebp
+        mov esp, STKP
 
         ; Read the file into memory
         push [stream]
@@ -1283,12 +1283,12 @@ entry $
         push 1
         push THE_MEMORY
         call [fread]
-        mov esp, ebp
+        mov esp, STKP
 
         ; Close the file
         push [stream]
         call [fclose]
-        mov esp, ebp
+        mov esp, STKP
 
         ; Initialize the VM
         call s_SYS_INIT

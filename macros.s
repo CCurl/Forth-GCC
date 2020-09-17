@@ -4,38 +4,38 @@
 
 macro m_setTOS val
 {
-       mov edi, val
+       mov TOS, val
 }
 
 macro m_push val
 {
        ; inc [dDepth]
-       add ebp, CELL_SIZE
-       mov [ebp], edi
+       add STKP, CELL_SIZE
+       mov [STKP], TOS
        m_setTOS val
 }
 
 ; ------------------------------------------------------------------------------
 macro m_get2ND val
 {
-       mov val, [ebp]
+       mov val, [STKP]
 }
 macro m_set2ND val
 {
-       mov [ebp], val
+       mov [STKP], val
 }
 
 ; ------------------------------------------------------------------------------
 macro m_getTOS val
 {
-       mov val, edi
+       mov val, TOS
 }
 
 macro m_drop
 {
        ; dec [dDepth]
-       mov edi, [ebp]
-       sub ebp, CELL_SIZE
+       mov TOS, [STKP]
+       sub STKP, CELL_SIZE
 }
 
 macro m_pop val
@@ -56,42 +56,30 @@ macro m_fromVmAddr reg
 }
 
 ; ------------------------------------------------------------------------------
-macro CELL_AT addr, tgt
-{
-       mov tgt, [edx + addr]
-}
-
-
-macro SETAT addr, src
-{
-       mov [edx + addr], src
-}
-
-; ------------------------------------------------------------------------------
 
 macro m_rpush reg
 {
-       push edi
+       push TOS
        add [rStackPtr], CELL_SIZE
-       mov edi, [rStackPtr]
-       mov [edi], reg
-       pop edi
+       mov TOS, [rStackPtr]
+       mov [TOS], reg
+       pop TOS
 }
  
 macro m_rpop reg
 {
-       push edi
-       mov edi, [rStackPtr]
-       mov reg, [edi]
+       push TOS
+       mov TOS, [rStackPtr]
+       mov reg, [TOS]
        sub [rStackPtr], CELL_SIZE
-       pop edi
+       pop TOS
 }
 
 ; -------------------------------------------------------------------------------------
 macro m_NEXT
 {
-        movzx ecx, BYTE [esi]
+        movzx ecx, BYTE [PCIP]
         mov eax, [jmpTable+ecx*4]
-        inc esi
+        inc PCIP
         jmp eax
 }
