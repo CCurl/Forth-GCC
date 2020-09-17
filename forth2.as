@@ -641,8 +641,8 @@ u2lR:           ret
 ; -------------------------------------------------------------------------------------
 ; do_STRCMP
 ; Compare strings pointed to by PCIP and REG4
-; case sensitive: bl = 0
-; case insensitive: bl != 0
+; case sensitive: REG2 = 0
+; case insensitive: REG2 != 0
 ; return in eax: -1 => eax<REG3, 0 => same, 1 eax>REG3
 do_STRCMP:
                 mov al, [PCIP]
@@ -673,8 +673,8 @@ cmpEQ:          mov eax, 0
 ; -------------------------------------------------------------------------------------
 ; do_COMPARE
 ; Compare strings pointed to by PCIP and REG4
-; case sensitive: dl = 0
-; case insensitive: dl != 0
+; case sensitive: REG2 = 0
+; case insensitive: REG2 != 0
 ; return in eax: -1 => strings are equal, 0 => strings are NOT equal
 do_COMPARE:
                 call do_STRCMP
