@@ -39,7 +39,8 @@ import msvcrt, printf, 'printf', __getmainargs, '__getmainargs' \
     , putchar, 'putchar', getch, '_getch', fgets, 'fgets'
 
 ; -------------------------------------------------------------------------------------
-section '.bss' data readable writable executable
+; section '.bss' data readable writable executable
+section '.bss' data readable writable
 
 printArgError db 'Error: Wrong number of arguments. Run file with "program.exe <file>"', 0
 printFileError db 'Error: File [%s] does not exist. Check spelling and try again.', 0
@@ -344,7 +345,8 @@ dd f_RESET              ; Hex: FE (254)
 dd f_BYE                ; Hex: FF (255)
 
 ; -------------------------------------------------------------------------------------
-section '.code' code readable writable executable
+; section '.code' code readable writable executable
+section '.code' code readable executable
 
 include 'macros.s'
 
@@ -1297,6 +1299,7 @@ entry $
 cpuLoop:
         m_NEXT
 ; -------------------------------------------------------------------------------------
+section '.mem' data readable writable
 KILOBYTE = 1024
 MEGABYTE = KILOBYTE*KILOBYTE
 
