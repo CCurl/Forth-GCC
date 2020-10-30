@@ -154,8 +154,8 @@
 
 : -!  SWAP -=  ;   \ ( n addr -- )
 
-: ++  DUP @  1+ SWAP !  ;  INLINE  \ ( addr -- )
-: --  DUP @  1- SWAP !  ;  INLINE  \ ( addr -- )
+: ++   1 SWAP +! ;  INLINE  \ ( addr -- )
+: --  -1 SWAP +! ;  INLINE  \ ( addr -- )
 
 : C++ DUP C@ 1+ SWAP C! ;  INLINE  \ ( addr -- )
 : C-- DUP C@ 1- SWAP C! ;  INLINE  \ ( addr -- )
