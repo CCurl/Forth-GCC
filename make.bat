@@ -33,13 +33,13 @@ forth
 goto done
 
 :make-forth
-set output=forth
-set c-files=forth.c
-set c-files=%c-files% forth-vm.c
+set output=forth-new
+set c-files=forth-new.c
+set c-files=%c-files% forth-vm-new.c
 echo making %output% ...
 echo gcc -Ofast -o %output% %c-files%
 gcc -Ofast -o %output% %c-files%
-if "--%2%--" == "--1--" forth
+if "--%2%--" == "--1--" forth-new
 goto done
 
 :make-fd
