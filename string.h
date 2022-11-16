@@ -57,7 +57,7 @@ void string_padRight(char *dest, int targetLen, char withChar)
 void string_makeCounted(char *dest)
 {
     char tmp[128], *cp = tmp;
-    *(cp++) = strlen(dest);
+    *(cp++) = (BYTE)strlen(dest);
     string_set(cp, dest);
     string_set(dest, tmp);
 }
@@ -97,7 +97,7 @@ bool string_isEmpty(char *str)
 // *********************************************************************
 bool string_equals_nocase(char *str1, char *str2)
 {
-    return stricmp(str1, str2) == 0 ? true : false;
+    return _stricmp(str1, str2) == 0 ? true : false;
 }
 
 // *********************************************************************

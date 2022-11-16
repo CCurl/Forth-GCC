@@ -2947,235 +2947,235 @@ fbd7: fe 02 00 00 02             ; XT=02fe, flags=02
 fbdc: 06 47 4f 54 4f 58 59 00    ; 6, GOTOXY
 ;
 fbe4: f9 fb 00 00                ; OPEN-BLOCK - (next: fbf9 +!)
-fbe8: f6 02 00 00 02             ; XT=02f6, flags=02
+fbe8: f7 02 00 00 02             ; XT=02f7, flags=02
 fbed: 0a 4f 50 45 4e 2d 42 4c 4f 43 4b 00 ; 10, OPEN-BLOCK
 ;
 fbf9: 06 fc 00 00                ; +! - (next: fc06 RSHIFT)
-fbfd: ef 02 00 00 02             ; XT=02ef, flags=02
+fbfd: f0 02 00 00 02             ; XT=02f0, flags=02
 fc02: 02 2b 21 00                ; 2, +!
 ;
 fc06: 17 fc 00 00                ; RSHIFT - (next: fc17 LSHIFT)
-fc0a: e8 02 00 00 02             ; XT=02e8, flags=02
+fc0a: e9 02 00 00 02             ; XT=02e9, flags=02
 fc0f: 06 52 53 48 49 46 54 00    ; 6, RSHIFT
 ;
 fc17: 28 fc 00 00                ; LSHIFT - (next: fc28 GETTICK)
-fc1b: e1 02 00 00 02             ; XT=02e1, flags=02
+fc1b: e2 02 00 00 02             ; XT=02e2, flags=02
 fc20: 06 4c 53 48 49 46 54 00    ; 6, LSHIFT
 ;
 fc28: 3a fc 00 00                ; GETTICK - (next: fc3a DEC)
-fc2c: da 02 00 00 02             ; XT=02da, flags=02
+fc2c: db 02 00 00 02             ; XT=02db, flags=02
 fc31: 07 47 45 54 54 49 43 4b 00 ; 7, GETTICK
 ;
 fc3a: 48 fc 00 00                ; DEC - (next: fc48 RDEPTH)
-fc3e: d3 02 00 00 02             ; XT=02d3, flags=02
+fc3e: d4 02 00 00 02             ; XT=02d4, flags=02
 fc43: 03 44 45 43 00             ; 3, DEC
 ;
 fc48: 59 fc 00 00                ; RDEPTH - (next: fc59 INC)
-fc4c: cc 02 00 00 02             ; XT=02cc, flags=02
+fc4c: cd 02 00 00 02             ; XT=02cd, flags=02
 fc51: 06 52 44 45 50 54 48 00    ; 6, RDEPTH
 ;
 fc59: 67 fc 00 00                ; INC - (next: fc67 RFETCH)
-fc5d: c5 02 00 00 02             ; XT=02c5, flags=02
+fc5d: c6 02 00 00 02             ; XT=02c6, flags=02
 fc62: 03 49 4e 43 00             ; 3, INC
 ;
 fc67: 78 fc 00 00                ; RFETCH - (next: fc78 NOT)
-fc6b: be 02 00 00 02             ; XT=02be, flags=02
+fc6b: bf 02 00 00 02             ; XT=02bf, flags=02
 fc70: 06 52 46 45 54 43 48 00    ; 6, RFETCH
 ;
 fc78: 86 fc 00 00                ; NOT - (next: fc86 /MOD)
-fc7c: b7 02 00 00 02             ; XT=02b7, flags=02
+fc7c: b8 02 00 00 02             ; XT=02b8, flags=02
 fc81: 03 4e 4f 54 00             ; 3, NOT
 ;
 fc86: 95 fc 00 00                ; /MOD - (next: fc95 COMPAREI)
-fc8a: b0 02 00 00 02             ; XT=02b0, flags=02
+fc8a: b1 02 00 00 02             ; XT=02b1, flags=02
 fc8f: 04 2f 4d 4f 44 00          ; 4, /MOD
 ;
 fc95: a8 fc 00 00                ; COMPAREI - (next: fca8 GETCH)
-fc99: a9 02 00 00 02             ; XT=02a9, flags=02
+fc99: aa 02 00 00 02             ; XT=02aa, flags=02
 fc9e: 08 43 4f 4d 50 41 52 45 49 00 ; 8, COMPAREI
 ;
 fca8: b8 fc 00 00                ; GETCH - (next: fcb8 DEPTH)
-fcac: a2 02 00 00 02             ; XT=02a2, flags=02
+fcac: a3 02 00 00 02             ; XT=02a3, flags=02
 fcb1: 05 47 45 54 43 48 00       ; 5, GETCH
 ;
 fcb8: c8 fc 00 00                ; DEPTH - (next: fcc8 PICK)
-fcbc: 9b 02 00 00 02             ; XT=029b, flags=02
+fcbc: 9c 02 00 00 02             ; XT=029c, flags=02
 fcc1: 05 44 45 50 54 48 00       ; 5, DEPTH
 ;
 fcc8: d7 fc 00 00                ; PICK - (next: fcd7 AND)
-fccc: 94 02 00 00 02             ; XT=0294, flags=02
+fccc: 95 02 00 00 02             ; XT=0295, flags=02
 fcd1: 04 50 49 43 4b 00          ; 4, PICK
 ;
 fcd7: e5 fc 00 00                ; AND - (next: fce5 COM)
-fcdb: 8d 02 00 00 02             ; XT=028d, flags=02
+fcdb: 8e 02 00 00 02             ; XT=028e, flags=02
 fce0: 03 41 4e 44 00             ; 3, AND
 ;
 fce5: f3 fc 00 00                ; COM - (next: fcf3 R>)
-fce9: 86 02 00 00 02             ; XT=0286, flags=02
+fce9: 87 02 00 00 02             ; XT=0287, flags=02
 fcee: 03 43 4f 4d 00             ; 3, COM
 ;
 fcf3: 00 fd 00 00                ; R> - (next: fd00 >R)
-fcf7: 7f 02 00 00 02             ; XT=027f, flags=02
+fcf7: 80 02 00 00 02             ; XT=0280, flags=02
 fcfc: 02 52 3e 00                ; 2, R>
 ;
 fd00: 0d fd 00 00                ; >R - (next: fd0d FCLOSE)
-fd04: 78 02 00 00 02             ; XT=0278, flags=02
+fd04: 79 02 00 00 02             ; XT=0279, flags=02
 fd09: 02 3e 52 00                ; 2, >R
 ;
 fd0d: 1e fd 00 00                ; FCLOSE - (next: fd1e FWRITE)
-fd11: 71 02 00 00 02             ; XT=0271, flags=02
+fd11: 72 02 00 00 02             ; XT=0272, flags=02
 fd16: 06 46 43 4c 4f 53 45 00    ; 6, FCLOSE
 ;
 fd1e: 2f fd 00 00                ; FWRITE - (next: fd2f FREADLINE)
-fd22: 6a 02 00 00 02             ; XT=026a, flags=02
+fd22: 6b 02 00 00 02             ; XT=026b, flags=02
 fd27: 06 46 57 52 49 54 45 00    ; 6, FWRITE
 ;
 fd2f: 43 fd 00 00                ; FREADLINE - (next: fd43 FREAD)
-fd33: 63 02 00 00 02             ; XT=0263, flags=02
+fd33: 64 02 00 00 02             ; XT=0264, flags=02
 fd38: 09 46 52 45 41 44 4c 49 4e 45 00 ; 9, FREADLINE
 ;
 fd43: 53 fd 00 00                ; FREAD - (next: fd53 FOPEN)
-fd47: 5c 02 00 00 02             ; XT=025c, flags=02
+fd47: 5d 02 00 00 02             ; XT=025d, flags=02
 fd4c: 05 46 52 45 41 44 00       ; 5, FREAD
 ;
 fd53: 63 fd 00 00                ; FOPEN - (next: fd63 COMPARE)
-fd57: 55 02 00 00 02             ; XT=0255, flags=02
+fd57: 56 02 00 00 02             ; XT=0256, flags=02
 fd5c: 05 46 4f 50 45 4e 00       ; 5, FOPEN
 ;
 fd63: 75 fd 00 00                ; COMPARE - (next: fd75 OVER)
-fd67: 4e 02 00 00 02             ; XT=024e, flags=02
+fd67: 4f 02 00 00 02             ; XT=024f, flags=02
 fd6c: 07 43 4f 4d 50 41 52 45 00 ; 7, COMPARE
 ;
 fd75: 84 fd 00 00                ; OVER - (next: fd84 EMIT)
-fd79: 47 02 00 00 02             ; XT=0247, flags=02
+fd79: 48 02 00 00 02             ; XT=0248, flags=02
 fd7e: 04 4f 56 45 52 00          ; 4, OVER
 ;
 fd84: 93 fd 00 00                ; EMIT - (next: fd93 DICTP)
-fd88: 40 02 00 00 02             ; XT=0240, flags=02
+fd88: 41 02 00 00 02             ; XT=0241, flags=02
 fd8d: 04 45 4d 49 54 00          ; 4, EMIT
 ;
 fd93: a3 fd 00 00                ; DICTP - (next: fda3 >)
-fd97: 33 02 00 00 02             ; XT=0233, flags=02
+fd97: 34 02 00 00 02             ; XT=0234, flags=02
 fd9c: 05 44 49 43 54 50 00       ; 5, DICTP
 ;
 fda3: af fd 00 00                ; > - (next: fdaf =)
-fda7: 2c 02 00 00 02             ; XT=022c, flags=02
+fda7: 2d 02 00 00 02             ; XT=022d, flags=02
 fdac: 01 3e 00                   ; 1, >
 ;
 fdaf: bb fd 00 00                ; = - (next: fdbb <)
-fdb3: 25 02 00 00 02             ; XT=0225, flags=02
+fdb3: 26 02 00 00 02             ; XT=0226, flags=02
 fdb8: 01 3d 00                   ; 1, =
 ;
 fdbb: c7 fd 00 00                ; < - (next: fdc7 /)
-fdbf: 1e 02 00 00 02             ; XT=021e, flags=02
+fdbf: 1f 02 00 00 02             ; XT=021f, flags=02
 fdc4: 01 3c 00                   ; 1, <
 ;
 fdc7: d3 fd 00 00                ; / - (next: fdd3 *)
-fdcb: 17 02 00 00 02             ; XT=0217, flags=02
+fdcb: 18 02 00 00 02             ; XT=0218, flags=02
 fdd0: 01 2f 00                   ; 1, /
 ;
 fdd3: df fd 00 00                ; * - (next: fddf -)
-fdd7: 10 02 00 00 02             ; XT=0210, flags=02
+fdd7: 11 02 00 00 02             ; XT=0211, flags=02
 fddc: 01 2a 00                   ; 1, *
 ;
 fddf: eb fd 00 00                ; - - (next: fdeb +)
-fde3: 09 02 00 00 02             ; XT=0209, flags=02
+fde3: 0a 02 00 00 02             ; XT=020a, flags=02
 fde8: 01 2d 00                   ; 1, -
 ;
 fdeb: f7 fd 00 00                ; + - (next: fdf7 C!)
-fdef: 02 02 00 00 02             ; XT=0202, flags=02
+fdef: 03 02 00 00 02             ; XT=0203, flags=02
 fdf4: 01 2b 00                   ; 1, +
 ;
 fdf7: 04 fe 00 00                ; C! - (next: fe04 C@)
-fdfb: fb 01 00 00 02             ; XT=01fb, flags=02
+fdfb: fc 01 00 00 02             ; XT=01fc, flags=02
 fe00: 02 43 21 00                ; 2, C!
 ;
 fe04: 11 fe 00 00                ; C@ - (next: fe11 CLITERAL)
-fe08: f4 01 00 00 02             ; XT=01f4, flags=02
+fe08: f5 01 00 00 02             ; XT=01f5, flags=02
 fe0d: 02 43 40 00                ; 2, C@
 ;
 fe11: 24 fe 00 00                ; CLITERAL - (next: fe24 OR)
-fe15: e7 01 00 00 02             ; XT=01e7, flags=02
+fe15: e8 01 00 00 02             ; XT=01e8, flags=02
 fe1a: 08 43 4c 49 54 45 52 41 4c 00 ; 8, CLITERAL
 ;
 fe24: 31 fe 00 00                ; OR - (next: fe31 RET)
-fe28: e0 01 00 00 02             ; XT=01e0, flags=02
+fe28: e1 01 00 00 02             ; XT=01e1, flags=02
 fe2d: 02 4f 52 00                ; 2, OR
 ;
 fe31: 3f fe 00 00                ; RET - (next: fe3f CALL)
-fe35: d3 01 00 00 00             ; XT=01d3, flags=00
+fe35: d4 01 00 00 00             ; XT=01d4, flags=00
 fe3a: 03 52 45 54 00             ; 3, RET
 ;
 fe3f: 4e fe 00 00                ; CALL - (next: fe4e JMPNZ)
-fe43: c6 01 00 00 00             ; XT=01c6, flags=00
+fe43: c7 01 00 00 00             ; XT=01c7, flags=00
 fe48: 04 43 41 4c 4c 00          ; 4, CALL
 ;
 fe4e: 5e fe 00 00                ; JMPNZ - (next: fe5e JMPZ)
-fe52: b9 01 00 00 00             ; XT=01b9, flags=00
+fe52: ba 01 00 00 00             ; XT=01ba, flags=00
 fe57: 05 4a 4d 50 4e 5a 00       ; 5, JMPNZ
 ;
 fe5e: 6d fe 00 00                ; JMPZ - (next: fe6d JMP)
-fe62: ac 01 00 00 00             ; XT=01ac, flags=00
+fe62: ad 01 00 00 00             ; XT=01ad, flags=00
 fe67: 04 4a 4d 50 5a 00          ; 4, JMPZ
 ;
 fe6d: 7b fe 00 00                ; JMP - (next: fe7b SLITERAL)
-fe71: 9f 01 00 00 00             ; XT=019f, flags=00
+fe71: a0 01 00 00 00             ; XT=01a0, flags=00
 fe76: 03 4a 4d 50 00             ; 3, JMP
 ;
 fe7b: 8e fe 00 00                ; SLITERAL - (next: fe8e DUP)
-fe7f: 92 01 00 00 00             ; XT=0192, flags=00
+fe7f: 93 01 00 00 00             ; XT=0193, flags=00
 fe84: 08 53 4c 49 54 45 52 41 4c 00 ; 8, SLITERAL
 ;
 fe8e: 9c fe 00 00                ; DUP - (next: fe9c DROP)
-fe92: 8b 01 00 00 02             ; XT=018b, flags=02
+fe92: 8c 01 00 00 02             ; XT=018c, flags=02
 fe97: 03 44 55 50 00             ; 3, DUP
 ;
 fe9c: ab fe 00 00                ; DROP - (next: feab SWAP)
-fea0: 84 01 00 00 02             ; XT=0184, flags=02
+fea0: 85 01 00 00 02             ; XT=0185, flags=02
 fea5: 04 44 52 4f 50 00          ; 4, DROP
 ;
 feab: ba fe 00 00                ; SWAP - (next: feba !)
-feaf: 7d 01 00 00 02             ; XT=017d, flags=02
+feaf: 7e 01 00 00 02             ; XT=017e, flags=02
 feb4: 04 53 57 41 50 00          ; 4, SWAP
 ;
 feba: c6 fe 00 00                ; ! - (next: fec6 @)
-febe: 76 01 00 00 02             ; XT=0176, flags=02
+febe: 77 01 00 00 02             ; XT=0177, flags=02
 fec3: 01 21 00                   ; 1, !
 ;
 fec6: d2 fe 00 00                ; @ - (next: fed2 LITERAL)
-feca: 6f 01 00 00 02             ; XT=016f, flags=02
+feca: 70 01 00 00 02             ; XT=0170, flags=02
 fecf: 01 40 00                   ; 1, @
 ;
 fed2: e4 fe 00 00                ; LITERAL - (next: fee4 ])
-fed6: 62 01 00 00 00             ; XT=0162, flags=00
+fed6: 63 01 00 00 00             ; XT=0163, flags=00
 fedb: 07 4c 49 54 45 52 41 4c 00 ; 7, LITERAL
 ;
 fee4: f0 fe 00 00                ; ] - (next: fef0 [)
-fee8: 54 01 00 00 01             ; XT=0154, flags=01
+fee8: 55 01 00 00 01             ; XT=0155, flags=01
 feed: 01 5d 00                   ; 1, ]
 ;
 fef0: fc fe 00 00                ; [ - (next: fefc ,)
-fef4: 46 01 00 00 01             ; XT=0146, flags=01
+fef4: 47 01 00 00 01             ; XT=0147, flags=01
 fef9: 01 5b 00                   ; 1, [
 ;
 fefc: 08 ff 00 00                ; , - (next: ff08 C,)
-ff00: 2c 01 00 00 00             ; XT=012c, flags=00
+ff00: 2d 01 00 00 00             ; XT=012d, flags=00
 ff05: 01 2c 00                   ; 1, ,
 ;
 ff08: 15 ff 00 00                ; C, - (next: ff15 LAST)
-ff0c: 14 01 00 00 00             ; XT=0114, flags=00
+ff0c: 15 01 00 00 00             ; XT=0115, flags=00
 ff11: 02 43 2c 00                ; 2, C,
 ;
 ff15: 24 ff 00 00                ; LAST - (next: ff24 HERE)
-ff19: 08 01 00 00 00             ; XT=0108, flags=00
+ff19: 09 01 00 00 00             ; XT=0109, flags=00
 ff1e: 04 4c 41 53 54 00          ; 4, LAST
 ;
 ff24: 33 ff 00 00                ; HERE - (next: ff33 CELL)
-ff28: fc 00 00 00 00             ; XT=00fc, flags=00
+ff28: fd 00 00 00 00             ; XT=00fd, flags=00
 ff2d: 04 48 45 52 45 00          ; 4, HERE
 ;
 ff33: 42 ff 00 00                ; CELL - (next: ff42 T3)
-ff37: f4 00 00 00 02             ; XT=00f4, flags=02
+ff37: f5 00 00 00 02             ; XT=00f5, flags=02
 ff3c: 04 43 45 4c 4c 00          ; 4, CELL
 ;
 ff42: 4f ff 00 00                ; T3 - (next: ff4f T2)

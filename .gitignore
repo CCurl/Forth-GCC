@@ -56,3 +56,8 @@ dkms.conf
 *.img
 *.bak
 output.txt
+/.vs/forth-gcc/v16
+/Debug
+/Release
+/f-comp.vcxproj.user
+/history.txt

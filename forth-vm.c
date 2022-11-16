@@ -1,4 +1,3 @@
-#include <winbase.h>
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -352,7 +351,7 @@ void cpu_loop(CELL start)
 			push(depth);
 			break;
 		case GETCH:
-			push(getch());
+			push(_getch());
 			break;
 		case COMPAREI:
 			arg2 = pop();

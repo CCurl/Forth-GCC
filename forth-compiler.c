@@ -295,7 +295,7 @@ char *ParseWord(char *word, char *line)
 		}
 		else {
 			CComma(CLITERAL);
-			CComma(val);
+			CComma((BYTE)val);
 		}
 		return line;
 	}
