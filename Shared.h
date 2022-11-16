@@ -64,7 +64,15 @@
 #define PLUSSTORE  50   // 32
 #define OPENBLOCK  51   // 33
 #define GOTOXY     52   // 34
-// unused 53-99
+#define TOSRC      53   // 35
+#define SRCQ       54   // 36
+#define SRCP4      55   // 37
+#define SRCP1      56   // 38
+#define TODST      57   // 39
+#define DSTQ       58   // 3A
+#define DSTP4      59   // 3B
+#define DSTP1      60   // 3C
+// unused 61-99
 #define DBGDOT    100
 #define DBGDOTS   101
 // unused 102-251
