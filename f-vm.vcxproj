@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="forth-compiler.c" />
     <ClCompile Include="forth-vm.c" />
+    <ClCompile Include="forth.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="forth-vm.h" />
@@ -30,10 +30,10 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{7481fb3e-060e-4354-b1a0-f274e086d204}</ProjectGuid>
+    <ProjectGuid>{5A4E1336-1F10-4325-9358-CC5681596A97}</ProjectGuid>
     <RootNamespace>MinForth</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>f-comp</ProjectName>
+    <ProjectName>f-vm</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

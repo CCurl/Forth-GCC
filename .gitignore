@@ -61,3 +61,11 @@ output.txt
 /Release
 /f-comp.vcxproj.user
 /history.txt
+/f-comp/Debug
+/f-comp/Release
+/f-dis/Debug
+/f-dis/Release
+/f-vm/Debug
+/f-vm/Release
+/f-vm.vcxproj.user
+/f-dis.vcxproj.user
