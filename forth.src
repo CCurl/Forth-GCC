@@ -779,7 +779,8 @@ DECIMAL
 : VARIABLE  CREATE-NAME HERE 2 + CELL + LITERAL , RET 0 , ;
 
 : bench-loop BEGIN 1- DUP WHILE DROP ;
-: bench GETTICK SWAP bench-loop GETTICK SWAP - . ;
+: bench GETTICK >SRC bench-loop GETTICK SRC? - . ;
+: mil 1000 DUP * * ;
 
 \ 1 LOAD
 

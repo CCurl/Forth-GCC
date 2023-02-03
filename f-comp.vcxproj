@@ -27,6 +27,9 @@
     <ClInclude Include="Shared.h" />
     <ClInclude Include="string.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="forth.src" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
