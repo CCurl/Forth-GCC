@@ -794,10 +794,3 @@ sys-info
 
 \ This is so that forth-dis behaves as it should
 99 STATE !
-
-\ CELL ADDR_CELL     = 0x08;
-\ CELL ADDR_HERE     = 0x10;
-\ CELL ADDR_LAST     = 0x14;
-\ CELL ADDR_BASE     = 0x18;
-\ CELL ADDR_STATE    = 0x20;
-\ CELL ADDR_MEM_SZ   = 0x24;

@@ -43,7 +43,6 @@ void init_vm(int vm_size)
     the_cells = (CELL*)the_bytes;
     if (the_bytes != NULL) {
         memset(the_bytes, 0, memory_size);
-        // CELL_AT(36) = memory_size;
     }
 }
 
@@ -268,7 +267,6 @@ next:
     case RESET:
         printf("-RESET at $%04lX-", PC-1);
         PC = 0;
-        //DSP = dStack;
         sp = rsp = 0;
         NEXT;
     case BYE: return;

@@ -13,16 +13,6 @@ FILE *input_fp = NULL;
 FILE *output_fp = NULL;
 int mem_size_KB = 64;
 
-//CELL HERE, LAST, STATE;
-//CELL BASE = 10;
-
-// CELL ADDR_CELL     = 0x08;
-// CELL ADDR_HERE     = 0x10;
-// CELL ADDR_LAST     = 0x14;
-// CELL ADDR_BASE     = 0x18;
-// CELL ADDR_STATE    = 0x20;
-// CELL ADDR_MEM_SZ   = 12;
-
 #define CELL_ADDR    8
 #define HERE_ADDR   16
 #define LAST_ADDR   20
