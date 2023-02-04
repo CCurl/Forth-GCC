@@ -43,7 +43,7 @@ void init_vm(int vm_size)
     the_cells = (CELL*)the_bytes;
     if (the_bytes != NULL) {
         memset(the_bytes, 0, memory_size);
-        CELL_AT(ADDR_MEM_SZ) = memory_size;
+        // CELL_AT(36) = memory_size;
     }
 }
 

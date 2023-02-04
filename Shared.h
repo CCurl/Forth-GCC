@@ -118,12 +118,12 @@ typedef struct {
 #define DSTACK_SZ 64
 #define RSTACK_SZ 64
 
-extern CELL ADDR_CELL;     // 0x08
-extern CELL ADDR_HERE;     // 0x10
-extern CELL ADDR_LAST;     // 0x14
-extern CELL ADDR_BASE;     // 0x18
-extern CELL ADDR_STATE;    // 0x20
-extern CELL ADDR_MEM_SZ;   // 0x24
+// extern CELL ADDR_CELL;     // 0x08
+// extern CELL ADDR_HERE;     // 0x10
+// extern CELL ADDR_LAST;     // 0x14
+// extern CELL ADDR_BASE;     // 0x18
+// extern CELL ADDR_STATE;    // 0x20
+// extern CELL ADDR_MEM_SZ;   // 0x24
 
 #define ONE_KB (1024)
 #define ONE_MB (ONE_KB * ONE_KB)

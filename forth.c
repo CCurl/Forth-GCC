@@ -6,7 +6,7 @@
 #include "forth-vm.h"
 #include "string.h"
 
-CELL ADDR_MEM_SZ   = 0x24;
+//CELL ADDR_MEM_SZ   = 0x24;
 
 char input_fn[256];
 FILE *input_fp = NULL;

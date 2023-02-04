@@ -19,26 +19,30 @@
 
 .EndOfVariables. \ marks the end of the variables
 
-: (HERE)   $10 ;
-: (LAST)   $14 ;
-: BASE     $18 ;
-: STATE    $20 ;
-: (MEM_SZ) $24 ;
+: (CELL)    8 ; .INLINE.
+: (HERE)   16 ; .INLINE.
+: (LAST)   20 ; .INLINE.
+: BASE     24 ; .INLINE.
+: (VHERE)  28 ; .INLINE.
+: STATE    32 ; .INLINE.
+: (MEM_SZ) 36 ; .INLINE.
 
-: CELL 4 ; .INLINE.
+: CELL (CELL) FETCH ; .INLINE.
+: @	  FETCH  ; .INLINE.
+: !	  STORE  ; .INLINE.
+: C!  CSTORE ; .INLINE.
+: +	  ADD    ; .INLINE.
+: 1+  INC    ; .INLINE.
 
-: HERE (HERE) FETCH ;
-: LAST (LAST) FETCH ;
-
-: C, HERE CSTORE HERE      INC (HERE) STORE ;
-: ,  HERE STORE  HERE CELL ADD (HERE) STORE ;
+: HERE (HERE) @ ; .INLINE.
+: C, HERE ! HERE 1+ (HERE) ! ;
+: ,  HERE ! HERE CELL + (HERE) ! ;
 
 : [ 0 STATE STORE ; .IMMEDIATE.
 : ] 1 STATE STORE ; .IMMEDIATE.
+: LAST (LAST) @ ;
 
 : LITERAL	    1 C,   ;
-: @			[   2 C, ] ; .INLINE.
-: !			[   3 C, ] ; .INLINE.
 : SWAP		[   4 C, ] ; .INLINE.
 : DROP		[   5 C, ] ; .INLINE.
 : DUP		[   6 C, ] ; .INLINE.
@@ -50,9 +54,7 @@
 : RET		   12 C,   ;
 : OR		[  13 C, ] ; .INLINE.
 : CLITERAL	   14 C,   ; .INLINE.
-: C@		[  15 C, ] ; .INLINE.
-: C!		[  16 C, ] ; .INLINE.
-: +			[  17 C, ] ; .INLINE.
+: C@		CFETCH ; .INLINE.
 : -			[  18 C, ] ; .INLINE.
 : *			[  19 C, ] ; .INLINE.
 : /			[  20 C, ] ; .INLINE.

@@ -16,22 +16,26 @@ int mem_size_KB = 64;
 //CELL HERE, LAST, STATE;
 //CELL BASE = 10;
 
-CELL ADDR_CELL     = 0x08;
+// CELL ADDR_CELL     = 0x08;
 // CELL ADDR_HERE     = 0x10;
 // CELL ADDR_LAST     = 0x14;
 // CELL ADDR_BASE     = 0x18;
 // CELL ADDR_STATE    = 0x20;
-CELL ADDR_MEM_SZ   = 0x24;
+// CELL ADDR_MEM_SZ   = 12;
 
-#define HERE_ADDR   4
-#define LAST_ADDR   5
-#define BASE_ADDR   6
-#define STATE_ADDR  8
+#define CELL_ADDR    8
+#define HERE_ADDR   16
+#define LAST_ADDR   20
+#define BASE_ADDR   24
+#define VHERE_ADDR  28
+#define STATE_ADDR  32
+#define MEMSZ_ADDR  36
 
-#define HERE  the_cells[HERE_ADDR]
-#define LAST  the_cells[LAST_ADDR]
-#define BASE  the_cells[BASE_ADDR]
-#define STATE the_cells[STATE_ADDR]
+#define HERE  the_cells[HERE_ADDR/CELL_SZ]
+#define VHERE the_cells[VHERE_ADDR/CELL_SZ]
+#define LAST  the_cells[LAST_ADDR/CELL_SZ]
+#define BASE  the_cells[BASE_ADDR/CELL_SZ]
+#define STATE the_cells[STATE_ADDR/CELL_SZ]
 
 void  Store(CELL loc, CELL val) { CELL_AT(loc) = val; }
 void CStore(CELL loc, CELL val) { BYTE_AT(loc) = (BYTE)val; }
@@ -240,8 +244,8 @@ char *ParseWord(char *word, char *line)
     if (string_equals(word, ":")) {
         line = GetWord(line, word);
         DefineWord(word, 0);
-        CComma(DICTP);
-        Comma(LAST);
+        // CComma(DICTP);
+        // Comma(LAST);
         STATE = 1;
 
         return line;
@@ -250,8 +254,8 @@ char *ParseWord(char *word, char *line)
     if (string_equals(word, ".VARIABLE.")) {
         line = GetWord(line, word);
         DefineWord(word, 0);
-        CComma(DICTP);
-        Comma(LAST);
+        // CComma(DICTP);
+        // Comma(LAST);
         CComma(LITERAL);
         Comma(HERE + 5);
         CComma(RET);
@@ -337,7 +341,8 @@ char *ParseWord(char *word, char *line)
                 cpu_loop(dp->XT);
             } else if (dp->flags & IS_INLINE) {
                 // Skip the DICTP instruction
-                CELL addr = dp->XT + 1 + CELL_SZ;
+                // CELL addr = dp->XT + 1 + CELL_SZ;
+                CELL addr = dp->XT;
 
                 // Copy bytes until the first RET
                 while (true)
@@ -430,27 +435,29 @@ void CompilerInit()
 
     HERE = 0x0040;
     LAST = MEM_SZ - CELL_SZ;
-    STATE = 0;
     BASE = 10;
+    STATE = 0;
+    VHERE = 0x1000;
 
     Store(LAST, 0);
-    Store(ADDR_CELL, CELL_SZ);
+    the_cells[MEMSZ_ADDR/CELL_SZ] = MEM_SZ;
+    the_cells[CELL_ADDR/CELL_SZ] = CELL_SZ;
 }
 
+char the_line[128];
 void Compile(FILE *fp_in)
 {
     int line_no = 0;
     char buf[128];
-    char line[128];
 
     while (fgets(buf, sizeof(buf), fp_in) == buf)
     {
         string_rtrim(buf);
         ++line_no;
-        strcpy(line, buf);
+        strcpy(the_line, buf);
         ParseLine(buf);
         if (_QUIT_HIT == 1) {
-            printf("QUIT hit on line %d: %s\n", line_no, line);
+            printf("QUIT hit on line %d: %s\n", line_no, the_line);
             break;
         }
     }
