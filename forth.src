@@ -9,12 +9,6 @@
 
 \ Variables mess up the disassembler, put them first
 
-.VARIABLE. (HERE)
-.VARIABLE. (LAST)
-.VARIABLE. BASE
-.VARIABLE. STATE
-.VARIABLE. (MEM_SZ)
-
 .VARIABLE. >IN
 .VARIABLE. #NEG
 .VARIABLE. #LEN
@@ -24,6 +18,12 @@
 .VARIABLE. T3			\ guarantee that the value won't change across words.
 
 .EndOfVariables. \ marks the end of the variables
+
+: (HERE)   $10 ;
+: (LAST)   $14 ;
+: BASE     $18 ;
+: STATE    $20 ;
+: (MEM_SZ) $24 ;
 
 : CELL 4 ; .INLINE.
 
@@ -86,7 +86,7 @@
 : LSHIFT    [  48 C, ] ; .INLINE.	\ SHIFTLEFT  ( n1 n2 -- n3 )
 : RSHIFT    [  49 C, ] ; .INLINE.	\ SHIFTRIGHT ( n1 n2 -- n3 )
 : +!        [  50 C, ] ; .INLINE.   \ ( n addr -- )
-: OPEN-BLOCK [  51 C, ] ; .INLINE.   \ ( n -- fp bool )
+: OPEN-BLOCK [  51 C, ] ; .INLINE.   \ ( n -- fp int )
 : GOTOXY    [  52 C, ] ; .INLINE.	\ ( x y -- )
 : >SRC      [ 53 C, ] ; .INLINE.
 : SRC?      [ 54 C, ] ; .INLINE.
@@ -199,7 +199,7 @@
 : CRLF #13 EMIT #10 EMIT ; INLINE
 : CR CRLF ; INLINE
 
-: BETWEEN											\ ( num min max -- bool )
+: BETWEEN											\ ( num min max -- int )
     2 PICK < IF 
         2DROP FALSE LEAVE 
     THEN
@@ -285,7 +285,7 @@
 : DICT.GetIMMEDIATE DICT.GetFLAGS FLAGS.ISIMMEDIATE? ;
 : DICT.GetINLINE    DICT.GetFLAGS FLAGS.ISINLINE? ;
 
-: findInDict						\ ( addr -- XT IMM bool )
+: findInDict						\ ( addr -- XT IMM int )
     LAST >R
     BEGIN
         R@ DUP
@@ -303,7 +303,7 @@
     AGAIN
 ;
 
-: is-num-char?				\ ( base ch -- val bool )
+: is-num-char?				\ ( base ch -- val int )
      to-upper
      SWAP >R
      S" 0123456789ABCDEF"
@@ -313,11 +313,11 @@
 : NEGATE 0 SWAP - ;
 : ABS DUP 0 < IF NEGATE THEN ;
 
-: parse-char 			\ ( addr -- num bool )
+: parse-char 			\ ( addr -- num int )
     DUP 1+  C@ ''' <> IF 0   LEAVE   THEN
     DUP 2 + C@        IF 0 ELSE C@ 1 THEN ;
 
-: isNumber?				\ ( addr -- num bool )
+: isNumber?				\ ( addr -- num int )
     \ 'c' means it's a character literal
     DUP C@ ''' = IF 1+ parse-char LEAVE THEN
 
@@ -507,7 +507,7 @@ DECIMAL
         THEN
     ELSE             \ word not found
         2DROP        \ discard IMM and XT place holders
-        R@ isNumber? \ ( addr -- num bool )
+        R@ isNumber? \ ( addr -- num int )
         IF
             ?COMPILING
             IF
@@ -656,16 +656,6 @@ DECIMAL
 : FREE LAST HERE - ;
 : .FREE FREE (.) S"  bytes free." CT ;
 
-: mainLoop 
-    resetState 
-    BEGIN 
-        ?COMPILING 0= IF S"  OK" CT .S THEN
-        CRLF getLine 1+ >IN ! 
-        executeInput BL 
-    AGAIN ;
-
-: main STATE @ 99 = IF STATE OFF S" Hello." CT THEN mainLoop ;
-
 \ ------------------------------------------------------------------------------------
 : file-getLine		\ ( fp -- addr num-read )
     Pad SWAP 200 SWAP
@@ -783,22 +773,24 @@ DECIMAL
 : bench TIMER >SRC bench-loop TIMER SRC? - . ;
 : mil 1000 DUP * * ;
 : xx S" running bench: " CT 500 mil bench ;
-xx
 
+: mainLoop 
+    resetState 
+    BEGIN 
+        ?COMPILING 0= IF S"  OK" CT .S THEN
+        CRLF getLine 1+ >IN ! 
+        executeInput BL 
+    AGAIN ;
+
+: main STATE @ 99 = IF STATE OFF S" Hello." CT THEN mainLoop ;
+
+xx CR \ main
 \ 1 LOAD
 
 \ --------------------------------------------------------------------------------
 sys-info
 
 \ This is so that forth-dis behaves as it should
-HEX
-    CELL   08 !
-    HERE   10 !
-    LAST   14 !
-    0A     18 ! \ BASE
-    0      20 ! \ STATE
-    MEM_SZ 24 !
-DECIMAL
 99 STATE !
 
 \ CELL ADDR_CELL     = 0x08;

@@ -9,7 +9,8 @@
 // ------------------------------------------------------------------------------------------
 // The VM
 // ------------------------------------------------------------------------------------------
-BYTE *the_memory;
+BYTE *the_bytes;
+CELL *the_cells;
 long memory_size = 0;
 
 CELL dStack[DSTACK_SZ], sp = 0;
@@ -21,8 +22,8 @@ CELL rStack[RSTACK_SZ], rsp = 0;
 #define DROP1   sp--
 #define DROP2   sp-=2
 
-bool isEmbedded = false;
-bool isBYE = false;
+int isEmbedded = false;
+int isBYE = false;
 
 int _QUIT_HIT = 0;
 int MEM_SZ = 0;
@@ -35,12 +36,13 @@ void init_vm(int vm_size)
     memory_size = vm_size > 0 ? vm_size : MEM_SZ;
     sp = rsp = 0;
 
-    if (the_memory != NULL)
-        free(the_memory);
+    if (the_bytes != NULL)
+        free(the_bytes);
 
-    the_memory = malloc(memory_size);
-    if (the_memory != NULL) {
-        memset(the_memory, 0, memory_size);
+    the_bytes = malloc(memory_size);
+    the_cells = (CELL*)the_bytes;
+    if (the_bytes != NULL) {
+        memset(the_bytes, 0, memory_size);
         CELL_AT(ADDR_MEM_SZ) = memory_size;
     }
 }
@@ -62,7 +64,7 @@ void cpu_loop(CELL start)
     isBYE = false;
  
 next:
-    switch (the_memory[PC++]) {
+    switch (the_bytes[PC++]) {
     case LITERAL: push(CELL_AT(PC));
         PC += CELL_SZ;
         NEXT;
@@ -93,9 +95,9 @@ next:
     case RET: if (rsp < 1) return;
         PC = rpop();
         NEXT;
-    case CLITERAL: push(the_memory[PC++]); NEXT;
-    case CFETCH: TOS = the_memory[TOS];    NEXT;
-    case CSTORE: the_memory[TOS] = (BYTE)NOS;
+    case CLITERAL: push(the_bytes[PC++]); NEXT;
+    case CFETCH: TOS = the_bytes[TOS];    NEXT;
+    case CSTORE: the_bytes[TOS] = (BYTE)NOS;
         DROP2;
         NEXT;
     case ADD: NOS += TOS; DROP1; NEXT;
@@ -112,8 +114,8 @@ next:
         t2 = pop();
         t1 = pop();
         {
-            char *cp1 = (char *)&the_memory[t1];
-            char *cp2 = (char *)&the_memory[t2];
+            char *cp1 = (char *)&the_bytes[t1];
+            char *cp2 = (char *)&the_bytes[t2];
             t3 = strcmp(cp1, cp2) ? 0 : 1;
             push(t3);
         }
@@ -122,8 +124,8 @@ next:
         t2 = pop();
         t1 = pop();
         {
-            char* cp1 = (char*)&the_memory[t1];
-            char* cp2 = (char*)&the_memory[t2];
+            char* cp1 = (char*)&the_bytes[t1];
+            char* cp2 = (char*)&the_bytes[t2];
             t3 = _strcmpi(cp1, cp2) ? 0 : 1;
             push(t3);
         }
@@ -133,7 +135,7 @@ next:
         t2 = pop();   // mode: 0 => read, 1 => write
         t1 = pop();   // name
         {
-            char *fileName = (char *)&the_memory[t1 + 1];
+            char *fileName = (char *)&the_bytes[t1 + 1];
             char mode[4];
             sprintf(mode, "%c%c", (t2 == 0) ? 'r' : 'w', (t3 == 0) ? 't' : 'b');
             FILE *fp = fopen(fileName, mode);
@@ -147,7 +149,7 @@ next:
         t2 = pop();
         t1 = pop();
         {
-            BYTE *pBuf = (BYTE *)&the_memory[t1 + 1];
+            BYTE *pBuf = (BYTE *)&the_bytes[t1 + 1];
             int num = fread(pBuf, sizeof(BYTE), t2, (t3 == 0) ? stdin : (FILE *)t3);
             push(num);
         }
@@ -157,7 +159,7 @@ next:
         t2 = pop();		// max-sz
         t1 = pop();		// to-addr - NB: this is a COUNTED and NULL-TERMINATED string!
         {
-            char *tgt = (char *)&the_memory[t1];
+            char *tgt = (char *)&the_bytes[t1];
             FILE *fp = t3 ? (FILE *)t3 : stdin;
             char *pBuf = tgt;
             if (fgets((pBuf+1), t2, fp) != (pBuf+1))
@@ -184,7 +186,7 @@ next:
         t2 = pop();
         t1 = pop();
         {
-            BYTE *pBuf = (BYTE *)&the_memory[t1];
+            BYTE *pBuf = (BYTE *)&the_bytes[t1];
             int num = fwrite(pBuf, sizeof(BYTE), t2, t3 == 0 ? stdin : (FILE *)t3);
             push(num);
         }
@@ -271,7 +273,7 @@ next:
         NEXT;
     case BYE: return;
     default:
-        printf("-unknown inst %d at %lx-", the_memory[PC-1], PC-1);
+        printf("-unknown inst %d at %lx-", the_bytes[PC-1], PC-1);
         NEXT;
     }
     return;

@@ -12,7 +12,7 @@ char input_fn[256];
 FILE *input_fp = NULL;
 
 // *********************************************************************
-bool load_vm()
+int load_vm()
 {
 	TRACE("loading VM from %s ...", input_fn);
 	input_fp = fopen(input_fn, "rb");
@@ -30,7 +30,7 @@ bool load_vm()
     memory_size = file_sz;
     init_vm(file_sz);
 
-	int num_read = fread(the_memory, 1, memory_size, input_fp);
+	int num_read = fread(the_bytes, 1, memory_size, input_fp);
     TRACE("%ld bytes read\n", num_read);
 	fclose(input_fp);
 	input_fp = NULL;

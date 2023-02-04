@@ -38,7 +38,7 @@
 #define DICTP      24	// 18
 #define EMIT       25	// 19
 #define OVER       26	// 1A
-#define COMPARE    27	// 1B  ( addr1 addr2 -- bool )
+#define COMPARE    27	// 1B  ( addr1 addr2 -- int )
 #define FOPEN      28	// 1C  ( name mode -- fp status ) - mode: 0 = read, 1 = write
 #define FREAD      29	// 1D  ( addr num fp -- count ) - fp == 0 means STDIN
 #define FREADLINE  30	// 1E  ( addr fp -- count )
@@ -51,7 +51,7 @@
 #define PICK       37	// 25
 #define DEPTH      38	// 26
 #define GETCH      39	// 27
-#define COMPAREI   40	// 28 ( addr1 addr2 -- bool )
+#define COMPAREI   40	// 28 ( addr1 addr2 -- int )
 #define SLASHMOD   41	// 29
 #define NOT        42	// 2A ( val1 -- val2 )
 #define RFETCH     43	// 2B ( addr -- val )
@@ -89,7 +89,7 @@
 typedef unsigned char BYTE;
 typedef long CELL;				// Use long for a 32-bit implementation, short for a 16-bit
 // #define CELL long;				// Use long for a 32-bit implementation, short for a 16-bit
-typedef int bool;
+//typedef int int;
 typedef char *String;
 
 typedef struct {
@@ -129,8 +129,8 @@ extern CELL ADDR_MEM_SZ;   // 0x24
 #define ONE_MB (ONE_KB * ONE_KB)
 extern int MEM_SZ;
 
-#define CELL_AT(loc) *(CELL *)(&the_memory[loc])
-#define BYTE_AT(loc) (the_memory[loc])
+#define CELL_AT(loc) *(CELL *)(&the_bytes[loc])
+#define BYTE_AT(loc) (the_bytes[loc])
 
 #define true 1
 #define false 0

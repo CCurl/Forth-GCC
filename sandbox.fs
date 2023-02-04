@@ -27,7 +27,7 @@ variable tl tl !
 		1- SWAP 1+ SWAP
 	AGAIN ;
 
-: is-num? ( base ch -- val bool )
+: is-num? ( base ch -- val int )
      to-upper
      SWAP >R
      " 0123456789ABCDEF" \ SWAP OVER + 1+ 0 SWAP C! DUP COUNT TYPE

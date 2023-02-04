@@ -10,9 +10,10 @@ extern CELL *RSP; // the return stack pointer
 extern CELL *DSP; // the data stack pointer
 extern CELL TOS; // The top of the stack
 
-extern bool isEmbedded;
-extern bool isBYE;
-extern BYTE *the_memory;
+extern int isEmbedded;
+extern int isBYE;
+extern BYTE *the_bytes;
+extern CELL *the_cells;
 extern long memory_size;
 
 // ------------------------------------------------------------------------------------------

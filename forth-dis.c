@@ -28,7 +28,7 @@ void dis_range(CELL start, CELL end, char *bytes)
 	char x[8];
 	while (start <= end)
 	{
-		BYTE val = the_memory[start++];
+		BYTE val = the_bytes[start++];
 		sprintf(x, " %02x", (int)val);
 		strcat(bytes, x);
 	}
@@ -59,7 +59,7 @@ void dis_PC2(int num, char *bytes)
 	char x[8];
 	for (int i = 0; i < num; i++)
 	{
-		BYTE val = the_memory[PC++];
+		BYTE val = the_bytes[PC++];
 		sprintf(x, " %02x", (int)val);
 		strcat(bytes, x);
 	}
@@ -73,13 +73,13 @@ CELL GetSysVarAddr(char *name)
 	CELL def_sz = 0x0f;
 	while ( addr < 0x1000 )
 	{
-		if ( the_memory[addr] != DICTP )
+		if ( the_bytes[addr] != DICTP )
 		{
 			printf("[%s] NOT FOUND!\n", name);
 			return 0;
 		}
 		CELL tmp = CELL_AT(addr+1);
-		DICT_T *dp = (DICT_T *)&the_memory[tmp];
+		DICT_T *dp = (DICT_T *)&the_bytes[tmp];
 		// printf("0x%04lX, 0x%04lX, [%s] = [%s]?\n", addr, dp, name, dp->name);
 		if (strcmp(dp->name, name) == 0)
 		{
@@ -101,13 +101,13 @@ CELL dis_vars(FILE *write_to)
 	CELL def_sz = 0x0f;
 	while ( true )
 	{
-		if ( the_memory[addr] != DICTP )
+		if ( the_bytes[addr] != DICTP )
 		{
 			return addr;
 		}
 		CELL tmp = CELL_AT(addr+1);
 		CELL tmp2;
-		DICT_T *dp = (DICT_T *)&the_memory[tmp];
+		DICT_T *dp = (DICT_T *)&the_bytes[tmp];
 
 		sprintf(bytes, "%04lx:", addr);
 		dis_start(addr, 5, bytes);
@@ -144,7 +144,7 @@ CELL dis_vars(FILE *write_to)
 // ------------------------------------------------------------------------------------------
 CELL dis_one(char *bytes, char *desc)
 {
-	IR = the_memory[PC];
+	IR = the_bytes[PC];
 	sprintf(bytes, "%04lx: %02x", PC, (int)IR);
 	++PC;
 
@@ -157,7 +157,7 @@ CELL dis_one(char *bytes, char *desc)
 		return CELL_SZ;
 
 	case CLITERAL:
-		arg1 = the_memory[PC];
+		arg1 = the_bytes[PC];
 		dis_PC2(1, bytes);
 		sprintf(desc, "CLITERAL %ld", arg1);
 		return 1;
@@ -193,10 +193,10 @@ CELL dis_one(char *bytes, char *desc)
 	case JMP:
 		arg1 = CELL_AT(PC);
 		sprintf(desc, "JMP %04lx", arg1);
-		if (the_memory[arg1] == DICTP)
+		if (the_bytes[arg1] == DICTP)
 		{
 			arg2 = CELL_AT(arg1+1);
-			DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
+			DICT_T *dp = (DICT_T *)&(the_bytes[arg2]);
 			sprintf(desc, "JMP %s (%04lx)\n;", dp->name, arg1);
 		}
 		dis_PC2(CELL_SZ, bytes);
@@ -215,14 +215,14 @@ CELL dis_one(char *bytes, char *desc)
 	case CALL:
 		arg1 = CELL_AT(PC);
 		arg2 = CELL_AT(arg1+1);
-		DICT_T *dp = (DICT_T *)&(the_memory[arg2]);
+		DICT_T *dp = (DICT_T *)&(the_bytes[arg2]);
 		sprintf(desc, "CALL %s (%04lx)", dp->name, arg1);
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
 
 	case RET:
 		sprintf(desc, "RET");
-		if (the_memory[PC] == DICTP)
+		if (the_bytes[PC] == DICTP)
 		{
 			strcat(desc, "\n;");
 		}
@@ -247,9 +247,9 @@ CELL dis_one(char *bytes, char *desc)
 		// SLIT   03    A    B    C   00
 		// PC starts at 0101, should be set to 0106
 
-		arg1 = the_memory[PC]; // count-byte (and the beginning of the counted string)
+		arg1 = the_bytes[PC]; // count-byte (and the beginning of the counted string)
 		arg2 = arg1 + 2;  // count-byte + count + NULL
-		sprintf(desc, "SLITERAL (%04lx) [%s]", PC, (char *)&the_memory[PC+1]);
+		sprintf(desc, "SLITERAL (%04lx) [%s]", PC, (char *)&the_bytes[PC+1]);
 		dis_PC2(arg2, bytes);
 		return PC-arg1;
 
@@ -291,7 +291,7 @@ CELL dis_one(char *bytes, char *desc)
 
 	case DICTP:
 		arg1 = CELL_AT(PC);
-		sprintf(desc, "DICTP %s (%04lx)", &(the_memory[arg1+10]), arg1);
+		sprintf(desc, "DICTP %s (%04lx)", &(the_bytes[arg1+10]), arg1);
 		dis_PC2(CELL_SZ, bytes);
 		return CELL_SZ;
 
@@ -439,8 +439,8 @@ CELL dis_one(char *bytes, char *desc)
 void dis_dict(FILE *write_to, CELL dict_addr)
 {
 	char bytes[128], desc[128];
-	DICT_T *dp = (DICT_T *)&the_memory[dict_addr];
-	DICT_T *next_dp = (DICT_T *)&the_memory[dp->next];
+	DICT_T *dp = (DICT_T *)&the_bytes[dict_addr];
+	DICT_T *next_dp = (DICT_T *)&the_bytes[dp->next];
 	CELL addr = dict_addr;
 
 	if (dp->next == 0)
@@ -544,7 +544,7 @@ void load_vm()
     memory_size = file_sz;
     init_vm(file_sz);
 
-	int num_read = fread(the_memory, 1, memory_size, input_fp);
+	int num_read = fread(the_bytes, 1, memory_size, input_fp);
     TRACE("%ld bytes read\n", num_read);
 	fclose(input_fp);
 	input_fp = NULL;

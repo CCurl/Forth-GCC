@@ -13,24 +13,34 @@ FILE *input_fp = NULL;
 FILE *output_fp = NULL;
 int mem_size_KB = 64;
 
-CELL HERE, LAST, STATE;
-CELL BASE = 10;
+//CELL HERE, LAST, STATE;
+//CELL BASE = 10;
 
 CELL ADDR_CELL     = 0x08;
-CELL ADDR_HERE     = 0x10;
-CELL ADDR_LAST     = 0x14;
-CELL ADDR_BASE     = 0x18;
-CELL ADDR_STATE    = 0x20;
+// CELL ADDR_HERE     = 0x10;
+// CELL ADDR_LAST     = 0x14;
+// CELL ADDR_BASE     = 0x18;
+// CELL ADDR_STATE    = 0x20;
 CELL ADDR_MEM_SZ   = 0x24;
 
-#define  Store(loc, val) CELL_AT(loc) = val
-#define CStore(loc, val) BYTE_AT(loc) = val
+#define HERE_ADDR   4
+#define LAST_ADDR   5
+#define BASE_ADDR   6
+#define STATE_ADDR  8
 
-#define  Fetch(loc) CELL_AT(loc)
-#define CFetch(loc) BYTE_AT(loc)
+#define HERE  the_cells[HERE_ADDR]
+#define LAST  the_cells[LAST_ADDR]
+#define BASE  the_cells[BASE_ADDR]
+#define STATE the_cells[STATE_ADDR]
 
-#define  Comma(val) CELL_AT(HERE) = val; HERE += CELL_SZ
-#define CComma(val) BYTE_AT(HERE) = val; HERE += 1
+void  Store(CELL loc, CELL val) { CELL_AT(loc) = val; }
+void CStore(CELL loc, CELL val) { BYTE_AT(loc) = (BYTE)val; }
+
+CELL  Fetch(CELL loc) { return CELL_AT(loc); }
+BYTE CFetch(CELL loc) { return BYTE_AT(loc); }
+
+void  Comma(CELL val) { CELL_AT(HERE) = val; HERE += CELL_SZ; }
+void CComma(CELL val) { BYTE_AT(HERE) = (BYTE)val; HERE += 1; }
 
 extern int _QUIT_HIT;
 
@@ -106,58 +116,30 @@ OPCODE_T theOpcodes[] = {
  };
 
 
-/*
-NB build this in somehow to enable usage of VT100 ECSAPE sequences to control the screen
-
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    DWORD dwMode = 0;
-    GetConsoleMode(hOut, &dwMode);
-    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    SetConsoleMode(hOut, dwMode);
-*/
-
 // ------------------------------------------------------------------------------------------
-void SyncMem(bool isSet)
-{
-    if (isSet) {
-        Store(ADDR_LAST,  LAST);
-        Store(ADDR_HERE,  HERE);
-        Store(ADDR_BASE,  BASE);
-        Store(ADDR_STATE, STATE);
-        Store(ADDR_MEM_SZ, MEM_SZ);
-    } else {
-        LAST  = Fetch(ADDR_LAST);
-        HERE  = Fetch(ADDR_HERE);
-        BASE  = Fetch(ADDR_BASE);
-        STATE = Fetch(ADDR_STATE);
-    }
-}
-
 void ExecuteXT(CELL XT)
 {
-    SyncMem(true);
     cpu_loop(XT);
-    SyncMem(false);
 }
 
 DICT_T *FindWord(LPCTSTR word)
 {
-    DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
+    DICT_T *dp = (DICT_T *)(&the_bytes[LAST]);
     while (dp->next > 0)
     {
         if (string_equals(word, dp->name)) {
             return dp;
         }
-        dp = (DICT_T *)(&the_memory[dp->next]);
+        dp = (DICT_T *)(&the_bytes[dp->next]);
     }
 
     return 0;
 }
 
-bool MakeNumber(LPCTSTR word, CELL *the_num)
+int MakeNumber(LPCTSTR word, CELL *the_num)
 {
     CELL base = BASE;
-    bool is_neg = false;
+    int is_neg = false;
     char *w = word;
     CELL my_num = 0;
     char *possible_chars = "0123456789abcdef";
@@ -213,13 +195,12 @@ void DefineWord(LPCTSTR word, BYTE flags)
     CELL curLAST = LAST;
     LAST -= ((CELL_SZ*2) + 3 + string_len(word));
 
-    DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
+    DICT_T *dp = (DICT_T *)(&the_bytes[LAST]);
     dp->next = curLAST;
     dp->XT = HERE;
     dp->flags = flags;
     dp->len = string_len(word);
     strcpy(dp->name, word);
-    SyncMem(true);
 }
 
 // Returns a pointer to the first char after the first word in the line
@@ -274,24 +255,7 @@ char *ParseWord(char *word, char *line)
         CComma(LITERAL);
         Comma(HERE + 5);
         CComma(RET);
-
-        if (strcmp(word, "(HERE)") == 0)
-            ADDR_HERE = HERE;
-
-        if (strcmp(word, "(LAST)") == 0)
-            ADDR_LAST = HERE;
-
-        if (strcmp(word, "BASE") == 0)
-            ADDR_BASE = HERE;
-
-        if (strcmp(word, "STATE") == 0)
-            ADDR_STATE = HERE;
-
-        if (strcmp(word, "(MEM_SZ)") == 0)
-            ADDR_MEM_SZ = HERE;
-
         Comma(0);
-        SyncMem(true);
         return line;
     }
 
@@ -310,13 +274,13 @@ char *ParseWord(char *word, char *line)
     }
 
     if (strcmp(word, ".INLINE.") == 0) {
-        DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
+        DICT_T *dp = (DICT_T *)(&the_bytes[LAST]);
         dp->flags |= IS_INLINE;
         return line;
     }
 
     if (strcmp(word, ".IMMEDIATE.") == 0) {
-        DICT_T *dp = (DICT_T *)(&the_memory[LAST]);
+        DICT_T *dp = (DICT_T *)(&the_bytes[LAST]);
         dp->flags |= IS_IMMEDIATE;
         return line;
     }
@@ -347,8 +311,7 @@ char *ParseWord(char *word, char *line)
 
     if (string_equals(word, "S\"")) {
         CComma(SLITERAL);
-        int count = 0;
-        bool done = false;
+        int count = 0, done = false;
         line += 1;
         CELL cur_here = HERE++;
         BYTE ch;
@@ -371,9 +334,7 @@ char *ParseWord(char *word, char *line)
     if (dp != NULL) {
         if (STATE == 1) {
             if (dp->flags & IS_IMMEDIATE) {
-                SyncMem(true);
                 cpu_loop(dp->XT);
-                SyncMem(false);
             } else if (dp->flags & IS_INLINE) {
                 // Skip the DICTP instruction
                 CELL addr = dp->XT + 1 + CELL_SZ;
@@ -392,9 +353,7 @@ char *ParseWord(char *word, char *line)
                 Comma(dp->XT);
             }
         } else {
-            SyncMem(true);
             cpu_loop(dp->XT);
-            SyncMem(false);
         }
         return line;
     }
@@ -414,9 +373,7 @@ char *ParseWord(char *word, char *line)
                 CELL xt = HERE + 0x0100;
                 CStore(xt, op->opcode);
                 CStore(xt+1, RET);
-                SyncMem(true);
                 cpu_loop(xt);
-                SyncMem(false);
             }
             return line;
         }
@@ -468,16 +425,16 @@ void ParseLine(char *line)
 void CompilerInit()
 {
     init_vm(MEM_SZ);
-    the_memory[0] = RET;
+    the_bytes[0] = RET;
     isEmbedded = true;
 
     HERE = 0x0040;
     LAST = MEM_SZ - CELL_SZ;
     STATE = 0;
+    BASE = 10;
 
     Store(LAST, 0);
     Store(ADDR_CELL, CELL_SZ);
-    Store(ADDR_BASE, BASE);
 }
 
 void Compile(FILE *fp_in)
@@ -503,14 +460,12 @@ void Compile(FILE *fp_in)
     if (dp == NULL)	{
         dp = FindWord("MAIN");
         if (dp == NULL) {
-            dp = (DICT_T *)&the_memory[LAST];
+            dp = (DICT_T *)&the_bytes[LAST];
         }
     }
 
     CStore(0, JMP);
     Store(1, dp->XT);
-
-    SyncMem(true);
 }
 
 void do_compile()
@@ -526,7 +481,7 @@ void do_compile()
     }
 
     Compile(input_fp);
-    Store(ADDR_BASE, 10);
+    BASE = 10;
     fclose(input_fp);
     input_fp = NULL;
 }
@@ -542,7 +497,7 @@ void write_output_file()
         exit(1);
     }
 
-    int num = fwrite(the_memory, 1, MEM_SZ, output_fp);
+    int num = fwrite(the_bytes, 1, MEM_SZ, output_fp);
     fclose(output_fp);
     output_fp = NULL;
     printf("%d bytes written.\n", num);

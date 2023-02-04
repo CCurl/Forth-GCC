@@ -76,13 +76,13 @@ void string_makeZ(char *dest)
 }
 
 // *********************************************************************
-bool string_equals(char *str1, char *str2)
+int string_equals(char *str1, char *str2)
 {
     return strcmp(str1, str2) == 0 ? true : false;
 }
 
 // *********************************************************************
-bool string_isEmpty(char *str)
+int string_isEmpty(char *str)
 {
 	char ch = *str;
 	if (ch == 0)
@@ -95,7 +95,7 @@ bool string_isEmpty(char *str)
 }
 
 // *********************************************************************
-bool string_equals_nocase(char *str1, char *str2)
+int string_equals_nocase(char *str1, char *str2)
 {
     return _stricmp(str1, str2) == 0 ? true : false;
 }
