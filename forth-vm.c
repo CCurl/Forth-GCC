@@ -25,7 +25,6 @@ CELL rStack[RSTACK_SZ], rsp = 0;
 int isEmbedded = false;
 int isBYE = false;
 
-int _QUIT_HIT = 0;
 int MEM_SZ = 0;
 
 CELL src, dst, t1, t2, t3;

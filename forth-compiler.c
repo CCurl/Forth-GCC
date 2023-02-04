@@ -12,6 +12,7 @@ char output_fn[256];
 FILE *input_fp = NULL;
 FILE *output_fp = NULL;
 int mem_size_KB = 64;
+int _QUIT_HIT = 0;
 
 #define CELL_ADDR    8
 #define HERE_ADDR   16
