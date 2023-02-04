@@ -82,7 +82,7 @@
 : INC		[  44 C, ] ; .INLINE.
 : RDEPTH	[  45 C, ] ; .INLINE.
 : DEC		[  46 C, ] ; .INLINE.
-: GETTICK	[  47 C, ] ; .INLINE.
+: TIMER	[  47 C, ] ; .INLINE.
 : LSHIFT    [  48 C, ] ; .INLINE.	\ SHIFTLEFT  ( n1 n2 -- n3 )
 : RSHIFT    [  49 C, ] ; .INLINE.	\ SHIFTRIGHT ( n1 n2 -- n3 )
 : +!        [  50 C, ] ; .INLINE.   \ ( n addr -- )
@@ -96,6 +96,7 @@
 : DST?      [ 58 C, ] ; .INLINE.
 : DST+      [ 59 C, ] ; .INLINE.
 : DST+1     [ 60 C, ] ; .INLINE.
+: XOR       [ 61 C, ] ; .INLINE.
 : NOP		[ 252 C, ] ; .INLINE.
 : BREAK		[ 253 C, ] ; .INLINE.
 : RESET		[ 254 C, ] ; .INLINE.
@@ -779,8 +780,10 @@ DECIMAL
 : VARIABLE  CREATE-NAME HERE 2 + CELL + LITERAL , RET 0 , ;
 
 : bench-loop BEGIN 1- DUP WHILE DROP ;
-: bench GETTICK >SRC bench-loop GETTICK SRC? - . ;
+: bench TIMER >SRC bench-loop TIMER SRC? - . ;
 : mil 1000 DUP * * ;
+: xx S" running bench: " CT 500 mil bench ;
+xx
 
 \ 1 LOAD
 

@@ -989,7 +989,7 @@ f_DEC:
             m_NEXT
 
 ; -------------------------------------------------------------------------------------
-; GETTICK
+; TIMER
 f_GETTICK:
                 push REG2
                 call [GetTickCount]

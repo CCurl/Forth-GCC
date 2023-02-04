@@ -12,6 +12,7 @@ FILE *input_fp = NULL;
 FILE *output_fp = NULL;
 CELL PC;
 BYTE IR;
+CELL arg1, arg2, arg3;
 
 CELL ADDR_CELL     = 0x08;
 CELL ADDR_HERE     = 0x10;
@@ -362,8 +363,8 @@ CELL dis_one(char *bytes, char *desc)
 		sprintf(desc, "DEC");
 		return 0;
 
-	case GETTICK:
-		sprintf(desc, "GETTICK");
+	case TIMER:
+		sprintf(desc, "TIMER");
 		return 0;
 
 	case SHIFTLEFT:
@@ -499,7 +500,7 @@ void dis_vm(FILE *write_to)
 		PC += 0x10;
 	}
 
-	fprintf(write_to, ";\n", bytes);
+	fprintf(write_to, ";\n");
 	fflush(write_to);
 
 	// Code

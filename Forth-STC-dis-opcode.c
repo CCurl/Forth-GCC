@@ -256,7 +256,7 @@ void dis_opcode(int opcode)
             line = make_codeU(NULL, "m_onePlus");
             return;
 
-        case GETTICK:
+        case TIMER:
             line = make_codeU(NULL, "call prim_GETTICK");
             return;
 

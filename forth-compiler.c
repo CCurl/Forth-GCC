@@ -71,6 +71,7 @@ OPCODE_T theOpcodes[] = {
         , { "RTOD",             RTOD,             "RTOD",           IS_INLINE }
         , { "COM",              COM,              "COM",            IS_INLINE }
         , { "AND",              AND,              "AND",            IS_INLINE }
+        , { "XOR",              XOR,              "XOR",            IS_INLINE }
         , { "PICK",             PICK,             "PICK",           IS_INLINE }
         , { "DEPTH",            DEPTH,            "DEPTH",          IS_INLINE }
         , { "GETCH",            GETCH,            "GETCH",          IS_INLINE }
@@ -81,7 +82,7 @@ OPCODE_T theOpcodes[] = {
         , { "INC",              INC,              "INC",            IS_INLINE }
         , { "RDEPTH",           RDEPTH,           "RDEPTH",         IS_INLINE }
         , { "DEC",              DEC,              "DEC",            IS_INLINE }
-        , { "GETTICK",          GETTICK,          "GETTICK",        IS_INLINE }
+        , { "TIMER",          TIMER,          "TIMER",        IS_INLINE }
         , { "SHIFTLEFT",        SHIFTLEFT,        "LSHIFT",         IS_INLINE }
         , { "SHIFTRIGHT",       SHIFTRIGHT,       "RSHIFT",         IS_INLINE }
         , { "PLUSSTORE",        PLUSSTORE,        "PLUSSTORE",      IS_INLINE }

@@ -117,7 +117,7 @@ variable delay 1 delay !
 : clr-cell cell-at 0 SWAP C! ;
 : cell? cell-at C@ . ;
 
-: reset-life GETTICK 5000 MOD DUP .
+: reset-life TIMER 5000 MOD DUP .
     grid grid-sz CMOVE ;
 
 : go 50 life ; 

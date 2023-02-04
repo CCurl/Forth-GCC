@@ -4,7 +4,7 @@
 // The VM
 // ------------------------------------------------------------------------------------------
 
-extern CELL arg1, arg2, arg3;
+extern CELL t1, t2, t3;
 
 extern CELL *RSP; // the return stack pointer
 extern CELL *DSP; // the data stack pointer

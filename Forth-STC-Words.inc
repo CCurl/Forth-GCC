@@ -344,7 +344,7 @@ L000002B4:
                 m_oneMinus
                 ret
                 
-                dict_ENTRY L02BB, L02B4, 2, 7, "GETTICK"
+                dict_ENTRY L02BB, L02B4, 2, 7, "TIMER"
 L000002BB:      
                 call prim_GETTICK
                 ret

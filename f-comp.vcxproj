@@ -28,6 +28,18 @@
     <ClInclude Include="string.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="benches.fs" />
+    <None Include="block-0001.fs" />
+    <None Include="block-0002.fs" />
+    <None Include="block-0003.fs" />
+    <None Include="block-0004.fs" />
+    <None Include="block-0005.fs" />
+    <None Include="block-0100.fs" />
+    <None Include="block-6502.fs" />
+    <None Include="block-9999.fs" />
+    <None Include="ex.lst" />
+    <None Include="ex.src" />
+    <None Include="forth.lst" />
     <None Include="forth.src" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

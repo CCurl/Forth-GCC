@@ -18,121 +18,41 @@
 .VARIABLE. T2			\ might use one or more of them, there is no
 .VARIABLE. T3			\ guarantee that the value won't change across words.
 
-.NOP. \ marks the end of the variables
+.EndOfVariables. \ marks the end of the variables
 
-: CELL 4 ;                  .INLINE.
-: LAST (LAST) .FETCH. ;     .INLINE.
-: HERE (HERE) .FETCH. ;     .INLINE.
+: CELL 4 ;                .INLINE.
+: LAST (LAST) FETCH ;     .INLINE.
+: HERE (HERE) FETCH ;     .INLINE.
 
-: ,  HERE .STORE.  HERE CELL .ADD. (HERE) .STORE. ;
-: C, HERE .CSTORE. HERE      .INC. (HERE) .STORE. ;
+: ,  HERE STORE  HERE CELL ADD (HERE) STORE ;
+: C, HERE CSTORE HERE      INC (HERE) STORE ;
 
 : JMP    8 C, ;
 : JMPZ   9 C, ;
 : JMPNZ 10 C, ;
 : RET   12 C, ;
 
-: ?COMPILING STATE .FETCH. ;   .INLINE.
+: ?COMPILING STATE FETCH ;   .INLINE.
 
-: IF   ?COMPILING .IF JMPZ HERE        0 ,                     .THEN ; .IMMEDIATE.
-\ ELSE ?COMPILING .IF JMP  HERE .SWAP. 0 , HERE .SWAP. .STORE. .THEN ; .IMMEDIATE.
-: THEN ?COMPILING .IF      HERE .SWAP.                 .STORE. .THEN ; .IMMEDIATE.
+: IF   ?COMPILING .IF JMPZ HERE  0 , .THEN ; .IMMEDIATE.
+\ ELSE ?COMPILING .IF JMP  HERE SWAP 0 , HERE SWAP STORE .THEN ; .IMMEDIATE.
+: THEN ?COMPILING .IF HERE SWAP STORE .THEN ; .IMMEDIATE.
 
 : BEGIN ?COMPILING IF HERE    THEN ;    .IMMEDIATE.
 : AGAIN ?COMPILING IF JMP   , THEN ;    .IMMEDIATE.
-: WHILE ?COMPILING IF JMPNZ , THEN ;    .IMMEDIATE.
-: UNTIL ?COMPILING IF JMPZ  , THEN ;    .IMMEDIATE.
-: LEAVE ?COMPILING IF RET     THEN ;    .IMMEDIATE.
+\ : WHILE ?COMPILING IF JMPNZ , THEN ;    .IMMEDIATE.
 
-: COUNT .DUP. .INC. .SWAP. .CFETCH. ;
-: TYPE
+: COUNT DBGDOTS DUP INC SWAP CFETCH ;
+: TYPE RET
 	BEGIN
-		.DUP. 0 .EQ. IF
-			.DROP. .DROP. .RET.
+		DUP 0 EQ IF
+			DROP DROP RET
 		THEN
-		.SWAP. .DUP. .CFETCH. .EMIT. .INC.
-		.SWAP. .DEC.
+		SWAP DUP CFETCH EMIT INC
+		SWAP DEC
 	AGAIN ;
-
-: CT COUNT TYPE ;
-: CR 13 .EMIT. 10 .EMIT. ;  .INLINE.
-: BL 32 .EMIT. ;            .INLINE.
-
-: 2DUP .OVER. .OVER. ;      .INLINE.
-
- : <# 					\ ( u1 -- 0 u2 )
-	0 #NEG .STORE. 
-	0 #LEN .STORE.
-	.DUP. 0 .LT. IF 
-		1 #NEG .STORE.
-		0 .SWAP. .SUB. 
-	THEN 0 .SWAP. ;
-
-: #
-	 BASE .FETCH.		\  ( u1 -- c u2 )
-	.SLASHMOD. .SWAP. 48 .ADD.
-	.DUP. 57 .GT. IF 
-		7 .ADD. 
-	THEN .SWAP.
-	#LEN .DUP. .FETCH. .INC. .SWAP. .STORE. ;
-
-: #S BEGIN # .DUP. 0 .EQ. UNTIL ;            \  ( u1 -- u2 )
-: #> ;
-: #P- .DROP. #NEG .FETCH. IF 45 .EMIT. THEN ;
-: #P #P-					\ ( 0 ... n 0 -- )
-	BEGIN 
-		.EMIT. 
-		.DUP. 0 .EQ.
-	UNTIL .DROP. ;      
-
-: (.) <# #S #> #P ;
-: . (.) BL ;
-: .2 <# # # #> #P ;
-: .3 <# # # # #> #P ;
-: .4 <# # # # # #> #P ;
-
-: DECIMAL 10 BASE .STORE. ; 
-: HEX     16 BASE .STORE. ;
-
-HEX
-: H. BASE .FETCH. .SWAP.  HEX .DUP. 10 .LT. IF 30 .EMIT. THEN (.) BASE .STORE. ; 
-: D. BASE .FETCH. .SWAP.  DECIMAL (.) BASE .STORE. ;
-DECIMAL
 
 \ **********************************************************************************
-: ascii                 \ ( from to -- )
-	.OVER. .SUB. .INC.
-	BEGIN
-		.DTOR.
-		.DUP. H. BL .DUP. D. BL .DUP. .EMIT. CR .INC.
-		.RTOD.
-		.DEC. .DUP.
-	WHILE .DROP. .DROP. ;
+: main S" Hello, world!" COUNT TYPE BYE ;
 
-: .w .DUP. D. BL .DUP. 2 CELL .MUL. .ADD. .INC. CT BL .FETCH. ;
-
-: WORDS LAST
-	BEGIN
-		.DUP. .FETCH. 0 .EQ. IF .DROP. LEAVE THEN
-		.w
-	AGAIN ;
-
-: count-to                  \ ( n -- )
-    S" counting to " CT .DUP. D. S"  ..." CT
-	BEGIN
-		.DEC. .DUP.
-	WHILE .DROP. 
-    S"  done." CT ;
-
-: main S" Hello, world!" COUNT TYPE 
-	LAST CELL .ADD. .FETCH. 1 .STORE.
-	CR 33 55 ascii CR
-	WORDS
-	CR 1000 1000 .MUL. 250 .MUL. count-to CR
-	S" VM size is " CT (MEM_SZ) .FETCH. D. S"  bytes, " CT
-	HERE D. S"  bytes used, " CT
-	LAST HERE .SUB. D. S"  bytes free" CT
-	S" ." CT
-	.BYE. ;
-
-: catch-error S" ** ERROR occurred, exiting **" CT .BYE. ;
+: catch-error S" ** ERROR occurred, exiting **" CT BYE ;

@@ -58,7 +58,7 @@
 #define INC        44	// 2C 
 #define RDEPTH     45	// 2D
 #define DEC        46	// 2E 
-#define GETTICK    47   // 2F
+#define TIMER    47   // 2F
 #define SHIFTLEFT  48   // 30
 #define SHIFTRIGHT 49   // 31
 #define PLUSSTORE  50   // 32
@@ -72,6 +72,7 @@
 #define DSTQ       58   // 3A
 #define DSTP4      59   // 3B
 #define DSTP1      60   // 3C
+#define XOR        61   // 3D
 // unused 61-99
 #define DBGDOT    100
 #define DBGDOTS   101

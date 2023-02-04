@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="forth-compiler.c" />
+    <ClCompile Include="forth-dis.c" />
     <ClCompile Include="forth-vm.c" />
   </ItemGroup>
   <ItemGroup>
