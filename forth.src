@@ -27,38 +27,41 @@
 : STATE    32 ; .INLINE.
 : (MEM_SZ) 36 ; .INLINE.
 
-: CELL (CELL) FETCH ; .INLINE.
-: @	  FETCH  ; .INLINE.
-: !	  STORE  ; .INLINE.
-: C!  CSTORE ; .INLINE.
-: +	  ADD    ; .INLINE.
-: 1+  INC    ; .INLINE.
+: @	  .FETCH  ; .INLINE.
+: !	  .STORE  ; .INLINE.
+: C!  .CSTORE ; .INLINE.
+: +	  .ADD    ; .INLINE.
+: 1+  .INC    ; .INLINE.
 
+10000 (VHERE) !
+
+: CELL (CELL) @ ; .INLINE.
 : HERE (HERE) @ ; .INLINE.
+: VHERE (VHERE) @ ; .INLINE.
 : C, HERE ! HERE 1+ (HERE) ! ;
 : ,  HERE ! HERE CELL + (HERE) ! ;
 
-: [ 0 STATE STORE ; .IMMEDIATE.
-: ] 1 STATE STORE ; .IMMEDIATE.
+: [ 0 STATE ! ; .IMMEDIATE.
+: ] 1 STATE ! ;
 : LAST (LAST) @ ;
 
-: LITERAL	    1 C,   ;
-: SWAP		[   4 C, ] ; .INLINE.
-: DROP		[   5 C, ] ; .INLINE.
-: DUP		[   6 C, ] ; .INLINE.
-: SLITERAL	    7 C,   ;
-: JMP		    8 C,   ;
-: JMPZ		    9 C,   ;
-: JMPNZ		   10 C,   ;
+: C-LIT	   .C-LIT .C-LIT C,   ; .INLINE.
+: LIT      .C-LIT .LIT C,   ;
+: SWAP		   .SWAP   ; .INLINE.
+: DROP		   .DROP   ; .INLINE.
+: DUP		   .DUP    ; .INLINE.
+: S-LIT	    .C-LIT .S-LIT C,   ;
+: JMP   .C-LIT .JMP   C,   ;
+: JMPZ  .C-LIT .JMPZ  C,   ;
+: JMPNZ .C-LIT .JMPNZ C,   ;
 : CALL		   11 C,   ;
 : RET		   12 C,   ;
-: OR		[  13 C, ] ; .INLINE.
-: CLITERAL	   14 C,   ; .INLINE.
-: C@		CFETCH ; .INLINE.
-: -			[  18 C, ] ; .INLINE.
-: *			[  19 C, ] ; .INLINE.
-: /			[  20 C, ] ; .INLINE.
-: <			[  21 C, ] ; .INLINE.
+: OR		.OR ; .INLINE.
+: C@		.CFETCH ; .INLINE.
+: -			.SUB ; .INLINE.
+: *			.MUL ; .INLINE.
+: /			.DIV ; .INLINE.
+: <			.LT ; .INLINE.
 : =			[  22 C, ] ; .INLINE.
 : >			[  23 C, ] ; .INLINE.
 : DICTP		   24 C,   ; .INLINE.
@@ -273,11 +276,11 @@
 : DICTP>NAME 1+ @ DICT>NAME ;
 
 : XT.GetDICTP 						\ ( XT -- dictp )
-    DUP C@ [ CLITERAL DICTP ] = 
+    DUP C@ [ C-LIT DICTP ] = 
     IF
         1+ @
     ELSE
-        DROP RESET
+        RESET
     THEN
 ;
 
@@ -399,6 +402,7 @@ DECIMAL
 
 : .(MEM_SZ) S" Memory: " CT MEM_SZ DUP HEX. S"  (" CT (.) S" )" CT ;
 : .(HERE)   S" HERE: "   CT HERE   DUP HEX. S"  (" CT (.) S" )" CT ;
+: .(VHERE)  S" VHERE: "  CT VHERE  DUP HEX. S"  (" CT (.) S" )" CT ;
 : .(LAST)   S" LAST: "   CT LAST   DUP HEX. S"  (" CT (.) S" )" CT ;
 
 : .WORD-SHORT DUP DICT>NAME CT BL @ ;
@@ -432,7 +436,7 @@ DECIMAL
 : find.ret			\ ( addr1 -- addr2 )
     BEGIN
         DUP C@ 
-        [ CLITERAL RET ] =
+        [ C-LIT RET ] =
         IF
             LEAVE
         THEN
@@ -458,7 +462,7 @@ DECIMAL
 
 : Copy.INLINE		\ ( XT -- )
     \ Skip over the DICTP
-    DUP C@ [ CLITERAL DICTP ] =
+    DUP C@ [ C-LIT DICTP ] =
     IF 
         1+ CELL +
     THEN
@@ -515,9 +519,9 @@ DECIMAL
             IF
                 DUP 0 255 BETWEEN
                 IF
-                    CLITERAL C,
+                    C-LIT C,
                 ELSE
-                    LITERAL   ,
+                    LIT   ,
                 THEN
             THEN
         ELSE
@@ -626,7 +630,7 @@ DECIMAL
             DICTP
             LAST ,
         ELSE
-            DROP RESET
+            RESET
         THEN
     THEN
 ;
@@ -712,8 +716,8 @@ DECIMAL
     AGAIN ;
 
 \ ******************************************************************************************
-: STR.EMPTY 0 OVER ! ; INLINE		\ ( addr -- addr )
-: STR.LEN DUP C@     ; INLINE		\ ( addr -- addr len )
+: STR.EMPTY 0 OVER C! ; INLINE		\ ( addr -- addr )
+: STR.LEN DUP C@      ; INLINE		\ ( addr -- addr len )
 
 : STR.CATC			\ ( addr ch -- addr )
     OVER
@@ -726,50 +730,31 @@ DECIMAL
 
 \ ******************************************************************************************
 \ String literals
-: I" 				 \ ( -- addr )
-    HERE 100 + STR.EMPTY
-    BEGIN 						
-        >IN @ C@		        \ ( 1001 ch )
+: comp-qt             \ ( --addr )
+    VHERE STR.EMPTY
+    BEGIN
+        >IN @ C@		        \ ( --ch )
         DUP 0= IF
-            S" missing closing " CT 34 EMIT
-            RESET
+            S" missing closing quote" CT RESET
         THEN
-        >IN ++ 					\ ( 1001 ch )
-        DUP 34 = IF				\ 34 = '"'
-            DROP LEAVE 
-        THEN
+        >IN ++
+        DUP 34 = IF DROP LEAVE THEN
         STR.CATC
     AGAIN ;
 
-: " ?COMPILING 0= IF 
-        I" LEAVE 
-    THEN
-    
-    SLITERAL
-    HERE 0 C,						\ count-byte placeholder
-    BEGIN 						
-        >IN @ C@
-        DUP 0= IF
-            DROP 1- (HERE) !		\ reset HERE
-            S" missing closing '" CT 34 EMIT 39 EMIT
-            RESET
-        THEN
-        >IN ++
-        DUP 34 = IF				\ 34 = '"'
-            DROP HERE 0 C,		\ NT string ( 1001 1004 ) 
-            OVER - 1- SWAP C!	\ 
-            LEAVE 
-        THEN
-        C,
-    AGAIN ; IMMEDIATE
+: " comp-qt
+    ?COMPILING 0= IF LEAVE THEN
+    LIT , VHERE DUP C@ + 2 + (VHERE) !
+    ; IMMEDIATE
 
 : sys-info
     .(MEM_SZ) 44 EMIT BL
     .(HERE)   44 EMIT BL 
+    .(VHERE)  44 EMIT BL 
     .(LAST)   44 EMIT BL
     .FREE CR ;
 
-: VARIABLE  CREATE-NAME HERE 2 + CELL + LITERAL , RET 0 , ;
+: VARIABLE  CREATE-NAME HERE 2 + CELL + LIT , RET 0 , ;
 
 : bench-loop BEGIN 1- DUP WHILE DROP ;
 : bench TIMER >SRC bench-loop TIMER SRC? - . ;
@@ -794,3 +779,4 @@ sys-info
 
 \ This is so that forth-dis behaves as it should
 99 STATE !
+ 
