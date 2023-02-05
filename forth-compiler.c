@@ -46,7 +46,7 @@ OPCODE_T theOpcodes[] = {
         , { ".SWAP",            SWAP,             "SWAP",           IS_INLINE }
         , { ".DROP",            DROP,             "DROP",           IS_INLINE }
         , { ".DUP",             DUP,              "DUP",            IS_INLINE }
-        , { ".S-LIT",           SLITERAL,         "S-LIT",          IS_INLINE }
+        , { ".CTYPE",           CTYPE,            "CTYPE",          IS_INLINE }
         , { ".JMP",             JMP,              "JMP",            0 }
         , { ".JMPZ",            JMPZ,             "JMPZ",           0 }
         , { ".JMPNZ",           JMPNZ,            "JMPNZ",          0 }
@@ -305,23 +305,22 @@ char *ParseWord(char *word, char *line)
     }
 
     if (string_equals(word, "S\"")) {
-        CComma(SLITERAL);
-        int count = 0, done = false;
+        CComma(LITERAL);
+        Comma(VHERE);
+        // CComma(CTYPE);
+        CELL sla = VHERE++, len = 0;
+        the_bytes[sla] = 0;
         line += 1;
-        CELL cur_here = HERE++;
-        BYTE ch;
-        while ((!done) && (!string_isEmpty(line)))
-        {
-            ch = *(line++);
+        while (*line) {
+            BYTE ch = *(line++);
             if (ch == '\"') {
-                done = true;
+                break;
             } else {
-                CComma(ch);
-                count++;
+                the_bytes[VHERE++] = ch;
+                ++(the_bytes[sla]);
             }
         }
-        CComma(0);
-        CStore(cur_here, count);
+        the_bytes[VHERE++] = 0;
         return line;
     }
 

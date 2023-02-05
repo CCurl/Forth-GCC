@@ -77,8 +77,9 @@ next:
         NEXT;
     case DROP: pop();    NEXT;
     case DUP: push(TOS); NEXT;
-    case SLITERAL: push(PC);
-        PC += BYTE_AT(PC) + 2;
+    case CTYPE: t1=pop();
+        t2 = BYTE_AT(t1++);
+        for (int x=0; x<t2; x++) { putchar(BYTE_AT(t1++)); }
         NEXT;
     case JMP: PC = CELL_AT(PC); NEXT;
     case JMPZ: if (pop()) PC += CELL_SZ;

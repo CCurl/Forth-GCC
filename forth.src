@@ -50,7 +50,7 @@
 : SWAP		   .SWAP   ; .INLINE.
 : DROP		   .DROP   ; .INLINE.
 : DUP		   .DUP    ; .INLINE.
-: S-LIT	    .C-LIT .S-LIT C,   ;
+: CTYPE .C-LIT .CTYPE C,   ;
 : JMP   .C-LIT .JMP   C,   ;
 : JMPZ  .C-LIT .JMPZ  C,   ;
 : JMPNZ .C-LIT .JMPNZ C,   ;
@@ -716,36 +716,35 @@ DECIMAL
     AGAIN ;
 
 \ ******************************************************************************************
-: STR.EMPTY 0 OVER C! ; INLINE		\ ( addr -- addr )
-: STR.LEN DUP C@      ; INLINE		\ ( addr -- addr len )
+: STR.EMPTY 0 OVER C! ; INLINE          \ ( addr -- addr )
+: STR.LEN DUP C@      ; INLINE          \ ( addr -- addr len )
+: STR.END DUP C@ + 1+ ; INLINE          \ ( addr -- addr2 )
+: STR.NULLTERM 0 OVER STR.END 1+ C! ;   \ ( addr -- addr )
+: STR.CATC OVER STR.END C! DUP C++      \ ( addr ch -- addr )
+    STR.NULLTERM ;
 
-: STR.CATC			\ ( addr ch -- addr )
-    OVER
-    DUP C++        \ increment len
-    STR.LEN + 
-    0 OVER 1+ C!   \ null-terminate
-    C! ;
-
-: STR.NULLTERM DUP STR.LEN + 1+ 0 SWAP C! ;			\ ( addr -- addr )
 
 \ ******************************************************************************************
 \ String literals
-: comp-qt             \ ( --addr )
+: cq             \ ( --addr )
     VHERE STR.EMPTY
     BEGIN
-        >IN @ C@		        \ ( --ch )
+        >IN @ C@ >IN ++            \ ( addr--addr ch )
         DUP 0= IF
             S" missing closing quote" CT RESET
         THEN
-        >IN ++
-        DUP 34 = IF DROP LEAVE THEN
-        STR.CATC
+        DUP '"' = IF DROP          \ ( addr ch--addr )
+            ?COMPILING IF
+                LIT ,              \ ( -- )
+                VHERE C@ 2 + VHERE + (VHERE) !
+            THEN
+            LEAVE 
+        THEN
+        STR.CATC                   \ ( addr ch--addr )
     AGAIN ;
 
-: " comp-qt
-    ?COMPILING 0= IF LEAVE THEN
-    LIT , VHERE DUP C@ + 2 + (VHERE) !
-    ; IMMEDIATE
+: " cq ; IMMEDIATE
+: ." cq ?COMPILING IF .C-LIT .CTYPE C, ELSE CT THEN ; IMMEDIATE
 
 : sys-info
     .(MEM_SZ) 44 EMIT BL
@@ -759,7 +758,7 @@ DECIMAL
 : bench-loop BEGIN 1- DUP WHILE DROP ;
 : bench TIMER >SRC bench-loop TIMER SRC? - . ;
 : mil 1000 DUP * * ;
-: xx S" running bench: " CT 500 mil bench ;
+: xx S" running bench: " CT 5 mil bench ;
 
 : mainLoop 
     resetState 

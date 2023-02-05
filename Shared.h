@@ -18,7 +18,7 @@
 #define SWAP        4	// 04
 #define DROP        5	// 05
 #define DUP         6	// 06
-#define SLITERAL    7	// 07
+#define CTYPE       7	// 07
 #define JMP         8	// 08
 #define JMPZ        9	// 09
 #define JMPNZ      10	// 0A
